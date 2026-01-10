@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pub Quizzz</title>
+    <style>
+        body { font-family: sans-serif; margin: 50px; }
+        button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .admin-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .admin-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<h1>Willkommen zum Pub Quizzz Archiv</h1>
+
+<button class="admin-btn" onclick="goToAdmin()">Admin Panel</button>
+
+<script>
+    function goToAdmin() {
+        window.location.href = '/admin/admin_main.html';
+    }
+</script>
+</body>
+</html>
+
