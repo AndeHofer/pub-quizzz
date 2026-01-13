@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="de-AT">
 <head>
-    <title>Admin Panel - Pub Quizzz</title>
+    <meta charset="UTF-8">
+    <title>Admin Bereich - Pub Quizzz</title>
     <style>
         body {
             font-family: sans-serif;
@@ -33,6 +34,7 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
+            margin-bottom: 10px;
         }
         button:hover {
             background-color: #45a049;
@@ -56,62 +58,14 @@
 </head>
 <body>
 <div class="container">
-    <h1>Admin Panel</h1>
-    <h3>Register New User</h3>
+    <h1>Admin Bereich</h1>
 
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-
-    <button onclick="registerUser()">Register User</button>
-    <button class="back-btn" onclick="goBack()">Back to Home</button>
-
-    <div id="message" class="message"></div>
+    <button onclick="location.href='register_user.html'">Neuen Admin User anlegen</button>
+    <button onclick="location.href='create_question.html'">Neues Quiz anlegen</button>
+    <button class="back-btn" onclick="goBack()">Zurück zur Hauptseite</button>
 </div>
 
 <script>
-    function registerUser() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const messageDiv = document.getElementById('message');
-
-        if (!username || !password) {
-            showMessage('Please fill in all fields', 'error');
-            return;
-        }
-
-        const params = new URLSearchParams();
-        params.append('username', username);
-        params.append('password', password);
-
-        fetch('/admin/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params
-        })
-            .then(response => {
-                if (response.ok) {
-                    showMessage('User registered successfully!', 'success');
-                    document.getElementById('username').value = '';
-                    document.getElementById('password').value = '';
-                } else {
-                    showMessage('Registration failed. Please try again.', 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('Error: ' + error, 'error');
-                console.error('Error:', error);
-            });
-    }
-
-    function showMessage(text, type) {
-        const messageDiv = document.getElementById('message');
-        messageDiv.textContent = text;
-        messageDiv.className = 'message ' + type;
-        messageDiv.style.display = 'block';
-    }
-
     function goBack() {
         window.location.href = '/index.html';
     }

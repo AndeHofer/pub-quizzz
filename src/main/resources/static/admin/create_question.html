@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="de-AT">
+<head>
+    <meta charset="UTF-8">
+    <title>Neuer Quiz Eintrag</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+        h1, h2 { color: #333; }
+        .section {
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
+        .field-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .back-btn {
+            background-color: #888;
+        }
+        .back-btn:hover {
+            background-color: #666;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Neuer Quiz Eintrag</h1>
+
+    <form id="questionForm">
+        <div class="section">
+            <h2>Generelle Info</h2>
+            <div class="field-group">
+                <label for="pubDate">Pub Quiz Datum (optional):</label>
+                <input type="date" id="pubDate">
+            </div>
+        </div>
+
+        <div id="questionsContainer">
+            <!-- We will generate inputs for 8 questions -->
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <button type="submit">Speichere Frage</button>
+        <button type="button" class="back-btn" onclick="goBack()">Zurück zum Admin Bereich</button>
+    </form>
+</div>
+
+<script>
+    const questionsContainer = document.getElementById('questionsContainer');
+    
+    // Questions 1-4 have 4 hints, 5-8 have 3 hints.
+    for (let i = 1; i <= 8; i++) {
+        const section = document.createElement('div');
+        section.className = 'section';
+        
+        let hintsHtml = '';
+        const numHints = i <= 4 ? 4 : 3;
+        for (let j = 1; j <= numHints; j++) {
+            hintsHtml += `
+                <div class="field-group">
+                    <label for="hint${i}_${j}">Hinweis ${i}.${j}:</label>
+                    <input type="text" id="hint${i}_${j}" required>
+                </div>`;
+        }
+
+        section.innerHTML = `
+            <h2>Frage ${i}</h2>
+            <div class="field-group">
+                <input type="text" id="question${i}" required>
+            </div>
+            ${hintsHtml}
+            <div class="field-group">
+                <label for="answer${i}">Antwort ${i}:</label>
+                <input type="text" id="answer${i}" required>
+            </div>
+            <div class="field-group">
+                <label for="note${i}">Anmerkung ${i} (optional):</label>
+                <input type="text" id="note${i}">
+            </div>
+        `;
+        questionsContainer.appendChild(section);
+    }
+
+    document.getElementById('questionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const data = {};
+        data.pubDate = document.getElementById('pubDate').value || null;
+        
+        for (let i = 1; i <= 8; i++) {
+            data[`question${i}`] = document.getElementById(`question${i}`).value;
+            const numHints = i <= 4 ? 4 : 3;
+            for (let j = 1; j <= numHints; j++) {
+                data[`hint${i}_${j}`] = document.getElementById(`hint${i}_${j}`).value;
+            }
+            data[`answer${i}`] = document.getElementById(`answer${i}`).value;
+            data[`note${i}`] = document.getElementById(`note${i}`).value;
+        }
+
+        fetch('/admin/create-question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                showMessage('Question entry saved successfully!', 'success');
+                // Optional: document.getElementById('questionForm').reset();
+            } else {
+                showMessage('Failed to save question entry.', 'error');
+            }
+        })
+        .catch(error => {
+            showMessage('Error: ' + error, 'error');
+            console.error('Error:', error);
+        });
+    });
+
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = text;
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+    }
+
+    function goBack() {
+        window.location.href = 'admin_main.html';
+    }
+
+</script>
+</body>
+</html>
