@@ -8,19 +8,18 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "users")
+@Table(name = "teams")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Teams {
 
-    @Column(unique = true)
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private long teamsId;
+
     @NotNull
-    private String username;
-    @NotNull
-    private String password;
+    @Column(nullable = false, unique = true)
+    private String teamName;
 }
