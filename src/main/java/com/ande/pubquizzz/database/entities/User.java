@@ -8,7 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "users")
+@Table(name = "appUser")
 @Getter
 @Setter
 @ToString
@@ -16,7 +16,7 @@ import lombok.ToString;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long appUserId;
 
     @Column(unique = true)
     @NotNull

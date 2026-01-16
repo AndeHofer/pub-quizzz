@@ -1,5 +1,5 @@
 ## INFO
-A simple app to archive results, questions and answers.
+A simple app to archive results, question and answers.
 
 ## TODOS
 

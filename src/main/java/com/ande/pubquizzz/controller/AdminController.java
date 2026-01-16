@@ -1,8 +1,8 @@
 package com.ande.pubquizzz.controller;
 
-import com.ande.pubquizzz.database.entities.Questions;
+import com.ande.pubquizzz.database.entities.Question;
 import com.ande.pubquizzz.database.entities.User;
-import com.ande.pubquizzz.database.repositories.QuestionsRepository;
+import com.ande.pubquizzz.database.repositories.QuestionRepository;
 import com.ande.pubquizzz.database.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class AdminController {
     private UserRepository userRepository;
 
     @Autowired
-    private QuestionsRepository questionsRepository;
+    private QuestionRepository questionRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -40,12 +40,12 @@ public class AdminController {
     }
 
     @PostMapping("create-question")
-    public void createQuestion(@RequestBody Questions questions) {
+    public void createQuestion(@RequestBody Question question) {
         log.info("Creating new question entry");
-        if (questions.getSubmitDate() == null) {
-            questions.setSubmitDate(LocalDate.now());
+        if (question.getSubmitDate() == null) {
+            question.setSubmitDate(LocalDate.now());
         }
-        questionsRepository.save(questions);
+        questionRepository.save(question);
         log.info("Question entry saved successfully");
     }
 

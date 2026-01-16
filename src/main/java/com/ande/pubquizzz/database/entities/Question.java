@@ -10,17 +10,19 @@ import lombok.ToString;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "questions")
+@Table(name = "question")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Questions {
+public class Question {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long questionId;
 
+    @Column(nullable = false)
+    @NotNull
     private LocalDate pubDate;
     @Column(nullable = false)
     private LocalDate submitDate;

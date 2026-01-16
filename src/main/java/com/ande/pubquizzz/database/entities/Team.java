@@ -8,12 +8,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "teams")
+@Table(name = "team")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Teams {
+public class Team {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
