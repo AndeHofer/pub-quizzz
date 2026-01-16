@@ -2,8 +2,7 @@
 A simple app to archive results, question and answers.
 
 ## TODOS
-
-- user handling with spring boot security
-- user persistence with h2
+- db schema change -> own tables for the 2 question types
+- pictures as hints possible
 - run on lxc
 - create docker image

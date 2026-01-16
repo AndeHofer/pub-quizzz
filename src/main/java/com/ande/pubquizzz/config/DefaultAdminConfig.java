@@ -1,6 +1,6 @@
 package com.ande.pubquizzz.config;
 
-import com.ande.pubquizzz.database.entities.User;
+import com.ande.pubquizzz.database.entities.AppUser;
 import com.ande.pubquizzz.database.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class DefaultAdminConfig {
     @PostConstruct
     public void createDefaultAdmin() {
         if (userRepository.findByUsername(defaultUsername).isEmpty()) {
-            User admin = new User();
+            AppUser admin = new AppUser();
             admin.setUsername(defaultUsername);
             admin.setPassword(passwordEncoder.encode(defaultPassword));
             userRepository.save(admin);

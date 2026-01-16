@@ -21,7 +21,7 @@ public class DatabaseTest {
     private QuestionRepository questionRepository;
 
     @Test
-    public void testCreateQuestion() {
+    public void testCreateFictionalQuestion() {
         Question question = new Question();
         question.setPubDate(LocalDate.of(2024, 1, 7));
         question.setQuestion1("What is the capital of France?");
@@ -98,7 +98,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void testCreateQuestionWithExistingDatabaseData() {
+    public void testCreateFictionalQuestion2() {
         // Get initial count of questions in database
         long initialCount = questionRepository.count();
 
@@ -183,14 +183,13 @@ public class DatabaseTest {
     }
 
     @Test
-    public void testCreateQuestionFromSqlData() {
+    public void testCreateReaöQuestion() {
         // Get initial count of questions in database
         long initialCount = questionRepository.count();
 
         // Create a question based on the data from QUESTIONS.sql
         Question sqlQuestion = new Question();
         sqlQuestion.setPubDate(LocalDate.of(2026, 1, 7));
-        sqlQuestion.setSubmitDate(LocalDate.of(2026, 1, 16));
 
         sqlQuestion.setQuestion1("Academy Award für den besten Schnitt. Die spielenhöchstens in 8mm-Filmen.");
         sqlQuestion.setHint1_1("Kate Blanchet");

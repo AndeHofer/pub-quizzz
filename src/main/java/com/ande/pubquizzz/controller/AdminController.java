@@ -1,7 +1,7 @@
 package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.database.entities.Question;
-import com.ande.pubquizzz.database.entities.User;
+import com.ande.pubquizzz.database.entities.AppUser;
 import com.ande.pubquizzz.database.repositories.QuestionRepository;
 import com.ande.pubquizzz.database.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +32,10 @@ public class AdminController {
     @PostMapping("register")
     public void register(@RequestParam String username, @RequestParam String password) {
         log.info("Registering new user: {}", username);
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        userRepository.save(user);
+        AppUser appUser = new AppUser();
+        appUser.setUsername(username);
+        appUser.setPassword(passwordEncoder.encode(password));
+        userRepository.save(appUser);
         log.info("User '{}' registered successfully", username);
     }
 
