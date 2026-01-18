@@ -10,16 +10,16 @@ import lombok.ToString;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "question")
+@Table(name = "quiz")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Question {
+public class Quiz {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long questionId;
+    private long quizId;
 
     @Column(nullable = false)
     @NotNull

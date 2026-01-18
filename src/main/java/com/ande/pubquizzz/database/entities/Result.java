@@ -22,8 +22,8 @@ public class Result {
     private Team team;
 
     @ManyToOne
-    @JoinColumn(name = "questionId")
-    private Question question;
+    @JoinColumn(name = "quizId")
+    private Quiz quiz;
 
 
     private Integer answer1Points = 0;

@@ -114,7 +114,7 @@
         section.innerHTML = `
             <h2>Frage ${i}</h2>
             <div class="field-group">
-                <input type="text" id="question${i}" required>
+                <input type="text" id="quiz${i}" required>
             </div>
             ${hintsHtml}
             <div class="field-group">
@@ -136,7 +136,7 @@
         data.pubDate = document.getElementById('pubDate').value || null;
         
         for (let i = 1; i <= 8; i++) {
-            data[`question${i}`] = document.getElementById(`question${i}`).value;
+            data[`quiz${i}`] = document.getElementById(`quiz${i}`).value;
             const numHints = i <= 4 ? 4 : 3;
             for (let j = 1; j <= numHints; j++) {
                 data[`hint${i}_${j}`] = document.getElementById(`hint${i}_${j}`).value;
@@ -145,7 +145,7 @@
             data[`note${i}`] = document.getElementById(`note${i}`).value;
         }
 
-        fetch('/admin/create-question', {
+        fetch('/admin/create-quiz', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -157,7 +157,7 @@
                 showMessage('Question entry saved successfully!', 'success');
                 // Optional: document.getElementById('questionForm').reset();
             } else {
-                showMessage('Failed to save question entry.', 'error');
+                showMessage('Failed to save quiz entry.', 'error');
             }
         })
         .catch(error => {

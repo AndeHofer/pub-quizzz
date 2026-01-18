@@ -1,6 +1,6 @@
 package com.ande.pubquizzz.controller;
 
-import com.ande.pubquizzz.database.entities.Question;
+import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.entities.AppUser;
 import com.ande.pubquizzz.database.repositories.QuestionRepository;
 import com.ande.pubquizzz.database.repositories.UserRepository;
@@ -40,12 +40,12 @@ public class AdminController {
     }
 
     @PostMapping("create-question")
-    public void createQuestion(@RequestBody Question question) {
+    public void createQuestion(@RequestBody Quiz quiz) {
         log.info("Creating new question entry");
-        if (question.getSubmitDate() == null) {
-            question.setSubmitDate(LocalDate.now());
+        if (quiz.getSubmitDate() == null) {
+            quiz.setSubmitDate(LocalDate.now());
         }
-        questionRepository.save(question);
+        questionRepository.save(quiz);
         log.info("Question entry saved successfully");
     }
 
