@@ -73,7 +73,7 @@
 <div class="container">
     <h1>Neuer Quiz Eintrag</h1>
 
-    <form id="questionForm">
+    <form id="quízForm">
         <div class="section">
             <h2>Generelle Info</h2>
             <div class="field-group">
@@ -88,19 +88,19 @@
 
         <div id="message" class="message"></div>
 
-        <button type="submit">Speichere Frage</button>
+        <button type="submit">Speichere Quiz</button>
         <button type="button" class="back-btn" onclick="goBack()">Zurück zum Admin Bereich</button>
     </form>
 </div>
 
 <script>
     const questionsContainer = document.getElementById('questionsContainer');
-    
+
     // Questions 1-4 have 4 hints, 5-8 have 3 hints.
     for (let i = 1; i <= 8; i++) {
         const section = document.createElement('div');
         section.className = 'section';
-        
+
         let hintsHtml = '';
         const numHints = i <= 4 ? 4 : 3;
         for (let j = 1; j <= numHints; j++) {
@@ -114,6 +114,7 @@
         section.innerHTML = `
             <h2>Frage ${i}</h2>
             <div class="field-group">
+                <label for="quiz${i}">Frage ${i}:</label>
                 <input type="text" id="quiz${i}" required>
             </div>
             ${hintsHtml}
@@ -129,41 +130,64 @@
         questionsContainer.appendChild(section);
     }
 
-    document.getElementById('questionForm').addEventListener('submit', function(e) {
+    document.getElementById('quizForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        const data = {};
-        data.pubDate = document.getElementById('pubDate').value || null;
-        
+
+        // Build proper JSON structure matching CreateQuizRequest
+        const quizData = {
+            pubDate: document.getElementById('pubDate').value || null,
+            questions: []
+        };
+
+        // Collect all 8 questions
         for (let i = 1; i <= 8; i++) {
-            data[`quiz${i}`] = document.getElementById(`quiz${i}`).value;
             const numHints = i <= 4 ? 4 : 3;
+            const hints = [];
+
+            // Collect hints for this question
             for (let j = 1; j <= numHints; j++) {
-                data[`hint${i}_${j}`] = document.getElementById(`hint${i}_${j}`).value;
+                hints.push(document.getElementById(`hint${i}_${j}`).value);
             }
-            data[`answer${i}`] = document.getElementById(`answer${i}`).value;
-            data[`note${i}`] = document.getElementById(`note${i}`).value;
+
+            quizData.questions.push({
+                number: i,
+                question: document.getElementById(`quiz${i}`).value,
+                answer: document.getElementById(`answer${i}`).value,
+                note: document.getElementById(`note${i}`).value || null,
+                hints: hints
+            });
         }
+
+        console.log('Sending quiz data:', JSON.stringify(quizData, null, 2));
 
         fetch('/admin/create-quiz', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(quizData)
         })
-        .then(response => {
-            if (response.ok) {
-                showMessage('Question entry saved successfully!', 'success');
-                // Optional: document.getElementById('questionForm').reset();
-            } else {
-                showMessage('Failed to save quiz entry.', 'error');
-            }
-        })
-        .catch(error => {
-            showMessage('Error: ' + error, 'error');
-            console.error('Error:', error);
-        });
+            .then(response => {
+                if (response.ok) {
+                    return response.text().then(text => {
+                        showMessage('✅ ' + text, 'success');
+                        // Clear form immediately after successful save
+                        document.getElementById('quizForm').reset();
+                        // Hide success message after 3 seconds
+                        setTimeout(() => {
+                            document.getElementById('message').style.display = 'none';
+                        }, 3000);
+                    });
+                } else {
+                    return response.text().then(text => {
+                        showMessage('❌ Fehler: ' + text, 'error');
+                    });
+                }
+            })
+            .catch(error => {
+                showMessage('❌ Netzwerkfehler: ' + error, 'error');
+                console.error('Error:', error);
+            });
     });
 
     function showMessage(text, type) {
@@ -176,7 +200,6 @@
     function goBack() {
         window.location.href = 'admin_main.html';
     }
-
 </script>
 </body>
 </html>

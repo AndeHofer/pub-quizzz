@@ -1,13 +1,13 @@
 package com.ande.pubquizzz;
 
-import com.ande.pubquizzz.controller.AdminController;
 import com.ande.pubquizzz.database.entities.Quiz;
-import com.ande.pubquizzz.database.repositories.QuestionRepository;
+import com.ande.pubquizzz.database.repositories.QuizRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,255 +15,158 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DatabaseTest {
 
     @Autowired
-    private AdminController adminController;
-
-    @Autowired
-    private QuestionRepository questionRepository;
+    private QuizRepository quizRepository;
 
     @Test
     public void testCreateFictionalQuestion() {
         Quiz quiz = new Quiz();
         quiz.setPubDate(LocalDate.of(2024, 1, 7));
-        quiz.setQuestion1("What is the capital of France?");
-        quiz.setHint1_1("It's in Europe");
-        quiz.setHint1_2("It's a city of lights");
-        quiz.setHint1_3("Eiffel Tower is there");
-        quiz.setHint1_4("It starts with P");
-        quiz.setAnswer1("Paris");
-        quiz.setNote1("Easy question");
 
-        quiz.setQuestion2("Who painted the Mona Lisa?");
-        quiz.setHint2_1("Italian artist");
-        quiz.setHint2_2("Renaissance period");
-        quiz.setHint2_3("Also invented things");
-        quiz.setHint2_4("First name Leonardo");
-        quiz.setAnswer2("Leonardo da Vinci");
-        quiz.setNote2("Famous artist");
+        quiz.addQuestion(1, "What is the capital of France?", "Paris", "Easy question",
+                Arrays.asList("It's in Europe", "It's a city of lights", "Eiffel Tower is there", "It starts with P"));
 
-        quiz.setQuestion3("What is 2+2?");
-        quiz.setHint3_1("It's a number");
-        quiz.setHint3_2("Less than 10");
-        quiz.setHint3_3("Even number");
-        quiz.setHint3_4("Between 3 and 5");
-        quiz.setAnswer3("4");
-        quiz.setNote3("Math question");
+        quiz.addQuestion(2, "Who painted the Mona Lisa?", "Leonardo da Vinci", "Famous artist",
+                Arrays.asList("Italian artist", "Renaissance period", "Also invented things", "First name Leonardo"));
 
-        quiz.setQuestion4("What is H2O?");
-        quiz.setHint4_1("Chemical compound");
-        quiz.setHint4_2("Essential for life");
-        quiz.setHint4_3("Liquid at room temperature");
-        quiz.setHint4_4("You drink it");
-        quiz.setAnswer4("Water");
-        quiz.setNote4("Science question");
+        quiz.addQuestion(3, "What is 2+2?", "4", "Math question",
+                Arrays.asList("It's a number", "Less than 10", "Even number", "Between 3 and 5"));
 
-        quiz.setQuestion5("What year did WWII end?");
-        quiz.setHint5_1("20th century");
-        quiz.setHint5_2("1940s");
-        quiz.setHint5_3("After 1944");
-        quiz.setAnswer5("1945");
-        quiz.setNote5("History question");
+        quiz.addQuestion(4, "What is H2O?", "Water", "Science question",
+                Arrays.asList("Chemical compound", "Essential for life", "Liquid at room temperature", "You drink it"));
 
-        quiz.setQuestion6("What is the largest planet?");
-        quiz.setHint6_1("In our solar system");
-        quiz.setHint6_2("Gas giant");
-        quiz.setHint6_3("Has a Great Red Spot");
-        quiz.setAnswer6("Jupiter");
-        quiz.setNote6("Astronomy question");
+        quiz.addQuestion(5, "What year did WWII end?", "1945", "History question",
+                Arrays.asList("20th century", "1940s", "After 1944"));
 
-        quiz.setQuestion7("Who wrote Romeo and Juliet?");
-        quiz.setHint7_1("English playwright");
-        quiz.setHint7_2("Elizabethan era");
-        quiz.setHint7_3("Also wrote Hamlet");
-        quiz.setAnswer7("William Shakespeare");
-        quiz.setNote7("Literature question");
+        quiz.addQuestion(6, "What is the largest planet?", "Jupiter", "Astronomy question",
+                Arrays.asList("In our solar system", "Gas giant", "Has a Great Red Spot"));
 
-        quiz.setQuestion8("What is the speed of light?");
-        quiz.setHint8_1("Very fast");
-        quiz.setHint8_2("In vacuum");
-        quiz.setHint8_3("Approximately 300,000 km/s");
-        quiz.setAnswer8("299,792,458 m/s");
-        quiz.setNote8("Physics question");
+        quiz.addQuestion(7, "Who wrote Romeo and Juliet?", "William Shakespeare", "Literature question",
+                Arrays.asList("English playwright", "Elizabethan era", "Also wrote Hamlet"));
 
-        // Test that submitDate is set automatically when null
-        assertNull(quiz.getSubmitDate());
+        quiz.addQuestion(8, "What is the speed of light?", "299,792,458 m/s", "Physics question",
+                Arrays.asList("Very fast", "In vacuum", "Approximately 300,000 km/s"));
 
-        adminController.createQuestion(quiz);
+        // Set submitDate and save directly via repository
+        quiz.setSubmitDate(LocalDate.now());
+        quizRepository.save(quiz);
 
-        // Verify the question was saved
-        Quiz savedQuiz = questionRepository.findById(quiz.getQuizId()).orElse(null);
+        // Verify the quiz was saved
+        Quiz savedQuiz = quizRepository.findById(quiz.getQuizId()).orElse(null);
         assertNotNull(savedQuiz);
-        assertEquals("What is the capital of France?", savedQuiz.getQuestion1());
-        assertEquals("Paris", savedQuiz.getAnswer1());
+        assertEquals(8, savedQuiz.getQuestions().size());
+        assertEquals("What is the capital of France?", savedQuiz.getQuestions().getFirst().getQuestion());
+        assertEquals("Paris", savedQuiz.getQuestions().getFirst().getAnswer());
         assertEquals(LocalDate.now(), savedQuiz.getSubmitDate());
     }
 
     @Test
     public void testCreateFictionalQuestion2() {
-        // Get initial count of questions in database
-        long initialCount = questionRepository.count();
+        // Get initial count of quizzes in database
+        long initialCount = quizRepository.count();
 
-        // Create a new question based on existing data pattern
+        // Create a new quiz based on existing data pattern
         Quiz newQuiz = new Quiz();
         newQuiz.setPubDate(LocalDate.of(2025, 1, 7));
-        newQuiz.setQuestion1("What is the capital of Germany?");
-        newQuiz.setHint1_1("It's in Europe");
-        newQuiz.setHint1_2("It's the largest city in Germany");
-        newQuiz.setHint1_3("Brandenburg Gate is there");
-        newQuiz.setHint1_4("It starts with B");
-        newQuiz.setAnswer1("Berlin");
-        newQuiz.setNote1("Geography question");
 
-        newQuiz.setQuestion2("Who wrote '1984'?");
-        newQuiz.setHint2_1("British author");
-        newQuiz.setHint2_2("Also wrote Animal Farm");
-        newQuiz.setHint2_3("Real name was Eric Blair");
-        newQuiz.setHint2_4("Pen name George");
-        newQuiz.setAnswer2("George Orwell");
-        newQuiz.setNote2("Literature question");
+        newQuiz.addQuestion(1, "What is the capital of Germany?", "Berlin", "Geography question",
+                Arrays.asList("It's in Europe", "It's the largest city in Germany", "Brandenburg Gate is there", "It starts with B"));
 
-        newQuiz.setQuestion3("What is 10 * 10?");
-        newQuiz.setHint3_1("It's a number");
-        newQuiz.setHint3_2("Perfect square");
-        newQuiz.setHint3_3("Three digits");
-        newQuiz.setHint3_4("Between 50 and 150");
-        newQuiz.setAnswer3("100");
-        newQuiz.setNote3("Math question");
+        newQuiz.addQuestion(2, "Who wrote '1984'?", "George Orwell", "Literature question",
+                Arrays.asList("British author", "Also wrote Animal Farm", "Real name was Eric Blair", "Pen name George"));
 
-        newQuiz.setQuestion4("What is CO2?");
-        newQuiz.setHint4_1("Chemical compound");
-        newQuiz.setHint4_2("Greenhouse gas");
-        newQuiz.setHint4_3("Plants use it");
-        newQuiz.setHint4_4("Carbon and oxygen");
-        newQuiz.setAnswer4("Carbon Dioxide");
-        newQuiz.setNote4("Science question");
+        newQuiz.addQuestion(3, "What is 10 * 10?", "100", "Math question",
+                Arrays.asList("It's a number", "Perfect square", "Three digits", "Between 50 and 150"));
 
-        newQuiz.setQuestion5("What year did WWI start?");
-        newQuiz.setHint5_1("20th century");
-        newQuiz.setHint5_2("1910s");
-        newQuiz.setHint5_3("Before 1920");
-        newQuiz.setAnswer5("1914");
-        newQuiz.setNote5("History question");
+        newQuiz.addQuestion(4, "What is CO2?", "Carbon Dioxide", "Science question",
+                Arrays.asList("Chemical compound", "Greenhouse gas", "Plants use it", "Carbon and oxygen"));
 
-        newQuiz.setQuestion6("What is the smallest planet?");
-        newQuiz.setHint6_1("In our solar system");
-        newQuiz.setHint6_2("Rocky planet");
-        newQuiz.setHint6_3("Closest to the sun");
-        newQuiz.setAnswer6("Mercury");
-        newQuiz.setNote6("Astronomy question");
+        newQuiz.addQuestion(5, "What year did WWI start?", "1914", "History question",
+                Arrays.asList("20th century", "1910s", "Before 1920"));
 
-        newQuiz.setQuestion7("Who wrote Hamlet?");
-        newQuiz.setHint7_1("English playwright");
-        newQuiz.setHint7_2("Elizabethan era");
-        newQuiz.setHint7_3("Also wrote Romeo and Juliet");
-        newQuiz.setAnswer7("William Shakespeare");
-        newQuiz.setNote7("Literature question");
+        newQuiz.addQuestion(6, "What is the smallest planet?", "Mercury", "Astronomy question",
+                Arrays.asList("In our solar system", "Rocky planet", "Closest to the sun"));
 
-        newQuiz.setQuestion8("What is the boiling point of water?");
-        newQuiz.setHint8_1("In Celsius");
-        newQuiz.setHint8_2("At sea level");
-        newQuiz.setHint8_3("Three digits");
-        newQuiz.setAnswer8("100°C");
-        newQuiz.setNote8("Physics question");
+        newQuiz.addQuestion(7, "Who wrote Hamlet?", "William Shakespeare", "Literature question",
+                Arrays.asList("English playwright", "Elizabethan era", "Also wrote Romeo and Juliet"));
 
-        // Call createQuestion through AdminController
-        adminController.createQuestion(newQuiz);
+        newQuiz.addQuestion(8, "What is the boiling point of water?", "100°C", "Physics question",
+                Arrays.asList("In Celsius", "At sea level", "Three digits"));
 
-        // Verify the new question was saved
-        long finalCount = questionRepository.count();
-        assertEquals(initialCount + 1, finalCount, "Question count should increase by 1");
+        // Set submitDate and save directly via repository
+        newQuiz.setSubmitDate(LocalDate.now());
+        quizRepository.save(newQuiz);
 
-        Quiz savedQuiz = questionRepository.findById(newQuiz.getQuizId()).orElse(null);
-        assertNotNull(savedQuiz, "Saved question should not be null");
-        assertEquals("What is the capital of Germany?", savedQuiz.getQuestion1());
-        assertEquals("Berlin", savedQuiz.getAnswer1());
-        assertEquals("George Orwell", savedQuiz.getAnswer2());
-        assertEquals("100", savedQuiz.getAnswer3());
+        // Verify the new quiz was saved
+        long finalCount = quizRepository.count();
+        assertEquals(initialCount + 1, finalCount, "Quiz count should increase by 1");
+
+        Quiz savedQuiz = quizRepository.findById(newQuiz.getQuizId()).orElse(null);
+        assertNotNull(savedQuiz, "Saved quiz should not be null");
+        assertEquals(8, savedQuiz.getQuestions().size());
+        assertEquals("What is the capital of Germany?", savedQuiz.getQuestions().get(0).getQuestion());
+        assertEquals("Berlin", savedQuiz.getQuestions().get(0).getAnswer());
+        assertEquals("George Orwell", savedQuiz.getQuestions().get(1).getAnswer());
+        assertEquals("100", savedQuiz.getQuestions().get(2).getAnswer());
         assertNotNull(savedQuiz.getSubmitDate(), "Submit date should be set automatically");
         assertEquals(LocalDate.now(), savedQuiz.getSubmitDate());
     }
 
     @Test
     public void testCreateRealQuestion() {
-        // Get initial count of questions in database
-        long initialCount = questionRepository.count();
+        // Get initial count of quizzes in database
+        long initialCount = quizRepository.count();
 
-        // Create a question based on the data from QUESTIONS.sql
+        // Create a quiz based on the data from QUESTIONS.sql
         Quiz sqlQuiz = new Quiz();
         sqlQuiz.setPubDate(LocalDate.of(2026, 1, 7));
 
-        sqlQuiz.setQuestion1("Academy Award für den besten Schnitt. Die spielenhöchstens in 8mm-Filmen.");
-        sqlQuiz.setHint1_1("Kate Blanchet");
-        sqlQuiz.setHint1_2("Sigourney Weaver");
-        sqlQuiz.setHint1_3("Demi Moore");
-        sqlQuiz.setHint1_4("Charlize Theron");
-        sqlQuiz.setAnswer1("Spielte eine Rolle mit Glatze");
-        sqlQuiz.setNote1("");
+        sqlQuiz.addQuestion(1, "Academy Award für den besten Schnitt. Die spielenhöchstens in 8mm-Filmen.",
+                "Spielte eine Rolle mit Glatze", "",
+                Arrays.asList("Kate Blanchet", "Sigourney Weaver", "Demi Moore", "Charlize Theron"));
 
-        sqlQuiz.setQuestion2("Beim Wiener Slang verstehe ich immer nur Bahnhof. (Oder eben ganz was anderes.)");
-        sqlQuiz.setHint2_1("Zeit");
-        sqlQuiz.setHint2_2("Anus");
-        sqlQuiz.setHint2_3("Teil");
-        sqlQuiz.setHint2_4("Großeltern");
-        sqlQuiz.setAnswer2("UR kann vor die Wörter gesetzt werden");
-        sqlQuiz.setNote2("");
+        sqlQuiz.addQuestion(2, "Beim Wiener Slang verstehe ich immer nur Bahnhof. (Oder eben ganz was anderes.)",
+                "UR kann vor die Wörter gesetzt werden", "",
+                Arrays.asList("Zeit", "Anus", "Teil", "Großeltern"));
 
-        sqlQuiz.setQuestion3("Wer bin ich? Ein Niemand. Ein Unausprechlicher. Ein Sklave (laut eigener Aussage)");
-        sqlQuiz.setHint3_1("Kreis");
-        sqlQuiz.setHint3_2("Bindestrich");
-        sqlQuiz.setHint3_3("Pfeil nach unten");
-        sqlQuiz.setHint3_4("eine Art Chamälionschwanz (nach links weg)");
-        sqlQuiz.setAnswer3("Prinz (Symbol)");
-        sqlQuiz.setNote3("");
+        sqlQuiz.addQuestion(3, "Wer bin ich? Ein Niemand. Ein Unausprechlicher. Ein Sklave (laut eigener Aussage)",
+                "Prinz (Symbol)", "",
+                Arrays.asList("Kreis", "Bindestrich", "Pfeil nach unten", "eine Art Chamälionschwanz (nach links weg)"));
 
-        sqlQuiz.setQuestion4("Klingt hart. Im Radio-Edit vor allem wegen der Übergänge beliebt.");
-        sqlQuiz.setHint4_1("Rockstar 28 ");
-        sqlQuiz.setHint4_2("The Great Pretender 80");
-        sqlQuiz.setHint4_3("Das Beste 47");
-        sqlQuiz.setHint4_4("Fear of the Dark 26");
-        sqlQuiz.setAnswer4("Interpret hat einen Namen passend zur Ordnungszahl der Elemente");
-        sqlQuiz.setNote4("");
+        sqlQuiz.addQuestion(4, "Klingt hart. Im Radio-Edit vor allem wegen der Übergänge beliebt.",
+                "Interpret hat einen Namen passend zur Ordnungszahl der Elemente", "",
+                Arrays.asList("Rockstar 28 ", "The Great Pretender 80", "Das Beste 47", "Fear of the Dark 26"));
 
-        sqlQuiz.setQuestion5("Arkanes Wissen aufdecken: Wer oder was ist die Große Unbekannte?");
-        sqlQuiz.setHint5_1("Keoprata III");
-        sqlQuiz.setHint5_2("Napoleon IV");
-        sqlQuiz.setHint5_3("Pius V");
-        sqlQuiz.setAnswer5("?");
-        sqlQuiz.setNote5("Tarot-Karten");
+        sqlQuiz.addQuestion(5, "Arkanes Wissen aufdecken: Wer oder was ist die Große Unbekannte?",
+                "?", "Tarot-Karten",
+                Arrays.asList("Keoprata III", "Napoleon IV", "Pius V"));
 
-        sqlQuiz.setQuestion6("Varus, Varus, hast du dich da verrechnent?");
-        sqlQuiz.setHint6_1("vier = 6");
-        sqlQuiz.setHint6_2("drei = 1");
-        sqlQuiz.setHint6_3("zwei = 1");
-        sqlQuiz.setAnswer6("eins = 1");
-        sqlQuiz.setNote6("zählen der römischen \"Zahlen\" im Wort");
+        sqlQuiz.addQuestion(6, "Varus, Varus, hast du dich da verrechnent?",
+                "eins = 1", "zählen der römischen \"Zahlen\" im Wort",
+                Arrays.asList("vier = 6", "drei = 1", "zwei = 1"));
 
-        sqlQuiz.setQuestion7("Ignorant und/oder Charmeur? Überall Fünfer (außer in Musik)");
-        sqlQuiz.setHint7_1("Geschichte");
-        sqlQuiz.setHint7_2("Biologie");
-        sqlQuiz.setHint7_3("Ein naturwissenschaftliches Lehrbuch");
-        sqlQuiz.setAnswer7("Französich");
-        sqlQuiz.setNote7("Liedtest Wonderful Day?");
+        sqlQuiz.addQuestion(7, "Ignorant und/oder Charmeur? Überall Fünfer (außer in Musik)",
+                "Französich", "Liedtest Wonderful Day?",
+                Arrays.asList("Geschichte", "Biologie", "Ein naturwissenschaftliches Lehrbuch"));
 
-        sqlQuiz.setQuestion8("Kling(!) wohl so verkehrt weil du die Leseliste Marsupialia überlässt.");
-        sqlQuiz.setHint8_1("Das Judas Evangelium (z.B.)");
-        sqlQuiz.setHint8_2("Das Johannes Evagelium");
-        sqlQuiz.setHint8_3("Dogma 95");
-        sqlQuiz.setAnswer8("Die Chroniken von Narnia");
-        sqlQuiz.setNote8("Känguru Bücher ");
+        sqlQuiz.addQuestion(8, "Kling(!) wohl so verkehrt weil du die Leseliste Marsupialia überlässt.",
+                "Die Chroniken von Narnia", "Känguru Bücher ",
+                Arrays.asList("Das Judas Evangelium (z.B.)", "Das Johannes Evagelium", "Dogma 95"));
 
-        // Call createQuestion through AdminController
-        adminController.createQuestion(sqlQuiz);
+        // Set submitDate and save directly via repository
+        sqlQuiz.setSubmitDate(LocalDate.now());
+        quizRepository.save(sqlQuiz);
 
-        // Verify the new question was saved
-        long finalCount = questionRepository.count();
-        assertEquals(initialCount + 1, finalCount, "Question count should increase by 1");
+        // Verify the new quiz was saved
+        long finalCount = quizRepository.count();
+        assertEquals(initialCount + 1, finalCount, "Quiz count should increase by 1");
 
-        Quiz savedQuiz = questionRepository.findById(sqlQuiz.getQuizId()).orElse(null);
-        assertNotNull(savedQuiz, "Saved question should not be null");
-        assertEquals("Academy Award für den besten Schnitt. Die spielenhöchstens in 8mm-Filmen.", savedQuiz.getQuestion1());
-        assertEquals("Spielte eine Rolle mit Glatze", savedQuiz.getAnswer1());
-        assertEquals("UR kann vor die Wörter gesetzt werden", savedQuiz.getAnswer2());
-        assertEquals("Prinz (Symbol)", savedQuiz.getAnswer3());
+        Quiz savedQuiz = quizRepository.findById(sqlQuiz.getQuizId()).orElse(null);
+        assertNotNull(savedQuiz, "Saved quiz should not be null");
+        assertEquals(8, savedQuiz.getQuestions().size());
+        assertEquals("Academy Award für den besten Schnitt. Die spielenhöchstens in 8mm-Filmen.", savedQuiz.getQuestions().get(0).getQuestion());
+        assertEquals("Spielte eine Rolle mit Glatze", savedQuiz.getQuestions().get(0).getAnswer());
+        assertEquals("UR kann vor die Wörter gesetzt werden", savedQuiz.getQuestions().get(1).getAnswer());
+        assertEquals("Prinz (Symbol)", savedQuiz.getQuestions().get(2).getAnswer());
         assertEquals(LocalDate.of(2026, 1, 7), savedQuiz.getPubDate());
     }
 }
