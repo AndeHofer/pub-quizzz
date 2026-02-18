@@ -1,4 +1,5 @@
 ## INFO
+
 A simple app to archive results, quiz and answers.
 
 ## TODOS
@@ -7,3 +8,4 @@ A simple app to archive results, quiz and answers.
 - pictures as hints possible
 - run on lxc
 - create docker image
+- quiz modus to replay the quiz online
