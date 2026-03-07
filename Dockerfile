@@ -8,16 +8,21 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Wir installieren 'su-exec', um später sicher den User zu wechseln
-RUN apk add --no-cache su-exec && \
-    addgroup -S spring && \
-    adduser -S spring -G spring
+# Installation von su-exec für den sicheren User-Wechsel
+RUN apk add --no-cache su-exec
+
+# Erstellen von User/Gruppe nur, wenn sie noch nicht existieren
+RUN getent group spring || addgroup -S spring && \
+    getent passwd spring || adduser -S spring -G spring
+
+# Vorbereiten des Datenverzeichnisses
+RUN mkdir -p /data && chown -R spring:spring /data
 
 COPY --from=build /app/target/*.jar app.jar
 
-# Wir erstellen ein kleines Start-Script direkt im Dockerfile
+# Start-Script erstellen, um Berechtigungen zur Laufzeit zu korrigieren
 RUN echo '#!/bin/sh' > /entrypoint.sh && \
-    echo 'mkdir -p /data && chown -R spring:spring /data' >> /entrypoint.sh && \
+    echo 'chown -R spring:spring /data' >> /entrypoint.sh && \
     echo 'exec su-exec spring java -jar /app/app.jar' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
