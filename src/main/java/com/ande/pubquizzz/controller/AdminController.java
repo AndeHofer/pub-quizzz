@@ -69,6 +69,22 @@ public class AdminController {
 
     // ==================== Quiz Management ====================
 
+    @GetMapping("/quizzes")
+    public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
+        log.info("Fetching all quizzes");
+        List<QuizDTO> quizzes = quizRepository.findAll().stream()
+                .map(quiz -> {
+                    QuizDTO dto = new QuizDTO();
+                    dto.setQuizId(quiz.getQuizId());
+                    dto.setPubDate(quiz.getPubDate());
+                    dto.setSubmitDate(quiz.getSubmitDate());
+                    dto.setQuestionCount(quiz.getQuestions() != null ? quiz.getQuestions().size() : 0);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(quizzes);
+    }
+
     @PostMapping("create-quiz")
     public ResponseEntity<String> createQuiz(@RequestBody CreateQuizRequest request) {
         log.info("Creating new quiz entry");
