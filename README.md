@@ -4,7 +4,7 @@ A simple app to archive results, quiz and answers.
 
 ## TODOS
 
-1) General pw to avoid a impressum
+1) General pw to avoid impressum
 2) Export and import db from LXC
 3) create some tests to autofill the db's
 4) show rankings
