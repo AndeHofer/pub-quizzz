@@ -10,6 +10,9 @@ services:
     volumes:
       - h2_data:/data
     restart: always
+    environment:
+      - ADMIN_USER=${ADMIN_USER}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
 
 volumes:
   h2_data:

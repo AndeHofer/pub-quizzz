@@ -19,10 +19,10 @@ public class DefaultAdminConfig {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${admin.default.username:admin}")
+    @Value("${ADMIN_USER}")
     private String defaultUsername;
 
-    @Value("${admin.default.password:admin123}")
+    @Value("${ADMIN_PASSWORD}")
     private String defaultPassword;
 
 
