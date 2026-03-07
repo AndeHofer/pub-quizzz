@@ -6,7 +6,7 @@ services:
       - "8080:8080"
         # user: "0:0" # Dies erzwingt Root-Rechte für den Schreibzugriff auf /data
       # 'nobody' ist ein Standard-User mit minimalen Rechten
-    user: "65534:65534"
+    user: "0:0"
     volumes:
       - h2_data:/data
     restart: always
