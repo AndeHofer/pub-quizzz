@@ -7,6 +7,13 @@ RUN mvn clean package -DskipTests
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+
+# Ordner erstellen und Rechte vergeben
+RUN mkdir /data && \
+    addgroup -S spring && \
+    adduser -S spring -G spring && \
+    chown spring:spring /data
+
 COPY --from=build /app/target/*.jar app.jar
 # Best Practice: Nicht als Root-User ausführen
 RUN addgroup -S spring && adduser -S spring -G spring
