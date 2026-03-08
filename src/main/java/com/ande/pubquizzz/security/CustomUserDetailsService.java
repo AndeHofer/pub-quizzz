@@ -3,7 +3,6 @@ package com.ande.pubquizzz.security;
 import com.ande.pubquizzz.database.entities.AppUser;
 import com.ande.pubquizzz.database.repositories.UserRepository;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,8 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public CustomUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
@@ -26,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User
                 .withUsername(appUser.getUsername())
                 .password(appUser.getPassword()) // This is the hashed password from DB
-                .roles("USER")
+                .roles(appUser.getRole().name()) // Use the actual role from the database
                 .build();
     }
 }

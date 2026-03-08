@@ -47,6 +47,7 @@ public class AdminController {
         AppUser appUser = new AppUser();
         appUser.setUsername(username);
         appUser.setPassword(passwordEncoder.encode(password));
+        appUser.setRole(Role.ADMIN);
         userRepository.save(appUser);
         log.info("User '{}' registered successfully", username);
 
