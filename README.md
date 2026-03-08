@@ -13,7 +13,7 @@ A simple app to archive results, quiz and answers.
 
 ## DONE
 
-- ~~eneral pw to avoid impressum~~
+- ~~general pw to avoid impressum~~
 - ~~db schema change -> own tables for the 2 quiz types~~
 - ~~run on lxc~~
 - ~~create docker image~~
