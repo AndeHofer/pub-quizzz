@@ -9,12 +9,12 @@
     </parent>
     <groupId>com.ande</groupId>
     <artifactId>pub-quizzz</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4-SNAPSHOT</version>
     <scm>
         <connection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</connection>
         <developerConnection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</developerConnection>
         <url>https://github.com/AndeHofer/pub-quizzz</url>
-        <tag>pub-quizzz-0.0.3</tag>
+        <tag>pub-quizzz-0.0.2</tag>
   </scm>
     <properties>
         <java.version>21</java.version>
