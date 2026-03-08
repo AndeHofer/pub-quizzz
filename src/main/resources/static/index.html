@@ -9,19 +9,6 @@
 
 <button id="adminBtn" class="admin-btn" onclick="goToAdmin()" style="display: none;">Admin Panel</button>
 
-<script>
-    function goToAdmin() {
-        window.location.href = '/admin/admin_main.html';
-    }
-
-    // Check if user is admin
-    fetch('/api/is-admin')
-        .then(response => response.json())
-        .then(isAdmin => {
-            if (isAdmin) {
-                document.getElementById('adminBtn').style.display = 'inline-block';
-            }
-        });
-</script>
+<script src="/js/index.js"></script>
 </body>
 </html>
