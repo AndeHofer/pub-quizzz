@@ -11,6 +11,11 @@
     <groupId>com.ande</groupId>
     <artifactId>pub-quizzz</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <scm>
+        <connection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</connection>
+        <developerConnection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</developerConnection>
+        <url>https://github.com/AndeHofer/pub-quizzz</url>
+    </scm>
     <properties>
         <java.version>21</java.version>
     </properties>
