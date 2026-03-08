@@ -2,6 +2,10 @@ src/main/resources/application-local.properties
 target/
 data/
 logs/
+.classpath
+.factorypath
+.project
+.settings/
 ### IntelliJ IDEA ###
 .idea
 *.iws
