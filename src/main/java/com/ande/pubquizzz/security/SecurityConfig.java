@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,11 +18,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable for registration/console testing
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                // It's better practice to not disable CSRF globally. We only ignore it for the H2 console.
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+                // Allow the H2 console to be embedded in a frame from the same origin, which is safer.
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").hasRole(Role.ADMIN.toString())
-                        .requestMatchers("/h2-console/**").hasRole(Role.ADMIN.toString())
+                        .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults());
 
