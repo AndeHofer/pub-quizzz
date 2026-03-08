@@ -6,12 +6,11 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.0.3</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>com.ande</groupId>
     <artifactId>pub-quizzz</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-
     <properties>
         <java.version>21</java.version>
     </properties>
