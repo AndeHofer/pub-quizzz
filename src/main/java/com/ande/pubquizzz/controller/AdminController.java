@@ -37,19 +37,19 @@ public class AdminController {
     // ==================== User Management ====================
 
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestParam String username, @RequestParam String password) {
-        log.info("Registering new user: {}", username);
+    public ResponseEntity<String> register(@RequestBody UserDTO userDto) {
+        log.info("Registering new user: {}", userDto.getUsername());
 
-        if (userRepository.findByUsername(username).isPresent()) {
+        if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
 
         AppUser appUser = new AppUser();
-        appUser.setUsername(username);
-        appUser.setPassword(passwordEncoder.encode(password));
-        appUser.setRole(Role.ADMIN);
+        appUser.setUsername(userDto.getUsername());
+        appUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        appUser.setRole(userDto.getRole());
         userRepository.save(appUser);
-        log.info("User '{}' registered successfully", username);
+        log.info("User '{}' registered successfully", userDto.getUsername());
 
         return ResponseEntity.ok("User registered successfully");
     }
@@ -62,10 +62,30 @@ public class AdminController {
                     UserDTO dto = new UserDTO();
                     dto.setUserId(user.getAppUserId());
                     dto.setUsername(user.getUsername());
+                    dto.setRole(user.getRole());
                     return dto;
                 })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);
+    }
+
+
+    @DeleteMapping("/user/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        log.info("Deleting user with ID: {}", id);
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            userRepository.deleteById(id);
+            log.info("User {} deleted successfully", id);
+            return ResponseEntity.ok("User deleted successfully");
+        } catch (Exception e) {
+            log.error("Error deleting user {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error deleting user: " + e.getMessage());
+        }
     }
 
     // ==================== Quiz Management ====================
