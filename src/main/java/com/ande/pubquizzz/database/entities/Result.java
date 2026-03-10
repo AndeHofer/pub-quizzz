@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "result")
 @Getter
@@ -13,46 +16,20 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor
 public class Result {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long resultsId;
 
     @ManyToOne
-    @JoinColumn(name = "teamId")
+    @JoinColumn(name = "team_id")
     private Team team;
 
     @ManyToOne
-    @JoinColumn(name = "quizId")
+    @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
-
-    private Integer answer1Points = 0;
-    private Boolean changedAnswer1;
-
-
-    private Integer answer2Points = 0;
-    private Boolean changedAnswer2;
-
-
-    private Integer answer3Points = 0;
-    private Boolean changedAnswer3;
-
-
-    private Integer answer4Points = 0;
-    private Boolean changedAnswer4;
-
-
-    private Integer answer5Points = 0;
-    private Boolean changedAnswer5;
-
-
-    private Integer answer6Points = 0;
-    private Boolean changedAnswer6;
-
-
-    private Integer answer7Points = 0;
-    private Boolean changedAnswer7;
-
-    private Integer answer8Points = 0;
-    private Boolean changedAnswer8;
+    @OneToMany(mappedBy = "result", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("questionNumber ASC")
+    private List<ResultAnswer> answers = new ArrayList<>();
 }
