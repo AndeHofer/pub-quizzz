@@ -4,8 +4,6 @@ import com.ande.pubquizzz.database.entities.Result;
 import com.ande.pubquizzz.database.entities.ResultAnswer;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResultAnswerMappingTest {

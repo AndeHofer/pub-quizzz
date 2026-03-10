@@ -31,5 +31,6 @@ public class Result {
 
     @OneToMany(mappedBy = "result", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("questionNumber ASC")
+    @ToString.Exclude
     private List<ResultAnswer> answers = new ArrayList<>();
 }
