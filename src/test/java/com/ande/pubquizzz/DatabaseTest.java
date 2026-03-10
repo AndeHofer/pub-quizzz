@@ -70,7 +70,7 @@ public class DatabaseTest {
         Quiz savedQuiz = quizRepository.findById(quiz.getQuizId()).orElse(null);
         assertNotNull(savedQuiz);
         assertEquals(8, savedQuiz.getQuestions().size());
-        assertEquals("What is the capital of France?", savedQuiz.getQuestions().getFirst().getQuestion());
+        assertEquals("What is the capital of France?", savedQuiz.getQuestions().getFirst().getQuestionText());
         assertEquals("Paris", savedQuiz.getQuestions().getFirst().getAnswer());
         assertEquals(LocalDate.now(), savedQuiz.getSubmitDate());
     }
@@ -119,7 +119,7 @@ public class DatabaseTest {
         Quiz savedQuiz = quizRepository.findById(newQuiz.getQuizId()).orElse(null);
         assertNotNull(savedQuiz, "Saved quiz should not be null");
         assertEquals(8, savedQuiz.getQuestions().size());
-        assertEquals("What is the capital of Germany?", savedQuiz.getQuestions().get(0).getQuestion());
+        assertEquals("What is the capital of Germany?", savedQuiz.getQuestions().get(0).getQuestionText());
         assertEquals("Berlin", savedQuiz.getQuestions().get(0).getAnswer());
         assertEquals("George Orwell", savedQuiz.getQuestions().get(1).getAnswer());
         assertEquals("100", savedQuiz.getQuestions().get(2).getAnswer());
@@ -179,7 +179,7 @@ public class DatabaseTest {
         Quiz savedQuiz = quizRepository.findById(sqlQuiz.getQuizId()).orElse(null);
         assertNotNull(savedQuiz, "Saved quiz should not be null");
         assertEquals(8, savedQuiz.getQuestions().size());
-        assertEquals("Academy Award für den besten Schnitt. Die spielenhöchstens in 8mm-Filmen.", savedQuiz.getQuestions().get(0).getQuestion());
+        assertEquals("Academy Award für den besten Schnitt. Die spielenhöchstens in 8mm-Filmen.", savedQuiz.getQuestions().get(0).getQuestionText());
         assertEquals("Spielte eine Rolle mit Glatze", savedQuiz.getQuestions().get(0).getAnswer());
         assertEquals("UR kann vor die Wörter gesetzt werden", savedQuiz.getQuestions().get(1).getAnswer());
         assertEquals("Prinz (Symbol)", savedQuiz.getQuestions().get(2).getAnswer());

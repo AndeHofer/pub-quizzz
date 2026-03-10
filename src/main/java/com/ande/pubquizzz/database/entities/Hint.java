@@ -1,20 +1,23 @@
 package com.ande.pubquizzz.database.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "question_hints")
 @Getter
 @Setter
+@ToString
 @RequiredArgsConstructor
 public class Hint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
@@ -26,7 +29,8 @@ public class Hint {
     @Column(name = "hint_order")
     private Integer hintOrder;
 
-    @Column(name = "hint_text")
+    @Column(name = "hint_text", nullable = false)
+    @NotNull
     private String hintText;
 
     @Column(name = "image_url")

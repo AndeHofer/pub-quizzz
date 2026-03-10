@@ -1,0 +1,55 @@
+package com.ande.pubquizzz.controller;
+
+import com.ande.pubquizzz.dto.TeamDTO;
+import com.ande.pubquizzz.service.TeamService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@Slf4j
+@RestController
+@RequestMapping("/admin")
+@RequiredArgsConstructor
+public class AdminTeamController {
+
+    private final TeamService teamService;
+
+    @GetMapping("/teams")
+    public ResponseEntity<List<TeamDTO>> getAllTeams() {
+        return ResponseEntity.ok(teamService.getAllTeams());
+    }
+
+    @GetMapping("/team/{id}")
+    public ResponseEntity<TeamDTO> getTeamById(@PathVariable Long id) {
+        return teamService.getTeamById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/team")
+    public ResponseEntity<String> createTeam(@RequestParam String teamName) {
+        try {
+            teamService.createTeam(teamName);
+            return ResponseEntity.ok("Team created successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/team/{id}")
+    public ResponseEntity<String> deleteTeam(@PathVariable Long id) {
+        if (!teamService.deleteTeam(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok("Team deleted successfully");
+    }
+}

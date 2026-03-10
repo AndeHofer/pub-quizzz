@@ -26,9 +26,9 @@ public class Question {
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
-    @Column(nullable = false)
+    @Column(name = "question", nullable = false)
     @NotNull
-    private String question;
+    private String questionText;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("hintOrder ASC")

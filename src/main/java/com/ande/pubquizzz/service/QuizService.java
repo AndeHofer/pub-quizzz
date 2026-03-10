@@ -53,7 +53,7 @@ public class QuizService {
                     .toList();
             quiz.addQuestion(
                     questionData.getNumber(),
-                    questionData.getQuestion(),
+                    questionData.getQuestionText(),
                     questionData.getAnswer(),
                     questionData.getNote(),
                     hints

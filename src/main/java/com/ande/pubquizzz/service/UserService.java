@@ -3,6 +3,7 @@ package com.ande.pubquizzz.service;
 import com.ande.pubquizzz.database.entities.AppUser;
 import com.ande.pubquizzz.database.entities.Role;
 import com.ande.pubquizzz.database.repositories.UserRepository;
+import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,17 +31,26 @@ public class UserService {
     }
 
     @Transactional
-    public void register(UserDTO userDto) {
-        log.info("Registering new user: {}", userDto.getUsername());
-        if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
+    public void register(CreateUserRequest request) {
+        log.info("Registering new user: {}", request.getUsername());
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            throw new IllegalArgumentException("Username must not be empty");
+        }
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password must not be empty");
+        }
+        if (request.getRole() == null) {
+            throw new IllegalArgumentException("Role must not be null");
+        }
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists: " + request.getUsername());
         }
         AppUser appUser = new AppUser();
-        appUser.setUsername(userDto.getUsername());
-        appUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        appUser.setRole(userDto.getRole());
+        appUser.setUsername(request.getUsername());
+        appUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        appUser.setRole(request.getRole());
         userRepository.save(appUser);
-        log.info("User '{}' registered successfully", userDto.getUsername());
+        log.info("User '{}' registered successfully", request.getUsername());
     }
 
     @Transactional

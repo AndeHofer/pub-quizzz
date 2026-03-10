@@ -27,6 +27,7 @@ public class Quiz {
     @NotNull
     private LocalDate pubDate;
     @Column(nullable = false)
+    @NotNull
     private LocalDate submitDate;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -55,7 +56,7 @@ public class Quiz {
         Question q = new Question();
         q.setId(new QuestionId(this.quizId, number));
         q.setQuiz(this);
-        q.setQuestion(text);
+        q.setQuestionText(text);
         q.setAnswer(answer);
         q.setNote(note);
 

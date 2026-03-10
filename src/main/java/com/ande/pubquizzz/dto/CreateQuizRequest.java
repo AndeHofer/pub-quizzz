@@ -13,7 +13,7 @@ public class CreateQuizRequest {
     @Data
     public static class QuestionData {
         private int number;
-        private String question;
+        private String questionText;
         private String answer;
         private String note;
         private List<HintData> hints;
