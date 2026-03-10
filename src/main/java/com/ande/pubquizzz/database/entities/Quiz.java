@@ -35,7 +35,7 @@ public class Quiz {
     private List<Question> questions = new ArrayList<>();
 
     // Helper method to add questions
-    public void addQuestion(int number, String text, String answer, String note, List<String> hints) {
+    public void addQuestion(int number, String text, String answer, String note, List<Hint> hints) {
         // 1. Validate hint count based on question number
         int hintCount = (hints == null) ? 0 : hints.size();
 
@@ -58,7 +58,15 @@ public class Quiz {
         q.setQuestion(text);
         q.setAnswer(answer);
         q.setNote(note);
-        q.setHints(new ArrayList<>(hints)); // defensive copy
+
+        List<Hint> orderedHints = new ArrayList<>();
+        for (int i = 0; i < hints.size(); i++) {
+            Hint h = hints.get(i);
+            h.setQuestion(q);
+            h.setHintOrder(i + 1);
+            orderedHints.add(h);
+        }
+        q.setHints(orderedHints);
 
         this.questions.add(q);
     }

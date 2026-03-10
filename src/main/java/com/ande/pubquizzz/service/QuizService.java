@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.service;
 
+import com.ande.pubquizzz.database.entities.Hint;
 import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
@@ -42,12 +43,20 @@ public class QuizService {
         quiz.setSubmitDate(LocalDate.now());
 
         for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
+            List<Hint> hints = questionData.getHints().stream()
+                    .map(hd -> {
+                        Hint h = new Hint();
+                        h.setHintText(hd.getHintText());
+                        h.setImageUrl(hd.getImageUrl());
+                        return h;
+                    })
+                    .toList();
             quiz.addQuestion(
                     questionData.getNumber(),
                     questionData.getQuestion(),
                     questionData.getAnswer(),
                     questionData.getNote(),
-                    questionData.getHints()
+                    hints
             );
         }
 

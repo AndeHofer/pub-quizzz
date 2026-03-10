@@ -30,16 +30,9 @@ public class Question {
     @NotNull
     private String question;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "question_hints",
-            joinColumns = {
-                    @JoinColumn(name = "quiz_id", referencedColumnName = "quiz_id"),
-                    @JoinColumn(name = "question_number", referencedColumnName = "question_number")
-            }
-    )
-    @Column(name = "hint_text")
-    private List<String> hints = new ArrayList<>();
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("hintOrder ASC")
+    private List<Hint> hints = new ArrayList<>();
 
     @Column(nullable = false)
     @NotNull

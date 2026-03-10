@@ -1,6 +1,7 @@
 package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.*;
+import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
 import com.ande.pubquizzz.service.ResultService;
 import com.ande.pubquizzz.service.TeamService;
@@ -8,10 +9,13 @@ import com.ande.pubquizzz.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -23,6 +27,7 @@ public class AdminController {
     private final QuizService quizService;
     private final TeamService teamService;
     private final ResultService resultService;
+    private final ImageStorageService imageStorageService;
 
     // ==================== User Management ====================
 
@@ -56,9 +61,23 @@ public class AdminController {
         return ResponseEntity.ok(quizService.getAllQuizzes());
     }
 
-    @PostMapping("create-quiz")
-    public ResponseEntity<String> createQuiz(@RequestBody CreateQuizRequest request) {
+    @PostMapping(value = "create-quiz", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> createQuiz(
+            @RequestPart("quiz") CreateQuizRequest request,
+            @RequestParam Map<String, MultipartFile> allFiles) {
         try {
+            // Inject imageUrls into matching HintData entries
+            for (CreateQuizRequest.QuestionData qd : request.getQuestions()) {
+                for (int j = 0; j < qd.getHints().size(); j++) {
+                    String partName = "hint_image_q" + qd.getNumber() + "_h" + (j + 1);
+                    MultipartFile file = allFiles.get(partName);
+                    if (file != null && !file.isEmpty()) {
+                        String url = imageStorageService.store(file);
+                        qd.getHints().get(j).setImageUrl(url);
+                    }
+                }
+            }
+
             quizService.createQuiz(request);
             return ResponseEntity.ok("Quiz created successfully");
         } catch (IllegalArgumentException e) {

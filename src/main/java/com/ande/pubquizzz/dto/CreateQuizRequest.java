@@ -16,6 +16,12 @@ public class CreateQuizRequest {
         private String question;
         private String answer;
         private String note;
-        private List<String> hints;
+        private List<HintData> hints;
+    }
+
+    @Data
+    public static class HintData {
+        private String hintText;
+        private String imageUrl;
     }
 }
