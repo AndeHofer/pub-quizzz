@@ -3,7 +3,6 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
-import com.ande.pubquizzz.dto.UserDTO;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
 import lombok.RequiredArgsConstructor;

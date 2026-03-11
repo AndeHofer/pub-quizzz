@@ -1,5 +1,15 @@
 const API_BASE = '/admin';
 
+// Helper for API fetch with basic network error handling
+async function apiFetch(url, options) {
+    try {
+        return await fetch(url, options);
+    } catch (error) {
+        alert('Netzwerkfehler: ' + error.message);
+        throw error;
+    }
+}
+
 function goBack() {
     window.location.href = '/index.html';
 }
@@ -41,7 +51,7 @@ async function viewQuizzes() {
     showModal('Alle Quizze', showLoading());
 
     try {
-        const response = await fetch(`${API_BASE}/quizzes`);
+        const response = await apiFetch(`${API_BASE}/quizzes`);
         const quizzes = await response.json();
 
         if (quizzes.length === 0) {
@@ -49,24 +59,17 @@ async function viewQuizzes() {
             return;
         }
 
-        let html = '<table><thead><tr><th>ID</th><th>Veröffentlicht am</th><th>Abgabedatum</th><th>Fragen</th><th>Aktionen</th></tr></thead><tbody>';
-        quizzes.forEach(quiz => {
-            html += `<tr>
-                <td>${quiz.quizId}</td>
-                <td>${quiz.pubDate}</td>
-                <td>${quiz.submitDate}</td>
-                <td>${quiz.questionCount}</td>
-                <td>
-                    <button class="icon-btn" onclick="editQuiz(${quiz.quizId})" title="Quiz bearbeiten">✏️</button>
-                    <button class="icon-btn" onclick="deleteQuiz(${quiz.quizId})" title="Quiz löschen">🗑️</button>
-                </td>
-            </tr>`;
+        const headers = ['ID', 'Veröffentlicht am', 'Abgabedatum', 'Fragen', 'Aktionen'];
+        const html = renderTable(headers, quizzes, quiz => {
+            return [`${quiz.quizId}`, `${quiz.pubDate}`, `${quiz.submitDate}`, `${quiz.questionCount}`, `
+                <button class="icon-btn" onclick="editQuiz(${quiz.quizId})" title="Quiz bearbeiten">✏️</button>
+                <button class="icon-btn" onclick="deleteQuiz(${quiz.quizId})" title="Quiz löschen">🗑️</button>
+            `];
         });
-        html += '</tbody></table>';
 
         showModal('Alle Quizze', html);
     } catch (error) {
-        showModal('Fehler', showError('Fehler beim Laden der Quizze: ' + error.message));
+        showModal('Fehler', showError('Fehler beim Laden der Quizze: ' + (error.message || error)));
     }
 }
 
@@ -133,7 +136,7 @@ async function viewTeams() {
     showModal('Alle Teams', showLoading());
 
     try {
-        const response = await fetch(`${API_BASE}/teams`);
+        const response = await apiFetch(`${API_BASE}/teams`);
         const teams = await response.json();
 
         if (teams.length === 0) {
@@ -141,21 +144,16 @@ async function viewTeams() {
             return;
         }
 
-        let html = '<table><thead><tr><th>ID</th><th>Team-Name</th><th>Aktionen</th></tr></thead><tbody>';
-        teams.forEach(team => {
-            html += `<tr>
-                <td>${team.teamsId}</td>
-                <td>${team.teamName}</td>
-                <td>
-                    <button class="icon-btn" onclick="deleteTeam(${team.teamsId}, '${team.teamName}')" title="Team löschen">🗑️</button>
-                </td>
-            </tr>`;
+        const headers = ['ID', 'Team-Name', 'Aktionen'];
+        const html = renderTable(headers, teams, team => {
+            return [`${team.teamsId}`, `${team.teamName}`, `
+                <button class="icon-btn" onclick="deleteTeam(${team.teamsId}, '${team.teamName}')" title="Team löschen">🗑️</button>
+            `];
         });
-        html += '</tbody></table>';
 
         showModal('Alle Teams', html);
     } catch (error) {
-        showModal('Fehler', showError('Fehler beim Laden der Teams: ' + error.message));
+        showModal('Fehler', showError('Fehler beim Laden der Teams: ' + (error.message || error)));
     }
 }
 
@@ -189,7 +187,7 @@ async function viewResults() {
 
     try {
         const url = quizId ? `${API_BASE}/results?quizId=${quizId}` : `${API_BASE}/results`;
-        const response = await fetch(url);
+        const response = await apiFetch(url);
         const results = await response.json();
 
         if (results.length === 0) {
@@ -204,26 +202,35 @@ async function viewResults() {
         html += '<th>Gesamt</th></tr></thead><tbody>';
 
         results.forEach(result => {
-            html += `<tr>
-                <td>${result.teamName}</td>
-                <td>${result.quizDate}</td>
-                <td>${result.answer1Points || 0}${result.changedAnswer1 ? '*' : ''}</td>
-                <td>${result.answer2Points || 0}${result.changedAnswer2 ? '*' : ''}</td>
-                <td>${result.answer3Points || 0}${result.changedAnswer3 ? '*' : ''}</td>
-                <td>${result.answer4Points || 0}${result.changedAnswer4 ? '*' : ''}</td>
-                <td>${result.answer5Points || 0}${result.changedAnswer5 ? '*' : ''}</td>
-                <td>${result.answer6Points || 0}${result.changedAnswer6 ? '*' : ''}</td>
-                <td>${result.answer7Points || 0}${result.changedAnswer7 ? '*' : ''}</td>
-                <td>${result.answer8Points || 0}${result.changedAnswer8 ? '*' : ''}</td>
-                <td><strong>${result.totalPoints}</strong></td>
-            </tr>`;
+            // Build a lookup map from questionNumber -> answer object
+            const answersMap = {};
+            if (Array.isArray(result.answers)) {
+                result.answers.forEach(a => {
+                    answersMap[a.questionNumber] = a;
+                });
+            }
+
+            html += `<tr>`;
+            html += `<td>${result.teamName}</td>`;
+            html += `<td>${result.quizDate}</td>`;
+
+            for (let i = 1; i <= 8; i++) {
+                const a = answersMap[i];
+                const points = a && typeof a.points === 'number' ? a.points : 0;
+                const changed = a && a.changed ? '*' : '';
+                html += `<td>${points}${changed}</td>`;
+            }
+
+            html += `<td><strong>${result.totalPoints || 0}</strong></td>`;
+            html += `</tr>`;
         });
+
         html += '</tbody></table>';
         html += '<p style="margin-top: 10px; color: #666;"><em>* = Antwort wurde geändert</em></p>';
 
         showModal('Ergebnisse', html);
     } catch (error) {
-        showModal('Fehler', showError('Fehler beim Laden der Ergebnisse: ' + error.message));
+        showModal('Fehler', showError('Fehler beim Laden der Ergebnisse: ' + (error.message || error)));
     }
 }
 
@@ -245,7 +252,7 @@ async function viewLeaderboard() {
 
     try {
         const url = quizId ? `${API_BASE}/leaderboard?quizId=${quizId}` : `${API_BASE}/leaderboard`;
-        const response = await fetch(url);
+        const response = await apiFetch(url);
         const leaderboard = await response.json();
 
         if (leaderboard.length === 0) {
@@ -253,21 +260,15 @@ async function viewLeaderboard() {
             return;
         }
 
-        let html = '<table><thead><tr><th>Rang</th><th>Team</th><th>Quiz Datum</th><th>Punkte</th></tr></thead><tbody>';
-        leaderboard.forEach(entry => {
+        const headers = ['Rang', 'Team', 'Quiz Datum', 'Punkte'];
+        const html = renderTable(headers, leaderboard, entry => {
             const rankEmoji = entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank;
-            html += `<tr>
-                <td>${rankEmoji}</td>
-                <td>${entry.teamName}</td>
-                <td>${entry.quizDate}</td>
-                <td><strong>${entry.totalPoints}</strong></td>
-            </tr>`;
+            return [`${rankEmoji}`, `${entry.teamName}`, `${entry.quizDate}`, `<strong>${entry.totalPoints}</strong>`];
         });
-        html += '</tbody></table>';
 
         showModal('🏆 Rangliste', html);
     } catch (error) {
-        showModal('Fehler', showError('Fehler beim Laden der Rangliste: ' + error.message));
+        showModal('Fehler', showError('Fehler beim Laden der Rangliste: ' + (error.message || error)));
     }
 }
 
@@ -277,7 +278,7 @@ async function viewUsers() {
     showModal('Alle Benutzer', showLoading());
 
     try {
-        const response = await fetch(`${API_BASE}/users`);
+        const response = await apiFetch(`${API_BASE}/users`);
         const users = await response.json();
 
         if (users.length === 0) {
@@ -285,23 +286,34 @@ async function viewUsers() {
             return;
         }
 
-        let html = '<table><thead><tr><th>ID</th><th>Benutzername</th><th>Rolle</th></tr></thead><tbody>';
-        users.forEach(user => {
-            html += `<tr>
-                <td>${user.userId}</td>
-                <td>${user.username}</td>
-                <td>${user.role}</td>
-                <td style="width: 1%; white-space: nowrap; text-align: center;">
-                    <button class="icon-btn" onclick="deleteUser(${user.userId}, '${user.username}')" title="Benutzer löschen">🗑️</button>
-                </td>
-            </tr>`;
+        const headers = ['ID', 'Benutzername', 'Rolle', ''];
+        const html = renderTable(headers, users, user => {
+            return [`${user.userId}`, `${user.username}`, `${user.role}`, `
+                <button class="icon-btn" onclick="deleteUser(${user.userId}, '${user.username}')" title="Benutzer löschen">🗑️</button>
+            `];
         });
-        html += '</tbody></table>';
 
         showModal('Alle Benutzer', html);
     } catch (error) {
-        showModal('Fehler', showError('Fehler beim Laden der Benutzer: ' + error.message));
+        showModal('Fehler', showError('Fehler beim Laden der Benutzer: ' + (error.message || error)));
     }
+}
+
+// Helper to render a table from headers and data. rowFn returns an array of cell HTML/text.
+function renderTable(headers, rows, rowFn) {
+    let html = '<table><thead><tr>';
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += '</tr></thead><tbody>';
+
+    rows.forEach(r => {
+        const cells = rowFn(r);
+        html += '<tr>';
+        cells.forEach(c => html += `<td>${c}</td>`);
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    return html;
 }
 
 // Add deleteUser function

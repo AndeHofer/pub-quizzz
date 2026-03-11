@@ -51,22 +51,17 @@ public class QuizService {
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : LocalDate.now());
         quiz.setSubmitDate(LocalDate.now());
 
-        for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
-            List<Hint> hints = questionData.getHints().stream()
-                    .map(hd -> {
-                        Hint h = new Hint();
-                        h.setHintText(hd.getHintText());
-                        h.setImageUrl(hd.getImageUrl());
-                        return h;
-                    })
-                    .toList();
-            quiz.addQuestion(
-                    questionData.getNumber(),
-                    questionData.getQuestionText(),
-                    questionData.getAnswer(),
-                    questionData.getNote(),
-                    hints
-            );
+        if (request.getQuestions() != null) {
+            for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
+                List<Hint> hints = buildHints(questionData.getHints());
+                quiz.addQuestion(
+                        questionData.getNumber(),
+                        questionData.getQuestionText(),
+                        questionData.getAnswer(),
+                        questionData.getNote(),
+                        hints
+                );
+            }
         }
 
         quizRepository.save(quiz);
@@ -102,22 +97,17 @@ public class QuizService {
         quizRepository.flush(); // Ensure deletes are done before adding new
 
         // Add new questions
-        for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
-            List<Hint> hints = questionData.getHints().stream()
-                    .map(hd -> {
-                        Hint h = new Hint();
-                        h.setHintText(hd.getHintText());
-                        h.setImageUrl(hd.getImageUrl());
-                        return h;
-                    })
-                    .toList();
-            quiz.addQuestion(
-                    questionData.getNumber(),
-                    questionData.getQuestionText(),
-                    questionData.getAnswer(),
-                    questionData.getNote(),
-                    hints
-            );
+        if (request.getQuestions() != null) {
+            for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
+                List<Hint> hints = buildHints(questionData.getHints());
+                quiz.addQuestion(
+                        questionData.getNumber(),
+                        questionData.getQuestionText(),
+                        questionData.getAnswer(),
+                        questionData.getNote(),
+                        hints
+                );
+            }
         }
 
         quizRepository.save(quiz);
@@ -175,5 +165,17 @@ public class QuizService {
             dto.setQuestions(questions);
         }
         return dto;
+    }
+
+    private List<Hint> buildHints(List<CreateQuizRequest.HintData> hintDataList) {
+        if (hintDataList == null) return List.of();
+        List<Hint> hints = new ArrayList<>();
+        for (CreateQuizRequest.HintData hd : hintDataList) {
+            Hint h = new Hint();
+            h.setHintText(hd.getHintText());
+            h.setImageUrl(hd.getImageUrl());
+            hints.add(h);
+        }
+        return hints;
     }
 }
