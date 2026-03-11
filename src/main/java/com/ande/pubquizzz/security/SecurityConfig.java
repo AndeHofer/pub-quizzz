@@ -16,11 +16,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // It's better practice to not disable CSRF globally. We only ignore it for the H2 console.
-                //.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
-                .csrf(AbstractHttpConfigurer::disable)
-                // Allow the H2 console to be embedded in a frame from the same origin, which is safer.
+        http.csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())

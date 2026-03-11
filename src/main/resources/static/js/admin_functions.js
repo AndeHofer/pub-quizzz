@@ -5,7 +5,8 @@ async function apiFetch(url, options) {
     try {
         return await fetch(url, options);
     } catch (error) {
-        alert('Netzwerkfehler: ' + error.message);
+        // show inline feedback if possible, otherwise rethrow
+        console.error('Netzwerkfehler:', error);
         throw error;
     }
 }
@@ -77,7 +78,8 @@ async function editQuiz(quizId) {
     try {
         const response = await fetch(`${API_BASE}/quiz/${quizId}/detail`);
         if (!response.ok) {
-            alert('Quiz nicht gefunden');
+            // quiz not found — show modal feedback
+            showModal('Fehler', showError('Quiz nicht gefunden'));
             return;
         }
 
@@ -85,7 +87,7 @@ async function editQuiz(quizId) {
         // Open create quiz form in edit mode with pre-filled data
         loadCreateQuizPage(quiz);
     } catch (error) {
-        alert('Fehler: ' + error.message);
+        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
     }
 }
 
@@ -100,13 +102,13 @@ async function deleteQuiz(quizId) {
         });
 
         if (response.ok) {
-            alert('Quiz erfolgreich gelöscht!');
+            // refresh silently
             viewQuizzes(); // Refresh the list
         } else {
-            alert('Fehler beim Löschen des Quiz');
+            showModal('Fehler', showError('Fehler beim Löschen des Quiz'));
         }
     } catch (error) {
-        alert('Fehler: ' + error.message);
+        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
     }
 }
 
@@ -121,14 +123,12 @@ async function createTeam() {
             method: 'POST'
         });
 
-        if (response.ok) {
-            alert('Team erfolgreich erstellt!');
-        } else {
+        if (!response.ok) {
             const message = await response.text();
-            alert('Fehler: ' + message);
+            showModal('Fehler', showError('Fehler: ' + message));
         }
     } catch (error) {
-        alert('Fehler: ' + error.message);
+        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
     }
 }
 
@@ -168,13 +168,12 @@ async function deleteTeam(teamId, teamName) {
         });
 
         if (response.ok) {
-            alert('Team erfolgreich gelöscht!');
             viewTeams(); // Refresh the list
         } else {
-            alert('Fehler beim Löschen des Teams');
+            showModal('Fehler', showError('Fehler beim Löschen des Teams'));
         }
     } catch (error) {
-        alert('Fehler: ' + error.message);
+        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
     }
 }
 
@@ -233,6 +232,126 @@ async function viewResults() {
         showModal('Fehler', showError('Fehler beim Laden der Ergebnisse: ' + (error.message || error)));
     }
 }
+
+// ==================== Add Result Modal (client-side team filter) ====================
+
+let _admin_quizzes_cache = null;
+let _admin_teams_cache = null;
+let _selectedTeamId = null;
+// Accessibility / keyboard navigation state for team suggestions
+// removed suggestion state (using select dropdown now)
+let _team_matches = [];
+let _team_suggestion_index = -1;
+
+async function showAddResultModal() {
+    showModal('Ergebnis hinzufügen', showLoading());
+
+    try {
+        if (!_admin_quizzes_cache) {
+            const res = await apiFetch(`${API_BASE}/quizzes`);
+            _admin_quizzes_cache = await res.json();
+        }
+        if (!_admin_teams_cache) {
+            const res = await apiFetch(`${API_BASE}/teams`);
+            _admin_teams_cache = await res.json();
+        }
+
+        const html = buildAddResultForm();
+        showModal('Ergebnis hinzufügen', html);
+
+        // use a select dropdown for teams (no free text)
+        const teamSelect = document.getElementById('add-result-team-select');
+        // populate select with teams (in case cache changed)
+        if (teamSelect && _admin_teams_cache) {
+            teamSelect.innerHTML = '<option value="">-- Team auswählen --</option>' +
+                _admin_teams_cache.map(t => `<option value="${t.teamsId}">${t.teamName}</option>`).join('');
+        }
+
+        document.getElementById('add-result-save-btn').addEventListener('click', onSaveAddResult);
+
+    } catch (err) {
+        showModal('Fehler', showError('Fehler beim Laden der Daten: ' + (err.message || err)));
+    }
+}
+
+function buildAddResultForm() {
+    let quizOptions = '<option value="">-- Quiz auswählen --</option>';
+    _admin_quizzes_cache.forEach(q => {
+        quizOptions += `<option value="${q.quizId}">ID ${q.quizId} — ${q.pubDate}</option>`;
+    });
+
+    let inputs = '';
+    for (let i = 1; i <= 8; i++) {
+        inputs += `<div class="form-row"><label>Frage ${i} Punkte</label><input type="number" id="add-result-q${i}" min="0" value="0"></div>`;
+    }
+
+    return `
+      <div id="add-result-form">
+        <div class="form-row"><label>Quiz auswählen</label>
+          <select id="add-result-quiz">${quizOptions}</select>
+        </div>
+          <div class="form-row"><label>Team auswählen</label>
+          <select id="add-result-team-select">
+            <option value="">-- Team auswählen --</option>
+          </select>
+        </div>
+        ${inputs}
+        <div class="form-actions">
+          <button id="add-result-save-btn" class="primary-btn">Speichern</button>
+          <button onclick="closeModal()" class="secondary-btn">Abbrechen</button>
+        </div>
+        <div id="add-result-feedback" class="form-feedback"></div>
+      </div>
+    `;
+}
+
+
+async function onSaveAddResult() {
+    const quizId = Number(document.getElementById('add-result-quiz').value);
+    const teamId = Number(document.getElementById('add-result-team-select').value);
+    const feedback = document.getElementById('add-result-feedback');
+
+    if (!quizId) {
+        feedback.textContent = 'Bitte ein Quiz auswählen.';
+        return;
+    }
+    if (!teamId) {
+        feedback.textContent = 'Bitte ein Team auswählen (über Vorschläge).';
+        return;
+    }
+
+    const answers = [];
+    for (let i = 1; i <= 8; i++) {
+        const val = Number(document.getElementById(`add-result-q${i}`).value);
+        if (!Number.isFinite(val) || val < 0) {
+            feedback.textContent = `Ungültige Punkte bei Frage ${i}.`;
+            return;
+        }
+        answers.push({questionNumber: i, points: val});
+    }
+
+    const payload = {quizId, teamId, answers};
+
+    try {
+        const res = await apiFetch(`${API_BASE}/results`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            feedback.textContent = 'Fehler: ' + text;
+            return;
+        }
+
+        const created = await res.json();
+        closeModal();
+    } catch (err) {
+        feedback.textContent = 'Fehler beim Speichern: ' + (err.message || err);
+    }
+}
+
 
 async function exportResults() {
     const quizId = prompt('Quiz ID für Export eingeben (leer = alle):');

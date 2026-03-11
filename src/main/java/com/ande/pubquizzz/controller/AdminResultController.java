@@ -39,4 +39,18 @@ public class AdminResultController {
                 .header("Content-Disposition", "attachment; filename=\"quiz_results.csv\"")
                 .body(csv);
     }
+
+    @org.springframework.web.bind.annotation.PostMapping(value = "/results", consumes = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createResult(@org.springframework.web.bind.annotation.RequestBody com.ande.pubquizzz.dto.CreateResultRequest request) {
+        try {
+            var created = resultService.createResult(request);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error creating result", e);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Fehler beim Speichern des Ergebnisses: " + e.getMessage());
+        }
+    }
 }

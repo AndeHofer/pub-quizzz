@@ -20,6 +20,8 @@ import java.util.List;
 public class ResultService {
 
     private final ResultRepository resultRepository;
+    private final com.ande.pubquizzz.database.repositories.QuizRepository quizRepository;
+    private final com.ande.pubquizzz.database.repositories.TeamRepository teamRepository;
 
     @Transactional(readOnly = true)
     public List<ResultDTO> getResults(Long quizId) {
@@ -112,5 +114,52 @@ public class ResultService {
             return "\"" + value.replace("\"", "\"\"") + "\"";
         }
         return value;
+    }
+
+    @Transactional
+    public ResultDTO createResult(com.ande.pubquizzz.dto.CreateResultRequest req) {
+        log.info("Creating result for quizId={} teamId={}", req.getQuizId(), req.getTeamId());
+
+        if (req.getQuizId() == null || req.getTeamId() == null) {
+            throw new IllegalArgumentException("Quiz und Team müssen ausgewählt werden.");
+        }
+
+        var quizOpt = quizRepository.findById(req.getQuizId());
+        if (quizOpt.isEmpty()) throw new IllegalArgumentException("Quiz nicht gefunden: " + req.getQuizId());
+        var teamOpt = teamRepository.findById(req.getTeamId());
+        if (teamOpt.isEmpty()) throw new IllegalArgumentException("Team nicht gefunden: " + req.getTeamId());
+
+        var answers = req.getAnswers();
+        if (answers == null || answers.size() != 8) {
+            throw new IllegalArgumentException("Es müssen 8 Antworten übergeben werden.");
+        }
+
+        boolean[] seen = new boolean[9];
+        for (com.ande.pubquizzz.dto.CreateResultRequest.AnswerSubmission a : answers) {
+            int qn = a.getQuestionNumber();
+            int pts = a.getPoints();
+            if (qn < 1 || qn > 8) throw new IllegalArgumentException("Ungültige Frage-Nummer: " + qn);
+            if (pts < 0) throw new IllegalArgumentException("Punkte müssen >= 0 sein.");
+            if (seen[qn]) throw new IllegalArgumentException("Doppelte Frage: " + qn);
+            seen[qn] = true;
+        }
+
+        Result result = new Result();
+        result.setQuiz(quizOpt.get());
+        result.setTeam(teamOpt.get());
+
+        List<ResultAnswer> resultAnswers = new ArrayList<>();
+        for (com.ande.pubquizzz.dto.CreateResultRequest.AnswerSubmission a : answers) {
+            ResultAnswer ra = new ResultAnswer();
+            ra.setQuestionNumber(a.getQuestionNumber());
+            ra.setPoints(a.getPoints());
+            ra.setChanged(false);
+            ra.setResult(result);
+            resultAnswers.add(ra);
+        }
+        result.setAnswers(resultAnswers);
+
+        Result saved = resultRepository.save(result);
+        return toDTO(saved);
     }
 }

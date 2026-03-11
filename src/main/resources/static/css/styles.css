@@ -102,6 +102,44 @@ button:hover, .admin-btn:hover {
     overflow-y: auto;
 }
 
+/* make suggestion positioning relative to modal */
+.modal-content {
+    position: relative;
+}
+
+.suggest-wrapper {
+    position: relative;
+}
+
+.suggestions {
+    list-style: none;
+    margin: 4px 0 0 0;
+    padding: 0;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    position: absolute;
+    z-index: 1100;
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.suggestions li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.suggestions li:hover, .suggestions li.highlight {
+    background-color: #f0f0f0;
+}
+
+/* Ensure suggestion list is keyboard-friendly */
+.suggestions li:focus {
+    outline: none;
+    background-color: #eef;
+}
+
 .close {
     color: #aaa;
     float: right;
