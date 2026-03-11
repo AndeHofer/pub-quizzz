@@ -19,6 +19,14 @@ function showLoading() {
     return '<div class="loading">Laden...</div>';
 }
 
+// Load create quiz page with pre-filled data for editing
+function loadCreateQuizPage(quiz) {
+    // Store quiz data in sessionStorage for the create_quiz page to pick up
+    sessionStorage.setItem('editingQuiz', JSON.stringify(quiz));
+    // Redirect to create quiz page
+    window.location.href = 'create_quiz.html';
+}
+
 function showError(message) {
     return `<div class="error">❌ ${message}</div>`;
 }
@@ -41,13 +49,17 @@ async function viewQuizzes() {
             return;
         }
 
-        let html = '<table><thead><tr><th>ID</th><th>Veröffentlicht am</th><th>Abgabedatum</th><th>Fragen</th></tr></thead><tbody>';
+        let html = '<table><thead><tr><th>ID</th><th>Veröffentlicht am</th><th>Abgabedatum</th><th>Fragen</th><th>Aktionen</th></tr></thead><tbody>';
         quizzes.forEach(quiz => {
             html += `<tr>
                 <td>${quiz.quizId}</td>
                 <td>${quiz.pubDate}</td>
                 <td>${quiz.submitDate}</td>
                 <td>${quiz.questionCount}</td>
+                <td>
+                    <button class="icon-btn" onclick="editQuiz(${quiz.quizId})" title="Quiz bearbeiten">✏️</button>
+                    <button class="icon-btn" onclick="deleteQuiz(${quiz.quizId})" title="Quiz löschen">🗑️</button>
+                </td>
             </tr>`;
         });
         html += '</tbody></table>';
@@ -58,46 +70,23 @@ async function viewQuizzes() {
     }
 }
 
-async function editQuiz() {
-    const quizId = prompt('Quiz ID eingeben:');
-    if (!quizId) return;
-
+async function editQuiz(quizId) {
     try {
-        const response = await fetch(`${API_BASE}/quiz/${quizId}`);
+        const response = await fetch(`${API_BASE}/quiz/${quizId}/detail`);
         if (!response.ok) {
             alert('Quiz nicht gefunden');
             return;
         }
 
         const quiz = await response.json();
-        const newPubDate = prompt('Neues Veröffentlichungsdatum (YYYY-MM-DD):', quiz.pubDate);
-        const newSubmitDate = prompt('Neues Abgabedatum (YYYY-MM-DD):', quiz.submitDate);
-
-        if (newPubDate && newSubmitDate) {
-            const updateResponse = await fetch(`${API_BASE}/quiz/${quizId}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    pubDate: newPubDate,
-                    submitDate: newSubmitDate
-                })
-            });
-
-            if (updateResponse.ok) {
-                alert('Quiz erfolgreich aktualisiert!');
-            } else {
-                alert('Fehler beim Aktualisieren des Quiz');
-            }
-        }
+        // Open create quiz form in edit mode with pre-filled data
+        loadCreateQuizPage(quiz);
     } catch (error) {
         alert('Fehler: ' + error.message);
     }
 }
 
-async function deleteQuiz() {
-    const quizId = prompt('Quiz ID zum Löschen eingeben:');
-    if (!quizId) return;
-
+async function deleteQuiz(quizId) {
     if (!confirm(`Quiz ${quizId} wirklich löschen? Dies kann nicht rückgängig gemacht werden!`)) {
         return;
     }
@@ -109,6 +98,7 @@ async function deleteQuiz() {
 
         if (response.ok) {
             alert('Quiz erfolgreich gelöscht!');
+            viewQuizzes(); // Refresh the list
         } else {
             alert('Fehler beim Löschen des Quiz');
         }
@@ -151,11 +141,14 @@ async function viewTeams() {
             return;
         }
 
-        let html = '<table><thead><tr><th>ID</th><th>Team-Name</th></tr></thead><tbody>';
+        let html = '<table><thead><tr><th>ID</th><th>Team-Name</th><th>Aktionen</th></tr></thead><tbody>';
         teams.forEach(team => {
             html += `<tr>
                 <td>${team.teamsId}</td>
                 <td>${team.teamName}</td>
+                <td>
+                    <button class="icon-btn" onclick="deleteTeam(${team.teamsId}, '${team.teamName}')" title="Team löschen">🗑️</button>
+                </td>
             </tr>`;
         });
         html += '</tbody></table>';
@@ -166,11 +159,8 @@ async function viewTeams() {
     }
 }
 
-async function deleteTeam() {
-    const teamId = prompt('Team ID zum Löschen eingeben:');
-    if (!teamId) return;
-
-    if (!confirm(`Team ${teamId} wirklich löschen?`)) {
+async function deleteTeam(teamId, teamName) {
+    if (!confirm(`Team "${teamName}" wirklich löschen?`)) {
         return;
     }
 
@@ -181,6 +171,7 @@ async function deleteTeam() {
 
         if (response.ok) {
             alert('Team erfolgreich gelöscht!');
+            viewTeams(); // Refresh the list
         } else {
             alert('Fehler beim Löschen des Teams');
         }

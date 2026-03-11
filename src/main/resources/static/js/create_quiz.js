@@ -1,5 +1,72 @@
 const questionsContainer = document.getElementById('questionsContainer');
 
+// Global variable to track edit mode
+let editingQuizId = null;
+
+// Check for editing quiz data in sessionStorage on page load
+document.addEventListener('DOMContentLoaded', function () {
+    const editingData = sessionStorage.getItem('editingQuiz');
+    if (editingData) {
+        const quiz = JSON.parse(editingData);
+        sessionStorage.removeItem('editingQuiz'); // Clear after reading
+        populateFormForEdit(quiz);
+    }
+});
+
+function populateFormForEdit(quiz) {
+    editingQuizId = quiz.quizId;
+
+    // Set the pubDate
+    const pubDateInput = document.getElementById('pubDate');
+    if (pubDateInput) {
+        pubDateInput.value = quiz.pubDate;
+    }
+
+    // Set the page title and submit button
+    const title = document.querySelector('h1');
+    if (title) {
+        title.textContent = 'Quiz bearbeiten';
+    }
+    const submitBtn = document.querySelector('#quizForm button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.textContent = 'Speichern';
+    }
+
+    // Fill in questions
+    if (quiz.questions) {
+        quiz.questions.forEach(q => {
+            const qNum = q.number;
+            const quizInput = document.getElementById(`quiz${qNum}`);
+            if (quizInput) quizInput.value = q.questionText || '';
+
+            const answerInput = document.getElementById(`answer${qNum}`);
+            if (answerInput) answerInput.value = q.answer || '';
+
+            const noteInput = document.getElementById(`note${qNum}`);
+            if (noteInput) noteInput.value = q.note || '';
+
+            // Fill hints
+            if (q.hints) {
+                q.hints.forEach((h, idx) => {
+                    const hNum = idx + 1;
+                    const hintInput = document.getElementById(`hint${qNum}_${hNum}`);
+                    if (hintInput && h.hintText) {
+                        hintInput.value = h.hintText;
+                    }
+                    // Show existing image if present
+                    if (h.imageUrl) {
+                        const preview = document.getElementById(`preview_q${qNum}_${hNum}`);
+                        if (preview) {
+                            preview.src = h.imageUrl;
+                            preview.style.display = 'block';
+                        }
+                    }
+                });
+            }
+        });
+    }
+}
+
 // Questions 1-4 have 4 hints, 5-8 have 3 hints.
 if (questionsContainer) {
     for (let i = 1; i <= 8; i++) {
@@ -71,7 +138,7 @@ if (quizForm) {
 
             quizData.questions.push({
                 number: i,
-                question: document.getElementById(`quiz${i}`).value,
+                questionText: document.getElementById(`quiz${i}`).value,
                 answer: document.getElementById(`answer${i}`).value,
                 note: document.getElementById(`note${i}`).value || null,
                 hints: hints
@@ -81,26 +148,38 @@ if (quizForm) {
         formData.append('quiz', new Blob([JSON.stringify(quizData)], {type: 'application/json'}));
         console.log('Sending quiz data:', JSON.stringify(quizData, null, 2));
 
-        fetch('/admin/create-quiz', {
-            method: 'POST',
+        const url = editingQuizId ? `/admin/quiz/${editingQuizId}` : '/admin/create-quiz';
+        const method = editingQuizId ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
             body: formData
             // No Content-Type header — browser sets it with boundary automatically
         })
             .then(response => {
                 if (response.ok) {
                     return response.text().then(text => {
-                        showMessage('✅ ' + text, 'success');
-                        // Clear form immediately after successful save
-                        document.getElementById('quizForm').reset();
-                        // Clear image previews
-                        document.querySelectorAll('img[id^="preview_q"]').forEach(img => {
-                            img.src = '';
-                            img.style.display = 'none';
-                        });
-                        // Hide success message after 3 seconds
-                        setTimeout(() => {
-                            document.getElementById('message').style.display = 'none';
-                        }, 3000);
+                        if (editingQuizId) {
+                            // In edit mode, redirect to admin page
+                            showMessage('✅ Quiz erfolgreich aktualisiert!', 'success');
+                            setTimeout(() => {
+                                window.location.href = 'admin_main.html';
+                            }, 1000);
+                        } else {
+                            // In create mode, clear form
+                            showMessage('✅ ' + text, 'success');
+                            // Clear form immediately after successful save
+                            document.getElementById('quizForm').reset();
+                            // Clear image previews
+                            document.querySelectorAll('img[id^="preview_q"]').forEach(img => {
+                                img.src = '';
+                                img.style.display = 'none';
+                            });
+                            // Hide success message after 3 seconds
+                            setTimeout(() => {
+                                document.getElementById('message').style.display = 'none';
+                            }, 3000);
+                        }
                     });
                 } else {
                     return response.text().then(text => {

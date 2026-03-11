@@ -2,6 +2,7 @@ package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
+import com.ande.pubquizzz.dto.QuizDetailDTO;
 import com.ande.pubquizzz.dto.UserDTO;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
@@ -63,6 +64,13 @@ public class AdminQuizController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/quiz/{id}/detail")
+    public ResponseEntity<QuizDetailDTO> getQuizDetailById(@PathVariable Long id) {
+        return quizService.getQuizDetailById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/quiz/{id}")
     public ResponseEntity<String> deleteQuiz(@PathVariable Long id) {
         if (!quizService.deleteQuiz(id)) {
@@ -71,8 +79,26 @@ public class AdminQuizController {
         return ResponseEntity.ok("Quiz deleted successfully");
     }
 
-    @PutMapping("/quiz/{id}")
-    public ResponseEntity<String> updateQuiz(@PathVariable Long id, @RequestBody QuizDTO updatedQuiz) {
+    @PutMapping(value = "/quiz/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> updateQuizFull(
+            @PathVariable Long id,
+            @RequestPart("quiz") CreateQuizRequest request,
+            @RequestParam Map<String, MultipartFile> allFiles) {
+        try {
+            injectImageUrls(request, allFiles);
+            quizService.updateQuizFull(id, request);
+            return ResponseEntity.ok("Quiz updated successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error updating quiz", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating quiz: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/quiz/{id}/dates")
+    public ResponseEntity<String> updateQuizDates(@PathVariable Long id, @RequestBody QuizDTO updatedQuiz) {
         return quizService.updateQuiz(id, updatedQuiz.getPubDate(), updatedQuiz.getSubmitDate())
                 .map(q -> ResponseEntity.ok("Quiz updated successfully"))
                 .orElse(ResponseEntity.notFound().build());
