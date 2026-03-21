@@ -12,11 +12,6 @@ Guidance for AI coding agents working in this repository.
 - All APIs need to have integration tests.
 - All business logic needs to have unit tests.
 - Always remove unused imports.
-- Document all the steps you plan to do in a "progress.md" file before you start coding. This file should be updated as
-  you make progress and should include a task list of what was done, what is left to do, and any blockers you encounter.
-- Ensure to document your progress after every single step in case copilot crashes.
-- Document your idea of what the project should be in a concise form in a "project.md". Update this whenever
-  requirements change.
 - Minimize the commands executed that need to be confirmed by user input. E.g. do not run individual tests, but run all
   tests and then fix all at once.
 - Do not put files outside of the project structure as you may not have permission to access them e.g. in /tmp. Delete

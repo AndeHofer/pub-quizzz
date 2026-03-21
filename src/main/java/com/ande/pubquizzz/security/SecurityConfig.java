@@ -20,6 +20,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers("/", "/index.html", "/assets/**", "/favicon.svg", "/icons.svg", "/.well-known/**").permitAll()
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults());
 
