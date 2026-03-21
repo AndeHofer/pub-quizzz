@@ -7,6 +7,7 @@ import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
+import com.ande.pubquizzz.mapper.QuizMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,25 +24,26 @@ import java.util.Optional;
 public class QuizService {
 
     private final QuizRepository quizRepository;
+    private final QuizMapper quizMapper;
 
     @Transactional(readOnly = true)
     public List<QuizDTO> getAllQuizzes() {
         log.info("Fetching all quizzes");
         return quizRepository.findAll().stream()
-                .map(this::toDTO)
+                .map(quizMapper::toDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public Optional<QuizDTO> getQuizById(Long id) {
         log.info("Fetching quiz with ID: {}", id);
-        return quizRepository.findById(id).map(this::toDTO);
+        return quizRepository.findById(id).map(quizMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
     public Optional<QuizDetailDTO> getQuizDetailById(Long id) {
         log.info("Fetching quiz detail with ID: {}", id);
-        return quizRepository.findById(id).map(this::toDetailDTO);
+        return quizRepository.findById(id).map(quizMapper::toDetailDTO);
     }
 
     @Transactional
@@ -66,7 +68,7 @@ public class QuizService {
 
         quizRepository.save(quiz);
         log.info("Quiz saved successfully with ID: {}", quiz.getQuizId());
-        return toDTO(quiz);
+        return quizMapper.toDTO(quiz);
     }
 
     @Transactional
@@ -77,7 +79,7 @@ public class QuizService {
             quiz.setSubmitDate(submitDate);
             quizRepository.save(quiz);
             log.info("Quiz {} updated successfully", id);
-            return toDTO(quiz);
+            return quizMapper.toDTO(quiz);
         });
     }
 
@@ -112,7 +114,7 @@ public class QuizService {
 
         quizRepository.save(quiz);
         log.info("Quiz {} fully updated successfully", id);
-        return toDTO(quiz);
+        return quizMapper.toDTO(quiz);
     }
 
     @Transactional
@@ -124,47 +126,6 @@ public class QuizService {
         quizRepository.deleteById(id);
         log.info("Quiz {} deleted successfully", id);
         return true;
-    }
-
-    private QuizDTO toDTO(Quiz quiz) {
-        QuizDTO dto = new QuizDTO();
-        dto.setQuizId(quiz.getQuizId());
-        dto.setPubDate(quiz.getPubDate());
-        dto.setSubmitDate(quiz.getSubmitDate());
-        dto.setQuestionCount(quiz.getQuestions() != null ? quiz.getQuestions().size() : 0);
-        return dto;
-    }
-
-    private QuizDetailDTO toDetailDTO(Quiz quiz) {
-        QuizDetailDTO dto = new QuizDetailDTO();
-        dto.setQuizId(quiz.getQuizId());
-        dto.setPubDate(quiz.getPubDate());
-        dto.setSubmitDate(quiz.getSubmitDate());
-        if (quiz.getQuestions() != null) {
-            List<QuizDetailDTO.QuestionDetailDTO> questions = quiz.getQuestions().stream()
-                    .map(q -> {
-                        QuizDetailDTO.QuestionDetailDTO qdto = new QuizDetailDTO.QuestionDetailDTO();
-                        qdto.setNumber(q.getId().getQuestionNumber());
-                        qdto.setQuestionText(q.getQuestionText());
-                        qdto.setAnswer(q.getAnswer());
-                        qdto.setNote(q.getNote());
-                        if (q.getHints() != null) {
-                            List<QuizDetailDTO.HintDetailDTO> hints = q.getHints().stream()
-                                    .map(h -> {
-                                        QuizDetailDTO.HintDetailDTO hdto = new QuizDetailDTO.HintDetailDTO();
-                                        hdto.setHintText(h.getHintText());
-                                        hdto.setImageUrl(h.getImageUrl());
-                                        return hdto;
-                                    })
-                                    .toList();
-                            qdto.setHints(hints);
-                        }
-                        return qdto;
-                    })
-                    .toList();
-            dto.setQuestions(questions);
-        }
-        return dto;
     }
 
     private List<Hint> buildHints(List<CreateQuizRequest.HintData> hintDataList) {

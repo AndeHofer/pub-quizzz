@@ -2,10 +2,14 @@ package com.ande.pubquizzz.service;
 
 import com.ande.pubquizzz.database.entities.Result;
 import com.ande.pubquizzz.database.entities.ResultAnswer;
+import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
+import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
+import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.LeaderboardEntry;
 import com.ande.pubquizzz.dto.ResultDTO;
+import com.ande.pubquizzz.mapper.ResultMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,13 +24,14 @@ import java.util.List;
 public class ResultService {
 
     private final ResultRepository resultRepository;
-    private final com.ande.pubquizzz.database.repositories.QuizRepository quizRepository;
-    private final com.ande.pubquizzz.database.repositories.TeamRepository teamRepository;
+    private final QuizRepository quizRepository;
+    private final TeamRepository teamRepository;
+    private final ResultMapper resultMapper;
 
     @Transactional(readOnly = true)
     public List<ResultDTO> getResults(Long quizId) {
         log.info("Fetching results{}", quizSuffix(quizId));
-        return loadResults(quizId).stream().map(this::toDTO).toList();
+        return loadResults(quizId).stream().map(resultMapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
@@ -38,7 +43,7 @@ public class ResultService {
 
         List<LeaderboardEntry> leaderboard = new ArrayList<>();
         for (int rank = 1; rank <= results.size(); rank++) {
-            leaderboard.add(toLeaderboardEntry(results.get(rank - 1), rank));
+            leaderboard.add(resultMapper.toLeaderboardEntry(results.get(rank - 1), rank));
         }
         return leaderboard;
     }
@@ -63,61 +68,8 @@ public class ResultService {
         return csv.toString();
     }
 
-    private List<Result> loadResults(Long quizId) {
-        return quizId != null
-                ? resultRepository.findByQuiz_QuizId(quizId)
-                : resultRepository.findAll();
-    }
-
-    private ResultDTO toDTO(Result result) {
-        ResultDTO dto = new ResultDTO();
-        dto.setResultsId(result.getResultsId());
-        dto.setTeamId(result.getTeam().getTeamsId());
-        dto.setTeamName(result.getTeam().getTeamName());
-        dto.setQuizId(result.getQuiz().getQuizId());
-        dto.setQuizDate(result.getQuiz().getPubDate());
-        dto.setAnswers(result.getAnswers().stream().map(this::toAnswerScoreDTO).toList());
-        dto.setTotalPoints(totalPoints(result));
-        return dto;
-    }
-
-    private AnswerScoreDTO toAnswerScoreDTO(ResultAnswer a) {
-        AnswerScoreDTO dto = new AnswerScoreDTO();
-        dto.setQuestionNumber(a.getQuestionNumber());
-        dto.setPoints(a.getPoints());
-        dto.setChanged(a.getChanged());
-        return dto;
-    }
-
-    private LeaderboardEntry toLeaderboardEntry(Result result, int rank) {
-        LeaderboardEntry entry = new LeaderboardEntry();
-        entry.setRank(rank);
-        entry.setTeamName(result.getTeam().getTeamName());
-        entry.setTeamId(result.getTeam().getTeamsId());
-        entry.setQuizId(result.getQuiz().getQuizId());
-        entry.setQuizDate(result.getQuiz().getPubDate().toString());
-        entry.setTotalPoints(totalPoints(result));
-        return entry;
-    }
-
-    private int totalPoints(Result result) {
-        return result.getAnswers().stream().mapToInt(ResultAnswer::getPoints).sum();
-    }
-
-    private String quizSuffix(Long quizId) {
-        return quizId != null ? " for quiz " + quizId : "";
-    }
-
-    private String escapeCsv(String value) {
-        if (value == null) return "";
-        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
-            return "\"" + value.replace("\"", "\"\"") + "\"";
-        }
-        return value;
-    }
-
     @Transactional
-    public ResultDTO createResult(com.ande.pubquizzz.dto.CreateResultRequest req) {
+    public ResultDTO createResult(CreateResultRequest req) {
         log.info("Creating result for quizId={} teamId={}", req.getQuizId(), req.getTeamId());
 
         if (req.getQuizId() == null || req.getTeamId() == null) {
@@ -135,7 +87,7 @@ public class ResultService {
         }
 
         boolean[] seen = new boolean[9];
-        for (com.ande.pubquizzz.dto.CreateResultRequest.AnswerSubmission a : answers) {
+        for (CreateResultRequest.AnswerSubmission a : answers) {
             int qn = a.getQuestionNumber();
             int pts = a.getPoints();
             if (qn < 1 || qn > 8) throw new IllegalArgumentException("Ungültige Frage-Nummer: " + qn);
@@ -149,7 +101,7 @@ public class ResultService {
         result.setTeam(teamOpt.get());
 
         List<ResultAnswer> resultAnswers = new ArrayList<>();
-        for (com.ande.pubquizzz.dto.CreateResultRequest.AnswerSubmission a : answers) {
+        for (CreateResultRequest.AnswerSubmission a : answers) {
             ResultAnswer ra = new ResultAnswer();
             ra.setQuestionNumber(a.getQuestionNumber());
             ra.setPoints(a.getPoints());
@@ -160,6 +112,28 @@ public class ResultService {
         result.setAnswers(resultAnswers);
 
         Result saved = resultRepository.save(result);
-        return toDTO(saved);
+        return resultMapper.toDTO(saved);
+    }
+
+    private List<Result> loadResults(Long quizId) {
+        return quizId != null
+                ? resultRepository.findByQuiz_QuizId(quizId)
+                : resultRepository.findAll();
+    }
+
+    private int totalPoints(Result result) {
+        return result.getAnswers().stream().mapToInt(ResultAnswer::getPoints).sum();
+    }
+
+    private String quizSuffix(Long quizId) {
+        return quizId != null ? " for quiz " + quizId : "";
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 }

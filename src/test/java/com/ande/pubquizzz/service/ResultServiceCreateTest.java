@@ -4,8 +4,10 @@ import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.entities.Team;
 import com.ande.pubquizzz.database.entities.Result;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
+import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.ResultDTO;
+import com.ande.pubquizzz.mapper.ResultMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,9 @@ public class ResultServiceCreateTest {
 
     @Mock
     private com.ande.pubquizzz.database.repositories.TeamRepository teamRepository;
+
+    @Mock
+    private ResultMapper resultMapper;
 
     @InjectMocks
     private ResultService resultService;
@@ -73,6 +78,18 @@ public class ResultServiceCreateTest {
             answers.add(a);
         }
         req.setAnswers(answers);
+
+        ResultDTO expectedDto = new ResultDTO();
+        expectedDto.setQuizId(1L);
+        expectedDto.setTeamId(5L);
+        expectedDto.setTotalPoints(total);
+        expectedDto.setAnswers(answers.stream().map(a -> {
+            AnswerScoreDTO s = new AnswerScoreDTO();
+            s.setQuestionNumber(a.getQuestionNumber());
+            s.setPoints(a.getPoints());
+            return s;
+        }).toList());
+        when(resultMapper.toDTO(any(Result.class))).thenReturn(expectedDto);
 
         ResultDTO dto = resultService.createResult(req);
         assertNotNull(dto);

@@ -5,6 +5,7 @@ import com.ande.pubquizzz.database.entities.Role;
 import com.ande.pubquizzz.database.repositories.UserRepository;
 import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.UserDTO;
+import com.ande.pubquizzz.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,12 +22,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
     public List<UserDTO> getAllUsers() {
         log.info("Fetching all users");
         return userRepository.findAll().stream()
-                .map(this::toDTO)
+                .map(userMapper::toDTO)
                 .toList();
     }
 
@@ -77,14 +79,6 @@ public class UserService {
             userRepository.save(user);
             log.info("Default {} user created: {}", role, username);
         }
-    }
-
-    private UserDTO toDTO(AppUser user) {
-        UserDTO dto = new UserDTO();
-        dto.setUserId(user.getAppUserId());
-        dto.setUsername(user.getUsername());
-        dto.setRole(user.getRole());
-        return dto;
     }
 
     @Transactional(readOnly = true)

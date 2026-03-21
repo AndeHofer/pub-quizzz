@@ -1,12 +1,17 @@
 package com.ande.pubquizzz.controller;
 
+import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.LeaderboardEntry;
 import com.ande.pubquizzz.dto.ResultDTO;
 import com.ande.pubquizzz.service.ResultService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,16 +45,16 @@ public class AdminResultController {
                 .body(csv);
     }
 
-    @org.springframework.web.bind.annotation.PostMapping(value = "/results", consumes = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createResult(@org.springframework.web.bind.annotation.RequestBody com.ande.pubquizzz.dto.CreateResultRequest request) {
+    @PostMapping(value = "/results", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createResult(@RequestBody CreateResultRequest request) {
         try {
             var created = resultService.createResult(request);
-            return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(created);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             log.error("Error creating result", e);
-            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Fehler beim Speichern des Ergebnisses: " + e.getMessage());
         }
     }

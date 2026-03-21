@@ -3,6 +3,7 @@ package com.ande.pubquizzz.service;
 import com.ande.pubquizzz.database.entities.Team;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.TeamDTO;
+import com.ande.pubquizzz.mapper.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,19 +18,20 @@ import java.util.Optional;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final TeamMapper teamMapper;
 
     @Transactional(readOnly = true)
     public List<TeamDTO> getAllTeams() {
         log.info("Fetching all teams");
         return teamRepository.findAll().stream()
-                .map(this::toDTO)
+                .map(teamMapper::toDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public Optional<TeamDTO> getTeamById(Long id) {
         log.info("Fetching team with ID: {}", id);
-        return teamRepository.findById(id).map(this::toDTO);
+        return teamRepository.findById(id).map(teamMapper::toDTO);
     }
 
     @Transactional
@@ -42,7 +44,7 @@ public class TeamService {
         team.setTeamName(teamName);
         teamRepository.save(team);
         log.info("Team '{}' created successfully", teamName);
-        return toDTO(team);
+        return teamMapper.toDTO(team);
     }
 
     @Transactional
@@ -54,12 +56,5 @@ public class TeamService {
         teamRepository.deleteById(id);
         log.info("Team {} deleted successfully", id);
         return true;
-    }
-
-    private TeamDTO toDTO(Team team) {
-        TeamDTO dto = new TeamDTO();
-        dto.setTeamsId(team.getTeamsId());
-        dto.setTeamName(team.getTeamName());
-        return dto;
     }
 }

@@ -6,8 +6,9 @@ logs/
 .factorypath
 .project
 .settings/
-### IntelliJ IDEA ###
+src/main/resources/static/
 .idea
 *.iws
 *.iml
 *.ipr
+node_modules/
