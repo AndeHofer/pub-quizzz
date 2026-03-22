@@ -49,11 +49,59 @@
       `SecurityMockMvcConfigurers.springSecurity()`
     - This ensures `@WithMockUser` works correctly and unauthenticated tests get proper 302 redirect
 
+## Phase 4: Refactoring (7-PR plan) ✅ COMPLETE
+
+### Task 1: Custom Exception Hierarchy ✅ COMMITTED
+- Created `BusinessValidationException`, `ResourceNotFoundException`
+- Replaced all `IllegalArgumentException` throws in services with typed exceptions
+
+### Task 2: Global Exception Handler ✅ COMMITTED
+- Created `ImageStorageException`, `GlobalExceptionHandler` (`@RestControllerAdvice`)
+- Removed all try/catch from controllers — exceptions handled centrally
+- `GlobalExceptionHandler` added to `@Import` in all `@WebMvcTest` controller tests
+
+### Task 3: Bean Validation on DTOs ✅ COMMITTED
+- Added `@NotBlank`/`@NotNull`/`@Size`/`@Min`/`@Max` to `CreateUserRequest`, `CreateQuizRequest`, `CreateResultRequest`
+- Added `@Valid` to all controller method parameters
+- Removed manual null/blank/size checks from services (now delegated to validation)
+- Added `@UniqueConstraint(team_id, quiz_id)` to `Result` entity
+
+### Task 4: XSS Fix + Method Security ✅ COMMITTED
+- Fixed DOM XSS in `admin_functions.ts`: replaced inline `onclick` with `data-*` + `addEventListener`
+- Replaced `window.onclick =` with `window.addEventListener('click', ...)`
+- Added `@EnableMethodSecurity` to `SecurityConfig`
+- Added `@PreAuthorize("hasRole('ADMIN')")` to all 4 admin controllers
+
+### Task 5: Code Duplication ✅ COMMITTED
+- Extracted `applyQuestionsToQuiz()` in `QuizService`
+- Extracted `createAndSaveUser()` in `UserService`
+- Added `calculateTotalPoints()` to `Result` entity + `ResultTest.java`
+- Updated `ResultMapper` to use `result.calculateTotalPoints()`
+- Created `utils.ts` with `showMessage`/`goBack`; used in `register_user.ts` and `create_quiz.ts`
+
+### Task 6: API Design ✅ COMMITTED
+- Created `CreateTeamRequest` DTO with `@NotBlank`
+- Created `UpdateQuizDatesRequest` DTO with `@NotNull` on both dates
+- `AdminTeamController.createTeam` now accepts `@RequestBody @Valid CreateTeamRequest` (was `@RequestParam`)
+- `PUT /quiz/{id}/dates` → `PATCH /quiz/{id}/dates` with `UpdateQuizDatesRequest`
+- `QuizService.updateQuiz` now throws `ResourceNotFoundException` instead of returning `Optional`
+- `admin_functions.ts` `createTeam` now sends JSON body; invalidates `_admin_teams_cache` on success
+- Updated `AdminTeamControllerTest` + `AdminQuizControllerTest` for new contracts
+
+### Task 7: Frontend Type Safety ✅ COMMITTED
+- Created `types.ts` with `HintDTO`, `QuestionDTO`, `QuizDTO`, `TeamDTO`, `AnswerScoreDTO`, `ResultDTO`, `LeaderboardEntry`, `UserDTO`
+- Replaced all `any` in `admin_functions.ts` with proper types from `types.ts`
+- Cache invalidation: `_admin_quizzes_cache` cleared on `deleteQuiz`; `_admin_teams_cache` cleared on `deleteTeam` and `createTeam`
+- Replaced local `Hint`/`Question`/`Quiz` interfaces in `create_quiz.ts` with `QuizDTO` from `types.ts`
+- Added `.catch()` to `index.ts` is-admin fetch
+
 ## Final Status
 
-- **Backend tests**: 57/57 passing (`mvn clean test`)
+- **Backend tests**: 61/61 passing (`mvn clean test`)
 - **Frontend type check**: 0 errors (`npm run type-check`)
 - **Frontend build**: succeeds (`vite build`)
+
+
 
 ## Key Discoveries
 
