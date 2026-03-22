@@ -7,6 +7,7 @@ import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.ResultDTO;
+import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.mapper.ResultMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,7 +107,7 @@ public class ResultServiceCreateTest {
         req.setTeamId(5L);
         req.setAnswers(new ArrayList<>());
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> resultService.createResult(req));
+        BusinessValidationException ex = assertThrows(BusinessValidationException.class, () -> resultService.createResult(req));
         assertTrue(ex.getMessage().contains("Quiz und Team müssen ausgewählt werden"));
     }
 
@@ -120,7 +121,7 @@ public class ResultServiceCreateTest {
         req.setTeamId(5L);
         req.setAnswers(new ArrayList<>()); // empty
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> resultService.createResult(req));
+        BusinessValidationException ex = assertThrows(BusinessValidationException.class, () -> resultService.createResult(req));
         assertTrue(ex.getMessage().contains("Es müssen 8 Antworten übergeben werden"));
     }
 
@@ -141,7 +142,7 @@ public class ResultServiceCreateTest {
         }
         req.setAnswers(answers);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> resultService.createResult(req));
+        BusinessValidationException ex = assertThrows(BusinessValidationException.class, () -> resultService.createResult(req));
         assertTrue(ex.getMessage().contains("Punkte müssen >= 0 sein"));
     }
 
@@ -167,7 +168,7 @@ public class ResultServiceCreateTest {
         answers.add(dup);
         req.setAnswers(answers);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> resultService.createResult(req));
+        BusinessValidationException ex = assertThrows(BusinessValidationException.class, () -> resultService.createResult(req));
         assertTrue(ex.getMessage().contains("Doppelte Frage"));
     }
 }

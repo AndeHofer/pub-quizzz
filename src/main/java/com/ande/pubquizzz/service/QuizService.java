@@ -7,6 +7,8 @@ import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
+import com.ande.pubquizzz.exception.BusinessValidationException;
+import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.mapper.QuizMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +89,7 @@ public class QuizService {
     public QuizDTO updateQuizFull(Long id, CreateQuizRequest request) {
         log.info("Fully updating quiz with ID: {}", id);
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Quiz not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz nicht gefunden: " + id));
 
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : quiz.getPubDate());
 

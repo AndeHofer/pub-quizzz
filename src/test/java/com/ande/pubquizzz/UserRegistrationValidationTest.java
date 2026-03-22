@@ -3,6 +3,8 @@ package com.ande.pubquizzz;
 import com.ande.pubquizzz.database.entities.Role;
 import com.ande.pubquizzz.database.repositories.UserRepository;
 import com.ande.pubquizzz.dto.CreateUserRequest;
+import com.ande.pubquizzz.exception.BusinessValidationException;
+import com.ande.pubquizzz.mapper.UserMapper;
 import com.ande.pubquizzz.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,9 @@ class UserRegistrationValidationTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private UserMapper userMapper;
 
     @InjectMocks
     private UserService userService;
@@ -74,7 +79,7 @@ class UserRegistrationValidationTest {
         request.setRole(Role.USER);
 
         assertThatThrownBy(() -> userService.register(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BusinessValidationException.class)
                 .hasMessageContaining("already exists");
     }
 }

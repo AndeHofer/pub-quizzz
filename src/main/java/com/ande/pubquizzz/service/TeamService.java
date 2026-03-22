@@ -3,6 +3,7 @@ package com.ande.pubquizzz.service;
 import com.ande.pubquizzz.database.entities.Team;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.TeamDTO;
+import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.mapper.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class TeamService {
     public TeamDTO createTeam(String teamName) {
         log.info("Creating new team: {}", teamName);
         if (teamRepository.existsByTeamName(teamName)) {
-            throw new IllegalArgumentException("Team name already exists");
+            throw new BusinessValidationException("Team name already exists");
         }
         Team team = new Team();
         team.setTeamName(teamName);

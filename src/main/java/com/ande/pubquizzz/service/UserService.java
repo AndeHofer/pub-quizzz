@@ -5,6 +5,7 @@ import com.ande.pubquizzz.database.entities.Role;
 import com.ande.pubquizzz.database.repositories.UserRepository;
 import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.UserDTO;
+import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class UserService {
             throw new IllegalArgumentException("Role must not be null");
         }
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists: " + request.getUsername());
+            throw new BusinessValidationException("Username already exists: " + request.getUsername());
         }
         AppUser appUser = new AppUser();
         appUser.setUsername(request.getUsername());
