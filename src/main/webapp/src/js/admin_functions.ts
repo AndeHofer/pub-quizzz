@@ -62,9 +62,9 @@ window.addEventListener('load', () => {
 
     const modal = document.getElementById('dataModal');
     if (modal) {
-        window.onclick = function (event: MouseEvent) {
+        window.addEventListener('click', (event: MouseEvent) => {
             if (event.target === modal) closeModal();
-        };
+        });
     }
 });
 
@@ -148,10 +148,17 @@ async function viewTeams() {
         const headers = ['ID', 'Team-Name', 'Aktionen'];
         const html = renderTable(headers, teams, (team: any) => {
             return [`${team.teamsId}`, `${team.teamName}`, `
-                <button class="icon-btn" onclick="deleteTeam(${team.teamsId}, '${team.teamName}')" title="Team löschen">🗑️</button>
+                <button class="icon-btn delete-team-btn" data-id="${team.teamsId}" data-name="${team.teamName}" title="Team löschen">🗑️</button>
             `];
         });
         showModal('Alle Teams', html);
+        document.querySelectorAll('.delete-team-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                const name = (btn as HTMLElement).dataset.name ?? '';
+                deleteTeam(id, name);
+            });
+        });
     } catch (error: any) {
         showModal('Fehler', showError('Fehler beim Laden der Teams: ' + (error.message || error)));
     }
@@ -325,10 +332,17 @@ async function viewUsers() {
         const headers = ['ID', 'Benutzername', 'Rolle', ''];
         const html = renderTable(headers, users, (user: any) => {
             return [`${user.userId}`, `${user.username}`, `${user.role}`, `
-                <button class="icon-btn" onclick="deleteUser(${user.userId}, '${user.username}')" title="Benutzer löschen">🗑️</button>
+                <button class="icon-btn delete-user-btn" data-id="${user.userId}" data-name="${user.username}" title="Benutzer löschen">🗑️</button>
             `];
         });
         showModal('Alle Benutzer', html);
+        document.querySelectorAll('.delete-user-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                const name = (btn as HTMLElement).dataset.name ?? '';
+                deleteUser(id, name);
+            });
+        });
     } catch (error: any) {
         showModal('Fehler', showError('Fehler beim Laden der Benutzer: ' + (error.message || error)));
     }
