@@ -3,6 +3,8 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.LeaderboardEntry;
 import com.ande.pubquizzz.dto.ResultDTO;
+import com.ande.pubquizzz.exception.BusinessValidationException;
+import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
 import com.ande.pubquizzz.service.ResultService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminResultController.class)
-@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class})
+@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class, GlobalExceptionHandler.class})
 class AdminResultControllerTest {
 
     @Autowired
@@ -112,7 +114,7 @@ class AdminResultControllerTest {
     @WithMockUser(roles = "ADMIN")
     void createResult_withInvalidRequest_returnsBadRequest() throws Exception {
         when(resultService.createResult(any(CreateResultRequest.class)))
-                .thenThrow(new IllegalArgumentException("Quiz und Team müssen ausgewählt werden."));
+                .thenThrow(new BusinessValidationException("Quiz und Team müssen ausgewählt werden."));
 
         CreateResultRequest request = new CreateResultRequest();
         request.setAnswers(List.of());

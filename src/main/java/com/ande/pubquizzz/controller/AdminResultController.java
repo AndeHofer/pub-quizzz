@@ -5,7 +5,6 @@ import com.ande.pubquizzz.dto.LeaderboardEntry;
 import com.ande.pubquizzz.dto.ResultDTO;
 import com.ande.pubquizzz.service.ResultService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -47,15 +45,7 @@ public class AdminResultController {
 
     @PostMapping(value = "/results", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createResult(@RequestBody CreateResultRequest request) {
-        try {
-            var created = resultService.createResult(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            log.error("Error creating result", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Fehler beim Speichern des Ergebnisses: " + e.getMessage());
-        }
+        var created = resultService.createResult(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 }

@@ -3,6 +3,8 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.database.entities.Role;
 import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.UserDTO;
+import com.ande.pubquizzz.exception.BusinessValidationException;
+import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
 import com.ande.pubquizzz.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminUserController.class)
-@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class})
+@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class, GlobalExceptionHandler.class})
 class AdminUserControllerTest {
 
     @Autowired
@@ -77,7 +79,7 @@ class AdminUserControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void registerUser_withDuplicateUsername_returnsBadRequest() throws Exception {
-        doThrow(new IllegalArgumentException("Username already exists: dup"))
+        doThrow(new BusinessValidationException("Username already exists: dup"))
                 .when(userService).register(any(CreateUserRequest.class));
 
         CreateUserRequest request = new CreateUserRequest();

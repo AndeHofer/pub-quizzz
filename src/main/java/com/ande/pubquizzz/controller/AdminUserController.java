@@ -4,7 +4,6 @@ import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.UserDTO;
 import com.ande.pubquizzz.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -26,12 +24,8 @@ public class AdminUserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody CreateUserRequest request) {
-        try {
-            userService.register(request);
-            return ResponseEntity.ok("User registered successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        userService.register(request);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @GetMapping("/users")

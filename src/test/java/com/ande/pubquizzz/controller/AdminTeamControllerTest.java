@@ -1,7 +1,10 @@
 package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.TeamDTO;
+import com.ande.pubquizzz.exception.BusinessValidationException;
+import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
+
 import com.ande.pubquizzz.service.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminTeamController.class)
-@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class})
+@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class, GlobalExceptionHandler.class})
 class AdminTeamControllerTest {
 
     @Autowired
@@ -93,7 +96,7 @@ class AdminTeamControllerTest {
     @WithMockUser(roles = "ADMIN")
     void createTeam_withDuplicateName_returnsBadRequest() throws Exception {
         when(teamService.createTeam(anyString()))
-                .thenThrow(new IllegalArgumentException("Team name already exists"));
+                .thenThrow(new BusinessValidationException("Team name already exists"));
 
         mockMvc.perform(post("/admin/team")
                         .with(csrf())

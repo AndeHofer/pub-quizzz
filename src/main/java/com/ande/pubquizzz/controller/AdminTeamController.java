@@ -3,7 +3,6 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.TeamDTO;
 import com.ande.pubquizzz.service.TeamService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -37,12 +35,8 @@ public class AdminTeamController {
 
     @PostMapping("/team")
     public ResponseEntity<String> createTeam(@RequestParam String teamName) {
-        try {
-            teamService.createTeam(teamName);
-            return ResponseEntity.ok("Team created successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        teamService.createTeam(teamName);
+        return ResponseEntity.ok("Team created successfully");
     }
 
     @DeleteMapping("/team/{id}")

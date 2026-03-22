@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ande.pubquizzz.exception.ImageStorageException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +29,7 @@ public class ImageStorageService {
      * Stores an uploaded image file and returns its public URL path (e.g. "/uploads/abc123.jpg").
      * Throws IllegalArgumentException if the file is not an image.
      */
-    public String store(MultipartFile file) throws IOException {
+    public String store(MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new IllegalArgumentException("Only image files are accepted. Got: " + contentType);
@@ -41,7 +43,11 @@ public class ImageStorageService {
 
         String filename = UUID.randomUUID() + extension;
         Path target = uploadDir.resolve(filename);
-        Files.copy(file.getInputStream(), target);
+        try {
+            Files.copy(file.getInputStream(), target);
+        } catch (IOException e) {
+            throw new ImageStorageException("Failed to store image file", e);
+        }
         log.info("Stored image: {}", target);
 
         return "/uploads/" + filename;

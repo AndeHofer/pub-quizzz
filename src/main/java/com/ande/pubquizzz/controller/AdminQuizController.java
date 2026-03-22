@@ -6,8 +6,6 @@ import com.ande.pubquizzz.dto.QuizDetailDTO;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -43,17 +40,9 @@ public class AdminQuizController {
     public ResponseEntity<String> createQuiz(
             @RequestPart("quiz") CreateQuizRequest request,
             @RequestParam Map<String, MultipartFile> allFiles) {
-        try {
-            injectImageUrls(request, allFiles);
-            quizService.createQuiz(request);
-            return ResponseEntity.ok("Quiz created successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            log.error("Error creating quiz", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error creating quiz: " + e.getMessage());
-        }
+        injectImageUrls(request, allFiles);
+        quizService.createQuiz(request);
+        return ResponseEntity.ok("Quiz created successfully");
     }
 
     @GetMapping("/quiz/{id}")
@@ -83,17 +72,9 @@ public class AdminQuizController {
             @PathVariable Long id,
             @RequestPart("quiz") CreateQuizRequest request,
             @RequestParam Map<String, MultipartFile> allFiles) {
-        try {
-            injectImageUrls(request, allFiles);
-            quizService.updateQuizFull(id, request);
-            return ResponseEntity.ok("Quiz updated successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            log.error("Error updating quiz", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating quiz: " + e.getMessage());
-        }
+        injectImageUrls(request, allFiles);
+        quizService.updateQuizFull(id, request);
+        return ResponseEntity.ok("Quiz updated successfully");
     }
 
     @PutMapping("/quiz/{id}/dates")
@@ -103,7 +84,7 @@ public class AdminQuizController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    private void injectImageUrls(CreateQuizRequest request, Map<String, MultipartFile> allFiles) throws java.io.IOException {
+    private void injectImageUrls(CreateQuizRequest request, Map<String, MultipartFile> allFiles) {
         for (CreateQuizRequest.QuestionData qd : request.getQuestions()) {
             for (int j = 0; j < qd.getHints().size(); j++) {
                 String partName = "hint_image_q" + qd.getNumber() + "_h" + (j + 1);
