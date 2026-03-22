@@ -1,5 +1,7 @@
 export {};
 
+import { showMessage, goBack } from './utils';
+
 const questionsContainer = document.getElementById('questionsContainer') as HTMLDivElement | null;
 
 // Global variable to track edit mode
@@ -215,19 +217,10 @@ if (quizForm) {
     });
 }
 
-function showMessage(text: string, type: string) {
-    const messageDiv = document.getElementById('message');
-    if (messageDiv) {
-        messageDiv.textContent = text;
-        messageDiv.className = 'message ' + type;
-        messageDiv.style.display = 'block';
-    }
-}
-
 // Ensure functions are available globally
 window.addEventListener('load', () => {
     (window as any).previewHintImage = previewHintImage;
-    (window as any).goBack = goBack;
+    (window as any).goBack = () => goBack('admin_main.html');
 });
 
 function previewHintImage(input: HTMLInputElement, previewId: string) {
@@ -247,6 +240,3 @@ function previewHintImage(input: HTMLInputElement, previewId: string) {
     }
 }
 
-function goBack() {
-    window.location.href = 'admin_main.html';
-}

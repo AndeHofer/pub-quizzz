@@ -35,4 +35,8 @@ public class Result {
     @OrderBy("questionNumber ASC")
     @ToString.Exclude
     private List<ResultAnswer> answers = new ArrayList<>();
+
+    public int calculateTotalPoints() {
+        return answers.stream().mapToInt(ResultAnswer::getPoints).sum();
+    }
 }

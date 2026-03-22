@@ -39,12 +39,8 @@ public class UserService {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new BusinessValidationException("Username already exists: " + request.getUsername());
         }
-        AppUser appUser = new AppUser();
-        appUser.setUsername(request.getUsername());
-        appUser.setPassword(passwordEncoder.encode(request.getPassword()));
-        appUser.setRole(request.getRole());
-        userRepository.save(appUser);
-        log.info("User '{}' registered successfully", request.getUsername());
+        AppUser appUser = createAndSaveUser(request.getUsername(), request.getPassword(), request.getRole());
+        log.info("User '{}' registered successfully", appUser.getUsername());
     }
 
     @Transactional
@@ -58,17 +54,10 @@ public class UserService {
         return true;
     }
 
-    /**
-     * Ensures the given user exists, creating it if not. Used for seeding default users on startup.
-     */
     @Transactional
     public void ensureUserExists(String username, String rawPassword, Role role) {
         if (userRepository.findByUsername(username).isEmpty()) {
-            AppUser user = new AppUser();
-            user.setUsername(username);
-            user.setPassword(passwordEncoder.encode(rawPassword));
-            user.setRole(role);
-            userRepository.save(user);
+            createAndSaveUser(username, rawPassword, role);
             log.info("Default {} user created: {}", role, username);
         }
     }
@@ -76,5 +65,13 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<AppUser> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    private AppUser createAndSaveUser(String username, String rawPassword, Role role) {
+        AppUser user = new AppUser();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setRole(role);
+        return userRepository.save(user);
     }
 }

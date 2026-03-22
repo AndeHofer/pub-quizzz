@@ -1,4 +1,4 @@
-function goToAdmin() {
+    function goToAdmin() {
     window.location.href = '/admin/admin_main.html';
 }
 

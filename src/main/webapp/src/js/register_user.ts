@@ -1,9 +1,11 @@
 export {};
 
+import { showMessage, goBack } from './utils';
+
 // Ensure functions are available globally
 window.addEventListener('load', () => {
     (window as any).registerUser = registerUser;
-    (window as any).goBack = goBack;
+    (window as any).goBack = () => goBack('admin_main.html');
 });
 
 function registerUser() {
@@ -29,31 +31,19 @@ function registerUser() {
         },
         body: JSON.stringify(userData)
     })
-        .then(response => {
+        .then(async response => {
             if (response.ok) {
                 showMessage('Benutzer erfolgreich registriert!', 'success');
                 (document.getElementById('username') as HTMLInputElement).value = '';
                 (document.getElementById('password') as HTMLInputElement).value = '';
                 (document.getElementById('role') as HTMLSelectElement).value = '';
             } else {
-                showMessage('Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.', 'error');
+                const errorText = await response.text();
+                showMessage(errorText || 'Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.', 'error');
             }
         })
         .catch(error => {
             showMessage('Fehler: ' + error, 'error');
             console.error('Error:', error);
         });
-}
-
-function showMessage(text: string, type: string) {
-    const messageDiv = document.getElementById('message') as HTMLElement | null;
-    if (messageDiv) {
-        messageDiv.textContent = text;
-        messageDiv.className = 'message ' + type;
-        messageDiv.style.display = 'block';
-    }
-}
-
-function goBack() {
-    window.location.href = 'admin_main.html';
 }

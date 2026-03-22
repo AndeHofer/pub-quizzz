@@ -16,7 +16,7 @@ public interface ResultMapper {
     @Mapping(target = "teamName", source = "team.teamName")
     @Mapping(target = "quizId", source = "quiz.quizId")
     @Mapping(target = "quizDate", source = "quiz.pubDate")
-    @Mapping(target = "totalPoints", expression = "java(result.getAnswers().stream().mapToInt(com.ande.pubquizzz.database.entities.ResultAnswer::getPoints).sum())")
+    @Mapping(target = "totalPoints", expression = "java(result.calculateTotalPoints())")
     ResultDTO toDTO(Result result);
 
     @Mapping(target = "questionNumber", source = "questionNumber")
@@ -29,6 +29,6 @@ public interface ResultMapper {
     @Mapping(target = "teamId", source = "result.team.teamsId")
     @Mapping(target = "quizId", source = "result.quiz.quizId")
     @Mapping(target = "quizDate", expression = "java(result.getQuiz().getPubDate().toString())")
-    @Mapping(target = "totalPoints", expression = "java(result.getAnswers().stream().mapToInt(com.ande.pubquizzz.database.entities.ResultAnswer::getPoints).sum())")
+    @Mapping(target = "totalPoints", expression = "java(result.calculateTotalPoints())")
     LeaderboardEntry toLeaderboardEntry(Result result, int rank);
 }

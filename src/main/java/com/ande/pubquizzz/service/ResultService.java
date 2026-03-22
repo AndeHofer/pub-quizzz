@@ -118,7 +118,7 @@ public class ResultService {
     }
 
     private int totalPoints(Result result) {
-        return result.getAnswers().stream().mapToInt(ResultAnswer::getPoints).sum();
+        return result.calculateTotalPoints();
     }
 
     private String quizSuffix(Long quizId) {

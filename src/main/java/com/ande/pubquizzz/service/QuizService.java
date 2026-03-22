@@ -1,13 +1,11 @@
 package com.ande.pubquizzz.service;
 
 import com.ande.pubquizzz.database.entities.Hint;
-import com.ande.pubquizzz.database.entities.Question;
 import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
-import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.mapper.QuizMapper;
 import lombok.RequiredArgsConstructor;
@@ -55,16 +53,7 @@ public class QuizService {
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : LocalDate.now());
         quiz.setSubmitDate(LocalDate.now());
 
-        for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
-            List<Hint> hints = buildHints(questionData.getHints());
-            quiz.addQuestion(
-                    questionData.getNumber(),
-                    questionData.getQuestionText(),
-                    questionData.getAnswer(),
-                    questionData.getNote(),
-                    hints
-            );
-        }
+        applyQuestionsToQuiz(quiz, request.getQuestions());
 
         quizRepository.save(quiz);
         log.info("Quiz saved successfully with ID: {}", quiz.getQuizId());
@@ -92,23 +81,10 @@ public class QuizService {
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : quiz.getPubDate());
 
         // Remove all existing questions first (cascade will remove hints)
-        List<Question> existingQuestions = new ArrayList<>(quiz.getQuestions());
-        for (Question q : existingQuestions) {
-            quiz.getQuestions().remove(q);
-        }
+        quiz.getQuestions().clear();
         quizRepository.flush(); // Ensure deletes are done before adding new
 
-        // Add new questions
-        for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
-            List<Hint> hints = buildHints(questionData.getHints());
-            quiz.addQuestion(
-                    questionData.getNumber(),
-                    questionData.getQuestionText(),
-                    questionData.getAnswer(),
-                    questionData.getNote(),
-                    hints
-            );
-        }
+        applyQuestionsToQuiz(quiz, request.getQuestions());
 
         quizRepository.save(quiz);
         log.info("Quiz {} fully updated successfully", id);
@@ -124,6 +100,19 @@ public class QuizService {
         quizRepository.deleteById(id);
         log.info("Quiz {} deleted successfully", id);
         return true;
+    }
+
+    private void applyQuestionsToQuiz(Quiz quiz, List<CreateQuizRequest.QuestionData> questions) {
+        for (CreateQuizRequest.QuestionData questionData : questions) {
+            List<Hint> hints = buildHints(questionData.getHints());
+            quiz.addQuestion(
+                    questionData.getNumber(),
+                    questionData.getQuestionText(),
+                    questionData.getAnswer(),
+                    questionData.getNote(),
+                    hints
+            );
+        }
     }
 
     private List<Hint> buildHints(List<CreateQuizRequest.HintData> hintDataList) {
