@@ -3,6 +3,7 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
+import com.ande.pubquizzz.dto.UpdateQuizDatesRequest;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -80,11 +82,10 @@ public class AdminQuizController {
         return ResponseEntity.ok("Quiz updated successfully");
     }
 
-    @PutMapping("/quiz/{id}/dates")
-    public ResponseEntity<String> updateQuizDates(@PathVariable Long id, @RequestBody QuizDTO updatedQuiz) {
-        return quizService.updateQuiz(id, updatedQuiz.getPubDate(), updatedQuiz.getSubmitDate())
-                .map(q -> ResponseEntity.ok("Quiz updated successfully"))
-                .orElse(ResponseEntity.notFound().build());
+    @PatchMapping("/quiz/{id}/dates")
+    public ResponseEntity<String> updateQuizDates(@PathVariable Long id, @RequestBody @Valid UpdateQuizDatesRequest request) {
+        quizService.updateQuiz(id, request.getPubDate(), request.getSubmitDate());
+        return ResponseEntity.ok("Quiz updated successfully");
     }
 
     private void injectImageUrls(CreateQuizRequest request, Map<String, MultipartFile> allFiles) {

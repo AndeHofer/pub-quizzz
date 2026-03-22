@@ -13,6 +13,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilte
 import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -82,14 +83,25 @@ class AdminTeamControllerTest {
     void createTeam_withValidName_returnsOk() throws Exception {
         TeamDTO dto = new TeamDTO();
         dto.setTeamsId(3L);
-        dto.setTeamName("Neues Team");
+        dto.setTeamName("Die Besten");
 
-        when(teamService.createTeam("Neues Team")).thenReturn(dto);
+        when(teamService.createTeam("Die Besten")).thenReturn(dto);
 
         mockMvc.perform(post("/admin/team")
                         .with(csrf())
-                        .param("teamName", "Neues Team"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"teamName\":\"Die Besten\"}"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void createTeam_withBlankName_returnsBadRequest() throws Exception {
+        mockMvc.perform(post("/admin/team")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"teamName\":\"\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -100,7 +112,8 @@ class AdminTeamControllerTest {
 
         mockMvc.perform(post("/admin/team")
                         .with(csrf())
-                        .param("teamName", "Duplikat"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"teamName\":\"Duplikat\"}"))
                 .andExpect(status().isBadRequest());
     }
 

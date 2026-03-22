@@ -1,18 +1,18 @@
 package com.ande.pubquizzz.controller;
 
+import com.ande.pubquizzz.dto.CreateTeamRequest;
 import com.ande.pubquizzz.dto.TeamDTO;
 import com.ande.pubquizzz.service.TeamService;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@Validated
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminTeamController {
 
@@ -39,8 +38,8 @@ public class AdminTeamController {
     }
 
     @PostMapping("/team")
-    public ResponseEntity<String> createTeam(@RequestParam @NotBlank String teamName) {
-        teamService.createTeam(teamName);
+    public ResponseEntity<String> createTeam(@RequestBody @Valid CreateTeamRequest request) {
+        teamService.createTeam(request.getTeamName());
         return ResponseEntity.ok("Team created successfully");
     }
 

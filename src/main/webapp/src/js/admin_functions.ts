@@ -126,8 +126,14 @@ async function createTeam() {
     const teamName = prompt('Team-Namen eingeben:');
     if (!teamName) return;
     try {
-        const response = await fetch(`${API_BASE}/team?teamName=${encodeURIComponent(teamName)}`, {method: 'POST'});
-        if (!response.ok) {
+        const response = await fetch(`${API_BASE}/team`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({teamName})
+        });
+        if (response.ok) {
+            await viewTeams();
+        } else {
             const message = await response.text();
             showModal('Fehler', showError('Fehler: ' + message));
         }

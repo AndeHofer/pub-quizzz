@@ -2,6 +2,7 @@ package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
+import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
@@ -12,6 +13,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilte
 import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,13 +24,15 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminQuizController.class)
-@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class})
+@Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class, GlobalExceptionHandler.class})
 class AdminQuizControllerTest {
 
     @Autowired
@@ -120,5 +124,25 @@ class AdminQuizControllerTest {
     void getAllQuizzes_unauthenticated_returns401or302() throws Exception {
         mockMvc.perform(get("/admin/quizzes"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateQuizDates_withValidDates_returnsOk() throws Exception {
+        mockMvc.perform(patch("/admin/quiz/1/dates")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"pubDate\":\"2024-01-01\",\"submitDate\":\"2024-01-15\"}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateQuizDates_withMissingDate_returnsBadRequest() throws Exception {
+        mockMvc.perform(patch("/admin/quiz/1/dates")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"pubDate\":\"2024-01-01\"}"))
+                .andExpect(status().isBadRequest());
     }
 }

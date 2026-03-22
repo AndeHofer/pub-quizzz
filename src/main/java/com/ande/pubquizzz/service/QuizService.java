@@ -61,15 +61,15 @@ public class QuizService {
     }
 
     @Transactional
-    public Optional<QuizDTO> updateQuiz(Long id, LocalDate pubDate, LocalDate submitDate) {
+    public QuizDTO updateQuiz(Long id, LocalDate pubDate, LocalDate submitDate) {
         log.info("Updating quiz with ID: {}", id);
-        return quizRepository.findById(id).map(quiz -> {
-            quiz.setPubDate(pubDate);
-            quiz.setSubmitDate(submitDate);
-            quizRepository.save(quiz);
-            log.info("Quiz {} updated successfully", id);
-            return quizMapper.toDTO(quiz);
-        });
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz nicht gefunden: " + id));
+        quiz.setPubDate(pubDate);
+        quiz.setSubmitDate(submitDate);
+        quizRepository.save(quiz);
+        log.info("Quiz {} updated successfully", id);
+        return quizMapper.toDTO(quiz);
     }
 
     @Transactional
