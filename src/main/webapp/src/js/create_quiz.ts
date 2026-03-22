@@ -1,48 +1,30 @@
 export {};
 
 import { showMessage, goBack } from './utils';
+import type { QuizDTO } from './types';
 
 const questionsContainer = document.getElementById('questionsContainer') as HTMLDivElement | null;
 
 // Global variable to track edit mode
 let editingQuizId: number | null = null;
 
-interface Hint {
-    hintText: string | null;
-    imageUrl?: string | null;
-}
-
-interface Question {
-    number: number;
-    questionText: string;
-    answer: string;
-    note: string | null;
-    hints: Hint[];
-}
-
-interface Quiz {
-    quizId: number;
-    pubDate: string;
-    questions: Question[];
-}
-
 // Check for editing quiz data in sessionStorage on page load
 document.addEventListener('DOMContentLoaded', function () {
     const editingData = sessionStorage.getItem('editingQuiz');
     if (editingData) {
-        const quiz: Quiz = JSON.parse(editingData);
+        const quiz: QuizDTO = JSON.parse(editingData);
         sessionStorage.removeItem('editingQuiz'); // Clear after reading
         populateFormForEdit(quiz);
     }
 });
 
-function populateFormForEdit(quiz: Quiz) {
+function populateFormForEdit(quiz: QuizDTO) {
     editingQuizId = quiz.quizId;
 
     // Set the pubDate
     const pubDateInput = document.getElementById('pubDate') as HTMLInputElement | null;
     if (pubDateInput) {
-        pubDateInput.value = quiz.pubDate;
+        pubDateInput.value = quiz.pubDate ?? '';
     }
 
     // Set the page title and submit button
@@ -134,7 +116,7 @@ if (quizForm) {
     quizForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const quizData: { pubDate: string | null; questions: any[] } = {
+        const quizData: { pubDate: string | null; questions: { number: number; questionText: string; answer: string; note: string | null; hints: { hintText: string | null; imageUrl: null }[] }[] } = {
             pubDate: (document.getElementById('pubDate') as HTMLInputElement).value || null,
             questions: []
         };
@@ -144,7 +126,7 @@ if (quizForm) {
         // Collect all 8 questions
         for (let i = 1; i <= 8; i++) {
             const numHints = i <= 4 ? 4 : 3;
-            const hints: any[] = [];
+            const hints: { hintText: string | null; imageUrl: null }[] = [];
 
             for (let j = 1; j <= numHints; j++) {
                 hints.push({

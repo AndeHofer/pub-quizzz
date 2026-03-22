@@ -12,4 +12,7 @@ fetch('/api/is-admin')
         if (isAdmin && adminBtn) {
             adminBtn.style.display = 'inline-block';
         }
+    })
+    .catch(() => {
+        // Admin button remains hidden if request fails — no action needed
     });

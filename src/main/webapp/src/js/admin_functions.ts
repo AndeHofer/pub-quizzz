@@ -1,5 +1,7 @@
 export {};
 
+import type { QuizDTO, TeamDTO, ResultDTO, LeaderboardEntry, UserDTO } from './types';
+
 const API_BASE = '/admin';
 
 // Helper for API fetch with basic network error handling
@@ -34,7 +36,7 @@ function showLoading() {
     return '<div class="loading">Laden...</div>';
 }
 
-function loadCreateQuizPage(quiz: any) {
+function loadCreateQuizPage(quiz: QuizDTO) {
     sessionStorage.setItem('editingQuiz', JSON.stringify(quiz));
     window.location.href = 'create_quiz.html';
 }
@@ -74,21 +76,22 @@ async function viewQuizzes() {
     showModal('Alle Quizze', showLoading());
     try {
         const response = await apiFetch(`${API_BASE}/quizzes`);
-        const quizzes = await response.json();
+        const quizzes: QuizDTO[] = await response.json();
         if (quizzes.length === 0) {
             showModal('Alle Quizze', '<p>Keine Quizze gefunden.</p>');
             return;
         }
         const headers = ['ID', 'Veröffentlicht am', 'Abgabedatum', 'Fragen', 'Aktionen'];
-        const html = renderTable(headers, quizzes, (quiz: any) => {
-            return [`${quiz.quizId}`, `${quiz.pubDate}`, `${quiz.submitDate}`, `${quiz.questionCount}`, `
-                <button class="icon-btn" onclick="editQuiz(${quiz.quizId})" title="Quiz bearbeiten">✏️</button>
-                <button class="icon-btn" onclick="deleteQuiz(${quiz.quizId})" title="Quiz löschen">🗑️</button>
+        const html = renderTable(headers, quizzes, (quiz: unknown) => {
+            const q = quiz as QuizDTO;
+            return [`${q.quizId}`, `${q.pubDate}`, `${q.submitDate}`, `${q.questionCount}`, `
+                <button class="icon-btn" onclick="editQuiz(${q.quizId})" title="Quiz bearbeiten">✏️</button>
+                <button class="icon-btn" onclick="deleteQuiz(${q.quizId})" title="Quiz löschen">🗑️</button>
             `];
         });
         showModal('Alle Quizze', html);
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler beim Laden der Quizze: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler beim Laden der Quizze: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -99,10 +102,10 @@ async function editQuiz(quizId: number) {
             showModal('Fehler', showError('Quiz nicht gefunden'));
             return;
         }
-        const quiz = await response.json();
+        const quiz: QuizDTO = await response.json();
         loadCreateQuizPage(quiz);
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -111,12 +114,13 @@ async function deleteQuiz(quizId: number) {
     try {
         const response = await fetch(`${API_BASE}/quiz/${quizId}`, {method: 'DELETE'});
         if (response.ok) {
+            _admin_quizzes_cache = null;
             await viewQuizzes();
         } else {
             showModal('Fehler', showError('Fehler beim Löschen des Quiz'));
         }
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -132,13 +136,14 @@ async function createTeam() {
             body: JSON.stringify({teamName})
         });
         if (response.ok) {
+            _admin_teams_cache = null;
             await viewTeams();
         } else {
             const message = await response.text();
             showModal('Fehler', showError('Fehler: ' + message));
         }
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -146,15 +151,16 @@ async function viewTeams() {
     showModal('Alle Teams', showLoading());
     try {
         const response = await apiFetch(`${API_BASE}/teams`);
-        const teams = await response.json();
+        const teams: TeamDTO[] = await response.json();
         if (teams.length === 0) {
             showModal('Alle Teams', '<p>Keine Teams gefunden.</p>');
             return;
         }
         const headers = ['ID', 'Team-Name', 'Aktionen'];
-        const html = renderTable(headers, teams, (team: any) => {
-            return [`${team.teamsId}`, `${team.teamName}`, `
-                <button class="icon-btn delete-team-btn" data-id="${team.teamsId}" data-name="${team.teamName}" title="Team löschen">🗑️</button>
+        const html = renderTable(headers, teams, (team: unknown) => {
+            const t = team as TeamDTO;
+            return [`${t.teamsId}`, `${t.teamName}`, `
+                <button class="icon-btn delete-team-btn" data-id="${t.teamsId}" data-name="${t.teamName}" title="Team löschen">🗑️</button>
             `];
         });
         showModal('Alle Teams', html);
@@ -165,8 +171,8 @@ async function viewTeams() {
                 deleteTeam(id, name);
             });
         });
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler beim Laden der Teams: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler beim Laden der Teams: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -175,12 +181,13 @@ async function deleteTeam(teamId: number, teamName: string) {
     try {
         const response = await fetch(`${API_BASE}/team/${teamId}`, {method: 'DELETE'});
         if (response.ok) {
+            _admin_teams_cache = null;
             await viewTeams();
         } else {
             showModal('Fehler', showError('Fehler beim Löschen des Teams'));
         }
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -192,7 +199,7 @@ async function viewResults() {
     try {
         const url = quizId ? `${API_BASE}/results?quizId=${quizId}` : `${API_BASE}/results`;
         const response = await apiFetch(url);
-        const results = await response.json();
+        const results: ResultDTO[] = await response.json();
         if (results.length === 0) {
             showModal('Ergebnisse', '<p>Keine Ergebnisse gefunden.</p>');
             return;
@@ -200,10 +207,10 @@ async function viewResults() {
         let html = '<table><thead><tr><th>Team</th><th>Quiz Datum</th>';
         for (let i = 1; i <= 8; i++) html += `<th>Q${i}</th>`;
         html += '<th>Gesamt</th></tr></thead><tbody>';
-        results.forEach((result: any) => {
-            const answersMap: any = {};
+        results.forEach((result: ResultDTO) => {
+            const answersMap: Record<number, { points: number; changed: boolean }> = {};
             if (Array.isArray(result.answers)) {
-                result.answers.forEach((a: any) => answersMap[a.questionNumber] = a);
+                result.answers.forEach(a => { answersMap[a.questionNumber] = a; });
             }
             html += `<tr><td>${result.teamName}</td><td>${result.quizDate}</td>`;
             for (let i = 1; i <= 8; i++) {
@@ -216,15 +223,15 @@ async function viewResults() {
         });
         html += '</tbody></table>';
         showModal('Ergebnisse', html);
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler beim Laden der Ergebnisse: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler beim Laden der Ergebnisse: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
 // ==================== Add Result ====================
 
-let _admin_quizzes_cache: any[] | null = null;
-let _admin_teams_cache: any[] | null = null;
+let _admin_quizzes_cache: QuizDTO[] | null = null;
+let _admin_teams_cache: TeamDTO[] | null = null;
 
 async function showAddResultModal() {
     showModal('Ergebnis hinzufügen', showLoading());
@@ -246,8 +253,8 @@ async function showAddResultModal() {
         }
         const saveBtn = document.getElementById('add-result-save-btn');
         if (saveBtn) saveBtn.addEventListener('click', onSaveAddResult);
-    } catch (err: any) {
-        showModal('Fehler', showError('Fehler beim Laden der Daten: ' + (err.message || err)));
+    } catch (err: unknown) {
+        showModal('Fehler', showError('Fehler beim Laden der Daten: ' + (err instanceof Error ? err.message : err)));
     }
 }
 
@@ -284,7 +291,7 @@ async function onSaveAddResult() {
         if (feedback) feedback.textContent = 'Bitte Quiz und Team auswählen.';
         return;
     }
-    const answers: any[] = [];
+    const answers: { questionNumber: number; points: number }[] = [];
     for (let i = 1; i <= 8; i++) {
         const val = Number((document.getElementById(`add-result-q${i}`) as HTMLInputElement).value);
         answers.push({questionNumber: i, points: val});
@@ -301,8 +308,8 @@ async function onSaveAddResult() {
             const text = await res.text();
             if (feedback) feedback.textContent = 'Fehler: ' + text;
         }
-    } catch (err: any) {
-        if (feedback) feedback.textContent = 'Fehler beim Speichern: ' + (err.message || err);
+    } catch (err: unknown) {
+        if (feedback) feedback.textContent = 'Fehler beim Speichern: ' + (err instanceof Error ? err.message : err);
     }
 }
 
@@ -318,15 +325,16 @@ async function viewLeaderboard() {
     try {
         const url = quizId ? `${API_BASE}/leaderboard?quizId=${quizId}` : `${API_BASE}/leaderboard`;
         const response = await apiFetch(url);
-        const leaderboard = await response.json();
+        const leaderboard: LeaderboardEntry[] = await response.json();
         const headers = ['Rang', 'Team', 'Quiz Datum', 'Punkte'];
-        const html = renderTable(headers, leaderboard, (entry: any) => {
-            const rankEmoji = entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank;
-            return [`${rankEmoji}`, `${entry.teamName}`, `${entry.quizDate}`, `<strong>${entry.totalPoints}</strong>`];
+        const html = renderTable(headers, leaderboard, (entry: unknown) => {
+            const e = entry as LeaderboardEntry;
+            const rankEmoji = e.rank === 1 ? '🥇' : e.rank === 2 ? '🥈' : e.rank === 3 ? '🥉' : e.rank;
+            return [`${rankEmoji}`, `${e.teamName}`, `${e.quizDate}`, `<strong>${e.totalPoints}</strong>`];
         });
         showModal('🏆 Rangliste', html);
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler beim Laden der Rangliste: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler beim Laden der Rangliste: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -334,11 +342,12 @@ async function viewUsers() {
     showModal('Alle Benutzer', showLoading());
     try {
         const response = await apiFetch(`${API_BASE}/users`);
-        const users = await response.json();
+        const users: UserDTO[] = await response.json();
         const headers = ['ID', 'Benutzername', 'Rolle', ''];
-        const html = renderTable(headers, users, (user: any) => {
-            return [`${user.userId}`, `${user.username}`, `${user.role}`, `
-                <button class="icon-btn delete-user-btn" data-id="${user.userId}" data-name="${user.username}" title="Benutzer löschen">🗑️</button>
+        const html = renderTable(headers, users, (user: unknown) => {
+            const u = user as UserDTO;
+            return [`${u.userId}`, `${u.username}`, `${u.role}`, `
+                <button class="icon-btn delete-user-btn" data-id="${u.userId}" data-name="${u.username}" title="Benutzer löschen">🗑️</button>
             `];
         });
         showModal('Alle Benutzer', html);
@@ -349,8 +358,8 @@ async function viewUsers() {
                 deleteUser(id, name);
             });
         });
-    } catch (error: any) {
-        showModal('Fehler', showError('Fehler beim Laden der Benutzer: ' + (error.message || error)));
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler beim Laden der Benutzer: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
@@ -360,12 +369,12 @@ async function deleteUser(userId: number, username: string) {
         const response = await fetch(`${API_BASE}/user/${userId}`, {method: 'DELETE'});
         if (response.ok) await viewUsers();
         else alert('Fehler beim Löschen');
-    } catch (error: any) {
-        alert('Fehler: ' + error.message);
+    } catch (error: unknown) {
+        alert('Fehler: ' + (error instanceof Error ? error.message : error));
     }
 }
 
-function renderTable(headers: string[], rows: any[], rowFn: (row: any) => string[]) {
+function renderTable(headers: string[], rows: unknown[], rowFn: (row: unknown) => string[]) {
     let html = '<table><thead><tr>';
     headers.forEach(h => html += `<th>${h}</th>`);
     html += '</tr></thead><tbody>';
