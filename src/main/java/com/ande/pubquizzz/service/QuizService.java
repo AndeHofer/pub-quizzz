@@ -55,17 +55,15 @@ public class QuizService {
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : LocalDate.now());
         quiz.setSubmitDate(LocalDate.now());
 
-        if (request.getQuestions() != null) {
-            for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
-                List<Hint> hints = buildHints(questionData.getHints());
-                quiz.addQuestion(
-                        questionData.getNumber(),
-                        questionData.getQuestionText(),
-                        questionData.getAnswer(),
-                        questionData.getNote(),
-                        hints
-                );
-            }
+        for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
+            List<Hint> hints = buildHints(questionData.getHints());
+            quiz.addQuestion(
+                    questionData.getNumber(),
+                    questionData.getQuestionText(),
+                    questionData.getAnswer(),
+                    questionData.getNote(),
+                    hints
+            );
         }
 
         quizRepository.save(quiz);
@@ -101,17 +99,15 @@ public class QuizService {
         quizRepository.flush(); // Ensure deletes are done before adding new
 
         // Add new questions
-        if (request.getQuestions() != null) {
-            for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
-                List<Hint> hints = buildHints(questionData.getHints());
-                quiz.addQuestion(
-                        questionData.getNumber(),
-                        questionData.getQuestionText(),
-                        questionData.getAnswer(),
-                        questionData.getNote(),
-                        hints
-                );
-            }
+        for (CreateQuizRequest.QuestionData questionData : request.getQuestions()) {
+            List<Hint> hints = buildHints(questionData.getHints());
+            quiz.addQuestion(
+                    questionData.getNumber(),
+                    questionData.getQuestionText(),
+                    questionData.getAnswer(),
+                    questionData.getNote(),
+                    hints
+            );
         }
 
         quizRepository.save(quiz);

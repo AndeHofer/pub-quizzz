@@ -36,15 +36,6 @@ public class UserService {
     @Transactional
     public void register(CreateUserRequest request) {
         log.info("Registering new user: {}", request.getUsername());
-        if (request.getUsername() == null || request.getUsername().isBlank()) {
-            throw new IllegalArgumentException("Username must not be empty");
-        }
-        if (request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password must not be empty");
-        }
-        if (request.getRole() == null) {
-            throw new IllegalArgumentException("Role must not be null");
-        }
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new BusinessValidationException("Username already exists: " + request.getUsername());
         }

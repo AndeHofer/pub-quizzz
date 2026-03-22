@@ -3,6 +3,7 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.UserDTO;
 import com.ande.pubquizzz.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +24,7 @@ public class AdminUserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<String> register(@RequestBody @Valid CreateUserRequest request) {
         userService.register(request);
         return ResponseEntity.ok("User registered successfully");
     }

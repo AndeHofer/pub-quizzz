@@ -74,26 +74,20 @@ public class ResultService {
     public ResultDTO createResult(CreateResultRequest req) {
         log.info("Creating result for quizId={} teamId={}", req.getQuizId(), req.getTeamId());
 
-        if (req.getQuizId() == null || req.getTeamId() == null) {
-            throw new BusinessValidationException("Quiz und Team müssen ausgewählt werden.");
-        }
-
         var quizOpt = quizRepository.findById(req.getQuizId());
         if (quizOpt.isEmpty()) throw new ResourceNotFoundException("Quiz nicht gefunden: " + req.getQuizId());
         var teamOpt = teamRepository.findById(req.getTeamId());
         if (teamOpt.isEmpty()) throw new ResourceNotFoundException("Team nicht gefunden: " + req.getTeamId());
 
-        var answers = req.getAnswers();
-        if (answers == null || answers.size() != 8) {
-            throw new BusinessValidationException("Es müssen 8 Antworten übergeben werden.");
+        // Check for duplicate result
+        if (resultRepository.findByTeam_TeamsIdAndQuiz_QuizId(req.getTeamId(), req.getQuizId()).isPresent()) {
+            throw new BusinessValidationException("Ergebnis für dieses Team und Quiz existiert bereits");
         }
 
+        var answers = req.getAnswers();
         boolean[] seen = new boolean[9];
         for (CreateResultRequest.AnswerSubmission a : answers) {
             int qn = a.getQuestionNumber();
-            int pts = a.getPoints();
-            if (qn < 1 || qn > 8) throw new BusinessValidationException("Ungültige Frage-Nummer: " + qn);
-            if (pts < 0) throw new BusinessValidationException("Punkte müssen >= 0 sein.");
             if (seen[qn]) throw new BusinessValidationException("Doppelte Frage: " + qn);
             seen[qn] = true;
         }

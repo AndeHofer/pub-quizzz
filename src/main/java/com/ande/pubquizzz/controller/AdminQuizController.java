@@ -5,6 +5,7 @@ import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class AdminQuizController {
 
     @PostMapping(value = "/create-quiz", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createQuiz(
-            @RequestPart("quiz") CreateQuizRequest request,
+            @RequestPart("quiz") @Valid CreateQuizRequest request,
             @RequestParam Map<String, MultipartFile> allFiles) {
         injectImageUrls(request, allFiles);
         quizService.createQuiz(request);
@@ -70,7 +71,7 @@ public class AdminQuizController {
     @PutMapping(value = "/quiz/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updateQuizFull(
             @PathVariable Long id,
-            @RequestPart("quiz") CreateQuizRequest request,
+            @RequestPart("quiz") @Valid CreateQuizRequest request,
             @RequestParam Map<String, MultipartFile> allFiles) {
         injectImageUrls(request, allFiles);
         quizService.updateQuizFull(id, request);

@@ -2,8 +2,10 @@ package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.TeamDTO;
 import com.ande.pubquizzz.service.TeamService;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
+@Validated
 public class AdminTeamController {
 
     private final TeamService teamService;
@@ -34,7 +37,7 @@ public class AdminTeamController {
     }
 
     @PostMapping("/team")
-    public ResponseEntity<String> createTeam(@RequestParam String teamName) {
+    public ResponseEntity<String> createTeam(@RequestParam @NotBlank String teamName) {
         teamService.createTeam(teamName);
         return ResponseEntity.ok("Team created successfully");
     }

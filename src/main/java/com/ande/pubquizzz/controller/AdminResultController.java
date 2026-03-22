@@ -4,6 +4,7 @@ import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.LeaderboardEntry;
 import com.ande.pubquizzz.dto.ResultDTO;
 import com.ande.pubquizzz.service.ResultService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,7 +45,7 @@ public class AdminResultController {
     }
 
     @PostMapping(value = "/results", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createResult(@RequestBody CreateResultRequest request) {
+    public ResponseEntity<?> createResult(@RequestBody @Valid CreateResultRequest request) {
         var created = resultService.createResult(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }

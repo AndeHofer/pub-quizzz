@@ -34,42 +34,6 @@ class UserRegistrationValidationTest {
     private UserService userService;
 
     @Test
-    void rejectsBlankUsername() {
-        CreateUserRequest request = new CreateUserRequest();
-        request.setUsername("  ");
-        request.setPassword("secret");
-        request.setRole(Role.USER);
-
-        assertThatThrownBy(() -> userService.register(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Username");
-    }
-
-    @Test
-    void rejectsNullPassword() {
-        CreateUserRequest request = new CreateUserRequest();
-        request.setUsername("alice");
-        request.setPassword(null);
-        request.setRole(Role.USER);
-
-        assertThatThrownBy(() -> userService.register(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Password");
-    }
-
-    @Test
-    void rejectsNullRole() {
-        CreateUserRequest request = new CreateUserRequest();
-        request.setUsername("alice");
-        request.setPassword("secret");
-        request.setRole(null);
-
-        assertThatThrownBy(() -> userService.register(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Role");
-    }
-
-    @Test
     void rejectsDuplicateUsername() {
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(new com.ande.pubquizzz.database.entities.AppUser()));
 
