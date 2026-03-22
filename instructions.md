@@ -1,8 +1,6 @@
 # Instructions:
 
 - Do not write markdown files or text files with implementation summaries unless you are instructed to do so!!!
-- When you are instructed to write APIs, write an OpenAPI specification for the API endpoints you are implementing. Then
-  generate the API Interfaces from the specification and lastly, create an implementation of that interface.
 - All APIs need to have integration tests.
 - All business logic needs to have unit tests.
 - Always remove unused imports.
