@@ -122,7 +122,17 @@ if (quizForm) {
     quizForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const quizData: { title: string | null; pubDate: string | null; questions: { number: number; questionText: string; answer: string; note: string | null; hints: { hintText: string | null; imageUrl: null }[] }[] } = {
+        const quizData: {
+            title: string | null;
+            pubDate: string | null;
+            questions: {
+                number: number;
+                questionText: string;
+                answer: string;
+                note: string | null;
+                hints: { hintText: string | null; imageUrl: null }[]
+            }[]
+        } = {
             title: (document.getElementById('quizTitle') as HTMLInputElement).value || null,
             pubDate: (document.getElementById('pubDate') as HTMLInputElement).value || null,
             questions: []
