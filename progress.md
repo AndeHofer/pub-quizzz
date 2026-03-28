@@ -107,6 +107,9 @@
 - Created `src/main/resources/openapi/leaderboard-api.yaml`
 - Created `AllTimeLeaderboardEntry` DTO (rank, teamName, totalPoints, quizCount)
 
+### Task 2: Repository Query ✅ COMMITTED
+- Added `findAllTimeLeaderboardRaw()` JPQL to `ResultRepository` — groups by team, sums points, counts distinct quizzes
+
 
 
 ## Key Discoveries
