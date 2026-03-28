@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de-AT">
+<head>
+    <meta charset="UTF-8">
+    <title>Gesamtrangliste - Pub Quizzz</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+
+    <div class="mb-6">
+        <a href="/" class="text-blue-600 hover:underline text-sm">&larr; Startseite</a>
+    </div>
+
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">🏆 Gesamtrangliste</h1>
+
+    <div id="loading" class="text-center py-12 text-gray-500">
+        Rangliste wird geladen...
+    </div>
+
+    <div id="errorMessage" class="bg-red-100 text-red-700 rounded-lg px-4 py-3 mb-4" style="display:none;"></div>
+
+    <table id="leaderboardTable" class="w-full bg-white rounded-lg shadow-sm" style="display:none;">
+        <thead>
+        <tr class="border-b-2 border-gray-200 bg-gray-100">
+            <th class="py-3 px-4 text-center text-gray-700 w-16">Rang</th>
+            <th class="py-3 px-4 text-left text-gray-700">Team</th>
+            <th class="py-3 px-4 text-center text-gray-700">Punkte</th>
+            <th class="py-3 px-4 text-center text-gray-700">Quizze gespielt</th>
+        </tr>
+        </thead>
+        <tbody id="leaderboardBody"></tbody>
+    </table>
+
+</div>
+
+<script type="module" src="/js/leaderboard.ts"></script>
+</body>
+</html>

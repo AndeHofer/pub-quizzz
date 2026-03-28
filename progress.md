@@ -122,6 +122,10 @@
 - Added `AllTimeLeaderboardEntry` interface to `types.ts`
 - Added `leaderboard` entrypoint to `vite.config.ts`
 
+### Task 6: Leaderboard Frontend Page ✅ COMMITTED
+- Created `leaderboard.html` and `leaderboard.ts`
+- Workaround: medal emojis use `\uD83E\uDD47` Unicode escapes (Rolldown panics on emoji in template literals)
+
 
 
 ## Key Discoveries
