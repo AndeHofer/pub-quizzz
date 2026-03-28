@@ -95,11 +95,17 @@
 - Replaced local `Hint`/`Question`/`Quiz` interfaces in `create_quiz.ts` with `QuizDTO` from `types.ts`
 - Added `.catch()` to `index.ts` is-admin fetch
 
-## Final Status
+## Final Status (Phase 1–4)
 
 - **Backend tests**: 61/61 passing (`mvn clean test`)
 - **Frontend type check**: 0 errors (`npm run type-check`)
 - **Frontend build**: succeeds (`vite build`)
+
+## Phase 5: User All-Time Leaderboard
+
+### Task 1: OpenAPI Spec + DTO ✅ COMMITTED
+- Created `src/main/resources/openapi/leaderboard-api.yaml`
+- Created `AllTimeLeaderboardEntry` DTO (rank, teamName, totalPoints, quizCount)
 
 
 
