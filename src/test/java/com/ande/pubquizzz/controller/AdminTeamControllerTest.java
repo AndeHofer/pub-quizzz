@@ -21,13 +21,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import com.ande.pubquizzz.exception.ResourceNotFoundException;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -139,5 +144,44 @@ class AdminTeamControllerTest {
     void getAllTeams_unauthenticated_redirects() throws Exception {
         mockMvc.perform(get("/admin/teams"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void renameTeam_withValidRequest_returnsOk() throws Exception {
+        TeamDTO dto = new TeamDTO();
+        dto.setTeamsId(1L);
+        dto.setTeamName("Neuer Name");
+        when(teamService.renameTeam(1L, "Neuer Name")).thenReturn(dto);
+
+        mockMvc.perform(put("/admin/team/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"teamName\":\"Neuer Name\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.teamName").value("Neuer Name"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void renameTeam_withBlankName_returnsBadRequest() throws Exception {
+        mockMvc.perform(put("/admin/team/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"teamName\":\"\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void renameTeam_notFound_returnsNotFound() throws Exception {
+        when(teamService.renameTeam(eq(99L), any()))
+                .thenThrow(new ResourceNotFoundException("Team nicht gefunden: 99"));
+
+        mockMvc.perform(put("/admin/team/99")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"teamName\":\"X\"}"))
+                .andExpect(status().isNotFound());
     }
 }
