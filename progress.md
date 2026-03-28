@@ -118,6 +118,10 @@
 - Created `UserLeaderboardController` at `GET /api/leaderboard`
 - Created `UserLeaderboardControllerTest` with 3 `@WebMvcTest` tests (66 total, all passing)
 
+### Task 5: Frontend Types + Vite Config ✅ COMMITTED
+- Added `AllTimeLeaderboardEntry` interface to `types.ts`
+- Added `leaderboard` entrypoint to `vite.config.ts`
+
 
 
 ## Key Discoveries

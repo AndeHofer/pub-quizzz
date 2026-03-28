@@ -56,3 +56,10 @@ export interface UserDTO {
     username: string;
     role: string;
 }
+
+export interface AllTimeLeaderboardEntry {
+    rank: number;
+    teamName: string;
+    totalPoints: number;
+    quizCount: number;
+}
