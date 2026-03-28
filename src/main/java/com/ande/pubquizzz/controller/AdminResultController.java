@@ -1,8 +1,8 @@
 package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.CreateResultRequest;
-import com.ande.pubquizzz.dto.LeaderboardEntry;
 import com.ande.pubquizzz.dto.ResultDTO;
+import com.ande.pubquizzz.dto.UpdateResultRequest;
 import com.ande.pubquizzz.service.ResultService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,23 +35,20 @@ public class AdminResultController {
         return ResponseEntity.ok(resultService.getResults(quizId));
     }
 
-    @GetMapping("/leaderboard")
-    public ResponseEntity<List<LeaderboardEntry>> getLeaderboard(@RequestParam(required = false) Long quizId) {
-        return ResponseEntity.ok(resultService.getLeaderboard(quizId));
-    }
-
-    @GetMapping("/results/export")
-    public ResponseEntity<String> exportResults(@RequestParam(required = false) Long quizId) {
-        String csv = resultService.exportResultsCsv(quizId);
-        return ResponseEntity.ok()
-                .header("Content-Type", "text/csv")
-                .header("Content-Disposition", "attachment; filename=\"quiz_results.csv\"")
-                .body(csv);
-    }
-
     @PostMapping(value = "/results", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createResult(@RequestBody @Valid CreateResultRequest request) {
         var created = resultService.createResult(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @DeleteMapping("/results/{id}")
+    public ResponseEntity<Void> deleteResult(@PathVariable Long id) {
+        resultService.deleteResult(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/results/{id}")
+    public ResponseEntity<ResultDTO> updateResult(@PathVariable Long id, @RequestBody @Valid UpdateResultRequest request) {
+        return ResponseEntity.ok(resultService.updateResult(id, request));
     }
 }
