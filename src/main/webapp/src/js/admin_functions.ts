@@ -1,8 +1,14 @@
 export {};
 
-import type { QuizDTO, TeamDTO, ResultDTO, LeaderboardEntry, UserDTO } from './types';
+import type { QuizDTO, TeamDTO, ResultDTO, UserDTO } from './types';
 
 const API_BASE = '/admin';
+
+// Module-level caches
+let _admin_quizzes_cache: QuizDTO[] | null = null;
+let _admin_teams_cache: TeamDTO[] | null = null;
+let _admin_results_cache: ResultDTO[] | null = null;
+let _admin_last_quiz_id_filter: string | null = null;
 
 // Helper for API fetch with basic network error handling
 async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
@@ -55,10 +61,11 @@ window.addEventListener('load', () => {
     (window as any).createTeam = createTeam;
     (window as any).viewTeams = viewTeams;
     (window as any).deleteTeam = deleteTeam;
+    (window as any).renameTeam = renameTeam;
     (window as any).viewResults = viewResults;
     (window as any).showAddResultModal = showAddResultModal;
-    (window as any).exportResults = exportResults;
-    (window as any).viewLeaderboard = viewLeaderboard;
+    (window as any).deleteResult = deleteResult;
+    (window as any).editResult = editResult;
     (window as any).viewUsers = viewUsers;
     (window as any).deleteUser = deleteUser;
 
@@ -160,10 +167,18 @@ async function viewTeams() {
         const html = renderTable(headers, teams, (team: unknown) => {
             const t = team as TeamDTO;
             return [`${t.teamsId}`, `${t.teamName}`, `
+                <button class="icon-btn rename-team-btn" data-id="${t.teamsId}" data-name="${t.teamName}" title="Team umbenennen">✏️</button>
                 <button class="icon-btn delete-team-btn" data-id="${t.teamsId}" data-name="${t.teamName}" title="Team löschen">🗑️</button>
             `];
         });
         showModal('Alle Teams', html);
+        document.querySelectorAll('.rename-team-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                const name = (btn as HTMLElement).dataset.name ?? '';
+                renameTeam(id, name);
+            });
+        });
         document.querySelectorAll('.delete-team-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = Number((btn as HTMLElement).dataset.id);
@@ -191,22 +206,45 @@ async function deleteTeam(teamId: number, teamName: string) {
     }
 }
 
+async function renameTeam(teamId: number, currentName: string) {
+    const newName = prompt('Team-Namen ändern:', currentName);
+    if (!newName || newName === currentName) return;
+    try {
+        const response = await fetch(`${API_BASE}/team/${teamId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({teamName: newName})
+        });
+        if (response.ok) {
+            _admin_teams_cache = null;
+            await viewTeams();
+        } else {
+            const message = await response.text();
+            showModal('Fehler', showError('Fehler: ' + message));
+        }
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
+    }
+}
+
 // ==================== Results Management ====================
 
-async function viewResults() {
-    const quizId = prompt('Quiz ID für Ergebnisse eingeben (leer = alle):');
+async function viewResults(quizIdOverride?: string | null) {
+    const quizId = quizIdOverride !== undefined ? quizIdOverride : prompt('Quiz ID für Ergebnisse eingeben (leer = alle):');
+    _admin_last_quiz_id_filter = quizId ?? null;
     showModal('Ergebnisse', showLoading());
     try {
         const url = quizId ? `${API_BASE}/results?quizId=${quizId}` : `${API_BASE}/results`;
         const response = await apiFetch(url);
         const results: ResultDTO[] = await response.json();
+        _admin_results_cache = results;
         if (results.length === 0) {
             showModal('Ergebnisse', '<p>Keine Ergebnisse gefunden.</p>');
             return;
         }
         let html = '<table><thead><tr><th>Team</th><th>Quiz Datum</th>';
         for (let i = 1; i <= 8; i++) html += `<th>Q${i}</th>`;
-        html += '<th>Gesamt</th></tr></thead><tbody>';
+        html += '<th>Gesamt</th><th>Aktionen</th></tr></thead><tbody>';
         results.forEach((result: ResultDTO) => {
             const answersMap: Record<number, { points: number; changed: boolean }> = {};
             if (Array.isArray(result.answers)) {
@@ -219,19 +257,105 @@ async function viewResults() {
                 const changed = a && a.changed ? '*' : '';
                 html += `<td>${points}${changed}</td>`;
             }
-            html += `<td><strong>${result.totalPoints || 0}</strong></td></tr>`;
+            html += `<td><strong>${result.totalPoints || 0}</strong></td>`;
+            html += `<td>
+    <button class="icon-btn edit-result-btn"
+        data-id="${result.resultsId}"
+        data-name="${result.teamName}"
+        title="Ergebnis bearbeiten">✏️</button>
+    <button class="icon-btn delete-result-btn"
+        data-id="${result.resultsId}"
+        data-name="${result.teamName}"
+        title="Ergebnis löschen">🗑️</button>
+</td>`;
+            html += '</tr>';
         });
         html += '</tbody></table>';
         showModal('Ergebnisse', html);
+        document.querySelectorAll('.delete-result-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                const name = (btn as HTMLElement).dataset.name ?? '';
+                deleteResult(id, name);
+            });
+        });
+        document.querySelectorAll('.edit-result-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                const name = (btn as HTMLElement).dataset.name ?? '';
+                editResult(id, name);
+            });
+        });
     } catch (error: unknown) {
         showModal('Fehler', showError('Fehler beim Laden der Ergebnisse: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
-// ==================== Add Result ====================
+async function deleteResult(resultId: number, teamName: string) {
+    if (!confirm(`Ergebnis für Team "${teamName}" wirklich löschen?`)) return;
+    try {
+        const response = await fetch(`${API_BASE}/results/${resultId}`, {method: 'DELETE'});
+        if (response.ok) {
+            await viewResults(_admin_last_quiz_id_filter);
+        } else {
+            showModal('Fehler', showError('Fehler beim Löschen des Ergebnisses'));
+        }
+    } catch (error: unknown) {
+        showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
+    }
+}
 
-let _admin_quizzes_cache: QuizDTO[] | null = null;
-let _admin_teams_cache: TeamDTO[] | null = null;
+async function editResult(resultId: number, teamName: string) {
+    const result = _admin_results_cache?.find(r => r.resultsId === resultId);
+    if (!result) {
+        showModal('Fehler', showError('Ergebnis nicht gefunden'));
+        return;
+    }
+
+    const answersMap: Record<number, number> = {};
+    if (Array.isArray(result.answers)) {
+        result.answers.forEach(a => { answersMap[a.questionNumber] = a.points; });
+    }
+
+    const pointOptions = [5, 3, 2, 1, 0];
+
+    let formHtml = `<h3>Ergebnis bearbeiten: ${teamName}</h3><form id="editResultForm">`;
+    for (let i = 1; i <= 8; i++) {
+        const current = answersMap[i] ?? 0;
+        const opts = pointOptions.map(v => `<option value="${v}"${v === current ? ' selected' : ''}>${v}</option>`).join('');
+        formHtml += `<div><label>Frage ${i}: <select name="q${i}">${opts}</select></label></div>`;
+    }
+    formHtml += `<button type="button" id="saveEditResultBtn">Speichern</button></form>`;
+
+    showModal(`Ergebnis bearbeiten`, formHtml);
+
+    document.getElementById('saveEditResultBtn')?.addEventListener('click', async () => {
+        const form = document.getElementById('editResultForm') as HTMLFormElement;
+        const answers = [];
+        for (let i = 1; i <= 8; i++) {
+            const select = form.querySelector(`[name="q${i}"]`) as HTMLSelectElement;
+            answers.push({questionNumber: i, points: Number(select.value)});
+        }
+        try {
+            const response = await fetch(`${API_BASE}/results/${resultId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({answers})
+            });
+            if (response.ok) {
+                closeModal();
+                await viewResults(_admin_last_quiz_id_filter);
+            } else {
+                const message = await response.text();
+                showModal('Fehler', showError('Fehler beim Speichern: ' + message));
+            }
+        } catch (error: unknown) {
+            showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
+        }
+    });
+}
+
+// ==================== Add Result ====================
 
 async function showAddResultModal() {
     showModal('Ergebnis hinzufügen', showLoading());
@@ -311,31 +435,6 @@ async function onSaveAddResult() {
         }
     } catch (err: unknown) {
         if (feedback) feedback.textContent = 'Fehler beim Speichern: ' + (err instanceof Error ? err.message : err);
-    }
-}
-
-async function exportResults() {
-    const quizId = prompt('Quiz ID für Export eingeben (leer = alle):');
-    const url = quizId ? `${API_BASE}/results/export?quizId=${quizId}` : `${API_BASE}/results/export`;
-    window.open(url, '_blank');
-}
-
-async function viewLeaderboard() {
-    const quizId = prompt('Quiz ID für Rangliste eingeben (leer = alle):');
-    showModal('Rangliste', showLoading());
-    try {
-        const url = quizId ? `${API_BASE}/leaderboard?quizId=${quizId}` : `${API_BASE}/leaderboard`;
-        const response = await apiFetch(url);
-        const leaderboard: LeaderboardEntry[] = await response.json();
-        const headers = ['Rang', 'Team', 'Quiz Datum', 'Punkte'];
-        const html = renderTable(headers, leaderboard, (entry: unknown) => {
-            const e = entry as LeaderboardEntry;
-            const rankEmoji = e.rank === 1 ? '🥇' : e.rank === 2 ? '🥈' : e.rank === 3 ? '🥉' : e.rank;
-            return [`${rankEmoji}`, `${e.teamName}`, `${e.quizDate}`, `<strong>${e.totalPoints}</strong>`];
-        });
-        showModal('🏆 Rangliste', html);
-    } catch (error: unknown) {
-        showModal('Fehler', showError('Fehler beim Laden der Rangliste: ' + (error instanceof Error ? error.message : error)));
     }
 }
 
