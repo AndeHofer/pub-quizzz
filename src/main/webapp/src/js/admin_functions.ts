@@ -75,6 +75,21 @@ window.addEventListener('load', () => {
             if (event.target === modal) closeModal();
         });
     }
+
+    const exportBtn = document.getElementById('exportBackupBtn');
+    if (exportBtn) exportBtn.addEventListener('click', exportBackup);
+
+    const importBtn = document.getElementById('importBackupBtn');
+    const importForm = document.getElementById('importBackupForm') as HTMLFormElement | null;
+    if (importBtn && importForm) {
+        importBtn.addEventListener('click', () => {
+            importForm.style.display = importForm.style.display === 'none' ? 'block' : 'none';
+        });
+        importForm.addEventListener('submit', async (e: Event) => {
+            e.preventDefault();
+            await importBackup();
+        });
+    }
 });
 
 // ==================== Quiz Management ====================
@@ -489,6 +504,39 @@ async function deleteUser(userId: number, username: string) {
         else alert('Fehler beim Löschen');
     } catch (error: unknown) {
         alert('Fehler: ' + (error instanceof Error ? error.message : error));
+    }
+}
+
+// ==================== Backup Management ====================
+
+function exportBackup() {
+    window.location.href = '/admin/backup/export';
+}
+
+async function importBackup() {
+    const input = document.getElementById('backupFileInput') as HTMLInputElement | null;
+    const msgDiv = document.getElementById('backupMessage') as HTMLElement | null;
+    if (!input || !input.files || input.files.length === 0) {
+        if (msgDiv) msgDiv.innerHTML = '<span style="color:red;">Bitte eine ZIP-Datei auswählen.</span>';
+        return;
+    }
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    if (msgDiv) msgDiv.innerHTML = '<span>Hochladen...</span>';
+
+    try {
+        const resp = await apiFetch('/admin/backup/import', { method: 'POST', body: formData });
+        if (resp.ok) {
+            const msg = await resp.text();
+            if (msgDiv) msgDiv.innerHTML = `<span style="color:green;">${msg}</span>`;
+        } else {
+            const err = await resp.json().catch(() => ({ error: 'Unbekannter Fehler' }));
+            if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Fehler: ${err.error}</span>`;
+        }
+    } catch (error: unknown) {
+        if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Netzwerkfehler: ${error instanceof Error ? error.message : error}</span>`;
     }
 }
 

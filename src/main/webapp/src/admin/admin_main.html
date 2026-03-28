@@ -43,6 +43,19 @@
         </div>
     </div>
 
+    <div class="section">
+        <h2>Datenbank-Backup</h2>
+        <div class="button-group">
+            <button id="exportBackupBtn">⬇ Backup exportieren</button>
+            <button class="secondary-btn" id="importBackupBtn">⬆ Backup importieren</button>
+        </div>
+        <form id="importBackupForm" style="display:none; margin-top:0.75rem;">
+            <input type="file" id="backupFileInput" accept=".zip" style="margin-bottom:0.5rem;"><br>
+            <button type="submit">Backup hochladen</button>
+        </form>
+        <div id="backupMessage"></div>
+    </div>
+
     <div class="button-group">
         <button class="back-btn" onclick="goBack()">← Zurück zur Hauptseite</button>
     </div>
