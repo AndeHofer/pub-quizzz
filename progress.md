@@ -110,6 +110,10 @@
 ### Task 2: Repository Query ✅ COMMITTED
 - Added `findAllTimeLeaderboardRaw()` JPQL to `ResultRepository` — groups by team, sums points, counts distinct quizzes
 
+### Task 3: Service Method + Unit Tests ✅ COMMITTED
+- Added `getAllTimeLeaderboard()` to `ResultService` — maps `Object[]` rows, assigns rank in Java
+- Created `ResultServiceLeaderboardTest` with 2 unit tests (63 total, all passing)
+
 
 
 ## Key Discoveries

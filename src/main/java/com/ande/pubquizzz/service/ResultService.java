@@ -5,6 +5,7 @@ import com.ande.pubquizzz.database.entities.ResultAnswer;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
+import com.ande.pubquizzz.dto.AllTimeLeaderboardEntry;
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.LeaderboardEntry;
@@ -34,6 +35,23 @@ public class ResultService {
     public List<ResultDTO> getResults(Long quizId) {
         log.info("Fetching results{}", quizSuffix(quizId));
         return loadResults(quizId).stream().map(resultMapper::toDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AllTimeLeaderboardEntry> getAllTimeLeaderboard() {
+        log.info("Fetching all-time leaderboard");
+        List<Object[]> rows = resultRepository.findAllTimeLeaderboardRaw();
+        List<AllTimeLeaderboardEntry> leaderboard = new ArrayList<>();
+        for (int i = 0; i < rows.size(); i++) {
+            Object[] row = rows.get(i);
+            AllTimeLeaderboardEntry entry = new AllTimeLeaderboardEntry();
+            entry.setRank(i + 1);
+            entry.setTeamName((String) row[0]);
+            entry.setTotalPoints(((Number) row[1]).intValue());
+            entry.setQuizCount(((Number) row[2]).intValue());
+            leaderboard.add(entry);
+        }
+        return leaderboard;
     }
 
     @Transactional(readOnly = true)
