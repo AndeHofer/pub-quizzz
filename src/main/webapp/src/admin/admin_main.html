@@ -13,7 +13,7 @@
         <h2>Quiz Verwaltung</h2>
         <div class="button-group">
             <button onclick="location.href='create_quiz.html'">➕ Neues Quiz anlegen</button>
-            <button class="secondary-btn" onclick="viewQuizzes()">📋 Alle Quizze anzeigen</button>
+            <button class="secondary-btn" onclick="viewQuizzes()">📋 Quizze anzeigen</button>
             <!-- page-level edit/delete removed: use per-row Aktionen in the quiz list -->
         </div>
     </div>
@@ -22,7 +22,7 @@
         <h2>Team Verwaltung</h2>
         <div class="button-group">
             <button onclick="createTeam()">➕ Neues Team anlegen</button>
-            <button class="secondary-btn" onclick="viewTeams()">👥 Alle Teams anzeigen</button>
+            <button class="secondary-btn" onclick="viewTeams()">👥 Teams anzeigen</button>
             <!-- page-level team delete removed: use per-row Aktionen in the team list -->
         </div>
     </div>
@@ -30,8 +30,8 @@
     <div class="section">
         <h2>Ergebnisse & Auswertung</h2>
         <div class="button-group">
-            <button class="primary-btn" onclick="showAddResultModal()">➕ Ergebnis hinzufügen</button>
-            <button onclick="viewResults()">📈 Ergebnisse anzeigen</button>
+            <button onclick="showAddResultModal()">➕ Ergebnis hinzufügen</button>
+            <button class="secondary-btn" onclick="viewResults()">📈 Ergebnisse anzeigen</button>
         </div>
     </div>
 
