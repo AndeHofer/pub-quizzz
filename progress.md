@@ -114,6 +114,10 @@
 - Added `getAllTimeLeaderboard()` to `ResultService` — maps `Object[]` rows, assigns rank in Java
 - Created `ResultServiceLeaderboardTest` with 2 unit tests (63 total, all passing)
 
+### Task 4: Controller + Integration Tests ✅ COMMITTED
+- Created `UserLeaderboardController` at `GET /api/leaderboard`
+- Created `UserLeaderboardControllerTest` with 3 `@WebMvcTest` tests (66 total, all passing)
+
 
 
 ## Key Discoveries
