@@ -130,6 +130,11 @@
 - `index.html` replaced with card-based navigation hub (Gesamtrangliste + hidden Admin Panel card)
 - `index.ts` simplified — only reveals admin card via `/api/is-admin`; removed old `goToAdmin` function
 
+### Task 8: Full Verification ✅
+- Backend: 66/66 tests passing (`mvn.cmd test`)
+- Frontend: 0 type errors (`npm run type-check`)
+- Full build: `mvn.cmd clean package -DskipTests` — BUILD SUCCESS
+
 
 
 ## Key Discoveries
