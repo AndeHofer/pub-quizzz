@@ -52,4 +52,27 @@ public class ImageStorageService {
 
         return "/uploads/" + filename;
     }
+
+    /**
+     * Deletes a previously stored image by its public URL (e.g. "/uploads/abc123.jpg").
+     * No-op if url is null or the file does not exist.
+     */
+    public void delete(String url) {
+        if (url == null) {
+            return;
+        }
+        String prefix = "/uploads/";
+        if (!url.startsWith(prefix)) {
+            log.warn("Unrecognized image URL format, skipping delete: {}", url);
+            return;
+        }
+        String filename = url.substring(prefix.length());
+        Path target = uploadDir.resolve(filename);
+        try {
+            Files.deleteIfExists(target);
+            log.info("Deleted image: {}", target);
+        } catch (IOException e) {
+            log.warn("Could not delete image file {}: {}", target, e.getMessage());
+        }
+    }
 }

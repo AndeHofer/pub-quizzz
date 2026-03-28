@@ -33,6 +33,9 @@ public class Hint {
     @NotNull
     private String hintText;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "image_url_at_start")
+    private String imageUrlAtStart;
+
+    @Column(name = "image_url_as_hint")
+    private String imageUrlAsHint;
 }

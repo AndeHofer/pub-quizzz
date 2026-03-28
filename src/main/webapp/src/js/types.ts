@@ -1,6 +1,7 @@
 export interface HintDTO {
     hintText: string | null;
-    imageUrl?: string | null;
+    imageUrlAtStart?: string | null;
+    imageUrlAsHint?: string | null;
 }
 
 export interface QuestionDTO {
@@ -9,7 +10,6 @@ export interface QuestionDTO {
     answer: string;
     note: string | null;
     hints: HintDTO[];
-    imageUrl?: string | null;
 }
 
 export interface QuizDTO {

@@ -27,6 +27,7 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final ResultRepository resultRepository;
     private final QuizMapper quizMapper;
+    private final ImageStorageService imageStorageService;
 
     @Transactional(readOnly = true)
     public List<QuizDTO> getAllQuizzes() {
@@ -84,6 +85,13 @@ public class QuizService {
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : quiz.getPubDate());
         quiz.setTitle(request.getTitle() != null ? request.getTitle() : quiz.getTitle());
 
+        // Snapshot old image URLs before clearing questions
+        List<String> oldImageUrls = quiz.getQuestions().stream()
+                .flatMap(q -> q.getHints().stream())
+                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .filter(url -> url != null)
+                .toList();
+
         // Remove all existing questions first (cascade will remove hints)
         quiz.getQuestions().clear();
         quizRepository.flush(); // Ensure deletes are done before adding new
@@ -91,6 +99,10 @@ public class QuizService {
         applyQuestionsToQuiz(quiz, request.getQuestions());
 
         quizRepository.save(quiz);
+
+        // Delete old image files from disk after successful save
+        oldImageUrls.forEach(imageStorageService::delete);
+
         log.info("Quiz {} fully updated successfully", id);
         return quizMapper.toDTO(quiz);
     }
@@ -126,7 +138,8 @@ public class QuizService {
         for (CreateQuizRequest.HintData hd : hintDataList) {
             Hint h = new Hint();
             h.setHintText(hd.getHintText());
-            h.setImageUrl(hd.getImageUrl());
+            h.setImageUrlAtStart(hd.getImageUrlAtStart());
+            h.setImageUrlAsHint(hd.getImageUrlAsHint());
             hints.add(h);
         }
         return hints;

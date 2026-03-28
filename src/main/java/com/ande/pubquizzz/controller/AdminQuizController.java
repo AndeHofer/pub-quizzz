@@ -91,11 +91,18 @@ public class AdminQuizController {
     private void injectImageUrls(CreateQuizRequest request, Map<String, MultipartFile> allFiles) {
         for (CreateQuizRequest.QuestionData qd : request.getQuestions()) {
             for (int j = 0; j < qd.getHints().size(); j++) {
-                String partName = "hint_image_q" + qd.getNumber() + "_h" + (j + 1);
-                MultipartFile file = allFiles.get(partName);
-                if (file != null && !file.isEmpty()) {
-                    String url = imageStorageService.store(file);
-                    qd.getHints().get(j).setImageUrl(url);
+                int q = qd.getNumber();
+                int h = j + 1;
+                CreateQuizRequest.HintData hint = qd.getHints().get(j);
+
+                MultipartFile atStart = allFiles.get("hint_atstart_q" + q + "_h" + h);
+                if (atStart != null && !atStart.isEmpty()) {
+                    hint.setImageUrlAtStart(imageStorageService.store(atStart));
+                }
+
+                MultipartFile asHint = allFiles.get("hint_ashint_q" + q + "_h" + h);
+                if (asHint != null && !asHint.isEmpty()) {
+                    hint.setImageUrlAsHint(imageStorageService.store(asHint));
                 }
             }
         }

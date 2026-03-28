@@ -3,6 +3,7 @@ package com.ande.pubquizzz.service;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.mapper.QuizMapper;
+import com.ande.pubquizzz.service.ImageStorageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -24,6 +25,9 @@ class QuizServiceDeleteTest {
 
     @Mock
     private QuizMapper quizMapper;
+
+    @Mock
+    private ImageStorageService imageStorageService;
 
     @InjectMocks
     private QuizService quizService;

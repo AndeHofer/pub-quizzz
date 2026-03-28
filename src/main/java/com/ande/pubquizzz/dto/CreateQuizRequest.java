@@ -44,6 +44,7 @@ public class CreateQuizRequest {
     @Data
     public static class HintData {
         private String hintText;
-        private String imageUrl;
+        private String imageUrlAtStart;
+        private String imageUrlAsHint;
     }
 }

@@ -64,11 +64,19 @@ function populateFormForEdit(quiz: QuizDTO) {
                     if (hintInput && h.hintText) {
                         hintInput.value = h.hintText;
                     }
-                    // Show existing image if present
-                    if (h.imageUrl) {
-                        const preview = document.getElementById(`preview_q${qNum}_${hNum}`) as HTMLImageElement | null;
+                    // Show existing "am Anfang" image if present
+                    if (h.imageUrlAtStart) {
+                        const preview = document.getElementById(`preview_atstart_q${qNum}_h${hNum}`) as HTMLImageElement | null;
                         if (preview) {
-                            preview.src = h.imageUrl;
+                            preview.src = h.imageUrlAtStart;
+                            preview.style.display = 'block';
+                        }
+                    }
+                    // Show existing "als Hinweis" image if present
+                    if (h.imageUrlAsHint) {
+                        const preview = document.getElementById(`preview_ashint_q${qNum}_h${hNum}`) as HTMLImageElement | null;
+                        if (preview) {
+                            preview.src = h.imageUrlAsHint;
                             preview.style.display = 'block';
                         }
                     }
@@ -91,9 +99,14 @@ if (questionsContainer) {
                 <div class="field-group">
                     <label>Hinweis ${i}.${j}:</label>
                     <input type="text" id="hint${i}_${j}" placeholder="Text (optional)">
-                    <input type="file" id="hint_image_q${i}_h${j}" accept="image/*"
-                           onchange="previewHintImage(this, 'preview_q${i}_h${j}')">
-                    <img id="preview_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
+                    <label style="font-size:0.85em; margin-top:4px;">Bild: Am Anfang</label>
+                    <input type="file" id="hint_atstart_q${i}_h${j}" accept="image/*"
+                           onchange="previewHintImage(this, 'preview_atstart_q${i}_h${j}')">
+                    <img id="preview_atstart_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
+                    <label style="font-size:0.85em; margin-top:4px;">Bild: Als Hinweis</label>
+                    <input type="file" id="hint_ashint_q${i}_h${j}" accept="image/*"
+                           onchange="previewHintImage(this, 'preview_ashint_q${i}_h${j}')">
+                    <img id="preview_ashint_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
                 </div>`;
         }
 
@@ -130,7 +143,7 @@ if (quizForm) {
                 questionText: string;
                 answer: string;
                 note: string | null;
-                hints: { hintText: string | null; imageUrl: null }[]
+                hints: { hintText: string | null; imageUrlAtStart: null; imageUrlAsHint: null }[]
             }[]
         } = {
             title: (document.getElementById('quizTitle') as HTMLInputElement).value || null,
@@ -143,18 +156,25 @@ if (quizForm) {
         // Collect all 8 questions
         for (let i = 1; i <= 8; i++) {
             const numHints = i <= 4 ? 4 : 3;
-            const hints: { hintText: string | null; imageUrl: null }[] = [];
+            const hints: { hintText: string | null; imageUrlAtStart: null; imageUrlAsHint: null }[] = [];
 
             for (let j = 1; j <= numHints; j++) {
                 hints.push({
                     hintText: (document.getElementById(`hint${i}_${j}`) as HTMLInputElement).value || null,
-                    imageUrl: null  // will be set by backend after file save
+                    imageUrlAtStart: null,  // will be set by backend after file save
+                    imageUrlAsHint: null    // will be set by backend after file save
                 });
 
-                // Attach image file if selected
-                const fileInput = document.getElementById(`hint_image_q${i}_h${j}`) as HTMLInputElement;
-                if (fileInput && fileInput.files && fileInput.files[0]) {
-                    formData.append(`hint_image_q${i}_h${j}`, fileInput.files[0]);
+                // Attach "am Anfang" image file if selected
+                const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement;
+                if (atStartInput && atStartInput.files && atStartInput.files[0]) {
+                    formData.append(`hint_atstart_q${i}_h${j}`, atStartInput.files[0]);
+                }
+
+                // Attach "als Hinweis" image file if selected
+                const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement;
+                if (asHintInput && asHintInput.files && asHintInput.files[0]) {
+                    formData.append(`hint_ashint_q${i}_h${j}`, asHintInput.files[0]);
                 }
             }
 
@@ -192,7 +212,7 @@ if (quizForm) {
                             // Clear form immediately after successful save
                             quizForm.reset();
                             // Clear image previews
-                            document.querySelectorAll('img[id^="preview_q"]').forEach(img => {
+                            document.querySelectorAll('img[id^="preview_"]').forEach(img => {
                                 (img as HTMLImageElement).src = '';
                                 (img as HTMLImageElement).style.display = 'none';
                             });
@@ -238,4 +258,3 @@ function previewHintImage(input: HTMLInputElement, previewId: string) {
         preview.style.display = 'none';
     }
 }
-

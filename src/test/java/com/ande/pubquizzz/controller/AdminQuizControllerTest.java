@@ -22,11 +22,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.mock.web.MockMultipartFile;
+
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -178,5 +181,101 @@ class AdminQuizControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"pubDate\":\"2024-01-01\"}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void createQuiz_withAtStartImage_storesImageAndReturnsOk() throws Exception {
+        MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
+        MockMultipartFile imagePart = new MockMultipartFile("hint_atstart_q1_h1", "start.jpg", "image/jpeg", "imgdata".getBytes());
+
+        when(imageStorageService.store(imagePart)).thenReturn("/uploads/start.jpg");
+
+        mockMvc.perform(multipart("/admin/create-quiz")
+                        .file(quizPart)
+                        .file(imagePart)
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void createQuiz_withAsHintImage_storesImageAndReturnsOk() throws Exception {
+        MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
+        MockMultipartFile imagePart = new MockMultipartFile("hint_ashint_q1_h1", "hint.jpg", "image/jpeg", "imgdata".getBytes());
+
+        when(imageStorageService.store(imagePart)).thenReturn("/uploads/hint.jpg");
+
+        mockMvc.perform(multipart("/admin/create-quiz")
+                        .file(quizPart)
+                        .file(imagePart)
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateQuizFull_withAtStartImage_storesImageAndReturnsOk() throws Exception {
+        MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
+        MockMultipartFile imagePart = new MockMultipartFile("hint_atstart_q2_h3", "q2h3.jpg", "image/jpeg", "data".getBytes());
+
+        when(imageStorageService.store(imagePart)).thenReturn("/uploads/q2h3.jpg");
+        when(quizService.updateQuizFull(anyLong(), org.mockito.ArgumentMatchers.any())).thenReturn(new com.ande.pubquizzz.dto.QuizDTO());
+
+        mockMvc.perform(multipart("/admin/quiz/1")
+                        .file(quizPart)
+                        .file(imagePart)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateQuizFull_withOldPartName_doesNotStoreImage() throws Exception {
+        MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
+        // Old part name format — should be ignored (not matched by new handler)
+        MockMultipartFile imagePart = new MockMultipartFile("hint_image_q1_h1", "old.jpg", "image/jpeg", "data".getBytes());
+
+        when(quizService.updateQuizFull(anyLong(), org.mockito.ArgumentMatchers.any())).thenReturn(new com.ande.pubquizzz.dto.QuizDTO());
+
+        mockMvc.perform(multipart("/admin/quiz/1")
+                        .file(quizPart)
+                        .file(imagePart)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        // imageStorageService.store() must NOT have been called
+        org.mockito.Mockito.verify(imageStorageService, org.mockito.Mockito.never()).store(org.mockito.ArgumentMatchers.any());
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────────────
+
+    private String buildMinimalQuizJson() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"pubDate\":\"2026-01-01\",\"questions\":[");
+        for (int q = 1; q <= 8; q++) {
+            if (q > 1) sb.append(",");
+            int hintCount = q <= 4 ? 4 : 3;
+            sb.append("{\"number\":").append(q)
+                    .append(",\"questionText\":\"Q").append(q).append("\"")
+                    .append(",\"answer\":\"A").append(q).append("\"")
+                    .append(",\"note\":\"\"")
+                    .append(",\"hints\":[");
+            for (int h = 1; h <= hintCount; h++) {
+                if (h > 1) sb.append(",");
+                sb.append("{\"hintText\":\"hint").append(h).append("\"}");
+            }
+            sb.append("]}");
+        }
+        sb.append("]}");
+        return sb.toString();
     }
 }

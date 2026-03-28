@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Verifies that Hint entities (hintOrder, imageUrl, hintText) are persisted and
+ * Verifies that Hint entities (hintOrder, imageUrlAtStart, imageUrlAsHint, hintText) are persisted and
  * loaded correctly — the core of today's entity model change.
  */
 @ActiveProfiles("test")
@@ -81,10 +81,10 @@ public class HintPersistenceTest {
     }
 
     @Test
-    void imageUrlIsPersistedWhenSet() {
+    void imageUrlAtStartIsPersistedWhenSet() {
         Hint h1 = new Hint();
         h1.setHintText("a clue");
-        h1.setImageUrl("/uploads/test-image.jpg");
+        h1.setImageUrlAtStart("/uploads/start-image.jpg");
 
         Hint h2 = new Hint(); h2.setHintText("h2");
         Hint h3 = new Hint(); h3.setHintText("h3");
@@ -96,17 +96,67 @@ public class HintPersistenceTest {
         Quiz loaded = quizRepository.findById(quiz.getQuizId()).orElseThrow();
         Hint savedFirstHint = loaded.getQuestions().get(0).getHints().get(0);
 
-        assertEquals("/uploads/test-image.jpg", savedFirstHint.getImageUrl());
+        assertEquals("/uploads/start-image.jpg", savedFirstHint.getImageUrlAtStart());
+        assertNull(savedFirstHint.getImageUrlAsHint());
         assertEquals("a clue", savedFirstHint.getHintText());
     }
 
     @Test
-    void hintWithoutImageUrlHasNullImageUrl() {
+    void imageUrlAsHintIsPersistedWhenSet() {
+        Hint h1 = new Hint();
+        h1.setHintText("a clue");
+        h1.setImageUrlAsHint("/uploads/hint-image.png");
+
+        Hint h2 = new Hint();
+        h2.setHintText("h2");
+        Hint h3 = new Hint();
+        h3.setHintText("h3");
+        Hint h4 = new Hint();
+        h4.setHintText("h4");
+
+        Quiz quiz = quizWithHintsOnFirstQuestion(List.of(h1, h2, h3, h4));
+        quizRepository.save(quiz);
+
+        Quiz loaded = quizRepository.findById(quiz.getQuizId()).orElseThrow();
+        Hint savedFirstHint = loaded.getQuestions().get(0).getHints().get(0);
+
+        assertNull(savedFirstHint.getImageUrlAtStart());
+        assertEquals("/uploads/hint-image.png", savedFirstHint.getImageUrlAsHint());
+    }
+
+    @Test
+    void bothImageUrlsAreNullWhenNotSet() {
         List<Hint> hints = textHints("only text", "h2", "h3", "h4");
         Quiz quiz = quizWithHintsOnFirstQuestion(hints);
         quizRepository.save(quiz);
 
         Quiz loaded = quizRepository.findById(quiz.getQuizId()).orElseThrow();
-        assertNull(loaded.getQuestions().get(0).getHints().get(0).getImageUrl());
+        Hint savedFirstHint = loaded.getQuestions().get(0).getHints().get(0);
+        assertNull(savedFirstHint.getImageUrlAtStart());
+        assertNull(savedFirstHint.getImageUrlAsHint());
+    }
+
+    @Test
+    void bothImageUrlsCanBeSetOnSameHint() {
+        Hint h1 = new Hint();
+        h1.setHintText("double image");
+        h1.setImageUrlAtStart("/uploads/start.jpg");
+        h1.setImageUrlAsHint("/uploads/hint.jpg");
+
+        Hint h2 = new Hint();
+        h2.setHintText("h2");
+        Hint h3 = new Hint();
+        h3.setHintText("h3");
+        Hint h4 = new Hint();
+        h4.setHintText("h4");
+
+        Quiz quiz = quizWithHintsOnFirstQuestion(List.of(h1, h2, h3, h4));
+        quizRepository.save(quiz);
+
+        Quiz loaded = quizRepository.findById(quiz.getQuizId()).orElseThrow();
+        Hint saved = loaded.getQuestions().get(0).getHints().get(0);
+
+        assertEquals("/uploads/start.jpg", saved.getImageUrlAtStart());
+        assertEquals("/uploads/hint.jpg", saved.getImageUrlAsHint());
     }
 }

@@ -368,3 +368,84 @@ Same root cause as Phase 12: deleting a quiz with existing results caused a FK v
 - TypeScript files without `import`/`export` are treated as global scripts — duplicate functions cause TS errors; fix
   with `export {}`
 - LSP errors in editor are Lombok false-positives; Maven compilation is the source of truth
+
+## Phase 14: Add Optional Title Field to Quiz ✅ COMPLETE
+
+### Goal
+
+Allow admins to give quizzes a human-readable title (e.g. "2026 Jänner") for display in the admin UI dropdown and quiz
+list.
+
+### Changes
+
+- `Quiz.java`: `@Column(nullable = true) private String title`
+- `QuizDTO.java`, `QuizDetailDTO.java`: `private String title`
+- `CreateQuizRequest.java`: `private String title` (optional)
+- `QuizService.java`: sets title in `createQuiz()` and `updateQuizFull()`
+- `types.ts`: `title?: string` in `QuizDTO`
+- `create_quiz.html`: Titel text input above pubDate
+- `create_quiz.ts`: reads/populates title field
+- `admin_functions.ts`: `quizDisplayTitle()` helper + `GERMAN_MONTHS` array; Titel column in quiz list; quiz dropdown
+  uses display title
+- `AdminQuizControllerTest`: 2 new title tests
+
+### Verification
+
+- Backend: 87/87 tests passing (`mvn.cmd clean test`)
+- Frontend: 0 type errors (`npm run type-check`)
+
+## Phase 15: Two Images Per Hint (`imageUrlAtStart` + `imageUrlAsHint`) ✅ COMPLETE
+
+### Goal
+
+Replace the single optional `imageUrl` per `Hint` with two distinct optional images:
+
+- `imageUrlAtStart` — shown when the question is first displayed
+- `imageUrlAsHint` — shown when the hint is revealed
+
+Both are optional and nullable. Old image files are deleted from disk when a quiz is fully updated.
+
+### Changes
+
+#### Backend
+
+- `Hint.java`: removed `imageUrl`; added `imageUrlAtStart` (`image_url_at_start`) and `imageUrlAsHint` (
+  `image_url_as_hint`), both `@Column(nullable = true)`
+- `QuizDetailDTO.HintDetailDTO`: replaced `imageUrl` with `imageUrlAtStart` + `imageUrlAsHint`
+- `CreateQuizRequest.HintData`: replaced `imageUrl` with `imageUrlAtStart` + `imageUrlAsHint`
+- `QuizService.buildHints()`: sets both new fields from `HintData`
+- `QuizService`: added `ImageStorageService` dependency; `updateQuizFull()` snapshots all old image URLs before
+  `questions.clear()`, then calls `imageStorageService.delete()` for each after save
+- `AdminQuizController.injectImageUrls()`: two part names per hint slot — `hint_atstart_q{q}_h{h}` and
+  `hint_ashint_q{q}_h{h}`
+- `ImageStorageService`: added `delete(String url)` — resolves filename from `/uploads/<name>`, calls
+  `Files.deleteIfExists()`; no-op for null or unrecognised URL format
+
+#### Frontend
+
+- `types.ts` `HintDTO`: replaced `imageUrl?` with `imageUrlAtStart?` + `imageUrlAsHint?`; removed stale `imageUrl?` from
+  `QuestionDTO`
+- `create_quiz.ts`: two file inputs per hint ("Bild: Am Anfang", "Bild: Als Hinweis"), each with preview `<img>`;
+  updated `populateFormForEdit` and form submit to use new field names and part names
+
+#### Tests (+11 new)
+
+- `ImageStorageServiceTest`: 3 new tests for `delete()` (removes file, no-op for null, no-op for missing file) — 9 total
+- `HintPersistenceTest`: replaced 2 old `imageUrl` tests with 4 new tests covering `imageUrlAtStart`, `imageUrlAsHint`,
+  both null, both set — 6 total
+- `QuizServiceUpdateTest` (new): 2 unit tests verifying `imageStorageService.delete()` is called with old URLs on
+  `updateQuizFull()`
+- `QuizServiceDeleteTest`: added `@Mock ImageStorageService imageStorageService` (required by new constructor
+  dependency)
+- `AdminQuizControllerTest`: 4 new multipart tests (atStart image, asHint image, PUT with new part names, old part name
+  ignored)
+
+### Schema note
+
+Hibernate `ddl-auto=update` adds the two new nullable columns on next startup. The orphaned `image_url` column is left
+in place (harmless on H2).
+
+### Verification
+
+- Backend: 98/98 tests passing (`mvn.cmd clean test`)
+- Frontend: 0 type errors (`npm run type-check`)

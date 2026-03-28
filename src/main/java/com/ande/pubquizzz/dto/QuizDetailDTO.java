@@ -25,6 +25,7 @@ public class QuizDetailDTO {
     @Data
     public static class HintDetailDTO {
         private String hintText;
-        private String imageUrl;
+        private String imageUrlAtStart;
+        private String imageUrlAsHint;
     }
 }

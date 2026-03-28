@@ -84,4 +84,32 @@ public class ImageStorageServiceTest {
 
         assertNotEquals(url1, url2, "Each upload should produce a unique URL");
     }
+
+    @Test
+    void delete_removesFileFromDisk() throws IOException {
+        ImageStorageService svc = service();
+        MockMultipartFile file = new MockMultipartFile("file", "del.jpg", "image/jpeg", "data".getBytes());
+        String url = svc.store(file);
+
+        String filename = url.substring("/uploads/".length());
+        assertTrue(Files.exists(tempDir.resolve(filename)), "File should exist before delete");
+
+        svc.delete(url);
+
+        assertFalse(Files.exists(tempDir.resolve(filename)), "File should be gone after delete");
+    }
+
+    @Test
+    void delete_withNullUrl_doesNothing() throws IOException {
+        ImageStorageService svc = service();
+        // Should not throw
+        assertDoesNotThrow(() -> svc.delete(null));
+    }
+
+    @Test
+    void delete_withMissingFile_doesNotThrow() throws IOException {
+        ImageStorageService svc = service();
+        // File was never stored — should silently succeed
+        assertDoesNotThrow(() -> svc.delete("/uploads/nonexistent-file.jpg"));
+    }
 }
