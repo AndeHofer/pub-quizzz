@@ -4,6 +4,7 @@ import com.ande.pubquizzz.database.entities.Team;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.TeamDTO;
 import com.ande.pubquizzz.exception.BusinessValidationException;
+import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.mapper.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,20 @@ public class TeamService {
         team.setTeamName(teamName);
         teamRepository.save(team);
         log.info("Team '{}' created successfully", teamName);
+        return teamMapper.toDTO(team);
+    }
+
+    @Transactional
+    public TeamDTO renameTeam(Long id, String newName) {
+        log.info("Renaming team with ID: {} to '{}'", id, newName);
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Team nicht gefunden: " + id));
+        if (!team.getTeamName().equals(newName) && teamRepository.existsByTeamName(newName)) {
+            throw new BusinessValidationException("Team name already exists");
+        }
+        team.setTeamName(newName);
+        teamRepository.save(team);
+        log.info("Team {} renamed to '{}' successfully", id, newName);
         return teamMapper.toDTO(team);
     }
 

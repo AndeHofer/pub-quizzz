@@ -2,6 +2,7 @@ package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.CreateTeamRequest;
 import com.ande.pubquizzz.dto.TeamDTO;
+import com.ande.pubquizzz.dto.UpdateTeamRequest;
 import com.ande.pubquizzz.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +43,11 @@ public class AdminTeamController {
     public ResponseEntity<String> createTeam(@RequestBody @Valid CreateTeamRequest request) {
         teamService.createTeam(request.getTeamName());
         return ResponseEntity.ok("Team created successfully");
+    }
+
+    @PutMapping("/team/{id}")
+    public ResponseEntity<TeamDTO> renameTeam(@PathVariable Long id, @RequestBody @Valid UpdateTeamRequest request) {
+        return ResponseEntity.ok(teamService.renameTeam(id, request.getTeamName()));
     }
 
     @DeleteMapping("/team/{id}")
