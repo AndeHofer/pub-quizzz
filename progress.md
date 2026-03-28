@@ -126,6 +126,10 @@
 - Created `leaderboard.html` and `leaderboard.ts`
 - Workaround: medal emojis use `\uD83E\uDD47` Unicode escapes (Rolldown panics on emoji in template literals)
 
+### Task 7: Home Page Nav Hub ✅ COMMITTED
+- `index.html` replaced with card-based navigation hub (Gesamtrangliste + hidden Admin Panel card)
+- `index.ts` simplified — only reveals admin card via `/api/is-admin`; removed old `goToAdmin` function
+
 
 
 ## Key Discoveries
