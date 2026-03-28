@@ -266,8 +266,9 @@ function buildAddResultForm() {
         });
     }
     let inputs = '';
+    const pointOptions = [5, 3, 2, 1, 0].map(v => `<option value="${v}"${v === 0 ? ' selected' : ''}>${v}</option>`).join('');
     for (let i = 1; i <= 8; i++) {
-        inputs += `<div class="form-row"><label>Frage ${i} Punkte</label><input type="number" id="add-result-q${i}" min="0" value="0"></div>`;
+        inputs += `<div class="form-row"><label>Frage ${i} Punkte</label><select id="add-result-q${i}">${pointOptions}</select></div>`;
     }
     return `
       <div id="add-result-form">
