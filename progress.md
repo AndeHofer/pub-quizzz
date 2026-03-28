@@ -449,3 +449,57 @@ in place (harmless on H2).
 
 - Backend: 98/98 tests passing (`mvn.cmd clean test`)
 - Frontend: 0 type errors (`npm run type-check`)
+
+---
+
+## Phase 16: Backup/Restore ✅ COMPLETE
+
+### Design
+
+- Export: H2 `SCRIPT TO` SQL dump + upload files zipped via `ZipOutputStream` + `StreamingResponseBody`
+- Import: staged to `app.backup.restore-dir` on disk — requires manual application restart to apply
+- Restore applied on `ApplicationStartedEvent` (before Tomcat accepts HTTP) by `BackupRestoreListener`
+- `DROP ALL OBJECTS DELETE FILES` then `RUNSCRIPT FROM` to restore DB
+- Single-pass ZIP extraction: validates + extracts simultaneously; cleans up on failure
+
+### ZIP structure
+
+```
+pubquizzz-backup-YYYY-MM-DD.zip
+├── database.sql
+└── uploads/
+    └── <files>
+```
+
+### API
+
+- `GET /admin/backup/export` → `application/zip` download
+- `POST /admin/backup/import` (multipart `file`) → `200 text/plain` German confirmation message
+
+### New Files
+
+- `BackupService.java` — `createBackup()` + `stageRestore()`
+- `AdminBackupController.java` — export + import endpoints
+- `BackupRestoreListener.java` — `ApplicationStartedEvent` hook
+- `BackupServiceTest.java` — 6 unit tests
+- `AdminBackupControllerTest.java` — 5 controller tests
+
+### Modified Files
+
+- `application.properties` — `app.backup.restore-dir=/data/pending-restore`
+- `application-test.properties` — `app.backup.restore-dir=${java.io.tmpdir}/pending-restore-test`
+- `admin_main.html` — "Datenbank-Backup" section with export button, import form
+- `admin_functions.ts` — `exportBackup()` + `importBackup()` functions
+
+### Commits
+
+- `7ea3d20` — BackupService (GREEN)
+- `5336fec` — AdminBackupController (GREEN)
+- `fba0ac3` — BackupRestoreListener
+- `48408c9` — properties
+- `ab55678` — frontend UI
+
+### Verification
+
+- Backend: 109/109 tests passing (`mvn.cmd clean test`)
+- Frontend: 0 type errors (`npm run type-check`)
