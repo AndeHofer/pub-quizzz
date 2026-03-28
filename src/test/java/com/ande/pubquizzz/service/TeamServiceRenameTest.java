@@ -1,6 +1,7 @@
 package com.ande.pubquizzz.service;
 
 import com.ande.pubquizzz.database.entities.Team;
+import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.TeamDTO;
 import com.ande.pubquizzz.exception.BusinessValidationException;
@@ -23,6 +24,9 @@ class TeamServiceRenameTest {
 
     @Mock
     private TeamRepository teamRepository;
+
+    @Mock
+    private ResultRepository resultRepository;
 
     @Mock
     private TeamMapper teamMapper;

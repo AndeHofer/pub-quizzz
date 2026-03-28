@@ -1,6 +1,7 @@
 package com.ande.pubquizzz.service;
 
 import com.ande.pubquizzz.database.entities.Team;
+import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.TeamDTO;
 import com.ande.pubquizzz.exception.BusinessValidationException;
@@ -20,6 +21,7 @@ import java.util.Optional;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final ResultRepository resultRepository;
     private final TeamMapper teamMapper;
 
     @Transactional(readOnly = true)
@@ -69,6 +71,7 @@ public class TeamService {
         if (!teamRepository.existsById(id)) {
             return false;
         }
+        resultRepository.deleteByTeamTeamsId(id);
         teamRepository.deleteById(id);
         log.info("Team {} deleted successfully", id);
         return true;

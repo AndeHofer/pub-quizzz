@@ -2,7 +2,7 @@
 
 @layer components {
     body {
-        @apply font-sans mt-[50px] bg-gray-100;
+        @apply font-sans mt-[50px] bg-gray-50;
     }
 
     .container {
@@ -18,7 +18,7 @@
     }
 
     h2 {
-        @apply text-gray-600 mt-[30px] border-b-2 border-green-500 pb-[10px];
+        @apply text-gray-600 mt-[30px] border-b-2 border-gray-200 pb-[10px];
     }
 
     .section {
@@ -32,20 +32,20 @@
 
     button,
     .admin-btn {
-        @apply bg-green-500 text-white px-5 py-3 border-0 rounded cursor-pointer text-base my-[10px];
+        @apply bg-gray-700 text-white px-5 py-3 border-0 rounded cursor-pointer text-base my-[10px];
     }
 
     button:hover,
     .admin-btn:hover {
-        @apply bg-green-600;
+        @apply bg-gray-800;
     }
 
     .secondary-btn {
-        @apply bg-blue-500;
+        @apply bg-gray-500;
     }
 
     .secondary-btn:hover {
-        @apply bg-blue-700;
+        @apply bg-gray-600;
     }
 
     .danger-btn {
@@ -112,7 +112,7 @@
     }
 
     th {
-        @apply bg-green-500 text-white;
+        @apply bg-gray-100 text-gray-700;
     }
 
     tr:hover {

@@ -63,6 +63,40 @@ class AdminQuizControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    void getAllQuizzes_withTitle_returnsTitleInResponse() throws Exception {
+        QuizDTO dto = new QuizDTO();
+        dto.setQuizId(5L);
+        dto.setPubDate(LocalDate.of(2026, 3, 4));
+        dto.setSubmitDate(LocalDate.of(2026, 3, 4));
+        dto.setQuestionCount(8);
+        dto.setTitle("2026 März");
+
+        when(quizService.getAllQuizzes()).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/admin/quizzes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("2026 März"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void getQuizById_withTitle_returnsTitleInResponse() throws Exception {
+        QuizDTO dto = new QuizDTO();
+        dto.setQuizId(7L);
+        dto.setPubDate(LocalDate.of(2026, 4, 1));
+        dto.setSubmitDate(LocalDate.of(2026, 4, 1));
+        dto.setQuestionCount(8);
+        dto.setTitle("2026 April");
+
+        when(quizService.getQuizById(7L)).thenReturn(Optional.of(dto));
+
+        mockMvc.perform(get("/admin/quiz/7"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("2026 April"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void getQuizById_whenFound_returnsQuiz() throws Exception {
         QuizDTO dto = new QuizDTO();
         dto.setQuizId(2L);

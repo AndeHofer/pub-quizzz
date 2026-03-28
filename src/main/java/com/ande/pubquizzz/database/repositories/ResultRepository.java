@@ -18,6 +18,10 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     @Query("SELECT r FROM Result r JOIN FETCH r.answers JOIN FETCH r.team JOIN FETCH r.quiz WHERE r.resultsId = :id")
     Optional<Result> findByIdWithAnswers(Long id);
 
+    void deleteByTeamTeamsId(Long teamId);
+
+    void deleteByQuizQuizId(Long quizId);
+
     @Query("""
             SELECT t.teamName,
                    COALESCE(SUM(ra.points), 0),

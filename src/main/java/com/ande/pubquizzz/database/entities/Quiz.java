@@ -30,6 +30,9 @@ public class Quiz {
     @NotNull
     private LocalDate submitDate;
 
+    @Column(nullable = true)
+    private String title;
+
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("id.questionNumber ASC")
     @ToString.Exclude

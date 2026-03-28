@@ -32,6 +32,7 @@ public class CreateResultRequest {
         private int questionNumber;
 
         @Min(value = 0, message = "Punkte müssen >= 0 sein")
+        @Max(value = 5, message = "Punkte dürfen maximal 5 sein")
         private int points;
     }
 }

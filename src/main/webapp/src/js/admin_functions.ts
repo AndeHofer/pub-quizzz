@@ -79,6 +79,24 @@ window.addEventListener('load', () => {
 
 // ==================== Quiz Management ====================
 
+const GERMAN_MONTHS = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+function quizDisplayTitle(quiz: QuizDTO): string {
+    if (quiz.title) return quiz.title;
+    if (quiz.pubDate) {
+        const parts = quiz.pubDate.split('-');
+        if (parts.length >= 2) {
+            const year = parts[0];
+            const month = parseInt(parts[1], 10);
+            if (month >= 1 && month <= 12) {
+                return `${year} ${GERMAN_MONTHS[month - 1]}`;
+            }
+        }
+    }
+    return `Quiz ${quiz.quizId}`;
+}
+
 async function viewQuizzes() {
     showModal('Alle Quizze', showLoading());
     try {
@@ -88,10 +106,10 @@ async function viewQuizzes() {
             showModal('Alle Quizze', '<p>Keine Quizze gefunden.</p>');
             return;
         }
-        const headers = ['ID', 'Veröffentlicht am', 'Abgabedatum', 'Fragen', 'Aktionen'];
+        const headers = ['ID', 'Titel', 'Veröffentlicht am', 'Abgabedatum', 'Fragen', 'Aktionen'];
         const html = renderTable(headers, quizzes, (quiz: unknown) => {
             const q = quiz as QuizDTO;
-            return [`${q.quizId}`, `${q.pubDate}`, `${q.submitDate}`, `${q.questionCount}`, `
+            return [`${q.quizId}`, quizDisplayTitle(q), `${q.pubDate}`, `${q.submitDate}`, `${q.questionCount}`, `
                 <button class="icon-btn" onclick="editQuiz(${q.quizId})" title="Quiz bearbeiten">✏️</button>
                 <button class="icon-btn" onclick="deleteQuiz(${q.quizId})" title="Quiz löschen">🗑️</button>
             `];
@@ -117,7 +135,7 @@ async function editQuiz(quizId: number) {
 }
 
 async function deleteQuiz(quizId: number) {
-    if (!confirm(`Quiz ${quizId} wirklich löschen? Dies kann nicht rückgängig gemacht werden!`)) return;
+    if (!confirm(`Quiz ${quizId} wirklich löschen?\n\nACHTUNG: Alle Ergebnisse dieses Quiz werden unwiderruflich gelöscht!`)) return;
     try {
         const response = await fetch(`${API_BASE}/quiz/${quizId}`, {method: 'DELETE'});
         if (response.ok) {
@@ -192,7 +210,7 @@ async function viewTeams() {
 }
 
 async function deleteTeam(teamId: number, teamName: string) {
-    if (!confirm(`Team "${teamName}" wirklich löschen?`)) return;
+    if (!confirm(`Team "${teamName}" wirklich löschen?\n\nACHTUNG: Alle Ergebnisse dieses Teams werden unwiderruflich gelöscht!`)) return;
     try {
         const response = await fetch(`${API_BASE}/team/${teamId}`, {method: 'DELETE'});
         if (response.ok) {
@@ -386,7 +404,7 @@ function buildAddResultForm() {
     let quizOptions = '<option value="">-- Quiz auswählen --</option>';
     if (_admin_quizzes_cache) {
         _admin_quizzes_cache.forEach(q => {
-            quizOptions += `<option value="${q.quizId}">ID ${q.quizId} — ${q.pubDate}</option>`;
+            quizOptions += `<option value="${q.quizId}">${quizDisplayTitle(q)}</option>`;
         });
     }
     let inputs = '';

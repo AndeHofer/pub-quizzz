@@ -14,6 +14,7 @@ export interface QuestionDTO {
 
 export interface QuizDTO {
     quizId: number;
+    title?: string;
     quizDate?: string;
     pubDate?: string;
     submitDate?: string;
@@ -40,15 +41,6 @@ export interface ResultDTO {
     quizDate: string;
     totalPoints: number;
     answers: AnswerScoreDTO[];
-}
-
-export interface LeaderboardEntry {
-    rank: number;
-    teamName: string;
-    teamId: number;
-    quizId: number;
-    quizDate: string;
-    totalPoints: number;
 }
 
 export interface UserDTO {

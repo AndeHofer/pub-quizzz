@@ -21,6 +21,12 @@ document.addEventListener('DOMContentLoaded', function () {
 function populateFormForEdit(quiz: QuizDTO) {
     editingQuizId = quiz.quizId;
 
+    // Set the title
+    const titleInput = document.getElementById('quizTitle') as HTMLInputElement | null;
+    if (titleInput) {
+        titleInput.value = quiz.title ?? '';
+    }
+
     // Set the pubDate
     const pubDateInput = document.getElementById('pubDate') as HTMLInputElement | null;
     if (pubDateInput) {
@@ -116,7 +122,8 @@ if (quizForm) {
     quizForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const quizData: { pubDate: string | null; questions: { number: number; questionText: string; answer: string; note: string | null; hints: { hintText: string | null; imageUrl: null }[] }[] } = {
+        const quizData: { title: string | null; pubDate: string | null; questions: { number: number; questionText: string; answer: string; note: string | null; hints: { hintText: string | null; imageUrl: null }[] }[] } = {
+            title: (document.getElementById('quizTitle') as HTMLInputElement).value || null,
             pubDate: (document.getElementById('pubDate') as HTMLInputElement).value || null,
             questions: []
         };

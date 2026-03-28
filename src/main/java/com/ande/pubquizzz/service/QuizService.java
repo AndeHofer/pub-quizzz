@@ -3,6 +3,7 @@ package com.ande.pubquizzz.service;
 import com.ande.pubquizzz.database.entities.Hint;
 import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
+import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class QuizService {
 
     private final QuizRepository quizRepository;
+    private final ResultRepository resultRepository;
     private final QuizMapper quizMapper;
 
     @Transactional(readOnly = true)
@@ -52,6 +54,7 @@ public class QuizService {
         Quiz quiz = new Quiz();
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : LocalDate.now());
         quiz.setSubmitDate(LocalDate.now());
+        quiz.setTitle(request.getTitle());
 
         applyQuestionsToQuiz(quiz, request.getQuestions());
 
@@ -79,6 +82,7 @@ public class QuizService {
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz nicht gefunden: " + id));
 
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : quiz.getPubDate());
+        quiz.setTitle(request.getTitle() != null ? request.getTitle() : quiz.getTitle());
 
         // Remove all existing questions first (cascade will remove hints)
         quiz.getQuestions().clear();
@@ -97,6 +101,7 @@ public class QuizService {
         if (!quizRepository.existsById(id)) {
             return false;
         }
+        resultRepository.deleteByQuizQuizId(id);
         quizRepository.deleteById(id);
         log.info("Quiz {} deleted successfully", id);
         return true;

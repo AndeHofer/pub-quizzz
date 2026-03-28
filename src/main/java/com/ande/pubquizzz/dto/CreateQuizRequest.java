@@ -14,6 +14,8 @@ import java.util.List;
 
 @Data
 public class CreateQuizRequest {
+    private String title;
+
     private LocalDate pubDate;
 
     @NotNull(message = "Fragen dürfen nicht null sein")
