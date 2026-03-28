@@ -55,12 +55,12 @@ public class TeamService {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team nicht gefunden: " + id));
         if (!team.getTeamName().equals(newName) && teamRepository.existsByTeamName(newName)) {
-            throw new BusinessValidationException("Team name already exists");
+            throw new BusinessValidationException("Team-Name bereits vergeben");
         }
         team.setTeamName(newName);
-        teamRepository.save(team);
+        Team saved = teamRepository.save(team);
         log.info("Team {} renamed to '{}' successfully", id, newName);
-        return teamMapper.toDTO(team);
+        return teamMapper.toDTO(saved);
     }
 
     @Transactional

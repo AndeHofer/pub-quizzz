@@ -3,7 +3,6 @@ package com.ande.pubquizzz.database.repositories;
 import com.ande.pubquizzz.database.entities.Result;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,22 +15,8 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
 
     Optional<Result> findByTeam_TeamsIdAndQuiz_QuizId(Long teamId, Long quizId);
 
-    @Query("""
-            SELECT r FROM Result r
-            JOIN FETCH r.team
-            JOIN FETCH r.quiz
-            ORDER BY (SELECT COALESCE(SUM(ra.points), 0) FROM ResultAnswer ra WHERE ra.result = r) DESC
-            """)
-    List<Result> findAllOrderByTotalPointsDesc();
-
-    @Query("""
-            SELECT r FROM Result r
-            JOIN FETCH r.team
-            JOIN FETCH r.quiz
-            WHERE r.quiz.quizId = :quizId
-            ORDER BY (SELECT COALESCE(SUM(ra.points), 0) FROM ResultAnswer ra WHERE ra.result = r) DESC
-            """)
-    List<Result> findByQuizIdOrderByTotalPointsDesc(@Param("quizId") Long quizId);
+    @Query("SELECT r FROM Result r JOIN FETCH r.answers JOIN FETCH r.team JOIN FETCH r.quiz WHERE r.resultsId = :id")
+    Optional<Result> findByIdWithAnswers(Long id);
 
     @Query("""
             SELECT t.teamName,
