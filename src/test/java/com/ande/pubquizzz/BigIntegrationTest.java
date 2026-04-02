@@ -344,6 +344,7 @@ class BigIntegrationTest {
         return list;
     }
 
+    // resourcePath must start with '/' for absolute classpath resolution (e.g. "/pics/foo.jpg")
     private String storeClasspathImage(String resourcePath) throws Exception {
         try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
             if (is == null) throw new IllegalStateException("Test resource not found: " + resourcePath);
