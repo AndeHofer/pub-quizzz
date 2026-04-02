@@ -6,8 +6,10 @@ import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.AllTimeLeaderboardEntry;
+import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.ResultDTO;
+import com.ande.pubquizzz.dto.TeamResultEntry;
 import com.ande.pubquizzz.dto.UpdateResultRequest;
 import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.exception.ResourceNotFoundException;
@@ -124,6 +126,28 @@ public class ResultService {
 
         Result saved = resultRepository.save(result);
         return resultMapper.toDTO(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeamResultEntry> getResultsForTeam(String teamName) {
+        return resultRepository.findByTeamNameOrderByPubDateDesc(teamName)
+                .stream()
+                .map(r -> {
+                    TeamResultEntry entry = new TeamResultEntry();
+                    entry.setQuizDate(r.getQuiz().getPubDate().toString());
+                    entry.setTotalPoints(r.calculateTotalPoints());
+                    entry.setAnswers(r.getAnswers().stream()
+                            .map(a -> {
+                                AnswerScoreDTO dto = new AnswerScoreDTO();
+                                dto.setQuestionNumber(a.getQuestionNumber());
+                                dto.setPoints(a.getPoints());
+                                dto.setChanged(Boolean.TRUE.equals(a.getChanged()));
+                                return dto;
+                            })
+                            .toList());
+                    return entry;
+                })
+                .toList();
     }
 
     private List<Result> loadResults(Long quizId) {

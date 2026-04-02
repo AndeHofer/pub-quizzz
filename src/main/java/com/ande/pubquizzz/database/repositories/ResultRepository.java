@@ -3,6 +3,7 @@ package com.ande.pubquizzz.database.repositories;
 import com.ande.pubquizzz.database.entities.Result;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,4 +34,14 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
             ORDER BY COALESCE(SUM(ra.points), 0) DESC
             """)
     List<Object[]> findAllTimeLeaderboardRaw();
+
+    @Query("""
+        SELECT DISTINCT r FROM Result r
+        JOIN FETCH r.team t
+        JOIN FETCH r.quiz q
+        JOIN FETCH r.answers
+        WHERE t.teamName = :teamName
+        ORDER BY q.pubDate DESC
+    """)
+    List<Result> findByTeamNameOrderByPubDateDesc(@Param("teamName") String teamName);
 }
