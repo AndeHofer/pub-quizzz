@@ -578,3 +578,36 @@ A quiz is **finished** when:
 - Backend: 132/132 tests passing (`.\mvnw.cmd test`)
 - Frontend: build succeeds (`npm run build`), `team.html` + `team-*.js` emitted to `src/main/resources/static/`
 - Two git commits: backend (`feat: add GET /api/teams/{teamName}/results endpoint with tests`) + frontend (`feat: add team detail page with expandable quiz result breakdown`)
+
+---
+
+## Phase 19: Quiz Archive Page ✅ COMPLETE
+
+**Goal:** A new "Quiz Archiv" navigation card on the home page links to `quizzes.html` — a list of all quizzes (title, date, team count) sorted newest-first. Clicking a quiz title navigates to `quiz.html?id=<quizId>` showing a ranked table of teams with total points, plus expandable per-question score breakdown (Olympic-style ranking).
+
+### Backend
+
+- `src/main/resources/openapi/quiz-api.yaml`: OpenAPI spec for `GET /api/quizzes` and `GET /api/quizzes/{quizId}/results`
+- `src/main/java/com/ande/pubquizzz/dto/QuizSummaryDTO.java`: New DTO (`quizId`, `quizTitle`, `pubDate`, `teamCount`)
+- `src/main/java/com/ande/pubquizzz/dto/QuizResultEntry.java`: New DTO (`rank`, `teamName`, `totalPoints`, `answers`)
+- `src/main/java/com/ande/pubquizzz/database/repositories/QuizRepository.java`: Added `findAllWithResultCount()` JPQL query grouping quizzes with result count, ordered by pubDate DESC
+- `src/main/java/com/ande/pubquizzz/database/repositories/ResultRepository.java`: Added `findByQuizIdWithTeamAndAnswers` JPQL query with JOIN FETCH
+- `src/main/java/com/ande/pubquizzz/service/ResultService.java`: Added `getQuizSummaries()` and `getResultsForQuiz(Long quizId)` with Olympic ranking
+- `src/main/java/com/ande/pubquizzz/controller/UserQuizController.java`: New controller with `GET /api/quizzes` and `GET /api/quizzes/{quizId}/results`
+- Tests: `ResultServiceQuizTest` (4 unit tests) + `UserQuizControllerTest` (4 integration tests)
+
+### Frontend
+
+- `src/main/webapp/src/js/types.ts`: Added `QuizSummaryDTO` and `QuizResultEntry` interfaces
+- `src/main/webapp/src/index.html`: Added "Quiz Archiv" navigation card between Gesamtrangliste and Admin Panel
+- `src/main/webapp/vite.config.ts`: Added `quizzes: './quizzes.html'` and `quiz: './quiz.html'` entries
+- `src/main/webapp/src/quizzes.html`: New quiz list page HTML (mobile-first Tailwind)
+- `src/main/webapp/src/js/quizzes.ts`: Fetch + render logic for quiz list
+- `src/main/webapp/src/quiz.html`: New quiz results page HTML with rank, team, points, details columns
+- `src/main/webapp/src/js/quiz.ts`: Fetch + render logic with Olympic medals, team links, expandable detail rows
+
+### Verification
+
+- Backend: 141/141 tests passing (`mvn test`)
+- Frontend: build succeeds (`npm run build`), `quizzes.html` + `quiz.html` + assets emitted to `src/main/resources/static/`
+- Two git commits: backend (`feat: add quiz archive API - GET /api/quizzes and GET /api/quizzes/{id}/results with Olympic ranking`) + frontend (`feat: add Quiz Archiv frontend pages - quizzes list and quiz results with Olympic ranking display`)
