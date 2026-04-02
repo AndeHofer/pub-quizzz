@@ -159,4 +159,24 @@ public class HintPersistenceTest {
         assertEquals("/uploads/start.jpg", saved.getImageUrlAtStart());
         assertEquals("/uploads/hint.jpg", saved.getImageUrlAsHint());
     }
+
+    @Test
+    void hintWithNullTextAndImageAsHintIsPersisted() {
+        Hint h1 = new Hint();
+        h1.setHintText(null);  // null is now allowed
+        h1.setImageUrlAsHint("/uploads/hint-only.jpg");
+
+        Hint h2 = new Hint(); h2.setHintText("h2");
+        Hint h3 = new Hint(); h3.setHintText("h3");
+        Hint h4 = new Hint(); h4.setHintText("h4");
+
+        Quiz quiz = quizWithHintsOnFirstQuestion(List.of(h1, h2, h3, h4));
+        quizRepository.save(quiz);
+
+        Quiz loaded = quizRepository.findById(quiz.getQuizId()).orElseThrow();
+        Hint saved = loaded.getQuestions().get(0).getHints().get(0);
+
+        assertNull(saved.getHintText());
+        assertEquals("/uploads/hint-only.jpg", saved.getImageUrlAsHint());
+    }
 }

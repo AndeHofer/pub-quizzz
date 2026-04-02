@@ -54,14 +54,14 @@ class AdminQuizControllerTest {
         dto.setQuizId(1L);
         dto.setPubDate(LocalDate.of(2026, 1, 7));
         dto.setSubmitDate(LocalDate.of(2026, 1, 7));
-        dto.setQuestionCount(8);
+        dto.setFinished(true);
 
         when(quizService.getAllQuizzes()).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/admin/quizzes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].quizId").value(1))
-                .andExpect(jsonPath("$[0].questionCount").value(8));
+                .andExpect(jsonPath("$[0].finished").value(true));
     }
 
     @Test
@@ -71,7 +71,7 @@ class AdminQuizControllerTest {
         dto.setQuizId(5L);
         dto.setPubDate(LocalDate.of(2026, 3, 4));
         dto.setSubmitDate(LocalDate.of(2026, 3, 4));
-        dto.setQuestionCount(8);
+        dto.setFinished(true);
         dto.setTitle("2026 März");
 
         when(quizService.getAllQuizzes()).thenReturn(List.of(dto));
@@ -88,7 +88,7 @@ class AdminQuizControllerTest {
         dto.setQuizId(7L);
         dto.setPubDate(LocalDate.of(2026, 4, 1));
         dto.setSubmitDate(LocalDate.of(2026, 4, 1));
-        dto.setQuestionCount(8);
+        dto.setFinished(true);
         dto.setTitle("2026 April");
 
         when(quizService.getQuizById(7L)).thenReturn(Optional.of(dto));
@@ -105,7 +105,7 @@ class AdminQuizControllerTest {
         dto.setQuizId(2L);
         dto.setPubDate(LocalDate.of(2026, 2, 1));
         dto.setSubmitDate(LocalDate.of(2026, 2, 1));
-        dto.setQuestionCount(8);
+        dto.setFinished(true);
 
         when(quizService.getQuizById(2L)).thenReturn(Optional.of(dto));
 
@@ -256,6 +256,18 @@ class AdminQuizControllerTest {
         org.mockito.Mockito.verify(imageStorageService, org.mockito.Mockito.never()).store(org.mockito.ArgumentMatchers.any());
     }
 
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void createQuiz_withBlankQuestionText_isAllowedAsDraft() throws Exception {
+        MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json",
+                buildDraftQuizJson().getBytes());
+
+        mockMvc.perform(multipart("/admin/create-quiz")
+                        .file(quizPart)
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private String buildMinimalQuizJson() {
@@ -272,6 +284,27 @@ class AdminQuizControllerTest {
             for (int h = 1; h <= hintCount; h++) {
                 if (h > 1) sb.append(",");
                 sb.append("{\"hintText\":\"hint").append(h).append("\"}");
+            }
+            sb.append("]}");
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private String buildDraftQuizJson() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"pubDate\":\"2026-01-01\",\"questions\":[");
+        for (int q = 1; q <= 8; q++) {
+            if (q > 1) sb.append(",");
+            int hintCount = q <= 4 ? 4 : 3;
+            sb.append("{\"number\":").append(q)
+                    .append(",\"questionText\":\"\"")
+                    .append(",\"answer\":\"\"")
+                    .append(",\"note\":\"\"")
+                    .append(",\"hints\":[");
+            for (int h = 1; h <= hintCount; h++) {
+                if (h > 1) sb.append(",");
+                sb.append("{\"hintText\":\"\"}");
             }
             sb.append("]}");
         }
