@@ -9,5 +9,5 @@ public class QuizDTO {
     private String title;
     private LocalDate pubDate;
     private LocalDate submitDate;
-    private int questionCount;
+    private boolean finished;
 }

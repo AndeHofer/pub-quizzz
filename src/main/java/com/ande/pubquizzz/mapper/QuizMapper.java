@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface QuizMapper {
 
-    @Mapping(target = "questionCount", expression = "java(quiz.getQuestions() != null ? quiz.getQuestions().size() : 0)")
+    @Mapping(target = "finished", expression = "java(com.ande.pubquizzz.mapper.QuizFinishedChecker.isFinished(quiz))")
     QuizDTO toDTO(Quiz quiz);
 
     @Mapping(target = "questions", source = "questions")

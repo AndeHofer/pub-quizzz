@@ -1,7 +1,6 @@
 package com.ande.pubquizzz.database.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -29,8 +28,7 @@ public class Hint {
     @Column(name = "hint_order")
     private Integer hintOrder;
 
-    @Column(name = "hint_text", nullable = false)
-    @NotNull
+    @Column(name = "hint_text", nullable = true)
     private String hintText;
 
     @Column(name = "image_url_at_start")
