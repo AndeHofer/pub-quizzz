@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: Cleanup API
+  description: Admin endpoint to remove orphaned image files from disk
+  version: 1.0.0
+
+paths:
+  /admin/cleanup-images:
+    delete:
+      summary: Delete orphaned image files
+      description: >
+        Scans the uploads directory, compares every file against all image URLs
+        currently referenced in the database, and permanently deletes any file
+        that is no longer referenced. Returns the count and names of deleted files.
+      operationId: cleanupOrphanedImages
+      security:
+        - basicAuth: [ ]
+      responses:
+        '200':
+          description: Cleanup completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanupResult'
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    CleanupResult:
+      type: object
+      properties:
+        deletedCount:
+          type: integer
+          description: Number of orphaned files deleted
+          example: 3
+        deletedFiles:
+          type: array
+          items:
+            type: string
+          description: List of deleted file names
+          example: [ "abc123.jpg", "def456.png" ]
