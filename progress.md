@@ -549,3 +549,32 @@ A quiz is **finished** when:
 
 - Backend: 119/119 tests passing (`mvn.cmd clean test`)
 - Frontend: 0 type errors (`npm run type-check`)
+
+---
+
+## Phase 18: Team Detail Page ✅ COMPLETE
+
+**Goal:** Clicking a team name in the Gesamtrangliste navigates to a team detail page showing all quiz results for that team, sorted newest-first, with expandable per-question score breakdown.
+
+### Backend
+
+- `src/main/resources/openapi/team-results-api.yaml`: OpenAPI spec for `GET /api/teams/{teamName}/results`
+- `src/main/java/com/ande/pubquizzz/dto/TeamResultEntry.java`: New response DTO (`quizDate`, `totalPoints`, `answers`)
+- `src/main/java/com/ande/pubquizzz/database/repositories/ResultRepository.java`: Added `findByTeamNameOrderByPubDateDesc` JPQL query with JOIN FETCH
+- `src/main/java/com/ande/pubquizzz/service/ResultService.java`: Added `getResultsForTeam(String teamName)` method
+- `src/main/java/com/ande/pubquizzz/controller/UserTeamController.java`: New `GET /api/teams/{teamName}/results` REST controller
+- Tests: `ResultServiceTeamResultsTest` (3 unit tests) + `UserTeamControllerTest` (3 integration tests)
+
+### Frontend
+
+- `src/main/webapp/src/js/types.ts`: Added `TeamResultEntry` interface
+- `src/main/webapp/src/js/leaderboard.ts`: Team name cells now render as `<a>` links to `/team.html?team=<name>`
+- `src/main/webapp/src/team.html`: New team detail page HTML (mobile-first Tailwind)
+- `src/main/webapp/src/js/team.ts`: Fetch + render logic with expandable per-question detail rows
+- `src/main/webapp/vite.config.ts`: Added `team: './team.html'` entry
+
+### Verification
+
+- Backend: 132/132 tests passing (`.\mvnw.cmd test`)
+- Frontend: build succeeds (`npm run build`), `team.html` + `team-*.js` emitted to `src/main/resources/static/`
+- Two git commits: backend (`feat: add GET /api/teams/{teamName}/results endpoint with tests`) + frontend (`feat: add team detail page with expandable quiz result breakdown`)
