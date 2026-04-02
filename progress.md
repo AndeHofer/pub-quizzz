@@ -679,3 +679,41 @@ classes with `sm:` breakpoints); the admin pages still used old fixed-size CSS c
 - Backend: 141/141 tests passing (`mvn test`)
 - Frontend: 0 type errors (`npm run type-check`)
 - Build: succeeds (`npm run build`)
+
+---
+
+## Phase 21: Flyway Migration — Fix hint_text NOT NULL ✅ COMPLETE
+
+### Problem
+
+`ddl-auto=update` only adds new columns; it never alters existing constraints. Phase 17 changed
+`Hint.hintText` to `nullable = true` in the entity, but the live database still had
+`hint_text NOT NULL` from its original creation. Any quiz edit that saved a hint with null text
+failed with `JdbcSQLIntegrityConstraintViolationException: NULL not allowed for column "HINT_TEXT"`.
+
+### Solution
+
+Introduced Flyway for schema migrations. Flyway tracks which scripts have been applied in a
+`flyway_schema_history` table and runs each script exactly once per database.
+
+### Changes
+
+- `pom.xml`: Added `flyway-core` dependency (version managed by Spring Boot BOM)
+- `application.properties`:
+  - `ddl-auto=update` → `ddl-auto=validate` (Flyway owns schema changes; Hibernate just validates)
+  - Added `spring.flyway.locations`, `spring.flyway.baseline-on-migrate=true`, `spring.flyway.baseline-version=1`
+  - `baseline-on-migrate` is required because the live DB already exists without any Flyway history
+- `src/main/resources/db/migration/V2__fix_hint_text_nullable.sql`: New migration —
+  `ALTER TABLE question_hints ALTER COLUMN hint_text VARCHAR NULL`
+- `application-test.properties`: Added `spring.flyway.enabled=false` — tests continue to use
+  Hibernate `create-drop` on in-memory H2; no migration scripts needed there
+
+### Backup/restore safety
+
+- Backups taken after this deploy include `flyway_schema_history` → restore + restart skips V2 (already recorded)
+- Old backups (before Flyway) do not include `flyway_schema_history` → restore + restart runs V2 automatically
+- Cross-instance restores (local ↔ Portainer) work correctly in all cases
+
+### Verification
+
+- Backend: 141/141 tests passing (`mvn test`)

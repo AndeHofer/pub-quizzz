@@ -8,6 +8,10 @@ const questionsContainer = document.getElementById('questionsContainer') as HTML
 // Global variable to track edit mode
 let editingQuizId: number | null = null;
 
+// Stores existing image URLs for hints when editing a quiz.
+// Key format: "atstart_q{q}_h{h}" or "ashint_q{q}_h{h}"
+const existingImageUrls = new Map<string, string>();
+
 // Check for editing quiz data in sessionStorage on page load
 document.addEventListener('DOMContentLoaded', function () {
     const editingData = sessionStorage.getItem('editingQuiz');
@@ -66,6 +70,7 @@ function populateFormForEdit(quiz: QuizDTO) {
                     }
                     // Show existing "am Anfang" image if present
                     if (h.imageUrlAtStart) {
+                        existingImageUrls.set(`atstart_q${qNum}_h${hNum}`, h.imageUrlAtStart);
                         const preview = document.getElementById(`preview_atstart_q${qNum}_h${hNum}`) as HTMLImageElement | null;
                         if (preview) {
                             preview.src = h.imageUrlAtStart;
@@ -74,6 +79,7 @@ function populateFormForEdit(quiz: QuizDTO) {
                     }
                     // Show existing "als Hinweis" image if present
                     if (h.imageUrlAsHint) {
+                        existingImageUrls.set(`ashint_q${qNum}_h${hNum}`, h.imageUrlAsHint);
                         const preview = document.getElementById(`preview_ashint_q${qNum}_h${hNum}`) as HTMLImageElement | null;
                         if (preview) {
                             preview.src = h.imageUrlAsHint;
@@ -154,7 +160,7 @@ if (quizForm) {
                 questionText: string;
                 answer: string;
                 note: string | null;
-                hints: { hintText: string | null; imageUrlAtStart: null; imageUrlAsHint: null }[]
+                hints: { hintText: string | null; imageUrlAtStart: string | null; imageUrlAsHint: string | null }[]
             }[]
         } = {
             title: (document.getElementById('quizTitle') as HTMLInputElement).value || null,
@@ -167,23 +173,37 @@ if (quizForm) {
         // Collect all 8 questions
         for (let i = 1; i <= 8; i++) {
             const numHints = i <= 4 ? 4 : 3;
-            const hints: { hintText: string | null; imageUrlAtStart: null; imageUrlAsHint: null }[] = [];
+            const hints: {
+                hintText: string | null;
+                imageUrlAtStart: string | null;
+                imageUrlAsHint: string | null
+            }[] = [];
 
             for (let j = 1; j <= numHints; j++) {
+                const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement;
+                const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement;
+
+                // If no new file selected, carry forward the existing URL (edit mode)
+                const imageUrlAtStart = (atStartInput && atStartInput.files && atStartInput.files[0])
+                    ? null  // will be set by backend after file save
+                    : (existingImageUrls.get(`atstart_q${i}_h${j}`) ?? null);
+
+                const imageUrlAsHint = (asHintInput && asHintInput.files && asHintInput.files[0])
+                    ? null  // will be set by backend after file save
+                    : (existingImageUrls.get(`ashint_q${i}_h${j}`) ?? null);
+
                 hints.push({
                     hintText: (document.getElementById(`hint${i}_${j}`) as HTMLInputElement).value || null,
-                    imageUrlAtStart: null,  // will be set by backend after file save
-                    imageUrlAsHint: null    // will be set by backend after file save
+                    imageUrlAtStart,
+                    imageUrlAsHint
                 });
 
                 // Attach "am Anfang" image file if selected
-                const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement;
                 if (atStartInput && atStartInput.files && atStartInput.files[0]) {
                     formData.append(`hint_atstart_q${i}_h${j}`, atStartInput.files[0]);
                 }
 
                 // Attach "als Hinweis" image file if selected
-                const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement;
                 if (asHintInput && asHintInput.files && asHintInput.files[0]) {
                     formData.append(`hint_ashint_q${i}_h${j}`, asHintInput.files[0]);
                 }

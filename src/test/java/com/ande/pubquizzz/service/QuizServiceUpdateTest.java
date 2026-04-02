@@ -112,4 +112,40 @@ class QuizServiceUpdateTest {
 
         verify(imageStorageService).delete("/uploads/old-hint.png");
     }
+
+    @Test
+    void updateQuizFull_doesNotDeleteImageUrl_whenKeptUnchanged() {
+        String keptUrl = "/uploads/kept-image.jpg";
+        Quiz existing = quizWithImageUrls(keptUrl, null);
+        when(quizRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(quizMapper.toDTO(any())).thenReturn(null);
+
+        // Build a request that carries the same URL through (frontend passes it back)
+        CreateQuizRequest req = minimalUpdateRequest();
+        req.getQuestions().get(0).getHints().get(0).setImageUrlAtStart(keptUrl);
+
+        quizService.updateQuizFull(1L, req);
+
+        verify(imageStorageService, never()).delete(keptUrl);
+    }
+
+    @Test
+    void updateQuizFull_deletesReplacedImageUrl_butKeepsOtherUnchanged() {
+        String keptUrl = "/uploads/kept.jpg";
+        String replacedUrl = "/uploads/replaced.png";
+        // existing quiz: q1-h1 has both URLs
+        Quiz existing = quizWithImageUrls(keptUrl, replacedUrl);
+        when(quizRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(quizMapper.toDTO(any())).thenReturn(null);
+
+        // Request keeps atStart but replaces asHint with a new URL
+        CreateQuizRequest req = minimalUpdateRequest();
+        req.getQuestions().get(0).getHints().get(0).setImageUrlAtStart(keptUrl);
+        req.getQuestions().get(0).getHints().get(0).setImageUrlAsHint("/uploads/new-hint.png");
+
+        quizService.updateQuizFull(1L, req);
+
+        verify(imageStorageService, never()).delete(keptUrl);
+        verify(imageStorageService).delete(replacedUrl);
+    }
 }

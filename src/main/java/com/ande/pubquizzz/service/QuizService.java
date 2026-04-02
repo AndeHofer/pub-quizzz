@@ -100,8 +100,17 @@ public class QuizService {
 
         quizRepository.save(quiz);
 
-        // Delete old image files from disk after successful save
-        oldImageUrls.forEach(imageStorageService::delete);
+        // Collect URLs still in use after the update
+        java.util.Set<String> newImageUrls = quiz.getQuestions().stream()
+                .flatMap(q -> q.getHints().stream())
+                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .filter(url -> url != null)
+                .collect(java.util.stream.Collectors.toSet());
+
+        // Only delete files that are no longer referenced (truly replaced or removed)
+        oldImageUrls.stream()
+                .filter(url -> !newImageUrls.contains(url))
+                .forEach(imageStorageService::delete);
 
         log.info("Quiz {} fully updated successfully", id);
         return quizMapper.toDTO(quiz);
