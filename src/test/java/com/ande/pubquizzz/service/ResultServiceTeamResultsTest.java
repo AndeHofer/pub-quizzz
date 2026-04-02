@@ -84,7 +84,21 @@ class ResultServiceTeamResultsTest {
 
         assertThat(results).hasSize(2);
         assertThat(results.get(0).getQuizDate()).isEqualTo("2026-03-15");
+        assertThat(results.get(0).getQuizTitle()).isEqualTo("2026 März");
         assertThat(results.get(1).getQuizDate()).isEqualTo("2026-01-01");
+        assertThat(results.get(1).getQuizTitle()).isEqualTo("2026 Jänner");
+    }
+
+    @Test
+    void getResultsForTeam_withExplicitTitle_usesTitle() {
+        quizNew.setTitle("Frühjahr 2026");
+        Result result = makeResult(quizNew, List.of(makeAnswer(1, 5, null)));
+        when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
+            .thenReturn(List.of(result));
+
+        List<TeamResultEntry> results = resultService.getResultsForTeam("TestTeam");
+
+        assertThat(results.get(0).getQuizTitle()).isEqualTo("Frühjahr 2026");
     }
 
     @Test

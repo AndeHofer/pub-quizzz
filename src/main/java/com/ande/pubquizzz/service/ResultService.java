@@ -135,6 +135,7 @@ public class ResultService {
                 .map(r -> {
                     TeamResultEntry entry = new TeamResultEntry();
                     entry.setQuizDate(r.getQuiz().getPubDate().toString());
+                    entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getTitle(), r.getQuiz().getPubDate()));
                     entry.setTotalPoints(r.calculateTotalPoints());
                     entry.setAnswers(r.getAnswers().stream()
                             .map(a -> {
@@ -148,6 +149,16 @@ public class ResultService {
                     return entry;
                 })
                 .toList();
+    }
+
+    private static final String[] GERMAN_MONTHS = {
+        "Jänner", "Februar", "März", "April", "Mai", "Juni",
+        "Juli", "August", "September", "Oktober", "November", "Dezember"
+    };
+
+    private String deriveQuizTitle(String title, java.time.LocalDate pubDate) {
+        if (title != null && !title.isBlank()) return title;
+        return pubDate.getYear() + " " + GERMAN_MONTHS[pubDate.getMonthValue() - 1];
     }
 
     private List<Result> loadResults(Long quizId) {

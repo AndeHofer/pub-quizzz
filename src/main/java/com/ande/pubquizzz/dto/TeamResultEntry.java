@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class TeamResultEntry {
     private String quizDate;
+    private String quizTitle;
     private int totalPoints;
     private List<AnswerScoreDTO> answers;
 }

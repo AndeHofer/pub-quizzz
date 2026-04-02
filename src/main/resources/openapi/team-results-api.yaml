@@ -35,6 +35,9 @@ components:
           type: string
           format: date
           description: Datum des Quizzes (ISO 8601)
+        quizTitle:
+          type: string
+          description: Titel des Quizzes (oder "YYYY Monatsname" als Fallback)
         totalPoints:
           type: integer
           description: Gesamtpunkte des Teams in diesem Quiz

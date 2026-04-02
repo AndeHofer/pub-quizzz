@@ -58,6 +58,7 @@ export interface AllTimeLeaderboardEntry {
 
 export interface TeamResultEntry {
     quizDate: string;
+    quizTitle: string;
     totalPoints: number;
     answers: AnswerScoreDTO[];
 }

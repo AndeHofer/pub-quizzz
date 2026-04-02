@@ -45,6 +45,7 @@ class UserTeamControllerTest {
 
         TeamResultEntry entry = new TeamResultEntry();
         entry.setQuizDate("2026-03-15");
+        entry.setQuizTitle("Frühjahr 2026");
         entry.setTotalPoints(5);
         entry.setAnswers(List.of(a));
 
@@ -54,6 +55,7 @@ class UserTeamControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].quizDate").value("2026-03-15"))
+                .andExpect(jsonPath("$[0].quizTitle").value("Frühjahr 2026"))
                 .andExpect(jsonPath("$[0].totalPoints").value(5));
     }
 

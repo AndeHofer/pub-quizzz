@@ -6,9 +6,8 @@ function escapeHtml(text: string): string {
     return div.innerHTML;
 }
 
-function formatDate(isoDate: string): string {
-    const [year, month, day] = isoDate.split('-');
-    return `${day}.${month}.${year}`;
+function numberBadge(n: number): string {
+    return `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold">${n}</span>`;
 }
 
 function renderResults(teamName: string, entries: TeamResultEntry[]): void {
@@ -29,7 +28,7 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
         // Summary row
         rows.push(`
             <tr class="border-b border-gray-200 hover:bg-gray-50">
-                <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base">${formatDate(entry.quizDate)}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base">${escapeHtml(entry.quizTitle)}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-blue-700 text-xs sm:text-base">${entry.totalPoints}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
                     <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"
@@ -40,18 +39,18 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
 
         // Detail row (hidden by default)
         const sortedAnswers = [...entry.answers].sort((a, b) => a.questionNumber - b.questionNumber);
-        const answerCells = sortedAnswers
-            .map(a => `<td class="py-1 px-2 text-center text-xs">${a.points}</td>`)
-            .join('');
         const answerHeaders = sortedAnswers
-            .map(a => `<th class="py-1 px-2 text-center text-xs font-medium text-gray-500">F${a.questionNumber}</th>`)
+            .map(a => `<th class="py-2 px-3 text-center">${numberBadge(a.questionNumber)}</th>`)
+            .join('');
+        const answerCells = sortedAnswers
+            .map(a => `<td class="py-2 px-3 text-center text-sm sm:text-base font-medium">${a.points}</td>`)
             .join('');
 
         rows.push(`
             <tr id="${detailRowId}" style="display:none;" class="bg-gray-50">
-                <td colspan="3" class="px-2 pb-3 pt-1">
+                <td colspan="3" class="px-3 pb-4 pt-2">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-xs border-collapse">
+                        <table class="w-full border-collapse">
                             <thead>
                                 <tr class="border-b border-gray-200">${answerHeaders}</tr>
                             </thead>
