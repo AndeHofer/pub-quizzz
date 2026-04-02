@@ -153,8 +153,8 @@ class BigIntegrationTest {
 
     private Quiz buildApril2026Quiz() throws Exception {
         Quiz q = new Quiz();
-        q.setPubDate(LocalDate.of(2025, 4, 1));
-        q.setSubmitDate(LocalDate.of(2025, 4, 2));
+        q.setPubDate(LocalDate.of(2026, 4, 1));
+        q.setSubmitDate(LocalDate.of(2026, 4, 2));
         q.addQuestion(1, "Zwar nicht sprichwörtlicih, aber das ist in Ordnung", "Wörter in alphabetischer Ordnung", "",
                 hints("Beikost", "Dekor", "Film", "Eis"));
         q.addQuestion(2, "Die neue ART der Suche. Deden - nein - Gegen das immer gleiche Bild?", "Google Doodle", "",
