@@ -277,7 +277,7 @@ class BigIntegrationTest {
 
     private List<Team> buildTeams() {
         return List.of(
-                team("Dicktales Wuhhu"),
+                team("Dicktales Wohoo^^"),
                 team("Stute"),
                 team("UDO"),
                 team("Vienna Lemmings"),
