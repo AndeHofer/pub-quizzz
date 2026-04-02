@@ -121,10 +121,10 @@ async function viewQuizzes() {
             showModal('Alle Quizze', '<p>Keine Quizze gefunden.</p>');
             return;
         }
-        const headers = ['ID', 'Titel', 'Veröffentlicht am', 'Abgabedatum', 'Fragen', 'Aktionen'];
+        const headers = ['ID', 'Titel', 'Veröffentlicht am', 'Abgabedatum', 'Fertig', 'Aktionen'];
         const html = renderTable(headers, quizzes, (quiz: unknown) => {
             const q = quiz as QuizDTO;
-            return [`${q.quizId}`, quizDisplayTitle(q), `${q.pubDate}`, `${q.submitDate}`, `${q.questionCount}`, `
+            return [`${q.quizId}`, quizDisplayTitle(q), `${q.pubDate}`, `${q.submitDate}`, q.finished ? '✅' : '❌', `
                 <button class="icon-btn" onclick="editQuiz(${q.quizId})" title="Quiz bearbeiten">✏️</button>
                 <button class="icon-btn" onclick="deleteQuiz(${q.quizId})" title="Quiz löschen">🗑️</button>
             `];

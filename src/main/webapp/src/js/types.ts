@@ -18,7 +18,7 @@ export interface QuizDTO {
     quizDate?: string;
     pubDate?: string;
     submitDate?: string;
-    questionCount?: number;
+    finished?: boolean;
     questions?: QuestionDTO[];
 }
 
