@@ -76,3 +76,8 @@ export interface QuizResultEntry {
     totalPoints: number;
     answers: AnswerScoreDTO[];
 }
+
+export interface QuizResultsResponse {
+    quizTitle: string;
+    entries: QuizResultEntry[];
+}

@@ -2,6 +2,7 @@ package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.QuizResultEntry;
+import com.ande.pubquizzz.dto.QuizResultsResponse;
 import com.ande.pubquizzz.dto.QuizSummaryDTO;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
@@ -76,14 +77,19 @@ class UserQuizControllerTest {
         entry.setTotalPoints(10);
         entry.setAnswers(List.of(a));
 
-        when(resultService.getResultsForQuiz(42L)).thenReturn(List.of(entry));
+        QuizResultsResponse response = new QuizResultsResponse();
+        response.setQuizTitle("2026 März");
+        response.setEntries(List.of(entry));
+
+        when(resultService.getResultsForQuiz(42L)).thenReturn(response);
 
         mockMvc.perform(get("/api/quizzes/42/results"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].rank").value(1))
-                .andExpect(jsonPath("$[0].teamName").value("Alpha"))
-                .andExpect(jsonPath("$[0].totalPoints").value(10))
-                .andExpect(jsonPath("$[0].answers[0].questionNumber").value(1));
+                .andExpect(jsonPath("$.quizTitle").value("2026 März"))
+                .andExpect(jsonPath("$.entries[0].rank").value(1))
+                .andExpect(jsonPath("$.entries[0].teamName").value("Alpha"))
+                .andExpect(jsonPath("$.entries[0].totalPoints").value(10))
+                .andExpect(jsonPath("$.entries[0].answers[0].questionNumber").value(1));
     }
 
     @Test

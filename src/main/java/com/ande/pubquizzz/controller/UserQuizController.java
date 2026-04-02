@@ -1,6 +1,6 @@
 package com.ande.pubquizzz.controller;
 
-import com.ande.pubquizzz.dto.QuizResultEntry;
+import com.ande.pubquizzz.dto.QuizResultsResponse;
 import com.ande.pubquizzz.dto.QuizSummaryDTO;
 import com.ande.pubquizzz.service.ResultService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class UserQuizController {
     }
 
     @GetMapping("/{quizId}/results")
-    public List<QuizResultEntry> getQuizResults(@PathVariable Long quizId) {
+    public QuizResultsResponse getQuizResults(@PathVariable Long quizId) {
         log.info("GET /api/quizzes/{}/results", quizId);
         return resultService.getResultsForQuiz(quizId);
     }

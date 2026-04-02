@@ -1,4 +1,4 @@
-import {QuizResultEntry} from './types';
+import {QuizResultEntry, QuizResultsResponse} from './types';
 
 function escapeHtml(text: string): string {
     const div = document.createElement('div');
@@ -108,13 +108,13 @@ async function loadQuizResults(): Promise<void> {
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        const entries: QuizResultEntry[] = await response.json();
+        const data: QuizResultsResponse = await response.json();
         if (loadingEl) loadingEl.style.display = 'none';
         if (tableEl) tableEl.style.display = 'table';
-        if (heading && entries.length > 0) {
-            heading.textContent = `\uD83C\uDFC6 Quiz Ergebnisse`;
+        if (heading) {
+            heading.textContent = `\uD83C\uDFC6 ${data.quizTitle}`;
         }
-        renderResults(entries);
+        renderResults(data.entries);
     } catch {
         if (loadingEl) loadingEl.style.display = 'none';
         if (errorEl) {

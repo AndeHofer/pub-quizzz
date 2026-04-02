@@ -10,6 +10,7 @@ import com.ande.pubquizzz.dto.AllTimeLeaderboardEntry;
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.CreateResultRequest;
 import com.ande.pubquizzz.dto.QuizResultEntry;
+import com.ande.pubquizzz.dto.QuizResultsResponse;
 import com.ande.pubquizzz.dto.QuizSummaryDTO;
 import com.ande.pubquizzz.dto.ResultDTO;
 import com.ande.pubquizzz.dto.TeamResultEntry;
@@ -52,9 +53,20 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
-    public List<QuizResultEntry> getResultsForQuiz(Long quizId) {
+    public QuizResultsResponse getResultsForQuiz(Long quizId) {
         log.info("Fetching results for quiz {}", quizId);
         List<Result> results = resultRepository.findByQuizIdWithTeamAndAnswers(quizId);
+
+        // Derive quiz title — from results if any, otherwise look up the quiz directly
+        String quizTitle;
+        if (!results.isEmpty()) {
+            Quiz q = results.get(0).getQuiz();
+            quizTitle = deriveQuizTitle(q.getTitle(), q.getPubDate());
+        } else {
+            quizTitle = quizRepository.findById(quizId)
+                    .map(q -> deriveQuizTitle(q.getTitle(), q.getPubDate()))
+                    .orElse("");
+        }
 
         // Sort by totalPoints descending
         List<Result> sorted = results.stream()
@@ -84,7 +96,11 @@ public class ResultService {
                     .toList());
             entries.add(entry);
         }
-        return entries;
+
+        QuizResultsResponse response = new QuizResultsResponse();
+        response.setQuizTitle(quizTitle);
+        response.setEntries(entries);
+        return response;
     }
 
     @Transactional(readOnly = true)

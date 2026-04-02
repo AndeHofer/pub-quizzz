@@ -48,6 +48,7 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     @Query("""
         SELECT DISTINCT r FROM Result r
         JOIN FETCH r.team
+        JOIN FETCH r.quiz
         JOIN FETCH r.answers
         WHERE r.quiz.quizId = :quizId
     """)

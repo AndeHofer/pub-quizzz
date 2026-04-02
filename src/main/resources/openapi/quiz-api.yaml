@@ -35,13 +35,11 @@ paths:
             format: int64
       responses:
         "200":
-          description: Teamrangliste für das Quiz
+          description: Quiztitel und Teamrangliste für das Quiz
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/QuizResultEntry'
+                $ref: '#/components/schemas/QuizResultsResponse'
         "401":
           description: Nicht authentifiziert
 components:
@@ -60,6 +58,16 @@ components:
           format: date
         teamCount:
           type: integer
+    QuizResultsResponse:
+      type: object
+      properties:
+        quizTitle:
+          type: string
+          description: Titel des Quizzes (oder "YYYY Monatsname" als Fallback)
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuizResultEntry'
     QuizResultEntry:
       type: object
       properties:

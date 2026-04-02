@@ -5,6 +5,7 @@ import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.QuizResultEntry;
+import com.ande.pubquizzz.dto.QuizResultsResponse;
 import com.ande.pubquizzz.dto.QuizSummaryDTO;
 import com.ande.pubquizzz.mapper.ResultMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,8 +119,10 @@ class ResultServiceQuizTest {
 
         when(resultRepository.findByQuizIdWithTeamAndAnswers(1L)).thenReturn(List.of(rA, rB));
 
-        List<QuizResultEntry> entries = resultService.getResultsForQuiz(1L);
+        QuizResultsResponse response = resultService.getResultsForQuiz(1L);
+        List<QuizResultEntry> entries = response.getEntries();
 
+        assertThat(response.getQuizTitle()).isEqualTo("2026 März");
         assertThat(entries).hasSize(2);
         assertThat(entries.get(0).getTeamName()).isEqualTo("Beta");
         assertThat(entries.get(0).getTotalPoints()).isEqualTo(20);
@@ -140,7 +143,7 @@ class ResultServiceQuizTest {
 
         when(resultRepository.findByQuizIdWithTeamAndAnswers(1L)).thenReturn(List.of(rA, rB, rC));
 
-        List<QuizResultEntry> entries = resultService.getResultsForQuiz(1L);
+        List<QuizResultEntry> entries = resultService.getResultsForQuiz(1L).getEntries();
 
         assertThat(entries).hasSize(3);
         // Both tied teams get rank 1
