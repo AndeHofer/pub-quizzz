@@ -114,12 +114,12 @@ if (questionsContainer) {
             <h2>Frage ${i}</h2>
             <div class="field-group">
                 <label for="quiz${i}">Frage ${i}:</label>
-                <input type="text" id="quiz${i}" required>
+                <input type="text" id="quiz${i}">
             </div>
             ${hintsHtml}
             <div class="field-group">
                 <label for="answer${i}">Antwort ${i}:</label>
-                <input type="text" id="answer${i}" required>
+                <input type="text" id="answer${i}">
             </div>
             <div class="field-group">
                 <label for="note${i}">Anmerkung ${i} (optional):</label>
