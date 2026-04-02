@@ -17,7 +17,9 @@ export default defineConfig({
                 create_quiz: './admin/create_quiz.html',
                 register_user: './admin/register_user.html',
                 leaderboard: './leaderboard.html',
-                team: './team.html'
+                team: './team.html',
+                quizzes: './quizzes.html',
+                quiz: './quiz.html'
             }
         }
     },

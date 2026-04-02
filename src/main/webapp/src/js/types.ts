@@ -62,3 +62,17 @@ export interface TeamResultEntry {
     totalPoints: number;
     answers: AnswerScoreDTO[];
 }
+
+export interface QuizSummaryDTO {
+    quizId: number;
+    quizTitle: string;
+    pubDate: string;
+    teamCount: number;
+}
+
+export interface QuizResultEntry {
+    rank: number;
+    teamName: string;
+    totalPoints: number;
+    answers: AnswerScoreDTO[];
+}
