@@ -83,26 +83,90 @@ class BigIntegrationTest {
         // Team i (0-indexed) participates in quizzes 0..min(i+1, 5)-1
         // so team[0] → 1 quiz, team[1] → 2 quizzes, ..., team[4..9] → 5 quizzes
         // Points ramp from high (team 0) to low (team 9) for realism
-        int[][] pointTemplates = {
-                {0, 3, 3, 5, 5, 2, 5, 5},  // team 0 — Dicktales
-                {0, 3, 3, 1, 5, 0, 5, 5},  // team 1 — Stute
-                {0, 3, 3, 5, 1, 0, 5, 5},  // team 2 — UDO
-                {0, 3, 3, 5, 5, 1, 5, 5},  // team 3 — Vienna Lemmings
-                {0, 3, 0, 2, 0, 0, 0, 2},  // team 4 — The M-Team
-                {0, 0, 0, 0, 2, 0, 0, 2},  // team 5 — Die Dodos
-                {0, 0, 0, 0, 1, 1, 3, 0},  // team 6 — 5BG Hotdogs
-                {2, 5, 0, 5, 3, 0, 5, 3},  // team 7 — TEAM
-                {0, 3, 0, 3, 0, 0, 3, 2},  // team 8 — Die Julians
-                {0, 3, 0, 5, 5, 1, 5, 2},  // team 9 — Ginger Army
-                {0, 2, 0, 5, 0, 1, 1, 0},  // team 9 — Me is Quiz
-                {0, 3, 0, 5, 0, 0, 2, 2},  // team 9 — SpaGra
+        // pointTemplates[quizIndex][teamIndex] — each quiz has its own score distribution
+        int[][][] pointTemplates = {
+            // Quiz 0 — April 2026 (actual questions, harder)
+            {
+                {0, 3, 3, 5, 5, 2, 5, 5},  // Dicktales
+                {0, 3, 3, 1, 5, 0, 5, 5},  // Stute
+                {0, 3, 3, 5, 1, 0, 5, 5},  // UDO
+                {0, 3, 3, 5, 5, 1, 5, 5},  // Vienna Lemmings
+                {0, 3, 0, 2, 0, 0, 0, 2},  // The M-Team
+                {0, 0, 0, 0, 2, 0, 0, 2},  // Die Dodos
+                {0, 0, 0, 0, 1, 1, 3, 0},  // 5BG Hotboys
+                {2, 5, 0, 5, 3, 0, 5, 3},  // TEAM
+                {0, 3, 0, 3, 0, 0, 3, 2},  // Die Julian
+                {0, 3, 0, 5, 5, 1, 5, 2},  // Ginger Army
+                {0, 2, 0, 5, 0, 1, 1, 0},  // Nix is Quiz
+                {0, 3, 0, 5, 0, 0, 2, 2},  // SpaGru
+            },
+            // Quiz 1 — Popkultur März 2025 (pop culture, mixed scores)
+            {
+                {5, 5, 3, 5, 3, 5, 5, 3},  // Dicktales
+                {5, 3, 5, 5, 3, 3, 5, 5},  // Stute
+                {3, 5, 5, 3, 5, 5, 3, 3},  // UDO
+                {5, 5, 5, 5, 5, 3, 5, 5},  // Vienna Lemmings
+                {3, 3, 0, 5, 3, 3, 3, 0},  // The M-Team
+                {5, 0, 3, 0, 5, 0, 3, 0},  // Die Dodos
+                {0, 3, 3, 0, 3, 0, 5, 3},  // 5BG Hotboys
+                {5, 5, 5, 3, 5, 5, 5, 5},  // TEAM
+                {3, 5, 3, 3, 0, 3, 5, 3},  // Die Julian
+                {5, 5, 0, 5, 5, 3, 5, 3},  // Ginger Army
+                {3, 3, 3, 0, 3, 0, 3, 0},  // Nix is Quiz
+                {5, 3, 0, 3, 3, 3, 3, 3},  // SpaGru
+            },
+            // Quiz 2 — Wissenschaft Mai 2025 (science, generally lower scores)
+            {
+                {3, 5, 3, 0, 5, 2, 5, 3},  // Dicktales
+                {3, 3, 0, 5, 3, 0, 3, 2},  // Stute
+                {5, 3, 5, 3, 0, 2, 5, 5},  // UDO
+                {3, 5, 3, 5, 3, 0, 3, 5},  // Vienna Lemmings
+                {0, 0, 3, 0, 0, 2, 0, 3},  // The M-Team
+                {3, 0, 0, 3, 2, 0, 3, 0},  // Die Dodos
+                {0, 3, 0, 0, 3, 2, 3, 0},  // 5BG Hotboys
+                {5, 5, 3, 5, 5, 2, 5, 5},  // TEAM
+                {0, 3, 3, 0, 0, 0, 3, 3},  // Die Julian
+                {3, 5, 0, 3, 3, 2, 5, 0},  // Ginger Army
+                {0, 0, 3, 0, 0, 0, 0, 3},  // Nix is Quiz
+                {3, 3, 0, 3, 3, 0, 3, 0},  // SpaGru
+            },
+            // Quiz 3 — Geschichte Juli 2025 (history, stronger top teams)
+            {
+                {5, 5, 5, 5, 3, 5, 5, 5},  // Dicktales
+                {3, 5, 3, 5, 5, 3, 5, 3},  // Stute
+                {5, 3, 5, 5, 3, 5, 3, 5},  // UDO
+                {5, 5, 5, 5, 5, 5, 5, 5},  // Vienna Lemmings
+                {3, 5, 3, 3, 0, 3, 5, 0},  // The M-Team
+                {3, 3, 0, 5, 3, 0, 3, 3},  // Die Dodos
+                {0, 5, 3, 0, 5, 3, 3, 0},  // 5BG Hotboys
+                {5, 5, 5, 5, 5, 5, 5, 3},  // TEAM
+                {3, 5, 5, 3, 3, 0, 5, 3},  // Die Julian
+                {5, 5, 3, 5, 5, 3, 5, 5},  // Ginger Army
+                {0, 3, 3, 0, 0, 3, 3, 0},  // Nix is Quiz
+                {3, 5, 3, 3, 0, 0, 5, 3},  // SpaGru
+            },
+            // Quiz 4 — Österreich September 2025 (local knowledge, variable)
+            {
+                {5, 3, 5, 5, 5, 3, 3, 5},  // Dicktales
+                {5, 5, 3, 3, 5, 5, 5, 3},  // Stute
+                {3, 5, 5, 5, 3, 3, 5, 5},  // UDO
+                {5, 5, 5, 5, 5, 5, 5, 5},  // Vienna Lemmings
+                {3, 0, 5, 3, 5, 0, 3, 3},  // The M-Team
+                {0, 5, 3, 0, 5, 3, 0, 5},  // Die Dodos
+                {3, 3, 5, 0, 3, 5, 3, 0},  // 5BG Hotboys
+                {5, 5, 5, 5, 5, 3, 5, 5},  // TEAM
+                {5, 3, 3, 5, 3, 5, 3, 3},  // Die Julian
+                {5, 5, 5, 3, 5, 5, 5, 3},  // Ginger Army
+                {3, 0, 5, 3, 0, 3, 3, 0},  // Nix is Quiz
+                {5, 3, 3, 5, 3, 0, 3, 5},  // SpaGru
+            },
         };
 
         List<Result> allResults = new ArrayList<>();
         for (int t = 0; t < teams.size(); t++) {
             int quizCount = Math.min(t + 1, quizzes.size());
             for (int q = 0; q < quizCount; q++) {
-                allResults.add(buildResult(teams.get(t), quizzes.get(q), pointTemplates[t]));
+                allResults.add(buildResult(teams.get(t), quizzes.get(q), pointTemplates[q][t]));
             }
         }
         resultRepository.saveAll(allResults);
