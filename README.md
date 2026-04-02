@@ -1,6 +1,6 @@
 ## INFO
 
-A simple app to archive results, quiz and answers.
+A simple webpage to archive results, quiz and answers.
 
 ## TODOS
 
