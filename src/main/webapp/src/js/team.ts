@@ -1,0 +1,120 @@
+import {TeamResultEntry} from './types';
+
+function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(isoDate: string): string {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}.${month}.${year}`;
+}
+
+function renderResults(teamName: string, entries: TeamResultEntry[]): void {
+    const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement;
+    const heading = document.getElementById('teamHeading') as HTMLHeadingElement;
+    heading.textContent = `\uD83C\uDFF5\uFE0F Team: ${escapeHtml(teamName)}`;
+
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">Noch keine Ergebnisse für dieses Team.</td></tr>';
+        return;
+    }
+
+    const rows: string[] = [];
+    entries.forEach((entry, index) => {
+        const detailRowId = `detail-${index}`;
+        const btnId = `btn-${index}`;
+
+        // Summary row
+        rows.push(`
+            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base">${formatDate(entry.quizDate)}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-blue-700 text-xs sm:text-base">${entry.totalPoints}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
+                    <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"
+                        class="text-xs sm:text-sm text-blue-600 hover:underline whitespace-nowrap">&#9658; anzeigen</button>
+                </td>
+            </tr>
+        `);
+
+        // Detail row (hidden by default)
+        const sortedAnswers = [...entry.answers].sort((a, b) => a.questionNumber - b.questionNumber);
+        const answerCells = sortedAnswers
+            .map(a => `<td class="py-1 px-2 text-center text-xs">${a.points}</td>`)
+            .join('');
+        const answerHeaders = sortedAnswers
+            .map(a => `<th class="py-1 px-2 text-center text-xs font-medium text-gray-500">F${a.questionNumber}</th>`)
+            .join('');
+
+        rows.push(`
+            <tr id="${detailRowId}" style="display:none;" class="bg-gray-50">
+                <td colspan="3" class="px-2 pb-3 pt-1">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-200">${answerHeaders}</tr>
+                            </thead>
+                            <tbody>
+                                <tr>${answerCells}</tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        `);
+    });
+
+    tbody.innerHTML = rows.join('');
+}
+
+// Exposed to global scope for inline onclick handlers
+(window as unknown as Record<string, unknown>)['toggleDetail'] = function(rowId: string, btnId: string): void {
+    const row = document.getElementById(rowId);
+    const btn = document.getElementById(btnId);
+    if (!row || !btn) return;
+    const isHidden = row.style.display === 'none';
+    row.style.display = isHidden ? 'table-row' : 'none';
+    btn.innerHTML = isHidden ? '&#9660; schlie&szlig;en' : '&#9658; anzeigen';
+};
+
+async function loadTeamResults(): Promise<void> {
+    const loadingEl = document.getElementById('loading');
+    const tableEl = document.getElementById('resultsTable');
+    const errorEl = document.getElementById('errorMessage');
+
+    const params = new URLSearchParams(window.location.search);
+    const teamName = params.get('team');
+
+    if (!teamName) {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = 'Kein Team angegeben.';
+        }
+        return;
+    }
+
+    // Set heading immediately so it shows during load
+    const heading = document.getElementById('teamHeading');
+    if (heading) heading.textContent = `\uD83C\uDFF5\uFE0F Team: ${teamName}`;
+
+    try {
+        const response = await fetch(`/api/teams/${encodeURIComponent(teamName)}/results`);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const entries: TeamResultEntry[] = await response.json();
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (tableEl) tableEl.style.display = 'table';
+        renderResults(teamName, entries);
+    } catch {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = 'Fehler beim Laden der Ergebnisse. Bitte Seite neu laden.';
+        }
+    }
+}
+
+window.addEventListener('load', loadTeamResults);

@@ -24,7 +24,7 @@ function renderLeaderboard(entries: AllTimeLeaderboardEntry[]): void {
     tbody.innerHTML = entries.map(e => `
         <tr class="border-b border-gray-200 hover:bg-gray-50">
             <td class="py-3 px-4 font-semibold text-center">${getMedal(e.rank)}</td>
-            <td class="py-3 px-4 font-medium">${escapeHtml(e.teamName)}</td>
+            <td class="py-3 px-4 font-medium"><a href="/team.html?team=${encodeURIComponent(e.teamName)}" class="text-blue-600 hover:underline">${escapeHtml(e.teamName)}</a></td>
             <td class="py-3 px-4 text-center font-bold text-blue-700">${e.totalPoints}</td>
             <td class="py-3 px-4 text-center text-gray-600">${e.quizCount}</td>
         </tr>

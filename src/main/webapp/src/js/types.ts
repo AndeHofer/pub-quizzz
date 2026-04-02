@@ -55,3 +55,9 @@ export interface AllTimeLeaderboardEntry {
     totalPoints: number;
     quizCount: number;
 }
+
+export interface TeamResultEntry {
+    quizDate: string;
+    totalPoints: number;
+    answers: AnswerScoreDTO[];
+}
