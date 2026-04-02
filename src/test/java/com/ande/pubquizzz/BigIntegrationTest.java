@@ -8,13 +8,16 @@ import com.ande.pubquizzz.database.entities.Team;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
+import com.ande.pubquizzz.service.ImageStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +45,9 @@ class BigIntegrationTest {
     @Autowired
     private ResultRepository resultRepository;
 
+    @Autowired
+    private ImageStorageService imageStorageService;
+
     // -------------------------------------------------------------------------
     // Cleanup — runs before the test to ensure a clean slate
     // -------------------------------------------------------------------------
@@ -58,7 +64,7 @@ class BigIntegrationTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void seedBaseData() {
+    void seedBaseData() throws Exception {
         // --- 1. Create quizzes ---
         Quiz quiz1 = buildApril2026Quiz();
         Quiz quiz2 = buildPopkulturQuiz();
@@ -145,7 +151,7 @@ class BigIntegrationTest {
     // Quiz builders
     // -------------------------------------------------------------------------
 
-    private Quiz buildApril2026Quiz() {
+    private Quiz buildApril2026Quiz() throws Exception {
         Quiz q = new Quiz();
         q.setPubDate(LocalDate.of(2025, 4, 1));
         q.setSubmitDate(LocalDate.of(2025, 4, 2));
@@ -156,7 +162,12 @@ class BigIntegrationTest {
         q.addQuestion(3, "Wer bin ich? Ein Lied, mal kalt, mal heiß. Abschnitte des Sesselspiels?", "Ned Stark", "",
                 hints("4", "12", "16", "20"));
         q.addQuestion(4, "Alle gemeinsam sind über jeder Tür zU finden", "Netzplan über den U-Bahn Türen", "",
-                hints("", "", "", ""));
+                hintsWithImages(
+                    "/pics/2026April_4_1.jpg",
+                    "/pics/2026April_4_2.jpg",
+                    "/pics/2026April_4_3.jpg",
+                    "/pics/2026April_4_4.jpg"
+                ));
         q.addQuestion(5, "Eine Erfindung der EU. Wenn die Hauptstadt nicht die Hauptstadt ist.", "Belgien 1993", "",
                 hints("Italien 1986", "BR Deutschland 1988", "UK 1990"));
         q.addQuestion(6, "Auch das Personal in meiner Gruppe. Aberwo MAg der Leiter sein?", "36-1200", "",
@@ -320,5 +331,26 @@ class BigIntegrationTest {
             list.add(h);
         }
         return list;
+    }
+
+    private List<Hint> hintsWithImages(String... resourcePaths) throws Exception {
+        List<Hint> list = new ArrayList<>();
+        for (String path : resourcePaths) {
+            Hint h = new Hint();
+            h.setHintText("");
+            h.setImageUrlAsHint(storeClasspathImage(path));
+            list.add(h);
+        }
+        return list;
+    }
+
+    private String storeClasspathImage(String resourcePath) throws Exception {
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            if (is == null) throw new IllegalStateException("Test resource not found: " + resourcePath);
+            byte[] bytes = is.readAllBytes();
+            String filename = resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
+            MockMultipartFile file = new MockMultipartFile(filename, filename, "image/jpeg", bytes);
+            return imageStorageService.store(file);
+        }
     }
 }
