@@ -277,18 +277,18 @@ class BigIntegrationTest {
 
     private List<Team> buildTeams() {
         return List.of(
-                team("Dicktales"),
+                team("Dicktales Wuhhu"),
                 team("Stute"),
                 team("UDO"),
                 team("Vienna Lemmings"),
                 team("The M-Team"),
                 team("Die Dodos"),
-                team("5BG Hotdogs"),
+                team("5BG Hotboys"),
                 team("TEAM"),
                 team("Die Julian"),
                 team("Ginger Army"),
-                team("Me is Quiz"),
-                team("Spagra")
+                team("Nix is Quiz"),
+                team("SpaGru")
         );
     }
 
