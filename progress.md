@@ -682,7 +682,7 @@ classes with `sm:` breakpoints); the admin pages still used old fixed-size CSS c
 
 ---
 
-## Phase 21: Flyway Migration — Fix hint_text NOT NULL ✅ COMPLETE
+## Phase 21: Fix hint_text NOT NULL — Flyway removed ✅ COMPLETE
 
 ### Problem
 
@@ -693,27 +693,27 @@ failed with `JdbcSQLIntegrityConstraintViolationException: NULL not allowed for 
 
 ### Solution
 
-Introduced Flyway for schema migrations. Flyway tracks which scripts have been applied in a
-`flyway_schema_history` table and runs each script exactly once per database.
+Remove the live Portainer DB file and redeploy. Hibernate `ddl-auto=update` recreates all tables
+from the current entity schema, which has `hint_text` nullable from the start. No migration tooling
+needed.
+
+A Flyway-based migration was attempted first but could not be confirmed working on Portainer (not
+appearing in startup logs despite correct config). Flyway was removed entirely to keep the setup simple.
 
 ### Changes
 
-- `pom.xml`: Added `flyway-core` dependency (version managed by Spring Boot BOM)
-- `application.properties`:
-  - `ddl-auto=update` → `ddl-auto=validate` (Flyway owns schema changes; Hibernate just validates)
-  - Added `spring.flyway.locations`, `spring.flyway.baseline-on-migrate=true`, `spring.flyway.baseline-version=1`
-  - `baseline-on-migrate` is required because the live DB already exists without any Flyway history
-- `src/main/resources/db/migration/V2__fix_hint_text_nullable.sql`: New migration —
-  `ALTER TABLE question_hints ALTER COLUMN hint_text VARCHAR NULL`
-- `application-test.properties`: Added `spring.flyway.enabled=false` — tests continue to use
-  Hibernate `create-drop` on in-memory H2; no migration scripts needed there
+- `pom.xml`: Removed `flyway-core` dependency
+- `application.properties`: Removed 3 Flyway config lines; restored `logging.level.root=INFO`
+- `application-test.properties`: Removed `spring.flyway.enabled=false`
+- `src/main/resources/db/`: Deleted entire directory (including `V2__fix_hint_text_nullable.sql`)
 
-### Backup/restore safety
+### Portainer deploy steps
 
-- Backups taken after this deploy include `flyway_schema_history` → restore + restart skips V2 (already recorded)
-- Old backups (before Flyway) do not include `flyway_schema_history` → restore + restart runs V2 automatically
-- Cross-instance restores (local ↔ Portainer) work correctly in all cases
+1. Take a manual backup via the admin UI
+2. Delete the H2 DB volume (`h2_data`) on Portainer
+3. Deploy the new image — Hibernate recreates the schema with nullable `hint_text`
 
 ### Verification
 
-- Backend: 141/141 tests passing (`mvn test`)
+- Backend: 143/143 tests passing (`mvn test`)
+- Frontend: 0 type errors (`npm run type-check`)
