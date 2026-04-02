@@ -4,6 +4,7 @@ import com.ande.pubquizzz.database.entities.Hint;
 import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
+import com.ande.pubquizzz.dto.CleanupResult;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
@@ -18,6 +19,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -119,13 +122,39 @@ public class QuizService {
     @Transactional
     public boolean deleteQuiz(Long id) {
         log.info("Deleting quiz with ID: {}", id);
-        if (!quizRepository.existsById(id)) {
+        Quiz quiz = quizRepository.findById(id).orElse(null);
+        if (quiz == null) {
             return false;
         }
+
+        // Snapshot image URLs before cascade-delete removes the hints
+        List<String> imageUrls = quiz.getQuestions().stream()
+                .flatMap(q -> q.getHints().stream())
+                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .filter(url -> url != null)
+                .toList();
+
         resultRepository.deleteByQuizQuizId(id);
         quizRepository.deleteById(id);
-        log.info("Quiz {} deleted successfully", id);
+
+        imageUrls.forEach(imageStorageService::delete);
+
+        log.info("Quiz {} deleted successfully, {} image(s) removed", id, imageUrls.size());
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    public CleanupResult cleanupOrphanedImages() {
+        log.info("Starting orphaned image cleanup");
+        Set<String> referencedUrls = quizRepository.findAll().stream()
+                .flatMap(q -> q.getQuestions().stream())
+                .flatMap(q -> q.getHints().stream())
+                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .filter(url -> url != null)
+                .collect(Collectors.toSet());
+        CleanupResult result = imageStorageService.cleanupOrphanedImages(referencedUrls);
+        log.info("Cleanup complete: {} file(s) deleted", result.getDeletedCount());
+        return result;
     }
 
     private void applyQuestionsToQuiz(Quiz quiz, List<CreateQuizRequest.QuestionData> questions) {

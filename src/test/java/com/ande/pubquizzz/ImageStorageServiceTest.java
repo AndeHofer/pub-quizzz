@@ -8,6 +8,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -111,5 +112,42 @@ public class ImageStorageServiceTest {
         ImageStorageService svc = service();
         // File was never stored — should silently succeed
         assertDoesNotThrow(() -> svc.delete("/uploads/nonexistent-file.jpg"));
+    }
+
+    @Test
+    void cleanup_deletesOrphanedFile() throws IOException {
+        ImageStorageService svc = service();
+        MockMultipartFile file = new MockMultipartFile("f", "orphan.jpg", "image/jpeg", "d".getBytes());
+        String url = svc.store(file);
+
+        // Pass an empty referenced set — the stored file is orphaned
+        var result = svc.cleanupOrphanedImages(Set.of());
+
+        assertEquals(1, result.getDeletedCount());
+        assertTrue(result.getDeletedFiles().contains(url.substring("/uploads/".length())));
+        assertFalse(Files.exists(tempDir.resolve(url.substring("/uploads/".length()))));
+    }
+
+    @Test
+    void cleanup_keepsReferencedFile() throws IOException {
+        ImageStorageService svc = service();
+        MockMultipartFile file = new MockMultipartFile("f", "keep.jpg", "image/jpeg", "d".getBytes());
+        String url = svc.store(file);
+
+        // The file is referenced — must NOT be deleted
+        var result = svc.cleanupOrphanedImages(Set.of(url));
+
+        assertEquals(0, result.getDeletedCount());
+        assertTrue(Files.exists(tempDir.resolve(url.substring("/uploads/".length()))));
+    }
+
+    @Test
+    void cleanup_emptyDir_returnsZero() throws IOException {
+        ImageStorageService svc = service();
+
+        var result = svc.cleanupOrphanedImages(Set.of());
+
+        assertEquals(0, result.getDeletedCount());
+        assertTrue(result.getDeletedFiles().isEmpty());
     }
 }

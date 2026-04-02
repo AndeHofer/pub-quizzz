@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.controller;
 
+import com.ande.pubquizzz.dto.CleanupResult;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
@@ -86,6 +87,11 @@ public class AdminQuizController {
     public ResponseEntity<String> updateQuizDates(@PathVariable Long id, @RequestBody @Valid UpdateQuizDatesRequest request) {
         quizService.updateQuiz(id, request.getPubDate(), request.getSubmitDate());
         return ResponseEntity.ok("Quiz updated successfully");
+    }
+
+    @DeleteMapping("/cleanup-images")
+    public ResponseEntity<CleanupResult> cleanupOrphanedImages() {
+        return ResponseEntity.ok(quizService.cleanupOrphanedImages());
     }
 
     private void injectImageUrls(CreateQuizRequest request, Map<String, MultipartFile> allFiles) {

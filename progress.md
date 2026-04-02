@@ -713,6 +713,63 @@ appearing in startup logs despite correct config). Flyway was removed entirely t
 2. Delete the H2 DB volume (`h2_data`) on Portainer
 3. Deploy the new image — Hibernate recreates the schema with nullable `hint_text`
 
+---
+
+## Phase 22: Fix Orphaned Image Files ✅ COMPLETE
+
+### Problem
+
+Two scenarios caused image files to accumulate on disk and never be deleted:
+
+1. **Quiz deleted** — `deleteQuiz()` removed DB records but never deleted the quiz's image files from disk
+2. **Backup restore** — old images deleted between backups were re-introduced from the backup zip on each restore
+
+The backup size kept growing even without new data being added.
+
+### Changes
+
+#### Fix 1: Delete images on quiz delete (`QuizService.deleteQuiz`)
+
+- Replaced `existsById` check with `findById` to load the quiz (and its hints via EAGER fetch)
+- Snapshot all image URLs from hints before cascade-delete
+- After DB delete, call `imageStorageService.delete()` for each URL
+
+#### Fix 2: `DELETE /admin/cleanup-images` endpoint
+
+- `src/main/resources/openapi/cleanup-api.yaml`: OpenAPI spec
+- `CleanupResult.java`: Response DTO (`deletedCount`, `deletedFiles`)
+- `ImageStorageService.cleanupOrphanedImages(Set<String> referencedUrls)`: Lists all files in upload dir, deletes any
+  not in the referenced set
+- `QuizService.cleanupOrphanedImages()`: Collects all URLs from DB, delegates to `ImageStorageService`
+- `AdminQuizController`: `DELETE /admin/cleanup-images` — returns `CleanupResult` JSON
+
+#### Tests (+7 new, 150 total)
+
+- `QuizServiceDeleteTest`: 2 new tests — `deletesAllImageFiles`, `noImages_doesNotCallImageDelete`
+- `ImageStorageServiceTest`: 3 new tests — `cleanup_deletesOrphanedFile`, `cleanup_keepsReferencedFile`,
+  `cleanup_emptyDir_returnsZero`
+- `AdminQuizControllerTest`: 2 new tests — `cleanupImages_returnsDeletedCount`,
+  `cleanupImages_nothingToDelete_returnsZero`
+
+### To clean up existing Portainer uploads
+
+After deploying, click "Verwaiste Bilder löschen" in the admin panel (Wartung section), or call
+`DELETE /admin/cleanup-images`. Returns JSON with count and names of deleted files.
+
+### Phase 22 addendum: Trigger cleanup from UI + on restore ✅
+
+- `admin_main.html`: Added "Wartung" section with "Verwaiste Bilder löschen" button (`cleanupImagesBtn`)
+- `admin_functions.ts`: Added `cleanupImages()` — calls `DELETE /admin/cleanup-images`, shows result message in German
+- `BackupRestoreListener`: Now accepts `QuizService` as constructor dependency; calls `cleanupOrphanedImages()`
+  automatically after every successful restore
+- `BackupRestoreListenerTest`: Updated constructor call; added 2 new tests (`applyRestore_callsCleanupAfterRestore`,
+  `noPendingRestore_doesNotCallCleanup`)
+
+### Verification
+
+- Backend: 152/152 tests passing (`mvn test`)
+- Frontend: 0 type errors (`npm run type-check`)
+
 ### Verification
 
 - Backend: 143/143 tests passing (`mvn test`)

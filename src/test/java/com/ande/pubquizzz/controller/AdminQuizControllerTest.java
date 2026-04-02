@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.controller;
 
+import com.ande.pubquizzz.dto.CleanupResult;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
@@ -33,6 +34,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
 
 @WebMvcTest(AdminQuizController.class)
 @Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class, GlobalExceptionHandler.class})
@@ -266,6 +269,29 @@ class AdminQuizControllerTest {
                         .file(quizPart)
                         .with(csrf()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void cleanupImages_returnsDeletedCount() throws Exception {
+        when(quizService.cleanupOrphanedImages())
+                .thenReturn(new CleanupResult(2, List.of("a.jpg", "b.png")));
+
+        mockMvc.perform(delete("/admin/cleanup-images").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deletedCount").value(2))
+                .andExpect(jsonPath("$.deletedFiles[0]").value("a.jpg"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void cleanupImages_nothingToDelete_returnsZero() throws Exception {
+        when(quizService.cleanupOrphanedImages())
+                .thenReturn(new CleanupResult(0, List.of()));
+
+        mockMvc.perform(delete("/admin/cleanup-images").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deletedCount").value(0));
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

@@ -5,12 +5,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ande.pubquizzz.dto.CleanupResult;
 import com.ande.pubquizzz.exception.ImageStorageException;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -74,5 +78,30 @@ public class ImageStorageService {
         } catch (IOException e) {
             log.warn("Could not delete image file {}: {}", target, e.getMessage());
         }
+    }
+
+    /**
+     * Deletes every file in the upload directory whose URL is not in {@code referencedUrls}.
+     * Returns a {@link CleanupResult} with the count and names of deleted files.
+     */
+    public CleanupResult cleanupOrphanedImages(Set<String> referencedUrls) {
+        List<String> deleted = new ArrayList<>();
+        try (var stream = Files.list(uploadDir)) {
+            stream.filter(Files::isRegularFile).forEach(file -> {
+                String url = "/uploads/" + file.getFileName().toString();
+                if (!referencedUrls.contains(url)) {
+                    try {
+                        Files.delete(file);
+                        deleted.add(file.getFileName().toString());
+                        log.info("Cleanup: deleted orphaned image {}", file);
+                    } catch (IOException e) {
+                        log.warn("Cleanup: could not delete {}: {}", file, e.getMessage());
+                    }
+                }
+            });
+        } catch (IOException e) {
+            throw new ImageStorageException("Failed to list upload directory for cleanup", e);
+        }
+        return new CleanupResult(deleted.size(), deleted);
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import com.ande.pubquizzz.service.QuizService;
+
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,14 +23,17 @@ import java.util.stream.Stream;
 public class BackupRestoreListener {
 
     private final DataSource dataSource;
+    private final QuizService quizService;
     private final Path uploadDir;
     private final Path restoreDir;
 
     public BackupRestoreListener(
             DataSource dataSource,
+            QuizService quizService,
             @Value("${app.upload.dir:/data/uploads}") String uploadDirPath,
             @Value("${app.backup.restore-dir:/data/pending-restore}") String restoreDirPath) {
         this.dataSource = dataSource;
+        this.quizService = quizService;
         this.uploadDir = Paths.get(uploadDirPath);
         this.restoreDir = Paths.get(restoreDirPath);
     }
@@ -45,6 +50,8 @@ public class BackupRestoreListener {
             applyRestore(pendingSql);
             deleteDirectory(restoreDir);
             log.info("Restore applied successfully.");
+            var cleanup = quizService.cleanupOrphanedImages();
+            log.info("Post-restore cleanup: {} orphaned image(s) removed", cleanup.getDeletedCount());
         } catch (Exception e) {
             log.error("Restore FAILED — leaving {} in place for diagnosis. Application continues with old state.", restoreDir, e);
             // Do NOT rethrow — application must continue running

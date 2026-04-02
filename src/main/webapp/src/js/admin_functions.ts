@@ -106,6 +106,8 @@ window.addEventListener('load', () => {
             await importBackup();
         });
     }
+
+    document.getElementById('cleanupImagesBtn')?.addEventListener('click', cleanupImages);
 });
 
 // ==================== Quiz Management ====================
@@ -551,6 +553,30 @@ async function importBackup() {
             if (msgDiv) msgDiv.innerHTML = `<span style="color:green;">${msg}</span>`;
         } else {
             const err = await resp.json().catch(() => ({ error: 'Unbekannter Fehler' }));
+            if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Fehler: ${err.error}</span>`;
+        }
+    } catch (error: unknown) {
+        if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Netzwerkfehler: ${error instanceof Error ? error.message : error}</span>`;
+    }
+}
+
+async function cleanupImages() {
+    const msgDiv = document.getElementById('cleanupMessage') as HTMLElement | null;
+    if (msgDiv) msgDiv.innerHTML = '<span>Bereinigung läuft...</span>';
+
+    try {
+        const resp = await apiFetch('/admin/cleanup-images', {method: 'DELETE'});
+        if (resp.ok) {
+            const result = await resp.json() as { deletedCount: number; deletedFiles: string[] };
+            if (msgDiv) {
+                if (result.deletedCount === 0) {
+                    msgDiv.innerHTML = '<span style="color:green;">Keine verwaisten Bilder gefunden.</span>';
+                } else {
+                    msgDiv.innerHTML = `<span style="color:green;">${result.deletedCount} verwaiste(s) Bild(er) gelöscht.</span>`;
+                }
+            }
+        } else {
+            const err = await resp.json().catch(() => ({error: 'Unbekannter Fehler'}));
             if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Fehler: ${err.error}</span>`;
         }
     } catch (error: unknown) {

@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.service;
 
+import com.ande.pubquizzz.dto.CleanupResult;
 import com.ande.pubquizzz.listener.BackupRestoreListener;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,14 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.ResultSet;
-import java.util.zip.ZipEntry;
+import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class BackupRestoreListenerTest {
 
@@ -22,6 +23,7 @@ public class BackupRestoreListenerTest {
     Path tempDir;
 
     private JdbcDataSource sharedDs;
+    private QuizService mockQuizService;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -31,7 +33,6 @@ public class BackupRestoreListenerTest {
         sharedDs.setPassword("");
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
-            // Create the tables referenced in SCRIPT TO ... TABLE ... (required before backup can run)
             stmt.execute("CREATE TABLE IF NOT EXISTS quiz (id BIGINT PRIMARY KEY, name VARCHAR(255))");
             stmt.execute("CREATE TABLE IF NOT EXISTS question (id BIGINT PRIMARY KEY, quiz_id BIGINT, FOREIGN KEY (quiz_id) REFERENCES quiz(id))");
             stmt.execute("CREATE TABLE IF NOT EXISTS question_hints (question_id BIGINT, hint_text VARCHAR(1024))");
@@ -40,11 +41,14 @@ public class BackupRestoreListenerTest {
             stmt.execute("CREATE TABLE IF NOT EXISTS result_answer (id BIGINT PRIMARY KEY, result_id BIGINT)");
         }
         Files.createDirectories(tempDir.resolve("uploads"));
+        mockQuizService = mock(QuizService.class);
+        when(mockQuizService.cleanupOrphanedImages()).thenReturn(new CleanupResult(0, List.of()));
     }
 
     private BackupRestoreListener listener() {
         return new BackupRestoreListener(
                 sharedDs,
+                mockQuizService,
                 tempDir.resolve("uploads").toString(),
                 tempDir.resolve("restore").toString());
     }
@@ -58,7 +62,6 @@ public class BackupRestoreListenerTest {
 
     @Test
     void applyRestore_preservesAppUserRows() throws Exception {
-        // Arrange: create appUser table with a row, and a quiz table with a row
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
             stmt.execute("CREATE TABLE IF NOT EXISTS appUser (id BIGINT PRIMARY KEY, username VARCHAR(255))");
@@ -67,7 +70,6 @@ public class BackupRestoreListenerTest {
             stmt.execute("INSERT INTO quiz VALUES (100, 'Test Quiz')");
         }
 
-        // Act: create a backup ZIP (excludes appUser), stage it, then trigger restore
         BackupService svc = backupService();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zip = new ZipOutputStream(baos)) {
@@ -75,7 +77,6 @@ public class BackupRestoreListenerTest {
         }
         svc.stageRestore(baos.toByteArray());
 
-        // Wipe the quiz table row to simulate a "dirty" state before restore
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
             stmt.execute("DELETE FROM quiz");
@@ -83,12 +84,37 @@ public class BackupRestoreListenerTest {
 
         listener().onApplicationStarted();
 
-        // Assert: appUser row must still exist
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM appUser WHERE username = 'admin'");
             rs.next();
             assertEquals(1, rs.getInt(1), "appUser row must survive a restore");
         }
+    }
+
+    @Test
+    void applyRestore_callsCleanupAfterRestore() throws Exception {
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE IF NOT EXISTS appUser (id BIGINT PRIMARY KEY, username VARCHAR(255))");
+        }
+
+        BackupService svc = backupService();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            svc.createBackup(zip);
+        }
+        svc.stageRestore(baos.toByteArray());
+
+        listener().onApplicationStarted();
+
+        verify(mockQuizService, times(1)).cleanupOrphanedImages();
+    }
+
+    @Test
+    void noPendingRestore_doesNotCallCleanup() {
+        listener().onApplicationStarted();
+
+        verify(mockQuizService, never()).cleanupOrphanedImages();
     }
 }
