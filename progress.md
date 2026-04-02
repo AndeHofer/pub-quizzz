@@ -503,3 +503,49 @@ pubquizzz-backup-YYYY-MM-DD.zip
 
 - Backend: 109/109 tests passing (`mvn.cmd clean test`)
 - Frontend: 0 type errors (`npm run type-check`)
+
+## Phase 17: Quiz Draft Saving + Finished Indicator ✅ COMPLETE
+
+### Goal
+
+Allow admins to save incomplete ("draft") quizzes, and replace the "Fragen" (question count) column
+in the admin quiz list with a ✅/❌ "Fertig" finished indicator.
+
+### Finished Definition
+
+A quiz is **finished** when:
+- It has exactly 8 questions
+- Every question has a non-blank `questionText` and non-blank `answer`
+- Every hint has either a non-blank `hintText` OR a non-null `imageUrlAsHint`
+  (`imageUrlAtStart` alone does **not** count as a filled hint)
+
+### Changes
+
+#### Backend
+
+- `Hint.java`: `@Column(nullable = false)` → `nullable = true`, removed `@NotNull` from `hintText`
+- `QuizDTO.java`: Removed `int questionCount`, added `boolean finished`
+- `QuizFinishedChecker.java` (new): Static utility in `mapper` package — `isFinished(Quiz)` implements
+  the finished definition above
+- `QuizMapper.java`: Replaced `questionCount` expression with `finished` via `QuizFinishedChecker.isFinished(quiz)`
+- `CreateQuizRequest.java`: Removed `@NotBlank` from `questionText` and `answer` in `QuestionData` —
+  blank strings are now accepted for draft quizzes
+
+#### Frontend
+
+- `types.ts`: Replaced `questionCount?: number` with `finished?: boolean` in `QuizDTO`
+- `admin_functions.ts`: "Fragen" header → "Fertig"; cell renders `✅` or `❌` based on `finished`
+- `create_quiz.ts`: Removed `required` attribute from question text and answer inputs
+
+#### Tests (+10 new)
+
+- `AdminQuizControllerTest.java`: Fixed 4 `setQuestionCount` → `setFinished`; fixed jsonPath assertion;
+  added `createQuiz_withBlankQuestionText_isAllowedAsDraft` test (16 total)
+- `QuizFinishedCheckerTest.java` (new): 8 unit tests for all `isFinished()` branches including the
+  `imageUrlAsHint`-only hint case and `imageUrlAtStart`-only (should be false) case
+- `HintPersistenceTest.java`: Added `hintWithNullTextAndImageAsHintIsPersisted` (7 total)
+
+### Verification
+
+- Backend: 119/119 tests passing (`mvn.cmd clean test`)
+- Frontend: 0 type errors (`npm run type-check`)
