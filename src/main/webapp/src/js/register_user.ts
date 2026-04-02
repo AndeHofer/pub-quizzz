@@ -6,6 +6,8 @@ import { showMessage, goBack } from './utils';
 window.addEventListener('load', () => {
     (window as any).registerUser = registerUser;
     (window as any).goBack = () => goBack('admin_main.html');
+    document.getElementById('registerUserBtn')?.addEventListener('click', registerUser);
+    document.getElementById('backBtn')?.addEventListener('click', () => goBack('admin_main.html'));
 });
 
 function registerUser() {

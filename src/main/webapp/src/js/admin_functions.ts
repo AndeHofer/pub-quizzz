@@ -69,6 +69,22 @@ window.addEventListener('load', () => {
     (window as any).viewUsers = viewUsers;
     (window as any).deleteUser = deleteUser;
 
+    // Wire up admin_main.html buttons by ID
+    document.getElementById('createQuizBtn')?.addEventListener('click', () => {
+        location.href = 'create_quiz.html';
+    });
+    document.getElementById('viewQuizzesBtn')?.addEventListener('click', viewQuizzes);
+    document.getElementById('createTeamBtn')?.addEventListener('click', createTeam);
+    document.getElementById('viewTeamsBtn')?.addEventListener('click', viewTeams);
+    document.getElementById('addResultBtn')?.addEventListener('click', showAddResultModal);
+    document.getElementById('viewResultsBtn')?.addEventListener('click', () => viewResults());
+    document.getElementById('createUserBtn')?.addEventListener('click', () => {
+        location.href = 'register_user.html';
+    });
+    document.getElementById('viewUsersBtn')?.addEventListener('click', viewUsers);
+    document.getElementById('backBtn')?.addEventListener('click', goBack);
+    document.getElementById('modalCloseBtn')?.addEventListener('click', closeModal);
+
     const modal = document.getElementById('dataModal');
     if (modal) {
         window.addEventListener('click', (event: MouseEvent) => {
@@ -275,7 +291,7 @@ async function viewResults(quizIdOverride?: string | null) {
             showModal('Ergebnisse', '<p>Keine Ergebnisse gefunden.</p>');
             return;
         }
-        let html = '<table><thead><tr><th>Team</th><th>Quiz Datum</th>';
+        let html = '<div class="overflow-x-auto"><table><thead><tr><th>Team</th><th>Quiz Datum</th>';
         for (let i = 1; i <= 8; i++) html += `<th>Q${i}</th>`;
         html += '<th>Gesamt</th><th>Aktionen</th></tr></thead><tbody>';
         results.forEach((result: ResultDTO) => {
@@ -303,7 +319,7 @@ async function viewResults(quizIdOverride?: string | null) {
 </td>`;
             html += '</tr>';
         });
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         showModal('Ergebnisse', html);
         document.querySelectorAll('.delete-result-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -410,6 +426,8 @@ async function showAddResultModal() {
         }
         const saveBtn = document.getElementById('add-result-save-btn');
         if (saveBtn) saveBtn.addEventListener('click', onSaveAddResult);
+        const cancelBtn = document.getElementById('add-result-cancel-btn');
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
     } catch (err: unknown) {
         showModal('Fehler', showError('Fehler beim Laden der Daten: ' + (err instanceof Error ? err.message : err)));
     }
@@ -434,7 +452,7 @@ function buildAddResultForm() {
         ${inputs}
         <div class="form-actions">
           <button id="add-result-save-btn" class="primary-btn">Speichern</button>
-          <button onclick="closeModal()" class="secondary-btn">Abbrechen</button>
+          <button id="add-result-cancel-btn" class="secondary-btn">Abbrechen</button>
         </div>
         <div id="add-result-feedback" class="form-feedback"></div>
       </div>
@@ -551,5 +569,5 @@ function renderTable(headers: string[], rows: unknown[], rowFn: (row: unknown) =
         html += '</tr>';
     });
     html += '</tbody></table>';
-    return html;
+    return `<div class="overflow-x-auto">${html}</div>`;
 }

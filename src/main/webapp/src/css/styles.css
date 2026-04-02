@@ -2,15 +2,15 @@
 
 @layer components {
     body {
-        @apply font-sans mt-[50px] bg-gray-50;
+        @apply font-sans mt-4 sm:mt-[50px] bg-gray-50;
     }
 
     .container {
-        @apply bg-white p-[30px] rounded-lg shadow max-w-[900px] mx-auto;
+        @apply bg-white px-4 py-5 sm:p-[30px] rounded-lg shadow max-w-[900px] mx-auto;
     }
 
     .container.small {
-        @apply max-w-[500px];
+        @apply max-w-full sm:max-w-[500px];
     }
 
     h1 {
@@ -70,7 +70,7 @@
     }
 
     .modal-content {
-        @apply bg-white relative my-[5%] mx-auto p-[30px] rounded-lg w-4/5 max-w-[800px] max-h-[80vh] overflow-y-auto;
+        @apply bg-white relative my-[2%] sm:my-[5%] mx-auto p-4 sm:p-[30px] rounded-lg w-[97%] sm:w-4/5 sm:max-w-[800px] max-h-[90vh] sm:max-h-[80vh] overflow-y-auto;
     }
 
     .suggest-wrapper {
@@ -108,7 +108,7 @@
 
     th,
     td {
-        @apply border border-gray-300 p-3 text-left;
+        @apply border border-gray-300 p-1.5 sm:p-3 text-left text-sm sm:text-base;
     }
 
     th {

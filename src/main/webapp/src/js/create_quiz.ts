@@ -100,12 +100,10 @@ if (questionsContainer) {
                     <label>Hinweis ${i}.${j}:</label>
                     <input type="text" id="hint${i}_${j}" placeholder="Text (optional)">
                     <label style="font-size:0.85em; margin-top:4px;">Bild: Am Anfang</label>
-                    <input type="file" id="hint_atstart_q${i}_h${j}" accept="image/*"
-                           onchange="previewHintImage(this, 'preview_atstart_q${i}_h${j}')">
+                    <input type="file" id="hint_atstart_q${i}_h${j}" accept="image/*">
                     <img id="preview_atstart_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
                     <label style="font-size:0.85em; margin-top:4px;">Bild: Als Hinweis</label>
-                    <input type="file" id="hint_ashint_q${i}_h${j}" accept="image/*"
-                           onchange="previewHintImage(this, 'preview_ashint_q${i}_h${j}')">
+                    <input type="file" id="hint_ashint_q${i}_h${j}" accept="image/*">
                     <img id="preview_ashint_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
                 </div>`;
         }
@@ -127,6 +125,19 @@ if (questionsContainer) {
             </div>
         `;
         questionsContainer.appendChild(section);
+
+        // Wire up image preview listeners (avoids inline onchange=)
+        const numHintsForListeners = i <= 4 ? 4 : 3;
+        for (let j = 1; j <= numHintsForListeners; j++) {
+            const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement | null;
+            if (atStartInput) {
+                atStartInput.addEventListener('change', () => previewHintImage(atStartInput, `preview_atstart_q${i}_h${j}`));
+            }
+            const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement | null;
+            if (asHintInput) {
+                asHintInput.addEventListener('change', () => previewHintImage(asHintInput, `preview_ashint_q${i}_h${j}`));
+            }
+        }
     }
 }
 
@@ -238,8 +249,8 @@ if (quizForm) {
 
 // Ensure functions are available globally
 window.addEventListener('load', () => {
-    (window as any).previewHintImage = previewHintImage;
     (window as any).goBack = () => goBack('admin_main.html');
+    document.getElementById('backBtn')?.addEventListener('click', () => goBack('admin_main.html'));
 });
 
 function previewHintImage(input: HTMLInputElement, previewId: string) {

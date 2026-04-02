@@ -611,3 +611,71 @@ A quiz is **finished** when:
 - Backend: 141/141 tests passing (`mvn test`)
 - Frontend: build succeeds (`npm run build`), `quizzes.html` + `quiz.html` + assets emitted to `src/main/resources/static/`
 - Two git commits: backend (`feat: add quiz archive API - GET /api/quizzes and GET /api/quizzes/{id}/results with Olympic ranking`) + frontend (`feat: add Quiz Archiv frontend pages - quizzes list and quiz results with Olympic ranking display`)
+
+---
+
+## Phase 20: Admin Section Mobile-Friendly ✅ COMPLETE
+
+### Goal
+
+Make all three admin pages usable on mobile phones. The non-admin pages were already mobile-first (Tailwind utility
+classes with `sm:` breakpoints); the admin pages still used old fixed-size CSS class definitions.
+
+### Problems fixed
+
+- No `<meta viewport>` on any admin page → browser zoomed out on mobile
+- `.container` fixed `p-[30px]` → clipped on narrow screens
+- `.container.small` fixed `max-w-[500px]` → too wide on small phones
+- `.modal-content` `w-4/5 max-w-[800px]` → barely fit on 375px screen
+- `body` `mt-[50px]` → wasted space on mobile
+- `th/td` `p-3` → too much padding on small screens
+- 12-column results table → completely unusable without scroll
+- Multiple `onclick=` / `onchange=` inline event handlers remaining in admin HTML/TS
+
+### Changes
+
+#### `styles.css`
+
+- `body`: `mt-[50px]` → `mt-4 sm:mt-[50px]`
+- `.container`: `p-[30px]` → `px-4 py-5 sm:p-[30px]`
+- `.container.small`: `max-w-[500px]` → `max-w-full sm:max-w-[500px]`
+- `.modal-content`: `my-[5%] p-[30px] w-4/5 max-w-[800px] max-h-[80vh]` →
+  `my-[2%] sm:my-[5%] p-4 sm:p-[30px] w-[97%] sm:w-4/5 sm:max-w-[800px] max-h-[90vh] sm:max-h-[80vh]`
+- `th, td`: `p-3` → `p-1.5 sm:p-3 text-sm sm:text-base`
+
+#### `admin_main.html`, `create_quiz.html`, `register_user.html`
+
+- Added `<meta name="viewport" content="width=device-width, initial-scale=1">` to all three
+
+#### `admin_functions.ts`
+
+- `renderTable`: wraps output in `<div class="overflow-x-auto">...</div>`
+- `viewResults` inline table: wrapped in `<div class="overflow-x-auto">...</div>`
+- `buildAddResultForm`: replaced `onclick="closeModal()"` on Abbrechen button with `id="add-result-cancel-btn"`; wired
+  in `showAddResultModal`
+- `window.addEventListener('load')`: added ID-based event listeners for all `admin_main.html` buttons (`createQuizBtn`,
+  `viewQuizzesBtn`, `createTeamBtn`, `viewTeamsBtn`, `addResultBtn`, `viewResultsBtn`, `createUserBtn`, `viewUsersBtn`,
+  `backBtn`, `modalCloseBtn`) — removed all corresponding inline `onclick=` from HTML
+
+#### `admin_main.html`
+
+- Replaced all `onclick=` on buttons with `id=` attributes
+- Replaced `onclick="closeModal()"` on modal close span with `id="modalCloseBtn"`
+
+#### `create_quiz.ts`
+
+- Hint file inputs no longer use `onchange="previewHintImage(...)"` — replaced with `addEventListener('change', ...)`
+  after appending each question section to the DOM
+- Removed `previewHintImage` from global window registration (no longer needed)
+- `backBtn` in `create_quiz.html` wired via `addEventListener` in load handler
+
+#### `register_user.html` + `register_user.ts`
+
+- Replaced `onclick="registerUser()"` and `onclick="goBack()"` with `id="registerUserBtn"` and `id="backBtn"`
+- Wired both in `register_user.ts` load handler
+
+### Verification
+
+- Backend: 141/141 tests passing (`mvn test`)
+- Frontend: 0 type errors (`npm run type-check`)
+- Build: succeeds (`npm run build`)
