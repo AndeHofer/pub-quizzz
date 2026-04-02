@@ -22,8 +22,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        // Add this line to allow the favicon without a login check
-                        .requestMatchers("/favicon.ico", "/css/**", "/js/**", "/images/**").permitAll()
+                        // Allow static assets (favicon, Vite output, uploaded images) without login
+                        .requestMatchers("/favicon.ico", "/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults());
@@ -39,6 +39,6 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/favicon.ico", "/static/**", "/css/**", "/js/**");
+        return (web) -> web.ignoring().requestMatchers("/favicon.ico", "/static/**", "/css/**", "/js/**", "/assets/**", "/uploads/**");
     }
 }
