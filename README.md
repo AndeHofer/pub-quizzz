@@ -4,15 +4,15 @@ A simple app to archive results, quiz and answers.
 
 ## TODOS
 
-1) fix hint → text should not be mandatory
-2) make it usable for mobile
-3) add more rankings
-4) enhance logging
-5) fix h2-console defaults
-6) quiz mode to replay the quiz online
+1) add more rankings
+2) enhance logging
+3) fix h2-console defaults
+4) quiz mode to replay the quiz online
 
 ## DONE
 
+- ~~make it usable for mobile~~
+- ~~fix hint → text should not be mandatory~~
 - ~~refactor admin inputs~~
 - ~~create some tests to autofill the db's~~
 - ~~show rankings on user page~~
