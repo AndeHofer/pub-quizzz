@@ -60,7 +60,7 @@ class BigIntegrationTest {
     @Test
     void seedBaseData() {
         // --- 1. Create quizzes ---
-        Quiz quiz1 = buildGeografieQuiz();
+        Quiz quiz1 = buildApril2026Quiz();
         Quiz quiz2 = buildPopkulturQuiz();
         Quiz quiz3 = buildWissenschaftQuiz();
         Quiz quiz4 = buildGeschichteQuiz();
@@ -78,16 +78,18 @@ class BigIntegrationTest {
         // so team[0] → 1 quiz, team[1] → 2 quizzes, ..., team[4..9] → 5 quizzes
         // Points ramp from high (team 0) to low (team 9) for realism
         int[][] pointTemplates = {
-                {5, 5, 5, 5, 5, 5, 5, 5},  // team 0 — Die Klugscheißer         40 pts/quiz
-                {5, 5, 5, 3, 5, 5, 5, 3},  // team 1 — Hirnlos aber herzlich    36 pts/quiz
-                {5, 5, 3, 3, 5, 5, 3, 3},  // team 2 — Quiz me if you can       32 pts/quiz
-                {5, 3, 5, 3, 5, 3, 5, 3},  // team 3 — Wir wissen nichts        32 pts/quiz
-                {5, 3, 3, 3, 5, 3, 3, 3},  // team 4 — Die Halbwissenden        28 pts/quiz
-                {3, 3, 3, 3, 3, 3, 3, 3},  // team 5 — Gehirn ist aus           24 pts/quiz
-                {3, 2, 3, 2, 3, 2, 3, 2},  // team 6 — Schrödingers Antwort     20 pts/quiz
-                {2, 2, 2, 1, 2, 2, 2, 1},  // team 7 — 404 - Antwort...         14 pts/quiz
-                {2, 1, 2, 0, 2, 1, 2, 0},  // team 8 — Falsifikation Ö.         10 pts/quiz
-                {1, 0, 1, 0, 1, 0, 1, 0},  // team 9 — Mit Abstand am ...        4 pts/quiz
+                {0, 3, 3, 5, 5, 2, 5, 5},  // team 0 — Dicktales
+                {0, 3, 3, 1, 5, 0, 5, 5},  // team 1 — Stute
+                {0, 3, 3, 5, 1, 0, 5, 5},  // team 2 — UDO
+                {0, 3, 3, 5, 5, 1, 5, 5},  // team 3 — Vienna Lemmings
+                {0, 3, 0, 2, 0, 0, 0, 2},  // team 4 — The M-Team
+                {0, 0, 0, 0, 2, 0, 0, 2},  // team 5 — Die Dodos
+                {0, 0, 0, 0, 1, 1, 3, 0},  // team 6 — 5BG Hotdogs
+                {2, 5, 0, 5, 3, 0, 5, 3},  // team 7 — TEAM
+                {0, 3, 0, 3, 0, 0, 3, 2},  // team 8 — Die Julians
+                {0, 3, 0, 5, 5, 1, 5, 2},  // team 9 — Ginger Army
+                {0, 2, 0, 5, 0, 1, 1, 0},  // team 9 — Me is Quiz
+                {0, 3, 0, 5, 0, 0, 2, 2},  // team 9 — SpaGra
         };
 
         List<Result> allResults = new ArrayList<>();
@@ -101,8 +103,8 @@ class BigIntegrationTest {
 
         // --- 4. Assert counts ---
         assertEquals(5, quizRepository.count(), "Expected 5 quizzes");
-        assertEquals(10, teamRepository.count(), "Expected 10 teams");
-        assertEquals(40, resultRepository.count(), "Expected 40 results (1+2+3+4+5+5+5+5+5+5)");
+        assertEquals(12, teamRepository.count(), "Expected 12 teams");
+        assertEquals(50, resultRepository.count(), "Expected 50 results");
 
         // --- 5. Spot-check quiz structure ---
         Quiz loaded1 = quizRepository.findById(quiz1.getQuizId()).orElseThrow();
@@ -143,26 +145,26 @@ class BigIntegrationTest {
     // Quiz builders
     // -------------------------------------------------------------------------
 
-    private Quiz buildGeografieQuiz() {
+    private Quiz buildApril2026Quiz() {
         Quiz q = new Quiz();
-        q.setPubDate(LocalDate.of(2025, 1, 15));
-        q.setSubmitDate(LocalDate.of(2025, 1, 14));
-        q.addQuestion(1, "Welche Stadt ist die Hauptstadt von Australien?", "Canberra", "Nicht Sydney!",
-                hints("Sydney ist falsch", "Melbourne auch nicht", "Es fängt mit C an", "Wurde speziell gebaut"));
-        q.addQuestion(2, "Wie heißt das größte Binnenmeer der Erde?", "Kaspisches Meer", "",
-                hints("In Asien", "Zwischen Russland und Iran", "Kein Zugang zum Ozean", "Größer als Deutschland"));
-        q.addQuestion(3, "In welchem Land liegt der Titicacasee?", "Peru und Bolivien", "Grenzgewässer",
-                hints("Südamerika", "Hochgebirge", "Zwei Länder teilen ihn", "Über 3800m Höhe"));
-        q.addQuestion(4, "Welches ist das flächenmäßig kleinste Land der Welt?", "Vatikanstadt", "",
-                hints("In Europa", "In Rom", "Unter 1 km²", "Sitz des Papstes"));
-        q.addQuestion(5, "Wie viele Zeitzonen hat Russland?", "11", "",
-                hints("Größtes Land der Erde", "Mehr als 10", "Ungerade Zahl"));
-        q.addQuestion(6, "Welches Land hat die längste Küstenlinie?", "Kanada", "",
-                hints("Nordamerika", "Nicht Australien", "Viele Inseln"));
-        q.addQuestion(7, "Wie heißt der höchste Vulkan der Erde?", "Ojos del Salado", "",
-                hints("In den Anden", "Nicht der Everest", "Grenzgebiet Chile/Argentinien"));
-        q.addQuestion(8, "In welcher Stadt steht die Freiheitsstatue?", "New York City", "",
-                hints("USA", "Ostküste", "Auf einer Insel im Hafen"));
+        q.setPubDate(LocalDate.of(2025, 4, 1));
+        q.setSubmitDate(LocalDate.of(2025, 4, 2));
+        q.addQuestion(1, "Zwar nicht sprichwörtlicih, aber das ist in Ordnung", "Wörter in alphabetischer Ordnung", "",
+                hints("Beikost", "Dekor", "Film", "Eis"));
+        q.addQuestion(2, "Die neue ART der Suche. Deden - nein - Gegen das immer gleiche Bild?", "Google Doodle", "",
+                hints("International: Tag der Bastille 2000", "Interaktiv: Pacman 2010", "Video: Charlie Chaplin 2011", "Überhaupt: Burning Man Festival 1998"));
+        q.addQuestion(3, "Wer bin ich? Ein Lied, mal kalt, mal heiß. Abschnitte des Sesselspiels?", "Ned Stark", "",
+                hints("4", "12", "16", "20"));
+        q.addQuestion(4, "Alle gemeinsam sind über jeder Tür zU finden", "Netzplan über den U-Bahn Türen", "",
+                hints("", "", "", ""));
+        q.addQuestion(5, "Eine Erfindung der EU. Wenn die Hauptstadt nicht die Hauptstadt ist.", "Belgien 1993", "",
+                hints("Italien 1986", "BR Deutschland 1988", "UK 1990"));
+        q.addQuestion(6, "Auch das Personal in meiner Gruppe. Aberwo MAg der Leiter sein?", "36-1200", "",
+                hints("20-1120", "22-1200", "31-1060"));
+        q.addQuestion(7, "Am Fuße des Doms stirbt der reiche Mann. Wieder und wieder und wieder...", "Peter 91x", "",
+                hints("Walther 55x", "Will 56x", "Alexander 69x"));
+        q.addQuestion(8, "In England schreit ein blinder Computer schriftlich um Hilfe?", "11 10 10 10 ", "HELP in Computer Braille",
+                hints("10 11 00 10", "10 01 00 10 ", "11 10 10 10"));
         return q;
     }
 
@@ -264,16 +266,18 @@ class BigIntegrationTest {
 
     private List<Team> buildTeams() {
         return List.of(
-                team("Die Klugscheißer"),
-                team("Hirnlos aber herzlich"),
-                team("Quiz me if you can"),
-                team("Wir wissen nichts, aber dafür laut"),
-                team("Die Halbwissenden"),
-                team("Gehirn ist aus"),
-                team("Schrödingers Antwort"),
-                team("404 - Antwort nicht gefunden"),
-                team("Falsifikation Österreich"),
-                team("Mit Abstand am schlechtesten")
+                team("Dicktales"),
+                team("Stute"),
+                team("UDO"),
+                team("Vienna Lemmings"),
+                team("The M-Team"),
+                team("Die Dodos"),
+                team("5BG Hotdogs"),
+                team("TEAM"),
+                team("Die Julian"),
+                team("Ginger Army"),
+                team("Me is Quiz"),
+                team("Spagra")
         );
     }
 

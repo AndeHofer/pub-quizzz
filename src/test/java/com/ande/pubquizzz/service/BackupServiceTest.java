@@ -32,8 +32,16 @@ public class BackupServiceTest {
         sharedDs.setURL("jdbc:h2:file:" + tempDir.resolve("testdb").toAbsolutePath() + ";AUTO_SERVER=FALSE");
         sharedDs.setUser("sa");
         sharedDs.setPassword("");
-        // Materialise the H2 file
-        try (var conn = sharedDs.getConnection()) { /* no-op */ }
+        // Materialise the H2 file and create the tables referenced in SCRIPT TO ... TABLE ...
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE IF NOT EXISTS quiz (id BIGINT PRIMARY KEY, name VARCHAR(255))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS question (id BIGINT PRIMARY KEY, quiz_id BIGINT, FOREIGN KEY (quiz_id) REFERENCES quiz(id))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS question_hints (question_id BIGINT, hint_text VARCHAR(1024))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS team (id BIGINT PRIMARY KEY, name VARCHAR(255))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS result (id BIGINT PRIMARY KEY, quiz_id BIGINT)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS result_answer (id BIGINT PRIMARY KEY, result_id BIGINT)");
+        }
         Files.createDirectories(tempDir.resolve("uploads"));
     }
 
@@ -128,6 +136,28 @@ public class BackupServiceTest {
 
         assertThrows(BusinessValidationException.class, () -> service().stageRestore(baos.toByteArray()),
                 "Should throw BusinessValidationException when database.sql is missing from ZIP");
+    }
+
+    @Test
+    void createBackup_sqlDump_doesNotContainAppUserTable() throws Exception {
+        // Create an appUser-like table and insert a row — backup must NOT include it
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE IF NOT EXISTS appUser (id BIGINT PRIMARY KEY, username VARCHAR(255))");
+            stmt.execute("INSERT INTO appUser VALUES (1, 'admin')");
+        }
+
+        BackupService svc = service();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            svc.createBackup(zip);
+        }
+
+        Map<String, byte[]> entries = readZipEntries(baos.toByteArray());
+        String sqlContent = new String(entries.get("database.sql"), StandardCharsets.UTF_8);
+        // H2 SCRIPT uppercases table names
+        assertFalse(sqlContent.toUpperCase().contains("APPUSER"),
+                "SQL dump must not contain APPUSER table");
     }
 
     @Test

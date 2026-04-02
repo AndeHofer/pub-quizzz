@@ -56,7 +56,13 @@ public class BackupRestoreListener {
 
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.execute("DROP ALL OBJECTS DELETE FILES");
+            // Drop only the backed-up tables (FK-safe order), leaving appUser untouched
+            stmt.execute("DROP TABLE IF EXISTS result_answer");
+            stmt.execute("DROP TABLE IF EXISTS result");
+            stmt.execute("DROP TABLE IF EXISTS question_hints");
+            stmt.execute("DROP TABLE IF EXISTS question");
+            stmt.execute("DROP TABLE IF EXISTS quiz");
+            stmt.execute("DROP TABLE IF EXISTS team");
             stmt.execute("RUNSCRIPT FROM '" + sqlPath + "'");
         }
 
