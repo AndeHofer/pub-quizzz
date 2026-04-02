@@ -44,4 +44,12 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
         ORDER BY q.pubDate DESC
     """)
     List<Result> findByTeamNameOrderByPubDateDesc(@Param("teamName") String teamName);
+
+    @Query("""
+        SELECT DISTINCT r FROM Result r
+        JOIN FETCH r.team
+        JOIN FETCH r.answers
+        WHERE r.quiz.quizId = :quizId
+    """)
+    List<Result> findByQuizIdWithTeamAndAnswers(@Param("quizId") Long quizId);
 }

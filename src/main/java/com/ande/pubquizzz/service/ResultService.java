@@ -1,6 +1,7 @@
 package com.ande.pubquizzz.service;
 
 import com.ande.pubquizzz.database.entities.Result;
+import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.entities.ResultAnswer;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
@@ -8,6 +9,8 @@ import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.AllTimeLeaderboardEntry;
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.CreateResultRequest;
+import com.ande.pubquizzz.dto.QuizResultEntry;
+import com.ande.pubquizzz.dto.QuizSummaryDTO;
 import com.ande.pubquizzz.dto.ResultDTO;
 import com.ande.pubquizzz.dto.TeamResultEntry;
 import com.ande.pubquizzz.dto.UpdateResultRequest;
@@ -31,6 +34,58 @@ public class ResultService {
     private final QuizRepository quizRepository;
     private final TeamRepository teamRepository;
     private final ResultMapper resultMapper;
+
+    @Transactional(readOnly = true)
+    public List<QuizSummaryDTO> getQuizSummaries() {
+        log.info("Fetching quiz summaries");
+        List<Object[]> rows = quizRepository.findAllWithResultCount();
+        return rows.stream().map(row -> {
+            Quiz quiz = (Quiz) row[0];
+            long count = ((Number) row[1]).longValue();
+            QuizSummaryDTO dto = new QuizSummaryDTO();
+            dto.setQuizId(quiz.getQuizId());
+            dto.setQuizTitle(deriveQuizTitle(quiz.getTitle(), quiz.getPubDate()));
+            dto.setPubDate(quiz.getPubDate().toString());
+            dto.setTeamCount((int) count);
+            return dto;
+        }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuizResultEntry> getResultsForQuiz(Long quizId) {
+        log.info("Fetching results for quiz {}", quizId);
+        List<Result> results = resultRepository.findByQuizIdWithTeamAndAnswers(quizId);
+
+        // Sort by totalPoints descending
+        List<Result> sorted = results.stream()
+                .sorted((a, b) -> b.calculateTotalPoints() - a.calculateTotalPoints())
+                .toList();
+
+        // Assign Olympic ranks
+        List<QuizResultEntry> entries = new ArrayList<>();
+        int rank = 1;
+        for (int i = 0; i < sorted.size(); i++) {
+            if (i > 0 && sorted.get(i).calculateTotalPoints() < sorted.get(i - 1).calculateTotalPoints()) {
+                rank = i + 1;
+            }
+            Result r = sorted.get(i);
+            QuizResultEntry entry = new QuizResultEntry();
+            entry.setRank(rank);
+            entry.setTeamName(r.getTeam().getTeamName());
+            entry.setTotalPoints(r.calculateTotalPoints());
+            entry.setAnswers(r.getAnswers().stream()
+                    .map(a -> {
+                        AnswerScoreDTO dto = new AnswerScoreDTO();
+                        dto.setQuestionNumber(a.getQuestionNumber());
+                        dto.setPoints(a.getPoints());
+                        dto.setChanged(Boolean.TRUE.equals(a.getChanged()));
+                        return dto;
+                    })
+                    .toList());
+            entries.add(entry);
+        }
+        return entries;
+    }
 
     @Transactional(readOnly = true)
     public List<ResultDTO> getResults(Long quizId) {
