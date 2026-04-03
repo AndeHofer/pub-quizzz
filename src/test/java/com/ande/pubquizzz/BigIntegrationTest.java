@@ -67,7 +67,7 @@ class BigIntegrationTest {
     void seedBaseData() throws Exception {
         // --- 1. Create quizzes ---
         Quiz quiz1 = buildApril2026Quiz();
-        Quiz quiz2 = buildPopkulturQuiz();
+        Quiz quiz2 = buildFebruary2026Quiz();
         Quiz quiz3 = buildWissenschaftQuiz();
         Quiz quiz4 = buildGeschichteQuiz();
         Quiz quiz5 = buildOesterreichQuiz();
@@ -100,7 +100,7 @@ class BigIntegrationTest {
                 {0, 2, 0, 5, 0, 1, 1, 0},  // Nix is Quiz
                 {0, 3, 0, 5, 0, 0, 2, 2},  // SpaGru
             },
-            // Quiz 1 — Popkultur März 2025 (pop culture, mixed scores)
+                // Quiz 1 — Februar 2026
             {
                 {5, 5, 3, 5, 3, 5, 5, 3},  // Dicktales
                 {5, 3, 5, 5, 3, 3, 5, 5},  // Stute
@@ -243,26 +243,26 @@ class BigIntegrationTest {
         return q;
     }
 
-    private Quiz buildPopkulturQuiz() {
+    private Quiz buildFebruary2026Quiz() {
         Quiz q = new Quiz();
-        q.setPubDate(LocalDate.of(2025, 3, 20));
-        q.setSubmitDate(LocalDate.of(2025, 3, 19));
-        q.addQuestion(1, "Wie heißt der Regisseur von Pulp Fiction?", "Quentin Tarantino", "",
-                hints("US-Amerikaner", "Bekannt für stilisierte Gewalt", "Auch Kill Bill", "Filmzitate-König"));
-        q.addQuestion(2, "In welchem Jahr erschien das erste iPhone?", "2007", "",
-                hints("21. Jahrhundert", "Steve Jobs stellte es vor", "Vor 2010", "Revolutionierte Smartphones"));
-        q.addQuestion(3, "Wer sang 'Thriller'?", "Michael Jackson", "",
-                hints("King of Pop", "Moonwalk-Erfinder", "Gestorben 2009", "Schwarzes Leder im Clip"));
-        q.addQuestion(4, "Wie heißt Harry Potters Eule?", "Hedwig", "",
-                hints("Weiße Eule", "Geschenk von Hagrid", "Schneeeule", "Weiblich"));
-        q.addQuestion(5, "In welcher Stadt spielt die Serie 'Breaking Bad'?", "Albuquerque", "",
-                hints("USA", "Bundesstaat New Mexico", "Wüstenklima"));
-        q.addQuestion(6, "Welche Band sang 'Bohemian Rhapsody'?", "Queen", "",
-                hints("Britisch", "Freddie Mercury", "Hard Rock trifft Oper"));
-        q.addQuestion(7, "Wie viele Oscars gewann Titanic (1997)?", "11", "",
-                hints("Gleich viele wie Ben-Hur", "Rekord damals", "Zweistellig"));
-        q.addQuestion(8, "Wer schrieb den Roman 'Der Herr der Ringe'?", "J.R.R. Tolkien", "",
-                hints("Britischer Autor", "Oxford-Professor", "Erfand Mittelerde"));
+        q.setPubDate(LocalDate.of(2026, 2, 4));
+        q.setSubmitDate(LocalDate.of(2026, 4, 3));
+        q.addQuestion(1, "Willst du nicht kurz hören? Nein? Genau das will ich nicht?", "", "",
+                hints("", "", "", ""));
+        q.addQuestion(2, "Da bin ich ganz bei(!) dir und deinem Brieffreund", "", "",
+                hints("", "", "", ""));
+        q.addQuestion(3, "Wer bin ich? Lebte mit denen zusammen in einer WG am Tanganjikdasee.", "", "",
+                hints("", "", "", ""));
+        q.addQuestion(4, "'My People' sind beruflich(!) in Frankreich Ein (Kinder)Spiel dieses Plattenlegen", "", "",
+                hints("", "", "", ""));
+        q.addQuestion(5, "Der Start is zwar noch keine Offenbarung. Am Schluss gehts aber so richtig los?", "", "",
+                hints("", "", ""));
+        q.addQuestion(6, "Wir sind dort wo die Harlunken sind: Cops, Bullen, Sheriffs", "", "",
+                hints("", "", ""));
+        q.addQuestion(7, "Entscheidung am Stephansplatz: Einer (der drei) hat Heimweh und plant keine Welttournee.", "", "",
+                hints("", "", ""));
+        q.addQuestion(8, "Abgemacht? Bruderherz? Man muss sich ja nicht immer vertragen!", "", "",
+                hints("", "", ""));
         return q;
     }
 
