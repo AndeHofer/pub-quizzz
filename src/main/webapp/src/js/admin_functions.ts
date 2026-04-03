@@ -139,7 +139,7 @@ async function viewQuizzes() {
             showModal('Alle Quizze', '<p>Keine Quizze gefunden.</p>');
             return;
         }
-        const headers = ['ID', 'Titel', 'Veröffentlicht am', 'Abgabedatum', 'Fertig', 'Aktionen'];
+        const headers = ['ID', 'Titel', 'Pub Datum', 'Archiv Datum', 'Fertig', 'Aktionen'];
         const html = renderTable(headers, quizzes, (quiz: unknown) => {
             const q = quiz as QuizDTO;
             return [`${q.quizId}`, quizDisplayTitle(q), `${q.pubDate}`, `${q.submitDate}`, q.finished ? '✅' : '❌', `

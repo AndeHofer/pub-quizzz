@@ -157,4 +157,21 @@
     .icon-btn:hover {
         @apply opacity-70;
     }
+
+    .question-toggle {
+        @apply flex items-center gap-2 cursor-pointer select-none
+        py-2 -mx-4 px-4 sm:mx-0 sm:px-0;
+    }
+
+    .question-toggle h2 {
+        @apply flex-1 mt-0 border-0 pb-0;
+    }
+
+    .question-arrow {
+        @apply text-gray-400 text-lg transition-transform duration-200;
+    }
+
+    .question-arrow.open {
+        @apply rotate-90;
+    }
 }

@@ -12,6 +12,133 @@ let editingQuizId: number | null = null;
 // Key format: "atstart_q{q}_h{h}" or "ashint_q{q}_h{h}"
 const existingImageUrls = new Map<string, string>();
 
+// ── Readiness helpers ────────────────────────────────────────────────────────
+
+function numHintsFor(q: number): number {
+    return q <= 4 ? 4 : 3;
+}
+
+/**
+ * Mirrors QuizFinishedChecker.isFinished() for a single question:
+ * - questionText non-blank
+ * - answer non-blank
+ * - every hint has non-blank hintText OR a selected/existing imageUrlAsHint file
+ */
+function isQuestionReady(i: number): boolean {
+    const questionInput = document.getElementById(`quiz${i}`) as HTMLInputElement | null;
+    if (!questionInput || !questionInput.value.trim()) return false;
+
+    const answerInput = document.getElementById(`answer${i}`) as HTMLInputElement | null;
+    if (!answerInput || !answerInput.value.trim()) return false;
+
+    const n = numHintsFor(i);
+    for (let j = 1; j <= n; j++) {
+        const hintText = (document.getElementById(`hint${i}_${j}`) as HTMLInputElement | null)?.value.trim() ?? '';
+        const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement | null;
+        const hasFile = !!(asHintInput?.files && asHintInput.files[0]);
+        const hasExisting = !!existingImageUrls.get(`ashint_q${i}_h${j}`);
+        if (!hintText && !hasFile && !hasExisting) return false;
+    }
+    return true;
+}
+
+function updateStatus(i: number): void {
+    const statusEl = document.getElementById(`status${i}`);
+    if (statusEl) {
+        statusEl.textContent = isQuestionReady(i) ? '✅' : '❌';
+    }
+}
+
+// ── Section generation ───────────────────────────────────────────────────────
+
+// Questions 1-4 have 4 hints, 5-8 have 3 hints.
+if (questionsContainer) {
+    for (let i = 1; i <= 8; i++) {
+        const section = document.createElement('div');
+        section.className = 'section';
+
+        const n = numHintsFor(i);
+
+        let hintsHtml = '';
+        for (let j = 1; j <= n; j++) {
+            hintsHtml += `
+                <div class="field-group">
+                    <label>Hinweis ${i}.${j}:</label>
+                    <input type="text" id="hint${i}_${j}" placeholder="Text (optional)">
+                    <label style="font-size:0.85em; margin-top:4px;">Bild: Am Anfang</label>
+                    <input type="file" id="hint_atstart_q${i}_h${j}" accept="image/*">
+                    <img id="preview_atstart_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
+                    <label style="font-size:0.85em; margin-top:4px;">Bild: Als Hinweis</label>
+                    <input type="file" id="hint_ashint_q${i}_h${j}" accept="image/*">
+                    <img id="preview_ashint_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
+                </div>`;
+        }
+
+        section.innerHTML = `
+            <div class="question-toggle" id="toggle${i}">
+                <span id="status${i}">❌</span>
+                <h2>Frage ${i}</h2>
+                <span class="question-arrow" id="arrow${i}">▶</span>
+            </div>
+            <div class="question-body" id="body${i}" style="display:none">
+                <div class="field-group">
+                    <label for="quiz${i}">Frage ${i}:</label>
+                    <input type="text" id="quiz${i}">
+                </div>
+                ${hintsHtml}
+                <div class="field-group">
+                    <label for="answer${i}">Antwort ${i}:</label>
+                    <input type="text" id="answer${i}">
+                </div>
+                <div class="field-group">
+                    <label for="note${i}">Anmerkung ${i} (optional):</label>
+                    <input type="text" id="note${i}">
+                </div>
+            </div>
+        `;
+        questionsContainer.appendChild(section);
+
+        // ── Fold toggle ──────────────────────────────────────────────────────
+        const toggle = document.getElementById(`toggle${i}`) as HTMLDivElement;
+        const body = document.getElementById(`body${i}`) as HTMLDivElement;
+        const arrow = document.getElementById(`arrow${i}`) as HTMLSpanElement;
+
+        toggle.addEventListener('click', () => {
+            const isOpen = body.style.display !== 'none';
+            body.style.display = isOpen ? 'none' : 'block';
+            arrow.classList.toggle('open', !isOpen);
+        });
+
+        // ── Status update on text input ──────────────────────────────────────
+        const textIds = [`quiz${i}`, `answer${i}`, `note${i}`];
+        for (let j = 1; j <= n; j++) textIds.push(`hint${i}_${j}`);
+        textIds.forEach(id => {
+            document.getElementById(id)?.addEventListener('input', () => updateStatus(i));
+        });
+
+        // ── Image preview + status update on file change ─────────────────────
+        for (let j = 1; j <= n; j++) {
+            const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement | null;
+            if (atStartInput) {
+                atStartInput.addEventListener('change', () => {
+                    previewHintImage(atStartInput, `preview_atstart_q${i}_h${j}`);
+                    // atstart does not affect readiness — no updateStatus needed
+                });
+            }
+
+            const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement | null;
+            if (asHintInput) {
+                asHintInput.addEventListener('change', () => {
+                    previewHintImage(asHintInput, `preview_ashint_q${i}_h${j}`);
+                    updateStatus(i);
+                });
+            }
+        }
+    }
+}
+
+// ── Edit mode population ─────────────────────────────────────────────────────
+
 // Check for editing quiz data in sessionStorage on page load
 document.addEventListener('DOMContentLoaded', function () {
     const editingData = sessionStorage.getItem('editingQuiz');
@@ -90,62 +217,12 @@ function populateFormForEdit(quiz: QuizDTO) {
             }
         });
     }
+
+    // Update all status indicators after filling in values
+    for (let i = 1; i <= 8; i++) updateStatus(i);
 }
 
-// Questions 1-4 have 4 hints, 5-8 have 3 hints.
-if (questionsContainer) {
-    for (let i = 1; i <= 8; i++) {
-        const section = document.createElement('div');
-        section.className = 'section';
-
-        let hintsHtml = '';
-        const numHints = i <= 4 ? 4 : 3;
-        for (let j = 1; j <= numHints; j++) {
-            hintsHtml += `
-                <div class="field-group">
-                    <label>Hinweis ${i}.${j}:</label>
-                    <input type="text" id="hint${i}_${j}" placeholder="Text (optional)">
-                    <label style="font-size:0.85em; margin-top:4px;">Bild: Am Anfang</label>
-                    <input type="file" id="hint_atstart_q${i}_h${j}" accept="image/*">
-                    <img id="preview_atstart_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
-                    <label style="font-size:0.85em; margin-top:4px;">Bild: Als Hinweis</label>
-                    <input type="file" id="hint_ashint_q${i}_h${j}" accept="image/*">
-                    <img id="preview_ashint_q${i}_h${j}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
-                </div>`;
-        }
-
-        section.innerHTML = `
-            <h2>Frage ${i}</h2>
-            <div class="field-group">
-                <label for="quiz${i}">Frage ${i}:</label>
-                <input type="text" id="quiz${i}">
-            </div>
-            ${hintsHtml}
-            <div class="field-group">
-                <label for="answer${i}">Antwort ${i}:</label>
-                <input type="text" id="answer${i}">
-            </div>
-            <div class="field-group">
-                <label for="note${i}">Anmerkung ${i} (optional):</label>
-                <input type="text" id="note${i}">
-            </div>
-        `;
-        questionsContainer.appendChild(section);
-
-        // Wire up image preview listeners (avoids inline onchange=)
-        const numHintsForListeners = i <= 4 ? 4 : 3;
-        for (let j = 1; j <= numHintsForListeners; j++) {
-            const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement | null;
-            if (atStartInput) {
-                atStartInput.addEventListener('change', () => previewHintImage(atStartInput, `preview_atstart_q${i}_h${j}`));
-            }
-            const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement | null;
-            if (asHintInput) {
-                asHintInput.addEventListener('change', () => previewHintImage(asHintInput, `preview_ashint_q${i}_h${j}`));
-            }
-        }
-    }
-}
+// ── Form submit ───────────────────────────────────────────────────────────────
 
 const quizForm = document.getElementById('quizForm') as HTMLFormElement | null;
 if (quizForm) {
@@ -172,14 +249,14 @@ if (quizForm) {
 
         // Collect all 8 questions
         for (let i = 1; i <= 8; i++) {
-            const numHints = i <= 4 ? 4 : 3;
+            const n = numHintsFor(i);
             const hints: {
                 hintText: string | null;
                 imageUrlAtStart: string | null;
                 imageUrlAsHint: string | null
             }[] = [];
 
-            for (let j = 1; j <= numHints; j++) {
+            for (let j = 1; j <= n; j++) {
                 const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement;
                 const asHintInput = document.getElementById(`hint_ashint_q${i}_h${j}`) as HTMLInputElement;
 
@@ -240,13 +317,14 @@ if (quizForm) {
                         } else {
                             // In create mode, clear form
                             showMessage('✅ ' + text, 'success');
-                            // Clear form immediately after successful save
                             quizForm.reset();
                             // Clear image previews
                             document.querySelectorAll('img[id^="preview_"]').forEach(img => {
                                 (img as HTMLImageElement).src = '';
                                 (img as HTMLImageElement).style.display = 'none';
                             });
+                            // Reset all status indicators
+                            for (let i = 1; i <= 8; i++) updateStatus(i);
                             // Hide success message after 3 seconds
                             setTimeout(() => {
                                 const msg = document.getElementById('message');
@@ -267,11 +345,14 @@ if (quizForm) {
     });
 }
 
-// Ensure functions are available globally
+// ── Global wiring ─────────────────────────────────────────────────────────────
+
 window.addEventListener('load', () => {
     (window as any).goBack = () => goBack('admin_main.html');
     document.getElementById('backBtn')?.addEventListener('click', () => goBack('admin_main.html'));
 });
+
+// ── Image preview helper ──────────────────────────────────────────────────────
 
 function previewHintImage(input: HTMLInputElement, previewId: string) {
     const preview = document.getElementById(previewId) as HTMLImageElement | null;
