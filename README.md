@@ -4,10 +4,12 @@ A simple webpage to archive results, quiz and answers.
 
 ## TODOS
 
-1) add more rankings
-2) enhance logging
-3) fix h2-console defaults
-4) quiz mode to replay the quiz online
+1) collum winnings in overall table
+2) edit results: change quiz should be possible, also widen the look in modal panel
+3) add more rankings
+4) enhance logging
+5) fix h2-console defaults
+6) quiz mode to replay the quiz online
 
 ## DONE
 
