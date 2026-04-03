@@ -9,3 +9,13 @@ fetch('/api/is-admin')
     .catch(() => {
         // Admin card remains hidden if request fails — no action needed
     });
+
+fetch('/api/version')
+    .then(res => res.ok ? res.json() : null)
+    .then((data: { version: string } | null) => {
+        if (!data) return;
+        const badge = document.getElementById('versionBadge');
+        if (badge) badge.textContent = data.version;
+    })
+    .catch(() => { /* silent */
+    });
