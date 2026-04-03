@@ -57,6 +57,7 @@ export interface AllTimeLeaderboardEntry {
 }
 
 export interface TeamResultEntry {
+    quizId: number;
     quizDate: string;
     quizTitle: string;
     totalPoints: number;

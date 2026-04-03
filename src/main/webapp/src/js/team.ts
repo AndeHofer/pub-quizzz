@@ -28,11 +28,11 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
         // Summary row
         rows.push(`
             <tr class="border-b border-gray-200 hover:bg-gray-50">
-                <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base">${escapeHtml(entry.quizTitle)}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base"><a href="/quiz.html?id=${entry.quizId}" class="text-blue-600 hover:underline">${escapeHtml(entry.quizTitle)}</a></td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-blue-700 text-xs sm:text-base">${entry.totalPoints}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
                     <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"
-                        class="text-xs sm:text-sm text-blue-600 hover:underline whitespace-nowrap">&#9658; anzeigen</button>
+                        class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">&#9658; anzeigen</button>
                 </td>
             </tr>
         `);

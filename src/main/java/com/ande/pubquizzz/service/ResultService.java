@@ -242,6 +242,7 @@ public class ResultService {
                 .stream()
                 .map(r -> {
                     TeamResultEntry entry = new TeamResultEntry();
+                    entry.setQuizId(r.getQuiz().getQuizId());
                     entry.setQuizDate(r.getQuiz().getPubDate().toString());
                     entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getTitle(), r.getQuiz().getPubDate()));
                     entry.setTotalPoints(r.calculateTotalPoints());
