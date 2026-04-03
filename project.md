@@ -6,7 +6,7 @@ Pub Quizzz is a Spring Boot 4.x web application for managing and running pub qui
 
 - **Backend:** Spring Boot 4.x, Java 21, Spring Security, Spring Data JPA (H2 dev / configurable prod DB), Lombok, MapStruct, Jakarta Validation
 - **Frontend:** TypeScript, Vite, Tailwind CSS v4 — built into `src/main/resources/static` via `frontend-maven-plugin`
-- **API:** REST; new API endpoints follow OpenAPI-first workflow (spec → generated interfaces → implementation)
+- **API:** REST; controllers use Spring MVC annotations directly (`@RestController`, `@GetMapping`, etc.)
 - **Auth:** Session-based, role-based (`ADMIN` / `USER`); all `/admin/**` endpoints require `ADMIN` role enforced via `@PreAuthorize`
 
 ## Business Rules

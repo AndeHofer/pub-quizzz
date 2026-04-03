@@ -19,7 +19,6 @@
 
 - Use Spring boot for the backend.
 - Use Java 21 for the backend.
-- Use the openapi-generator-maven-plugin to generate API interfaces from OpenAPI specifications.
 - Use JUnit for testing the backend.
 - Use Mockito for mocking dependencies in backend tests.
 - Use Spring Test for integration testing the backend.

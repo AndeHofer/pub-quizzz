@@ -103,8 +103,7 @@
 
 ## Phase 5: User All-Time Leaderboard
 
-### Task 1: OpenAPI Spec + DTO ✅ COMMITTED
-- Created `src/main/resources/openapi/leaderboard-api.yaml`
+### Task 1: DTO ✅ COMMITTED
 - Created `AllTimeLeaderboardEntry` DTO (rank, teamName, totalPoints, quizCount)
 
 ### Task 2: Repository Query ✅ COMMITTED
@@ -558,7 +557,6 @@ A quiz is **finished** when:
 
 ### Backend
 
-- `src/main/resources/openapi/team-results-api.yaml`: OpenAPI spec for `GET /api/teams/{teamName}/results`
 - `src/main/java/com/ande/pubquizzz/dto/TeamResultEntry.java`: New response DTO (`quizDate`, `totalPoints`, `answers`)
 - `src/main/java/com/ande/pubquizzz/database/repositories/ResultRepository.java`: Added `findByTeamNameOrderByPubDateDesc` JPQL query with JOIN FETCH
 - `src/main/java/com/ande/pubquizzz/service/ResultService.java`: Added `getResultsForTeam(String teamName)` method
@@ -587,7 +585,6 @@ A quiz is **finished** when:
 
 ### Backend
 
-- `src/main/resources/openapi/quiz-api.yaml`: OpenAPI spec for `GET /api/quizzes` and `GET /api/quizzes/{quizId}/results`
 - `src/main/java/com/ande/pubquizzz/dto/QuizSummaryDTO.java`: New DTO (`quizId`, `quizTitle`, `pubDate`, `teamCount`)
 - `src/main/java/com/ande/pubquizzz/dto/QuizResultEntry.java`: New DTO (`rank`, `teamName`, `totalPoints`, `answers`)
 - `src/main/java/com/ande/pubquizzz/database/repositories/QuizRepository.java`: Added `findAllWithResultCount()` JPQL query grouping quizzes with result count, ordered by pubDate DESC
@@ -736,7 +733,6 @@ The backup size kept growing even without new data being added.
 
 #### Fix 2: `DELETE /admin/cleanup-images` endpoint
 
-- `src/main/resources/openapi/cleanup-api.yaml`: OpenAPI spec
 - `CleanupResult.java`: Response DTO (`deletedCount`, `deletedFiles`)
 - `ImageStorageService.cleanupOrphanedImages(Set<String> referencedUrls)`: Lists all files in upload dir, deletes any
   not in the referenced set
@@ -773,4 +769,47 @@ After deploying, click "Verwaiste Bilder löschen" in the admin panel (Wartung s
 ### Verification
 
 - Backend: 143/143 tests passing (`mvn test`)
+- Frontend: 0 type errors (`npm run type-check`)
+
+---
+
+## Phase 23: Code Quality Pass ✅ COMPLETE
+
+### Goal
+
+Comprehensive code quality improvement pass covering backend dead code, N+1 queries, service clarity, frontend XSS/UX
+fixes, and new unit tests.
+
+### Backend Changes
+
+- `BackupService.java`: Two-pass ZIP validation — validates structure before extracting; cleans up on failure
+- `ResultRepository.java`: Added `findByQuizIdWithAnswers()` with JOIN FETCH to fix N+1 on result loading
+- `QuizRepository.java`: Added `findAllReferencedImageUrls()` to fix N+1 in `cleanupOrphanedImages()`
+- `ResultService.java`: Extracted `toAnswerScoreDTO()` helper; replaced O(n²) sort with `record ResultWithPoints`
+- `TeamRepository.java`: Removed unused `findByTeamName()` method
+- `UserController.java`: Removed unused `@Slf4j` import
+- `AllTimeLeaderboardEntry.java`: Removed unused `@AllArgsConstructor`
+- `Hint.java`: Removed stale `nullable=true` on `hint_text` (already nullable; was redundant noise)
+- `QuizService.java`: Import cleanup (removed unused imports)
+- `DatabaseTest.java`: Removed commented-out assertion on line 188
+- `AdminQuizControllerTest.java`: Removed duplicate `import java.util.List`
+
+### Frontend Changes
+
+- `utils.ts`: Extracted shared helpers `escapeHtml`, `getMedal`, `numberBadge`, `toggleDetail` (previously duplicated
+  across `quiz.ts`, `leaderboard.ts`, `team.ts`, `quizzes.ts`)
+- `admin_functions.ts`: Fixed XSS in `renderTable` (use `escapeHtml`); added `response.ok` checks; replaced `alert()`
+  with `showModal` in `deleteUser`; added `console.error` in catch blocks
+- `quiz.ts`, `leaderboard.ts`, `quizzes.ts`, `team.ts`: Updated to use shared helpers from `utils.ts`
+
+### New Tests
+
+- `UserServiceTest.java` (10 tests): Full coverage of user CRUD and validation paths
+- `QuizServiceCreateTest.java` (6 tests): Quiz creation validation including hint-count rules
+- `UserControllerTest.java` (3 tests): `@WebMvcTest` coverage for `UserController`
+- `BackupServiceTest.java` (+1 test): ZIP validation path
+
+### Verification
+
+- Backend: 152/152 tests passing (`mvn test`)
 - Frontend: 0 type errors (`npm run type-check`)
