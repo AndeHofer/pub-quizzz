@@ -68,6 +68,7 @@ export interface QuizSummaryDTO {
     quizTitle: string;
     pubDate: string;
     teamCount: number;
+    winnerTeamName?: string | null;
 }
 
 export interface QuizResultEntry {

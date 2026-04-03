@@ -763,17 +763,94 @@ After deploying, click "Verwaiste Bilder löschen" in the admin panel (Wartung s
 
 ### Verification
 
-- Backend: 152/152 tests passing (`mvn test`)
-- Frontend: 0 type errors (`npm run type-check`)
-
-### Verification
-
-- Backend: 143/143 tests passing (`mvn test`)
+- Backend: 155/155 tests passing (`mvn test`)
 - Frontend: 0 type errors (`npm run type-check`)
 
 ---
 
-## Phase 23: Code Quality Pass ✅ COMPLETE
+## Phase 24: "Sieger" Column on Quiz Archiv Page ✅ COMPLETE
+
+### Goal
+
+Replace the "Datum" column on `quizzes.html` with a "Sieger" (winner) column showing the team with
+the highest total points for each quiz, displayed as a link to their team detail page.
+
+### Changes
+
+#### Backend
+
+- `QuizSummaryDTO.java`: Added `String winnerTeamName` (nullable)
+- `ResultRepository.java`: Added `findWinnerTeamNamesByQuizIds(@Param("quizIds") List<Long> quizIds)` — single-query
+  batch JPQL that finds, for each quiz ID, the team whose total point sum equals the maximum total point sum for that
+  quiz (handles ties by returning multiple rows; service keeps first)
+- `ResultService.getQuizSummaries()`: Collects quiz IDs with at least one result, calls
+  `findWinnerTeamNamesByQuizIds` in one round-trip, builds a `Map<Long, String>` of quizId → first winner name,
+  populates `winnerTeamName` on each DTO
+
+#### Frontend
+
+- `types.ts`: Added `winnerTeamName?: string | null` to `QuizSummaryDTO`
+- `quizzes.html`: Renamed `<th>Datum</th>` → `<th>Sieger</th>`
+- `quizzes.ts`: Winner cell renders as `<a href="/team.html?team=...">name</a>` when present, or `—` when null
+
+#### Tests (+3 new unit tests, +1 updated controller test, 155 total)
+
+- `ResultServiceQuizTest`: Added `getQuizSummaries_withResults_populatesWinnerTeamName`,
+  `getQuizSummaries_withNoResults_winnerTeamNameIsNull`, `getQuizSummaries_withTiedWinners_returnsOneWinnerName`
+- `ResultServiceQuizTest`: Updated `getQuizSummaries_returnsSortedNewestFirst` to stub
+  `findWinnerTeamNamesByQuizIds` (required by new service logic)
+- `UserQuizControllerTest`: Updated `getQuizSummaries_authenticated_returnsList` to assert `winnerTeamName` in JSON
+
+### Verification
+
+- Backend: 155/155 tests passing (`mvn test`)
+- Frontend: 0 type errors (`npm run type-check`)
+- Frontend build: succeeds (`npm run build`)
+
+---
+
+## Phase 25: Tiebreaker — More 5-point Answers Win, Then More 3-point Answers ✅ COMPLETE
+
+### Goal
+
+When teams are tied on total points, the team with more 5-point answers wins. If still tied, the team with
+more 3-point answers wins. This applies to both:
+
+- `quizzes.html` — Sieger (winner) column
+- `quiz.html` — Olympic ranking table
+
+### Changes
+
+#### Backend
+
+- `Result.java`: Added `countAnswersWithPoints(int points)` helper method
+- `ResultService.java`:
+  - Added `RESULT_COMPARATOR` static constant: `totalPoints DESC → count(5) DESC → count(3) DESC`
+  - `getResultsForQuiz()`: replaced plain `totalPoints` sort with `RESULT_COMPARATOR`; Olympic rank
+    now advances only when `RESULT_COMPARATOR.compare(...) != 0` (teams are only same-rank when equal
+    on all three criteria)
+  - `getQuizSummaries()`: replaced `findWinnerTeamNamesByQuizIds` DB approach with `findScoresByQuizIds`
+    + Java tiebreaker using the same three criteria
+- `ResultRepository.java`:
+  - Removed `findWinnerTeamNamesByQuizIds` (couldn't express tiebreaker in JPQL)
+  - Added `findScoresByQuizIds(@Param("quizIds") List<Long> quizIds)` — returns `(quizId, teamName,
+    totalPoints, fivesCount, threesCount)` per result in one query; tiebreaker resolved in Java
+
+#### Tests (+5 new, 3 updated, 158 total)
+
+- `ResultServiceQuizTest`: Replaced `getQuizSummaries_withTiedWinners_returnsOneWinnerName` with
+  `getQuizSummaries_tieOnTotal_winnerHasMoreFives` and
+  `getQuizSummaries_tieOnTotalAndFives_winnerHasMoreThrees`
+- `ResultServiceQuizTest`: Updated `getQuizSummaries_withResults_populatesWinnerTeamName` to use
+  `findScoresByQuizIds` stub; updated `getQuizSummaries_returnsSortedNewestFirst` same
+- `ResultServiceQuizTest`: Added `getResultsForQuiz_tieOnTotal_rankedByFivesDesc` and
+  `getResultsForQuiz_tieOnTotalAndFives_rankedByThreesDesc`
+
+### Verification
+
+- Backend: 158/158 tests passing (`mvn test`)
+- Frontend: 0 type errors (`npm run type-check`)
+- Frontend build: succeeds (`npm run build`)
 
 ### Goal
 

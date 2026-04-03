@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -36,10 +37,45 @@ public class ResultService {
     private final TeamRepository teamRepository;
     private final ResultMapper resultMapper;
 
+    /**
+     * Tiebreaker order: total points DESC, count of 5-point answers DESC, count of 3-point answers DESC.
+     */
+    private static final Comparator<Result> RESULT_COMPARATOR =
+            Comparator.<Result, Integer>comparing(Result::calculateTotalPoints).reversed()
+                    .thenComparing(Comparator.<Result, Long>comparing(r -> r.countAnswersWithPoints(5)).reversed())
+                    .thenComparing(Comparator.<Result, Long>comparing(r -> r.countAnswersWithPoints(3)).reversed());
+
     @Transactional(readOnly = true)
     public List<QuizSummaryDTO> getQuizSummaries() {
         log.info("Fetching quiz summaries");
         List<Object[]> rows = quizRepository.findAllWithResultCount();
+
+        // Collect quiz IDs that have at least one result, then fetch scores in one query
+        List<Long> quizIdsWithResults = rows.stream()
+                .filter(row -> ((Number) row[1]).longValue() > 0)
+                .map(row -> ((Quiz) row[0]).getQuizId())
+                .toList();
+
+        java.util.Map<Long, String> winnerMap = new java.util.HashMap<>();
+        if (!quizIdsWithResults.isEmpty()) {
+            List<Object[]> scoreRows = resultRepository.findScoresByQuizIds(quizIdsWithResults);
+            // scoreRows: [quizId, teamName, totalPoints, fivesCount, threesCount]
+            // Group by quizId, pick the row with best tiebreaker order
+            java.util.Map<Long, Object[]> bestRow = new java.util.HashMap<>();
+            for (Object[] sr : scoreRows) {
+                Long qId = ((Number) sr[0]).longValue();
+                bestRow.merge(qId, sr, (existing, candidate) -> {
+                    int cmpTotal = Long.compare(((Number) candidate[2]).longValue(), ((Number) existing[2]).longValue());
+                    if (cmpTotal != 0) return cmpTotal > 0 ? candidate : existing;
+                    int cmpFives = Long.compare(((Number) candidate[3]).longValue(), ((Number) existing[3]).longValue());
+                    if (cmpFives != 0) return cmpFives > 0 ? candidate : existing;
+                    int cmpThrees = Long.compare(((Number) candidate[4]).longValue(), ((Number) existing[4]).longValue());
+                    return cmpThrees > 0 ? candidate : existing;
+                });
+            }
+            bestRow.forEach((qId, sr) -> winnerMap.put(qId, (String) sr[1]));
+        }
+
         return rows.stream().map(row -> {
             Quiz quiz = (Quiz) row[0];
             long count = ((Number) row[1]).longValue();
@@ -48,6 +84,7 @@ public class ResultService {
             dto.setQuizTitle(deriveQuizTitle(quiz.getTitle(), quiz.getPubDate()));
             dto.setPubDate(quiz.getPubDate().toString());
             dto.setTeamCount((int) count);
+            dto.setWinnerTeamName(winnerMap.get(quiz.getQuizId()));
             return dto;
         }).toList();
     }
@@ -68,16 +105,16 @@ public class ResultService {
                     .orElse("");
         }
 
-        // Sort by totalPoints descending
+        // Sort by tiebreaker comparator: total points DESC, fives DESC, threes DESC
         List<Result> sorted = results.stream()
-                .sorted((a, b) -> b.calculateTotalPoints() - a.calculateTotalPoints())
+                .sorted(RESULT_COMPARATOR)
                 .toList();
 
-        // Assign Olympic ranks
+        // Assign Olympic ranks — teams are equal in rank only when all three criteria match
         List<QuizResultEntry> entries = new ArrayList<>();
         int rank = 1;
         for (int i = 0; i < sorted.size(); i++) {
-            if (i > 0 && sorted.get(i).calculateTotalPoints() < sorted.get(i - 1).calculateTotalPoints()) {
+            if (i > 0 && RESULT_COMPARATOR.compare(sorted.get(i), sorted.get(i - 1)) != 0) {
                 rank = i + 1;
             }
             Result r = sorted.get(i);

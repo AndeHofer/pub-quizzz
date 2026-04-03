@@ -8,4 +8,5 @@ public class QuizSummaryDTO {
     private String quizTitle;
     private String pubDate;
     private int teamCount;
+    private String winnerTeamName;
 }

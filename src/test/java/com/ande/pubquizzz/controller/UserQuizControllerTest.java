@@ -45,6 +45,7 @@ class UserQuizControllerTest {
         dto.setQuizTitle("2026 März");
         dto.setPubDate("2026-03-15");
         dto.setTeamCount(3);
+        dto.setWinnerTeamName("Alpha");
 
         when(resultService.getQuizSummaries()).thenReturn(List.of(dto));
 
@@ -53,7 +54,8 @@ class UserQuizControllerTest {
                 .andExpect(jsonPath("$[0].quizId").value(1))
                 .andExpect(jsonPath("$[0].quizTitle").value("2026 März"))
                 .andExpect(jsonPath("$[0].pubDate").value("2026-03-15"))
-                .andExpect(jsonPath("$[0].teamCount").value(3));
+                .andExpect(jsonPath("$[0].teamCount").value(3))
+                .andExpect(jsonPath("$[0].winnerTeamName").value("Alpha"));
     }
 
     @Test

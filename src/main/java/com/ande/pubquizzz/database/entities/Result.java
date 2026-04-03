@@ -39,4 +39,8 @@ public class Result {
     public int calculateTotalPoints() {
         return answers.stream().mapToInt(ResultAnswer::getPoints).sum();
     }
+
+    public long countAnswersWithPoints(int points) {
+        return answers.stream().filter(a -> a.getPoints() == points).count();
+    }
 }

@@ -53,4 +53,16 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
         WHERE r.quiz.quizId = :quizId
     """)
     List<Result> findByQuizIdWithTeamAndAnswers(@Param("quizId") Long quizId);
+
+    @Query("""
+                SELECT r.quiz.quizId, r.team.teamName,
+                       COALESCE(SUM(a.points), 0),
+                       SUM(CASE WHEN a.points = 5 THEN 1 ELSE 0 END),
+                       SUM(CASE WHEN a.points = 3 THEN 1 ELSE 0 END)
+                FROM Result r
+                JOIN r.answers a
+                WHERE r.quiz.quizId IN :quizIds
+                GROUP BY r.quiz.quizId, r.resultsId, r.team.teamName
+            """)
+    List<Object[]> findScoresByQuizIds(@Param("quizIds") List<Long> quizIds);
 }
