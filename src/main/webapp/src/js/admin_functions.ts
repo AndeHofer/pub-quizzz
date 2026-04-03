@@ -108,6 +108,16 @@ window.addEventListener('load', () => {
     }
 
     document.getElementById('cleanupImagesBtn')?.addEventListener('click', cleanupImages);
+
+    fetch('/api/version')
+        .then(res => res.ok ? res.json() : null)
+        .then((data: { version: string } | null) => {
+            if (!data) return;
+            const h1 = document.querySelector('h1');
+            if (h1) h1.textContent += ` (${data.version})`;
+        })
+        .catch(() => { /* silent */
+        });
 });
 
 // ==================== Quiz Management ====================

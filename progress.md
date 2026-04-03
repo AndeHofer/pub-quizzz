@@ -890,3 +890,41 @@ fixes, and new unit tests.
 
 - Backend: 152/152 tests passing (`mvn test`)
 - Frontend: 0 type errors (`npm run type-check`)
+
+---
+
+## Phase 26: Version in Admin Header ✅ COMPLETE
+
+### Goal
+
+Show the deployed Maven version in the admin panel `<h1>` header, e.g. `Admin Bereich (1.0.1-SNAPSHOT)`, fetched live
+from the backend at page load.
+
+### Changes
+
+#### Backend
+
+- `pom.xml`: Added `build-info` execution to `spring-boot-maven-plugin` so `META-INF/build-info.properties` is generated
+  at build time (provides the `BuildProperties` Spring bean)
+- `UserController.java`: Added `BuildProperties` constructor dependency (via `@RequiredArgsConstructor`); added
+  `GET /api/version` endpoint returning `{ "version": "<maven.version>" }`; endpoint is protected by existing
+  `anyRequest().authenticated()` in `SecurityConfig`
+
+#### Frontend
+
+- `admin_functions.ts`: Inside `window.addEventListener('load', ...)`, after `cleanupImagesBtn` wiring, added a
+  `fetch('/api/version')` call that appends ` (version)` to the `<h1>` text content. Silently ignores errors.
+
+#### Tests (4 new)
+
+- `UserControllerTest.java` (new): 4 `@WebMvcTest` tests:
+  - `getVersion_authenticated_returnsVersion` — asserts `{ "version": "1.0.0-TEST" }` JSON
+  - `getVersion_unauthenticated_redirectsToLogin` — asserts 302 redirect
+  - `isAdmin_withAdminRole_returnsTrue` — asserts `{ "admin": true }`
+  - `isAdmin_withUserRole_returnsFalse` — asserts `{ "admin": false }`
+
+### Verification
+
+- Backend: 162/162 tests passing (`mvn test`)
+- Frontend: 0 type errors (`npm run type-check`)
+- Frontend build: succeeds (`npm run build`)
