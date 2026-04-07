@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,9 @@ class QuizServiceDeleteTest {
 
     @Mock
     private ImageStorageService imageStorageService;
+
+    @Mock
+    private DocumentStorageService documentStorageService;
 
     @InjectMocks
     private QuizService quizService;
@@ -82,6 +86,16 @@ class QuizServiceDeleteTest {
         verify(imageStorageService, never()).delete(any());
     }
 
+    @Test
+    void deleteQuiz_deletesDocuments() {
+        Quiz quiz = quizWithoutImages();
+        when(quizRepository.findById(5L)).thenReturn(Optional.of(quiz));
+
+        quizService.deleteQuiz(5L);
+
+        verify(documentStorageService).deleteAllDocumentsForQuiz(5L);
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private Quiz quizWithoutImages() {
@@ -117,7 +131,7 @@ class QuizServiceDeleteTest {
     }
 
     private static List<Hint> textHints(int count) {
-        java.util.List<Hint> list = new java.util.ArrayList<>();
+        List<Hint> list = new ArrayList<>();
         for (int i = 0; i < count; i++) list.add(hint());
         return list;
     }

@@ -3,8 +3,11 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.CleanupResult;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
+import com.ande.pubquizzz.dto.QuizDocumentDTO;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
+import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.security.SecurityConfig;
+import com.ande.pubquizzz.service.DocumentStorageService;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
 import org.junit.jupiter.api.Test;
@@ -14,12 +17,14 @@ import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilte
 import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,8 +40,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-
 @WebMvcTest(AdminQuizController.class)
 @Import({SecurityConfig.class, SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class, SecurityTestConfig.class, GlobalExceptionHandler.class})
 class AdminQuizControllerTest {
@@ -49,6 +52,9 @@ class AdminQuizControllerTest {
 
     @MockitoBean
     private ImageStorageService imageStorageService;
+
+    @MockitoBean
+    private DocumentStorageService documentStorageService;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -292,6 +298,70 @@ class AdminQuizControllerTest {
         mockMvc.perform(delete("/admin/cleanup-images").with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deletedCount").value(0));
+    }
+
+    // ── Document endpoint tests ───────────────────────────────────────────────
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void uploadDocument_returnsCreatedDocument() throws Exception {
+        QuizDocumentDTO dto = new QuizDocumentDTO(1L, 1L, "report.pdf", "application/pdf", 100L, LocalDateTime.of(2026, 1, 1, 12, 0));
+        MockMultipartFile file = new MockMultipartFile("file", "report.pdf", "application/pdf", "content".getBytes());
+        when(documentStorageService.storeDocument(1L, file)).thenReturn(dto);
+
+        mockMvc.perform(multipart("/admin/quiz/1/documents")
+                        .file(file)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.originalFilename").value("report.pdf"))
+                .andExpect(jsonPath("$.quizId").value(1));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void listDocuments_returnsDocumentList() throws Exception {
+        QuizDocumentDTO dto = new QuizDocumentDTO(1L, 1L, "notes.pdf", "application/pdf", 200L, LocalDateTime.of(2026, 1, 1, 12, 0));
+        when(documentStorageService.listDocuments(1L)).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/admin/quiz/1/documents"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].originalFilename").value("notes.pdf"))
+                .andExpect(jsonPath("$[0].fileSize").value(200));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void downloadDocument_returnsFile() throws Exception {
+        byte[] content = "pdf content".getBytes();
+        DocumentStorageService.DocumentDownload download = new DocumentStorageService.DocumentDownload(
+                new ByteArrayResource(content), "report.pdf", "application/pdf");
+        when(documentStorageService.getDocumentForDownload(1L, 1L)).thenReturn(download);
+
+        mockMvc.perform(get("/admin/quiz/1/documents/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deleteDocument_returnsOk() throws Exception {
+        mockMvc.perform(delete("/admin/quiz/1/documents/1").with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void downloadDocument_notFound_returns404() throws Exception {
+        when(documentStorageService.getDocumentForDownload(1L, 99L))
+                .thenThrow(new ResourceNotFoundException("Dokument nicht gefunden: 99"));
+
+        mockMvc.perform(get("/admin/quiz/1/documents/99"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void listDocuments_unauthenticated_redirects() throws Exception {
+        mockMvc.perform(get("/admin/quiz/1/documents"))
+                .andExpect(status().is3xxRedirection());
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

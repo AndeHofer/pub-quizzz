@@ -83,3 +83,12 @@ export interface QuizResultsResponse {
     quizTitle: string;
     entries: QuizResultEntry[];
 }
+
+export interface QuizDocumentDTO {
+    id: number;
+    quizId: number;
+    originalFilename: string;
+    contentType: string;
+    fileSize: number;
+    uploadedAt: string;
+}

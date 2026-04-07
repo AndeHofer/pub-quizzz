@@ -4,11 +4,15 @@ import com.ande.pubquizzz.dto.CleanupResult;
 import com.ande.pubquizzz.dto.CreateQuizRequest;
 import com.ande.pubquizzz.dto.QuizDTO;
 import com.ande.pubquizzz.dto.QuizDetailDTO;
+import com.ande.pubquizzz.dto.QuizDocumentDTO;
 import com.ande.pubquizzz.dto.UpdateQuizDatesRequest;
+import com.ande.pubquizzz.service.DocumentStorageService;
 import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +40,7 @@ public class AdminQuizController {
 
     private final QuizService quizService;
     private final ImageStorageService imageStorageService;
+    private final DocumentStorageService documentStorageService;
 
     @GetMapping("/quizzes")
     public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
@@ -92,6 +97,43 @@ public class AdminQuizController {
     @DeleteMapping("/cleanup-images")
     public ResponseEntity<CleanupResult> cleanupOrphanedImages() {
         return ResponseEntity.ok(quizService.cleanupOrphanedImages());
+    }
+
+    // ── Document endpoints ────────────────────────────────────────────────────
+
+    @PostMapping(value = "/quiz/{id}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<QuizDocumentDTO> uploadDocument(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        QuizDocumentDTO dto = documentStorageService.storeDocument(id, file);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/quiz/{id}/documents")
+    public ResponseEntity<List<QuizDocumentDTO>> listDocuments(@PathVariable Long id) {
+        return ResponseEntity.ok(documentStorageService.listDocuments(id));
+    }
+
+    @GetMapping("/quiz/{id}/documents/{docId}")
+    public ResponseEntity<org.springframework.core.io.Resource> downloadDocument(
+            @PathVariable Long id,
+            @PathVariable Long docId) {
+        DocumentStorageService.DocumentDownload download = documentStorageService.getDocumentForDownload(id, docId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(download.contentType()));
+        headers.setContentDisposition(
+                ContentDisposition.attachment().filename(download.originalFilename()).build());
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(download.resource());
+    }
+
+    @DeleteMapping("/quiz/{id}/documents/{docId}")
+    public ResponseEntity<String> deleteDocument(
+            @PathVariable Long id,
+            @PathVariable Long docId) {
+        documentStorageService.deleteDocument(id, docId);
+        return ResponseEntity.ok("Dokument gelöscht");
     }
 
     private void injectImageUrls(CreateQuizRequest request, Map<String, MultipartFile> allFiles) {

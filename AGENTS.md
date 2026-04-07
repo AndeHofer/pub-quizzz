@@ -15,6 +15,8 @@ Guidance for AI coding agents working in this repository.
 - Document all the steps you plan to do in a "progress.md" file before you start coding. This file should be updated as
   you make progress and should include a task list of what was done, what is left to do, and any blockers you encounter.
 - Ensure to document your progress after every single step in case copilot crashes.
+- Keep only 3 finished features in `progress.md` and move older finished entries to `progress_archive.md` to keep
+  `progress.md` clean and short.
 - Document your idea of what the project should be in a concise form in a "project.md". Update this whenever
   requirements change.
 - Minimize the commands executed that need to be confirmed by user input. E.g. do not run individual tests, but run all
@@ -23,6 +25,7 @@ Guidance for AI coding agents working in this repository.
   the files afterwards again.
 - Before confirming that features are working, ensure to run all the tests performed in the CICD pipeline, as well as
   frontend type check is successful.
+- Run Maven commands in Windows style (`mvn.cmd` / `mvnw.cmd`) to avoid creating `nul` files.
 
 ## Backend
 

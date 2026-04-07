@@ -1,7 +1,7 @@
 export {};
 
 import { showMessage, goBack } from './utils';
-import type { QuizDTO } from './types';
+import type {QuizDTO, QuizDocumentDTO} from './types';
 
 const questionsContainer = document.getElementById('questionsContainer') as HTMLDivElement | null;
 
@@ -220,6 +220,11 @@ function populateFormForEdit(quiz: QuizDTO) {
 
     // Update all status indicators after filling in values
     for (let i = 1; i <= 8; i++) updateStatus(i);
+
+    // Show the documents section and load existing documents
+    const docsSection = document.getElementById('documentsSection');
+    if (docsSection) docsSection.style.display = 'block';
+    loadDocuments();
 }
 
 // ── Form submit ───────────────────────────────────────────────────────────────
@@ -350,7 +355,125 @@ if (quizForm) {
 window.addEventListener('load', () => {
     (window as any).goBack = () => goBack('admin_main.html');
     document.getElementById('backBtn')?.addEventListener('click', () => goBack('admin_main.html'));
+    document.getElementById('uploadDocumentBtn')?.addEventListener('click', uploadDocument);
 });
+
+// ── Document management ───────────────────────────────────────────────────────
+
+function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+async function loadDocuments(): Promise<void> {
+    if (!editingQuizId) return;
+    const listEl = document.getElementById('documentList');
+    if (!listEl) return;
+    try {
+        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents`);
+        if (!resp.ok) {
+            listEl.innerHTML = '<span style="color:red;">Fehler beim Laden der Dokumente.</span>';
+            return;
+        }
+        const docs: QuizDocumentDTO[] = await resp.json();
+        if (docs.length === 0) {
+            listEl.innerHTML = '<p style="color:#888; font-size:0.875rem;">Keine Dokumente vorhanden.</p>';
+            return;
+        }
+        let html = '<table style="width:100%; border-collapse:collapse; font-size:0.875rem;"><thead><tr>' +
+            '<th style="text-align:left; padding:4px 8px; border-bottom:1px solid #e5e7eb;">Dateiname</th>' +
+            '<th style="text-align:left; padding:4px 8px; border-bottom:1px solid #e5e7eb;">Größe</th>' +
+            '<th style="padding:4px 8px; border-bottom:1px solid #e5e7eb;"></th>' +
+            '</tr></thead><tbody>';
+        docs.forEach(doc => {
+            html += `<tr>
+                <td style="padding:4px 8px;">
+                    <a href="/admin/quiz/${editingQuizId}/documents/${doc.id}"
+                       download="${doc.originalFilename}"
+                       style="color:#374151; text-decoration:underline;">${doc.originalFilename}</a>
+                </td>
+                <td style="padding:4px 8px; color:#6b7280;">${formatFileSize(doc.fileSize)}</td>
+                <td style="padding:4px 8px;">
+                    <button type="button" class="delete-doc-btn"
+                        data-id="${doc.id}"
+                        style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:1rem;"
+                        title="Dokument löschen">🗑️</button>
+                </td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        listEl.innerHTML = html;
+        listEl.querySelectorAll('.delete-doc-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                deleteDocument(id);
+            });
+        });
+    } catch (err) {
+        if (listEl) listEl.innerHTML = '<span style="color:red;">Netzwerkfehler beim Laden.</span>';
+        console.error('loadDocuments error:', err);
+    }
+}
+
+async function uploadDocument(): Promise<void> {
+    if (!editingQuizId) return;
+    const fileInput = document.getElementById('documentFileInput') as HTMLInputElement | null;
+    const msgEl = document.getElementById('documentMessage') as HTMLElement | null;
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        if (msgEl) {
+            msgEl.textContent = 'Bitte eine Datei auswählen.';
+            msgEl.style.display = 'block';
+        }
+        return;
+    }
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    if (msgEl) {
+        msgEl.textContent = 'Hochladen...';
+        msgEl.style.display = 'block';
+    }
+    try {
+        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents`, {method: 'POST', body: formData});
+        if (resp.ok) {
+            fileInput.value = '';
+            if (msgEl) {
+                msgEl.textContent = '';
+                msgEl.style.display = 'none';
+            }
+            await loadDocuments();
+        } else {
+            const text = await resp.text();
+            if (msgEl) {
+                msgEl.textContent = 'Fehler: ' + text;
+                msgEl.style.display = 'block';
+            }
+        }
+    } catch (err) {
+        if (msgEl) {
+            msgEl.textContent = 'Netzwerkfehler: ' + err;
+            msgEl.style.display = 'block';
+        }
+        console.error('uploadDocument error:', err);
+    }
+}
+
+async function deleteDocument(docId: number): Promise<void> {
+    if (!editingQuizId) return;
+    if (!confirm('Dokument wirklich löschen?')) return;
+    try {
+        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents/${docId}`, {method: 'DELETE'});
+        if (resp.ok) {
+            await loadDocuments();
+        } else {
+            const text = await resp.text();
+            console.error('deleteDocument error:', text);
+        }
+    } catch (err) {
+        console.error('deleteDocument network error:', err);
+    }
+}
 
 // ── Image preview helper ──────────────────────────────────────────────────────
 

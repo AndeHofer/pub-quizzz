@@ -31,6 +31,7 @@ public class QuizService {
     private final ResultRepository resultRepository;
     private final QuizMapper quizMapper;
     private final ImageStorageService imageStorageService;
+    private final DocumentStorageService documentStorageService;
 
     @Transactional(readOnly = true)
     public List<QuizDTO> getAllQuizzes() {
@@ -138,6 +139,7 @@ public class QuizService {
         quizRepository.deleteById(id);
 
         imageUrls.forEach(imageStorageService::delete);
+        documentStorageService.deleteAllDocumentsForQuiz(id);
 
         log.info("Quiz {} deleted successfully, {} image(s) removed", id, imageUrls.size());
         return true;

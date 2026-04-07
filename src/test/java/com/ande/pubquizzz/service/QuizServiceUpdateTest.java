@@ -35,6 +35,9 @@ class QuizServiceUpdateTest {
     @Mock
     private ImageStorageService imageStorageService;
 
+    @Mock
+    private DocumentStorageService documentStorageService;
+
     @InjectMocks
     private QuizService quizService;
 

@@ -32,6 +32,19 @@
         <button type="submit">Speichere Quiz</button>
         <button type="button" class="back-btn" id="backBtn">Zurück zum Admin Bereich</button>
     </form>
+
+    <!-- Document section — only shown in edit mode (requires a saved quiz ID) -->
+    <div id="documentsSection" class="section" style="display:none; margin-top:1.5rem;">
+        <h2>Dokumente</h2>
+        <p class="text-sm text-gray-500" style="margin-bottom:0.75rem;">Hier können Dokumente zum Quiz hochgeladen
+            werden (z.B. Fragen-PDF, Notizen). Dateien beliebigen Typs erlaubt.</p>
+        <div id="documentList" style="margin-bottom:1rem;"></div>
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+            <input type="file" id="documentFileInput" style="flex:1; min-width:0;">
+            <button type="button" id="uploadDocumentBtn">Hochladen</button>
+        </div>
+        <div id="documentMessage" class="message" style="margin-top:0.5rem;"></div>
+    </div>
 </div>
 
 <script type="module" src="/js/create_quiz.ts"></script>
