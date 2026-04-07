@@ -27,5 +27,6 @@ Older finished progress entries were moved here to keep `progress.md` short.
 - Phase 21: Fix `hint_text` NOT NULL — Flyway removed ✅ COMPLETE
 - Phase 22: Fix Orphaned Image Files ✅ COMPLETE
 - Phase 24: "Sieger" Column on Quiz Archiv Page ✅ COMPLETE
+- Phase 28: Bildantwort fuer Fragen 5-8 ✅ COMPLETE
 
 Note: Phase numbering reflects original historical labels.

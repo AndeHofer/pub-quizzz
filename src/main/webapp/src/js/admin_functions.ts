@@ -130,6 +130,12 @@ function quizDisplayTitle(quiz: QuizDTO): string {
     return `Quiz ${quiz.quizId}`;
 }
 
+function parsePubDateToMillis(pubDate?: string): number | null {
+    if (!pubDate) return null;
+    const parsed = Date.parse(`${pubDate}T00:00:00Z`);
+    return Number.isNaN(parsed) ? null : parsed;
+}
+
 async function viewQuizzes() {
     showModal('Alle Quizze', showLoading());
     try {
@@ -139,8 +145,22 @@ async function viewQuizzes() {
             showModal('Alle Quizze', '<p>Keine Quizze gefunden.</p>');
             return;
         }
+        const sortedQuizzes = [...quizzes].sort((a: QuizDTO, b: QuizDTO) => {
+            const aPubDate = parsePubDateToMillis(a.pubDate);
+            const bPubDate = parsePubDateToMillis(b.pubDate);
+
+            if (aPubDate !== null && bPubDate !== null) {
+                if (aPubDate !== bPubDate) return bPubDate - aPubDate;
+            } else if (aPubDate !== null) {
+                return -1;
+            } else if (bPubDate !== null) {
+                return 1;
+            }
+
+            return b.quizId - a.quizId;
+        });
         const headers = ['ID', 'Titel', 'Pub Datum', 'Archiv Datum', 'Fertig', 'Aktionen'];
-        const html = renderTable(headers, quizzes, (quiz: unknown) => {
+        const html = renderTable(headers, sortedQuizzes, (quiz: unknown) => {
             const q = quiz as QuizDTO;
             return [`${q.quizId}`, quizDisplayTitle(q), `${q.pubDate}`, `${q.submitDate}`, q.finished ? '✅' : '❌', `
                 <button class="icon-btn" onclick="editQuiz(${q.quizId})" title="Quiz bearbeiten">✏️</button>

@@ -2,6 +2,9 @@
 
 ## Open Tasks
 
+- [x] Plan Phase 31: Quiz anzeigen nach `pubDate` absteigend sortieren
+- [x] Implement frontend sorting in `viewQuizzes` (neueste zuerst, ungültige/fehlende Daten zuletzt)
+- [x] Run full verification (`npm run type-check`, `npm run build`, `mvnw.cmd test` with skip npm flags)
 - [x] Read `instructions.md` and identify new housekeeping rule
 - [x] Update `AGENTS.md` to include the new `progress.md` housekeeping rule
 - [x] Clean `progress.md` to keep only 3 finished features
@@ -21,6 +24,15 @@
 - [x] Run verification for legacy restore compatibility fix
 - [x] Blockers: none
 
+## Phase 31: Quiz anzeigen nach `pubDate` DESC ✅ COMPLETE
+
+- Updated `viewQuizzes()` in `src/main/webapp/src/js/admin_functions.ts` to sort quizzes before rendering
+- Sorting rule: valid `pubDate` first in descending order (newest to oldest)
+- Missing/invalid `pubDate` values are placed at the end
+- Deterministic fallback sort for ties/missing dates: `quizId` descending
+- Verification: `npm run type-check` (in `src/main/webapp`), `npm run build` (in `src/main/webapp`),
+  `./mvnw.cmd --% -Dskip.npm=true -Dskip.installnodenpm=true test` all passing
+
 ## Phase 30: Legacy Backup Compatibility for answer_image_url ✅ COMPLETE
 
 - Added post-restore schema compatibility step in `BackupRestoreListener` after `RUNSCRIPT`
@@ -38,16 +50,4 @@
 - Added regression tests:
   - `BackupRestoreListenerTest`: restore succeeds with `quiz_document -> quiz` FK dependency
   - `BackupServiceTest`: SQL dump contains `QUIZ_DOCUMENT`
-- Verification: backend tests passing, frontend type-check/build passing
-
-## Phase 28: Bildantwort fuer Fragen 5-8 ✅ COMPLETE
-
-- Added nullable `answerImageUrl` on `Question` and propagated it through request/response DTOs
-- Questions 5-8 now accept answer text, answer image, or both; questions 1-4 still require answer text for finished
-  status
-- Added multipart handling for `answer_image_q5..q8` in `AdminQuizController`
-- Extended image lifecycle cleanup in `QuizService` (update diff cleanup, quiz delete, orphan cleanup)
-- Frontend `create_quiz.ts` now supports answer image upload/preview for questions 5-8 and mirrors finished readiness
-  rule
-- Added tests for finished checker, controller multipart handling, service cleanup behavior, and persistence
 - Verification: backend tests passing, frontend type-check/build passing
