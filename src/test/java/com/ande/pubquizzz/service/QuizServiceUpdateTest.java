@@ -58,6 +58,18 @@ class QuizServiceUpdateTest {
         return quiz;
     }
 
+    private Quiz quizWithAnswerImageUrl(String answerImageUrl) {
+        Quiz quiz = new Quiz();
+        quiz.setPubDate(LocalDate.now());
+        quiz.addQuestion(1, "Q1", "A1", "", List.of(hint("h1"), hint("h2"), hint("h3"), hint("h4")));
+        quiz.addQuestion(2, "Q2", "A2", "", List.of(hint("h1"), hint("h2"), hint("h3"), hint("h4")));
+        quiz.addQuestion(3, "Q3", "A3", "", List.of(hint("h1"), hint("h2"), hint("h3"), hint("h4")));
+        quiz.addQuestion(4, "Q4", "A4", "", List.of(hint("h1"), hint("h2"), hint("h3"), hint("h4")));
+        quiz.addQuestion(5, "Q5", "", answerImageUrl, "", List.of(hint("h1"), hint("h2"), hint("h3")));
+        for (int i = 6; i <= 8; i++) quiz.addQuestion(i, "Q" + i, "A" + i, "", textHints(3));
+        return quiz;
+    }
+
     private static Hint hint(String text) {
         Hint h = new Hint();
         h.setHintText(text);
@@ -150,5 +162,31 @@ class QuizServiceUpdateTest {
 
         verify(imageStorageService, never()).delete(keptUrl);
         verify(imageStorageService).delete(replacedUrl);
+    }
+
+    @Test
+    void updateQuizFull_deletesOldAnswerImageUrl() {
+        Quiz existing = quizWithAnswerImageUrl("/uploads/old-answer-q5.jpg");
+        when(quizRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(quizMapper.toDTO(any())).thenReturn(null);
+
+        quizService.updateQuizFull(1L, minimalUpdateRequest());
+
+        verify(imageStorageService).delete("/uploads/old-answer-q5.jpg");
+    }
+
+    @Test
+    void updateQuizFull_doesNotDeleteAnswerImageUrl_whenKeptUnchanged() {
+        String keptAnswerUrl = "/uploads/kept-answer-q5.jpg";
+        Quiz existing = quizWithAnswerImageUrl(keptAnswerUrl);
+        when(quizRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(quizMapper.toDTO(any())).thenReturn(null);
+
+        CreateQuizRequest req = minimalUpdateRequest();
+        req.getQuestions().get(4).setAnswerImageUrl(keptAnswerUrl);
+
+        quizService.updateQuizFull(1L, req);
+
+        verify(imageStorageService, never()).delete(keptAnswerUrl);
     }
 }

@@ -31,6 +31,7 @@ import java.util.Optional;
 import org.springframework.mock.web.MockMultipartFile;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -224,6 +225,21 @@ class AdminQuizControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    void createQuiz_withAnswerImageOnQuestion5_storesImageAndReturnsOk() throws Exception {
+        MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
+        MockMultipartFile answerImagePart = new MockMultipartFile("answer_image_q5", "a5.jpg", "image/jpeg", "imgdata".getBytes());
+
+        when(imageStorageService.store(answerImagePart)).thenReturn("/uploads/a5.jpg");
+
+        mockMvc.perform(multipart("/admin/create-quiz")
+                        .file(quizPart)
+                        .file(answerImagePart)
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void updateQuizFull_withAtStartImage_storesImageAndReturnsOk() throws Exception {
         MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
         MockMultipartFile imagePart = new MockMultipartFile("hint_atstart_q2_h3", "q2h3.jpg", "image/jpeg", "data".getBytes());
@@ -262,7 +278,27 @@ class AdminQuizControllerTest {
                 .andExpect(status().isOk());
 
         // imageStorageService.store() must NOT have been called
-        org.mockito.Mockito.verify(imageStorageService, org.mockito.Mockito.never()).store(org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.verify(imageStorageService, never()).store(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void updateQuizFull_withAnswerImageOnQuestion8_storesImageAndReturnsOk() throws Exception {
+        MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
+        MockMultipartFile answerImagePart = new MockMultipartFile("answer_image_q8", "a8.png", "image/png", "data".getBytes());
+
+        when(imageStorageService.store(answerImagePart)).thenReturn("/uploads/a8.png");
+        when(quizService.updateQuizFull(anyLong(), org.mockito.ArgumentMatchers.any())).thenReturn(new com.ande.pubquizzz.dto.QuizDTO());
+
+        mockMvc.perform(multipart("/admin/quiz/1")
+                        .file(quizPart)
+                        .file(answerImagePart)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .with(csrf()))
+                .andExpect(status().isOk());
     }
 
     @Test

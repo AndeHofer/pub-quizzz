@@ -138,6 +138,13 @@ public class AdminQuizController {
 
     private void injectImageUrls(CreateQuizRequest request, Map<String, MultipartFile> allFiles) {
         for (CreateQuizRequest.QuestionData qd : request.getQuestions()) {
+            if (qd.getNumber() >= 5 && qd.getNumber() <= 8) {
+                MultipartFile answerImage = allFiles.get("answer_image_q" + qd.getNumber());
+                if (answerImage != null && !answerImage.isEmpty()) {
+                    qd.setAnswerImageUrl(imageStorageService.store(answerImage));
+                }
+            }
+
             for (int j = 0; j < qd.getHints().size(); j++) {
                 int q = qd.getNumber();
                 int h = j + 1;

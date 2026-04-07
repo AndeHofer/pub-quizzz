@@ -11,6 +11,7 @@ let editingQuizId: number | null = null;
 // Stores existing image URLs for hints when editing a quiz.
 // Key format: "atstart_q{q}_h{h}" or "ashint_q{q}_h{h}"
 const existingImageUrls = new Map<string, string>();
+const existingAnswerImageUrls = new Map<number, string>();
 
 // ── Readiness helpers ────────────────────────────────────────────────────────
 
@@ -21,7 +22,8 @@ function numHintsFor(q: number): number {
 /**
  * Mirrors QuizFinishedChecker.isFinished() for a single question:
  * - questionText non-blank
- * - answer non-blank
+ * - q1-4: answer non-blank
+ * - q5-8: answer non-blank OR answer image present
  * - every hint has non-blank hintText OR a selected/existing imageUrlAsHint file
  */
 function isQuestionReady(i: number): boolean {
@@ -29,7 +31,16 @@ function isQuestionReady(i: number): boolean {
     if (!questionInput || !questionInput.value.trim()) return false;
 
     const answerInput = document.getElementById(`answer${i}`) as HTMLInputElement | null;
-    if (!answerInput || !answerInput.value.trim()) return false;
+    const hasAnswerText = !!(answerInput && answerInput.value.trim());
+    const answerImageInput = document.getElementById(`answer_image_q${i}`) as HTMLInputElement | null;
+    const hasAnswerFile = !!(answerImageInput?.files && answerImageInput.files[0]);
+    const hasExistingAnswerImage = !!existingAnswerImageUrls.get(i);
+
+    if (i <= 4) {
+        if (!hasAnswerText) return false;
+    } else {
+        if (!hasAnswerText && !hasAnswerFile && !hasExistingAnswerImage) return false;
+    }
 
     const n = numHintsFor(i);
     for (let j = 1; j <= n; j++) {
@@ -74,6 +85,13 @@ if (questionsContainer) {
                 </div>`;
         }
 
+        const answerImageHtml = i >= 5 ? `
+                <div class="field-group">
+                    <label style="font-size:0.85em; margin-top:4px;">Antwortbild ${i} (optional):</label>
+                    <input type="file" id="answer_image_q${i}" accept="image/*">
+                    <img id="preview_answer_q${i}" src="" alt="" style="display:none; max-height:80px; margin-top:4px;">
+                </div>` : '';
+
         section.innerHTML = `
             <div class="question-toggle" id="toggle${i}">
                 <span id="status${i}">❌</span>
@@ -90,6 +108,7 @@ if (questionsContainer) {
                     <label for="answer${i}">Antwort ${i}:</label>
                     <input type="text" id="answer${i}">
                 </div>
+                ${answerImageHtml}
                 <div class="field-group">
                     <label for="note${i}">Anmerkung ${i} (optional):</label>
                     <input type="text" id="note${i}">
@@ -130,6 +149,16 @@ if (questionsContainer) {
             if (asHintInput) {
                 asHintInput.addEventListener('change', () => {
                     previewHintImage(asHintInput, `preview_ashint_q${i}_h${j}`);
+                    updateStatus(i);
+                });
+            }
+        }
+
+        if (i >= 5) {
+            const answerImageInput = document.getElementById(`answer_image_q${i}`) as HTMLInputElement | null;
+            if (answerImageInput) {
+                answerImageInput.addEventListener('change', () => {
+                    previewHintImage(answerImageInput, `preview_answer_q${i}`);
                     updateStatus(i);
                 });
             }
@@ -183,6 +212,15 @@ function populateFormForEdit(quiz: QuizDTO) {
 
             const answerInput = document.getElementById(`answer${qNum}`) as HTMLInputElement | null;
             if (answerInput) answerInput.value = q.answer || '';
+
+            if (qNum >= 5 && q.answerImageUrl) {
+                existingAnswerImageUrls.set(qNum, q.answerImageUrl);
+                const preview = document.getElementById(`preview_answer_q${qNum}`) as HTMLImageElement | null;
+                if (preview) {
+                    preview.src = q.answerImageUrl;
+                    preview.style.display = 'block';
+                }
+            }
 
             const noteInput = document.getElementById(`note${qNum}`) as HTMLInputElement | null;
             if (noteInput) noteInput.value = q.note || '';
@@ -241,6 +279,7 @@ if (quizForm) {
                 number: number;
                 questionText: string;
                 answer: string;
+                answerImageUrl: string | null;
                 note: string | null;
                 hints: { hintText: string | null; imageUrlAtStart: string | null; imageUrlAsHint: string | null }[]
             }[]
@@ -260,6 +299,11 @@ if (quizForm) {
                 imageUrlAtStart: string | null;
                 imageUrlAsHint: string | null
             }[] = [];
+
+            const answerImageInput = document.getElementById(`answer_image_q${i}`) as HTMLInputElement | null;
+            const answerImageUrl = (answerImageInput && answerImageInput.files && answerImageInput.files[0])
+                ? null
+                : (existingAnswerImageUrls.get(i) ?? null);
 
             for (let j = 1; j <= n; j++) {
                 const atStartInput = document.getElementById(`hint_atstart_q${i}_h${j}`) as HTMLInputElement;
@@ -295,9 +339,14 @@ if (quizForm) {
                 number: i,
                 questionText: (document.getElementById(`quiz${i}`) as HTMLInputElement).value,
                 answer: (document.getElementById(`answer${i}`) as HTMLInputElement).value,
+                answerImageUrl,
                 note: (document.getElementById(`note${i}`) as HTMLInputElement).value || null,
                 hints: hints
             });
+
+            if (answerImageInput && answerImageInput.files && answerImageInput.files[0]) {
+                formData.append(`answer_image_q${i}`, answerImageInput.files[0]);
+            }
         }
 
         formData.append('quiz', new Blob([JSON.stringify(quizData)], {type: 'application/json'}));

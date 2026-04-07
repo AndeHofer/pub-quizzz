@@ -13,6 +13,7 @@ Pub Quizzz is a Spring Boot 4.x web application for managing and running pub qui
 
 - Each quiz must have exactly **8 questions**
 - Questions 1–4 must have exactly **4 hints**; questions 5–8 must have exactly **3 hints**
+- For questions 5–8, the answer can be text, image, or both (questions 1–4 still require text answer)
 - A team may submit results for a given quiz only once (unique constraint on `team_id + quiz_id`)
 
 ## Key Design Decisions
@@ -24,4 +25,3 @@ Pub Quizzz is a Spring Boot 4.x web application for managing and running pub qui
 - Quiz images (hint images) stored in `${app.upload.dir}/` and served publicly via `/uploads/**`
 - Quiz documents (any file type) stored in `${app.upload.dir}/documents/` and served only to `ADMIN` users; managed in
   the quiz edit form
-

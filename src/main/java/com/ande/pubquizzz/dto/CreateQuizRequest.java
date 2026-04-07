@@ -32,6 +32,8 @@ public class CreateQuizRequest {
 
         private String answer;
 
+        private String answerImageUrl;
+
         private String note;
 
         @Valid

@@ -41,6 +41,7 @@ public class BackupServiceTest {
             stmt.execute("CREATE TABLE IF NOT EXISTS team (id BIGINT PRIMARY KEY, name VARCHAR(255))");
             stmt.execute("CREATE TABLE IF NOT EXISTS result (id BIGINT PRIMARY KEY, quiz_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS result_answer (id BIGINT PRIMARY KEY, result_id BIGINT)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS quiz_document (id BIGINT PRIMARY KEY, quiz_id BIGINT NOT NULL, FOREIGN KEY (quiz_id) REFERENCES quiz(id))");
         }
         Files.createDirectories(tempDir.resolve("uploads"));
     }
@@ -158,6 +159,20 @@ public class BackupServiceTest {
         // H2 SCRIPT uppercases table names
         assertFalse(sqlContent.toUpperCase().contains("APPUSER"),
                 "SQL dump must not contain APPUSER table");
+    }
+
+    @Test
+    void createBackup_sqlDump_containsQuizDocumentTable() throws Exception {
+        BackupService svc = service();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            svc.createBackup(zip);
+        }
+
+        Map<String, byte[]> entries = readZipEntries(baos.toByteArray());
+        String sqlContent = new String(entries.get("database.sql"), StandardCharsets.UTF_8).toUpperCase();
+        assertTrue(sqlContent.contains("QUIZ_DOCUMENT"),
+                "SQL dump must contain QUIZ_DOCUMENT table");
     }
 
     @Test

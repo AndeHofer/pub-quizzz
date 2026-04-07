@@ -8,6 +8,7 @@ export interface QuestionDTO {
     number: number;
     questionText: string;
     answer: string;
+    answerImageUrl?: string | null;
     note: string | null;
     hints: HintDTO[];
 }

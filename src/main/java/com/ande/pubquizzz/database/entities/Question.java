@@ -37,5 +37,9 @@ public class Question {
     @Column(nullable = false)
     @NotNull
     private String answer;
+
+    @Column(name = "answer_image_url", nullable = true)
+    private String answerImageUrl;
+
     private String note;
 }

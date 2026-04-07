@@ -77,6 +77,16 @@ class QuizServiceDeleteTest {
     }
 
     @Test
+    void deleteQuiz_deletesAnswerImageFile() {
+        Quiz quiz = quizWithAnswerImage("/uploads/answer-q5.jpg");
+        when(quizRepository.findById(4L)).thenReturn(Optional.of(quiz));
+
+        quizService.deleteQuiz(4L);
+
+        verify(imageStorageService).delete("/uploads/answer-q5.jpg");
+    }
+
+    @Test
     void deleteQuiz_noImages_doesNotCallImageDelete() {
         Quiz quiz = quizWithoutImages();
         when(quizRepository.findById(3L)).thenReturn(Optional.of(quiz));
@@ -121,6 +131,21 @@ class QuizServiceDeleteTest {
         quiz.addQuestion(1, "Q1", "A1", "", List.of(h, hint(), hint(), hint()));
         for (int i = 2; i <= 4; i++) quiz.addQuestion(i, "Q" + i, "A" + i, "", textHints(4));
         for (int i = 5; i <= 8; i++) quiz.addQuestion(i, "Q" + i, "A" + i, "", textHints(3));
+        return quiz;
+    }
+
+    private Quiz quizWithAnswerImage(String answerImageUrl) {
+        Quiz quiz = new Quiz();
+        quiz.setPubDate(LocalDate.now());
+        quiz.setSubmitDate(LocalDate.now());
+        quiz.addQuestion(1, "Q1", "A1", "", List.of(hint(), hint(), hint(), hint()));
+        quiz.addQuestion(2, "Q2", "A2", "", List.of(hint(), hint(), hint(), hint()));
+        quiz.addQuestion(3, "Q3", "A3", "", List.of(hint(), hint(), hint(), hint()));
+        quiz.addQuestion(4, "Q4", "A4", "", List.of(hint(), hint(), hint(), hint()));
+        quiz.addQuestion(5, "Q5", "", answerImageUrl, "", List.of(hint(), hint(), hint()));
+        quiz.addQuestion(6, "Q6", "A6", "", List.of(hint(), hint(), hint()));
+        quiz.addQuestion(7, "Q7", "A7", "", List.of(hint(), hint(), hint()));
+        quiz.addQuestion(8, "Q8", "A8", "", List.of(hint(), hint(), hint()));
         return quiz;
     }
 

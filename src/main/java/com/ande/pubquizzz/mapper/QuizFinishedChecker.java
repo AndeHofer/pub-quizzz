@@ -13,7 +13,9 @@ public class QuizFinishedChecker {
     /**
      * A quiz is "finished" when:
      * - It has exactly 8 questions
-     * - Every question has a non-blank questionText and non-blank answer
+     * - Every question has a non-blank questionText
+     * - Questions 1-4 need non-blank answer text
+     * - Questions 5-8 need non-blank answer text OR answerImageUrl
      * - Every hint has either a non-blank hintText OR a non-null imageUrlAsHint
      *   (imageUrlAtStart alone does NOT count as a filled hint)
      */
@@ -22,8 +24,14 @@ public class QuizFinishedChecker {
         if (questions == null || questions.size() != 8) return false;
         for (Question q : questions) {
             if (q.getQuestionText() == null || q.getQuestionText().isBlank()) return false;
-            if (q.getAnswer() == null || q.getAnswer().isBlank()) return false;
             int qNum = q.getId().getQuestionNumber();
+            boolean hasAnswerText = q.getAnswer() != null && !q.getAnswer().isBlank();
+            boolean hasAnswerImage = q.getAnswerImageUrl() != null;
+            if (qNum >= 1 && qNum <= 4) {
+                if (!hasAnswerText) return false;
+            } else {
+                if (!hasAnswerText && !hasAnswerImage) return false;
+            }
             int expectedHints = (qNum >= 1 && qNum <= 4) ? 4 : 3;
             List<Hint> hints = q.getHints();
             if (hints == null || hints.size() != expectedHints) return false;

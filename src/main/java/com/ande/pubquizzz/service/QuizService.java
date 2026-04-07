@@ -91,8 +91,10 @@ public class QuizService {
 
         // Snapshot old image URLs before clearing questions
         List<String> oldImageUrls = quiz.getQuestions().stream()
-                .flatMap(q -> q.getHints().stream())
-                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .flatMap(q -> java.util.stream.Stream.concat(
+                        java.util.stream.Stream.of(q.getAnswerImageUrl()),
+                        q.getHints().stream().flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                ))
                 .filter(url -> url != null)
                 .toList();
 
@@ -106,8 +108,10 @@ public class QuizService {
 
         // Collect URLs still in use after the update
         java.util.Set<String> newImageUrls = quiz.getQuestions().stream()
-                .flatMap(q -> q.getHints().stream())
-                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .flatMap(q -> java.util.stream.Stream.concat(
+                        java.util.stream.Stream.of(q.getAnswerImageUrl()),
+                        q.getHints().stream().flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                ))
                 .filter(url -> url != null)
                 .collect(java.util.stream.Collectors.toSet());
 
@@ -130,8 +134,10 @@ public class QuizService {
 
         // Snapshot image URLs before cascade-delete removes the hints
         List<String> imageUrls = quiz.getQuestions().stream()
-                .flatMap(q -> q.getHints().stream())
-                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .flatMap(q -> java.util.stream.Stream.concat(
+                        java.util.stream.Stream.of(q.getAnswerImageUrl()),
+                        q.getHints().stream().flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                ))
                 .filter(url -> url != null)
                 .toList();
 
@@ -150,8 +156,10 @@ public class QuizService {
         log.info("Starting orphaned image cleanup");
         Set<String> referencedUrls = quizRepository.findAll().stream()
                 .flatMap(q -> q.getQuestions().stream())
-                .flatMap(q -> q.getHints().stream())
-                .flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                .flatMap(q -> java.util.stream.Stream.concat(
+                        java.util.stream.Stream.of(q.getAnswerImageUrl()),
+                        q.getHints().stream().flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
+                ))
                 .filter(url -> url != null)
                 .collect(Collectors.toSet());
         CleanupResult result = imageStorageService.cleanupOrphanedImages(referencedUrls);
@@ -165,7 +173,8 @@ public class QuizService {
             quiz.addQuestion(
                     questionData.getNumber(),
                     questionData.getQuestionText(),
-                    questionData.getAnswer(),
+                    questionData.getAnswer() == null ? "" : questionData.getAnswer(),
+                    questionData.getAnswerImageUrl(),
                     questionData.getNote(),
                     hints
             );

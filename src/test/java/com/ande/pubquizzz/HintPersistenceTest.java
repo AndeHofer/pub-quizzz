@@ -1,6 +1,7 @@
 package com.ande.pubquizzz;
 
 import com.ande.pubquizzz.database.entities.Hint;
+import com.ande.pubquizzz.database.entities.Question;
 import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import org.junit.jupiter.api.Test;
@@ -178,5 +179,32 @@ public class HintPersistenceTest {
 
         assertNull(saved.getHintText());
         assertEquals("/uploads/hint-only.jpg", saved.getImageUrlAsHint());
+    }
+
+    @Test
+    void answerImageUrlIsPersistedForQuestion5() {
+        Quiz quiz = new Quiz();
+        quiz.setPubDate(LocalDate.of(2099, 1, 1));
+        quiz.setSubmitDate(LocalDate.now());
+
+        quiz.addQuestion(1, "Q1", "A1", "", textHints("h1", "h2", "h3", "h4"));
+        quiz.addQuestion(2, "Q2", "A2", "", textHints("h1", "h2", "h3", "h4"));
+        quiz.addQuestion(3, "Q3", "A3", "", textHints("h1", "h2", "h3", "h4"));
+        quiz.addQuestion(4, "Q4", "A4", "", textHints("h1", "h2", "h3", "h4"));
+        quiz.addQuestion(5, "Q5", "", "/uploads/answer-q5.png", "", textHints("h1", "h2", "h3"));
+        quiz.addQuestion(6, "Q6", "A6", "", textHints("h1", "h2", "h3"));
+        quiz.addQuestion(7, "Q7", "A7", "", textHints("h1", "h2", "h3"));
+        quiz.addQuestion(8, "Q8", "A8", "", textHints("h1", "h2", "h3"));
+
+        quizRepository.save(quiz);
+
+        Quiz loaded = quizRepository.findById(quiz.getQuizId()).orElseThrow();
+        Question q5 = loaded.getQuestions().stream()
+                .filter(q -> q.getId().getQuestionNumber() == 5)
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals("", q5.getAnswer());
+        assertEquals("/uploads/answer-q5.png", q5.getAnswerImageUrl());
     }
 }

@@ -18,6 +18,7 @@ public class QuizDetailDTO {
         private int number;
         private String questionText;
         private String answer;
+        private String answerImageUrl;
         private String note;
         private List<HintDetailDTO> hints;
     }

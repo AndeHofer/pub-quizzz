@@ -33,6 +33,30 @@ class QuizFinishedCheckerTest {
     }
 
     @Test
+    void isFinished_question5_blankAnswerButImageSet_returnsTrue() {
+        Quiz quiz = buildFullQuiz();
+        quiz.getQuestions().get(4).setAnswer("");
+        quiz.getQuestions().get(4).setAnswerImageUrl("/uploads/answer-q5.jpg");
+        assertTrue(QuizFinishedChecker.isFinished(quiz));
+    }
+
+    @Test
+    void isFinished_question5_blankAnswerAndNoImage_returnsFalse() {
+        Quiz quiz = buildFullQuiz();
+        quiz.getQuestions().get(4).setAnswer("");
+        quiz.getQuestions().get(4).setAnswerImageUrl(null);
+        assertFalse(QuizFinishedChecker.isFinished(quiz));
+    }
+
+    @Test
+    void isFinished_question1_blankAnswerEvenWithImage_returnsFalse() {
+        Quiz quiz = buildFullQuiz();
+        quiz.getQuestions().get(0).setAnswer("");
+        quiz.getQuestions().get(0).setAnswerImageUrl("/uploads/not-allowed-for-q1.jpg");
+        assertFalse(QuizFinishedChecker.isFinished(quiz));
+    }
+
+    @Test
     void isFinished_blankHintTextAndNoImage_returnsFalse() {
         Quiz quiz = buildFullQuiz();
         quiz.getQuestions().get(0).getHints().get(0).setHintText("");
