@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -153,7 +154,11 @@ public class ResultService {
     @Transactional(readOnly = true)
     public List<PointsLeaderboardEntry> getPointsLeaderboard() {
         log.info("Fetching all-time leaderboard");
-        List<Object[]> rows = resultRepository.findPointsLeaderboardRaw();
+        List<Object[]> rows = new ArrayList<>(resultRepository.findLeaderboardRaw());
+        // Sort rows defensively by totalPoints (DESC) and teamName (ASC)
+        rows.sort(Comparator.comparingInt((Object[] row) -> ((Number) row[1]).intValue()).reversed()
+                .thenComparing(row -> (String) row[0]));
+
         List<PointsLeaderboardEntry> leaderboard = new ArrayList<>();
         int rank = 1;
         for (int i = 0; i < rows.size(); i++) {
@@ -178,7 +183,7 @@ public class ResultService {
     @Transactional(readOnly = true)
     public List<AverageLeaderboardEntry> getAverageLeaderboard() {
         log.info("Fetching average leaderboard");
-        List<Object[]> rows = resultRepository.findAverageLeaderboardRaw();
+        List<Object[]> rows = resultRepository.findLeaderboardRaw();
 
         List<AverageTeamStats> stats = rows.stream()
                 .map(row -> {
@@ -361,26 +366,83 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<TeamResultEntry> getResultsForTeam(String teamName) {
-        return resultRepository.findByTeamNameOrderByPubDateDesc(teamName)
-                .stream()
-                .map(r -> {
-                    TeamResultEntry entry = new TeamResultEntry();
-                    entry.setQuizId(r.getQuiz().getQuizId());
-                    entry.setQuizDate(r.getQuiz().getPubDate().toString());
-                    entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getTitle(), r.getQuiz().getPubDate()));
-                    entry.setTotalPoints(r.calculateTotalPoints());
-                    entry.setAnswers(r.getAnswers().stream()
-                            .map(a -> {
-                                AnswerScoreDTO dto = new AnswerScoreDTO();
-                                dto.setQuestionNumber(a.getQuestionNumber());
-                                dto.setPoints(a.getPoints());
-                                dto.setChanged(Boolean.TRUE.equals(a.getChanged()));
-                                return dto;
-                            })
-                            .toList());
-                    return entry;
-                })
+        List<Result> results = resultRepository.findByTeamNameOrderByPubDateDesc(teamName);
+        if (results.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> quizIds = results.stream()
+                .map(r -> r.getQuiz().getQuizId())
+                .filter(java.util.Objects::nonNull)
                 .toList();
+
+        List<Object[]> rawScoreRows = quizIds.isEmpty()
+                ? List.of()
+                : java.util.Optional.ofNullable(resultRepository.findScoresByQuizIds(quizIds)).orElse(List.of());
+
+        Map<Long, List<Object[]>> quizScores = rawScoreRows.stream()
+                .collect(Collectors.groupingBy(row -> ((Number) row[0]).longValue()));
+
+        return results.stream().map(r -> {
+            TeamResultEntry entry = new TeamResultEntry();
+            entry.setQuizId(r.getQuiz().getQuizId());
+            entry.setQuizDate(r.getQuiz().getPubDate().toString());
+            entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getTitle(), r.getQuiz().getPubDate()));
+            entry.setTotalPoints(r.calculateTotalPoints());
+            entry.setAnswers(r.getAnswers().stream()
+                    .map(a -> {
+                        AnswerScoreDTO dto = new AnswerScoreDTO();
+                        dto.setQuestionNumber(a.getQuestionNumber());
+                        dto.setPoints(a.getPoints());
+                        dto.setChanged(Boolean.TRUE.equals(a.getChanged()));
+                        return dto;
+                    })
+                    .toList());
+
+            List<Object[]> scores = new ArrayList<>(quizScores.getOrDefault(r.getQuiz().getQuizId(), List.of()));
+            if (scores.isEmpty()) {
+                entry.setQuizRank(1);
+                entry.setParticipantCount(1);
+                return entry;
+            }
+
+            scores.sort((left, right) -> {
+                int totalCmp = Integer.compare(((Number) right[2]).intValue(), ((Number) left[2]).intValue());
+                if (totalCmp != 0) {
+                    return totalCmp;
+                }
+                int fiveCmp = Integer.compare(((Number) right[3]).intValue(), ((Number) left[3]).intValue());
+                if (fiveCmp != 0) {
+                    return fiveCmp;
+                }
+                return Integer.compare(((Number) right[4]).intValue(), ((Number) left[4]).intValue());
+            });
+
+            entry.setParticipantCount(scores.size());
+            int rank = 1;
+            for (int i = 0; i < scores.size(); i++) {
+                if (i > 0) {
+                    Object[] previous = scores.get(i - 1);
+                    Object[] current = scores.get(i);
+                    boolean sameRank = ((Number) previous[2]).intValue() == ((Number) current[2]).intValue()
+                            && ((Number) previous[3]).intValue() == ((Number) current[3]).intValue()
+                            && ((Number) previous[4]).intValue() == ((Number) current[4]).intValue();
+                    if (!sameRank) {
+                        rank = i + 1;
+                    }
+                }
+                String currentTeamName = (String) scores.get(i)[1];
+                if (currentTeamName.equals(r.getTeam().getTeamName())) {
+                    entry.setQuizRank(rank);
+                    break;
+                }
+            }
+
+            if (entry.getQuizRank() == 0) {
+                entry.setQuizRank(1);
+            }
+            return entry;
+        }).toList();
     }
 
     private static final String[] GERMAN_MONTHS = {

@@ -10,13 +10,20 @@ function numberBadge(n: number): string {
     return `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold">${n}</span>`;
 }
 
+function medalForRank(rank: number): string {
+    if (rank === 1) return '\uD83E\uDD47';
+    if (rank === 2) return '\uD83E\uDD48';
+    if (rank === 3) return '\uD83E\uDD49';
+    return '';
+}
+
 function renderResults(teamName: string, entries: TeamResultEntry[]): void {
     const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement;
     const heading = document.getElementById('teamHeading') as HTMLHeadingElement;
     heading.textContent = `\uD83C\uDFF5\uFE0F Team: ${escapeHtml(teamName)}`;
 
     if (entries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">Noch keine Ergebnisse für dieses Team.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">Noch keine Ergebnisse für dieses Team.</td></tr>';
         return;
     }
 
@@ -24,12 +31,15 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
     entries.forEach((entry, index) => {
         const detailRowId = `detail-${index}`;
         const btnId = `btn-${index}`;
+        const medal = medalForRank(entry.quizRank);
+        const rankLabel = medal ? `${medal} ${entry.quizRank}/${entry.participantCount}` : `${entry.quizRank}/${entry.participantCount}`;
 
         // Summary row
         rows.push(`
             <tr class="border-b border-gray-200 hover:bg-gray-50">
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base"><a href="/quiz.html?id=${entry.quizId}" class="text-blue-600 hover:underline">${escapeHtml(entry.quizTitle)}</a></td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-blue-700 text-xs sm:text-base">${entry.totalPoints}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-semibold text-xs sm:text-base">${rankLabel}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
                     <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"
                         class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">&#9658; anzeigen</button>
@@ -48,7 +58,7 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
 
         rows.push(`
             <tr id="${detailRowId}" style="display:none;" class="bg-gray-50">
-                <td colspan="3" class="px-3 pb-4 pt-2">
+                <td colspan="4" class="px-3 pb-4 pt-2">
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse">
                             <thead>

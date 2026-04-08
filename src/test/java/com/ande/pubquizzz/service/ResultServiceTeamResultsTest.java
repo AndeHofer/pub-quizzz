@@ -125,6 +125,8 @@ class ResultServiceTeamResultsTest {
         TeamResultEntry entry = results.get(0);
         assertThat(entry.getTotalPoints()).isEqualTo(6);
         assertThat(entry.getAnswers()).hasSize(2);
+        assertThat(entry.getQuizRank()).isEqualTo(1);
+        assertThat(entry.getParticipantCount()).isEqualTo(1);
         assertThat(entry.getAnswers().get(0).getQuestionNumber()).isEqualTo(1);
         assertThat(entry.getAnswers().get(0).getPoints()).isEqualTo(4);
         assertThat(entry.getAnswers().get(0).getChanged()).isTrue();

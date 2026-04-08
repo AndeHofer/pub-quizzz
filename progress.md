@@ -2,6 +2,15 @@
 
 ## Open Tasks
 
+- [x] Phase 33 Follow-up: Split Team table into separate Punkte and Rang columns
+- [x] Phase 33 Follow-up: Show medals in Team rank column for ranks 1-3
+- [x] Phase 33 Follow-up: Run full verification (`mvn.cmd test`) after Team UI changes
+
+- [x] Phase 33 Team ranking column: repair broken `ResultService.getResultsForTeam()` compilation/runtime logic
+- [x] Phase 33 Team ranking column: ensure API DTO fields `quizRank` + `participantCount` are serialized in controller
+  test fixture
+- [x] Phase 33 Team ranking column: run full verification (`mvn.cmd test`) and confirm green build
+
 - [x] Phase 32 Follow-up 9: Remove legacy `/api/leaderboard` endpoint from `UserLeaderboardController`
 - [x] Phase 32 Follow-up 9: Update controller/security tests to use `/api/leaderboard/points`
 - [x] Phase 32 Follow-up 9: Re-run tests and full verification

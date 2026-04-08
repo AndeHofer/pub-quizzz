@@ -6,6 +6,8 @@ import java.util.List;
 
 @Data
 public class TeamResultEntry {
+    private int quizRank;
+    private int participantCount;
     private Long quizId;
     private String quizDate;
     private String quizTitle;

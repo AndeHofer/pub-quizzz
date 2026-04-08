@@ -73,6 +73,8 @@ export interface AverageLeaderboardEntry {
 }
 
 export interface TeamResultEntry {
+    quizRank: number;
+    participantCount: number;
     quizId: number;
     quizDate: string;
     quizTitle: string;

@@ -25,15 +25,15 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
 
     @Query("""
             SELECT t.teamName,
-                   COALESCE(SUM(ra.points), 0),
-                   COUNT(DISTINCT r.quiz.quizId)
+                   COALESCE(SUM(ra.points), 0) AS totalPoints,
+                   COUNT(DISTINCT r.quiz.quizId) AS quizCount
             FROM Result r
             JOIN r.team t
             JOIN r.answers ra
             GROUP BY t.teamsId, t.teamName
-            ORDER BY COALESCE(SUM(ra.points), 0) DESC
+            ORDER BY COALESCE(SUM(ra.points), 0) DESC, t.teamName ASC
             """)
-    List<Object[]> findPointsLeaderboardRaw();
+    List<Object[]> findLeaderboardRaw();
 
     @Query("""
             SELECT t.teamName,

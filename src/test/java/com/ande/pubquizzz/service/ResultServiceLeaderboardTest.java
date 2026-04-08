@@ -30,11 +30,37 @@ class ResultServiceLeaderboardTest {
     @InjectMocks ResultService resultService;
 
     @Test
+    void getPointsLeaderboard_handlesUnsortedInput() {
+        Object[] row1 = {"Beta Team", 90L, 2L};
+        Object[] row2 = {"Alpha Team", 150L, 3L};
+        Object[] row3 = {"Gamma Team", 150L, 2L};
+        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
+
+        List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
+
+        assertThat(result).hasSize(3);
+        assertThat(result.get(0).getRank()).isEqualTo(1);
+        assertThat(result.get(0).getTeamName()).isEqualTo("Alpha Team");
+        assertThat(result.get(0).getTotalPoints()).isEqualTo(150);
+        assertThat(result.get(0).getQuizCount()).isEqualTo(3);
+
+        assertThat(result.get(1).getRank()).isEqualTo(1);
+        assertThat(result.get(1).getTeamName()).isEqualTo("Gamma Team");
+        assertThat(result.get(1).getTotalPoints()).isEqualTo(150);
+        assertThat(result.get(1).getQuizCount()).isEqualTo(2);
+
+        assertThat(result.get(2).getRank()).isEqualTo(3);
+        assertThat(result.get(2).getTeamName()).isEqualTo("Beta Team");
+        assertThat(result.get(2).getTotalPoints()).isEqualTo(90);
+        assertThat(result.get(2).getQuizCount()).isEqualTo(2);
+    }
+
+    @Test
     void getPointsLeaderboard_returnsEntriesRankedByPoints() {
         Object[] row1 = {"Alpha Team", 150L, 3L};
         Object[] row2 = {"Gamma Team", 150L, 2L};
         Object[] row3 = {"Beta Team", 90L, 2L};
-        when(resultRepository.findPointsLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
+        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
 
         List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
 
@@ -57,7 +83,7 @@ class ResultServiceLeaderboardTest {
 
     @Test
     void getPointsLeaderboard_whenEmpty_returnsEmptyList() {
-        when(resultRepository.findPointsLeaderboardRaw()).thenReturn(List.of());
+        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of());
 
         List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
 
@@ -69,7 +95,7 @@ class ResultServiceLeaderboardTest {
         Object[] row1 = {"Beta Team", 100L, 2L};
         Object[] row2 = {"Alpha Team", 120L, 3L};
         Object[] row3 = {"Gamma Team", 50L, 1L};
-        when(resultRepository.findAverageLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
+        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
 
         List<AverageLeaderboardEntry> result = resultService.getAverageLeaderboard();
 
