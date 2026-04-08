@@ -86,7 +86,7 @@ public class ResultService {
             long count = ((Number) row[1]).longValue();
             QuizSummaryDTO dto = new QuizSummaryDTO();
             dto.setQuizId(quiz.getQuizId());
-            dto.setQuizTitle(deriveQuizTitle(quiz.getTitle(), quiz.getPubDate()));
+            dto.setQuizTitle(deriveQuizTitle(quiz.getPubDate()));
             dto.setPubDate(quiz.getPubDate().toString());
             dto.setTeamCount((int) count);
             dto.setWinnerTeamName(winnerMap.get(quiz.getQuizId()));
@@ -103,10 +103,10 @@ public class ResultService {
         String quizTitle;
         if (!results.isEmpty()) {
             Quiz q = results.get(0).getQuiz();
-            quizTitle = deriveQuizTitle(q.getTitle(), q.getPubDate());
+            quizTitle = deriveQuizTitle(q.getPubDate());
         } else {
             quizTitle = quizRepository.findById(quizId)
-                    .map(q -> deriveQuizTitle(q.getTitle(), q.getPubDate()))
+                    .map(q -> deriveQuizTitle(q.getPubDate()))
                     .orElse("");
         }
 
@@ -387,7 +387,7 @@ public class ResultService {
             TeamResultEntry entry = new TeamResultEntry();
             entry.setQuizId(r.getQuiz().getQuizId());
             entry.setQuizDate(r.getQuiz().getPubDate().toString());
-            entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getTitle(), r.getQuiz().getPubDate()));
+            entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getPubDate()));
             entry.setTotalPoints(r.calculateTotalPoints());
             entry.setAnswers(r.getAnswers().stream()
                     .map(a -> {
@@ -450,8 +450,7 @@ public class ResultService {
         "Juli", "August", "September", "Oktober", "November", "Dezember"
     };
 
-    private String deriveQuizTitle(String title, java.time.LocalDate pubDate) {
-        if (title != null && !title.isBlank()) return title;
+    private String deriveQuizTitle(java.time.LocalDate pubDate) {
         return pubDate.getYear() + " " + GERMAN_MONTHS[pubDate.getMonthValue() - 1];
     }
 

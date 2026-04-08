@@ -8,7 +8,6 @@ import java.util.List;
 @Data
 public class QuizDetailDTO {
     private Long quizId;
-    private String title;
     private LocalDate pubDate;
     private LocalDate submitDate;
     private List<QuestionDetailDTO> questions;

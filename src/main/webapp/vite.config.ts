@@ -21,7 +21,8 @@ export default defineConfig({
                 average_leaderboard: './average-leaderboard.html',
                 team: './team.html',
                 quizzes: './quizzes.html',
-                quiz: './quiz.html'
+                quiz: './quiz.html',
+                quiz_details: './quiz-details.html'
             }
         }
     },

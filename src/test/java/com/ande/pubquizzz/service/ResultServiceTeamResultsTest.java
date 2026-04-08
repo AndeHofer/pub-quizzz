@@ -90,7 +90,7 @@ class ResultServiceTeamResultsTest {
     }
 
     @Test
-    void getResultsForTeam_withExplicitTitle_usesTitle() {
+    void getResultsForTeam_ignoresStoredTitleAndUsesPubDateMonthYear() {
         quizNew.setTitle("Frühjahr 2026");
         Result result = makeResult(quizNew, List.of(makeAnswer(1, 5, null)));
         when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
@@ -98,7 +98,7 @@ class ResultServiceTeamResultsTest {
 
         List<TeamResultEntry> results = resultService.getResultsForTeam("TestTeam");
 
-        assertThat(results.get(0).getQuizTitle()).isEqualTo("Frühjahr 2026");
+        assertThat(results.get(0).getQuizTitle()).isEqualTo("2026 März");
     }
 
     @Test

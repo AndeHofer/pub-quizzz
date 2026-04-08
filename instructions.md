@@ -9,6 +9,7 @@
 - Ensure to document your progress after every single step in case copilot crashes.
 - Keep only 3 finished features in progress.md and move older to progress_archive.md to keep the progress.md clean and
   short.
+- progress.md and progress_archive.md should be written in English.
 - Minimize the commands executed that need to be confirmed by user input. E.g. do not run individual tests, but run all
   tests and then fix all at once.
 - Do not put files outside the project structure as you may not have permission to access them e.g. in /tmp. Delete

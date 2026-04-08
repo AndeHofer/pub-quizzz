@@ -2,6 +2,62 @@
 
 ## Open Tasks
 
+- [x] Phase 34 Follow-up 13: Center text reveal buttons within cards using shared grid slot layout
+- [x] Phase 34 Follow-up 13: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 12: Center text reveal buttons while preserving no-jump behavior for short text
+- [x] Phase 34 Follow-up 12: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 11: Align text-only reveal button and revealed text baseline/spacing
+- [x] Phase 34 Follow-up 11: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 10: Keep text reveal blocks same size with button and revealed one-line text
+- [x] Phase 34 Follow-up 10: Remove quiz title/date card from quiz-details page
+- [x] Phase 34 Follow-up 10: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 9: Keep text-only reveal sections at constant height before and after reveal
+- [x] Phase 34 Follow-up 9: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 8: Use light green answer background while keeping note background yellow
+- [x] Phase 34 Follow-up 8: Reduce layout jump for text-only reveals and keep media reveals expandable
+- [x] Phase 34 Follow-up 8: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 7: Remove quiz-details load button and auto-load selected quiz from dropdown
+- [x] Phase 34 Follow-up 7: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 6: Refactor derived quiz title helper signature to remove unused title argument
+- [x] Phase 34 Follow-up 6: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 5: Remove quiz title from API/frontend contracts and derive display title from pubDate
+- [x] Phase 34 Follow-up 5: Remove admin create/edit title input and payload handling
+- [x] Phase 34 Follow-up 5: Update affected tests to assert derived month-year titles
+- [x] Phase 34 Follow-up 5: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 4: Reduce reveal jump by removing per-item button layout slot after click
+- [x] Phase 34 Follow-up 4: Add smooth expand/collapse transitions for hint/answer/note blocks
+- [x] Phase 34 Follow-up 4: Keep progress entries in English for new updates
+- [x] Phase 34 Follow-up 4: Run full verification with `mvn.cmd test`
+
+- [x] Phase 34 Follow-up 3: White/black Stil nur für "Quiz laden" und per-item Reveal-Buttons anwenden
+- [x] Phase 34 Follow-up 3: Per-item Button-Platz beim Aufdecken stabil halten (kein Box-Höhenwechsel)
+- [x] Phase 34 Follow-up 3: Vollverifikation mit `mvn.cmd test` ausführen
+
+- [x] Phase 34 Follow-up 2: Einmalige Reveal-Buttons für Hinweis/Antwort/Anmerkung umsetzen (nach Klick ausblenden)
+- [x] Phase 34 Follow-up 2: Globalen Toggle so anpassen, dass beim Ausblenden alle Reveal-Buttons zurückkommen
+- [x] Phase 34 Follow-up 2: Button-Farben auf neutralen Slate-Stil anpassen
+- [x] Phase 34 Follow-up 2: Vollverifikation mit `mvn.cmd test` ausführen
+
+- [x] Phase 34 Follow-up: Anmerkung nur bei befülltem Wert rendern (nicht null/leer)
+- [x] Phase 34 Follow-up: Hinweise/Antwort/Anmerkung initial verstecken und pro Block klickbar machen
+- [x] Phase 34 Follow-up: Globalen Toggle "Alle aufdecken / Alle ausblenden" auf Quiz-Details-Seite ergänzen
+- [x] Phase 34 Follow-up: Vollverifikation mit `mvn.cmd test` ausführen
+
+- [x] Phase 34 Quiz-Details Seite: Plan erstellen und bestehende Quiz-Datenpfade prüfen
+- [x] Phase 34 Quiz-Details Seite: User-API Endpoint für Quiz-Details bereitstellen (`GET /api/quizzes/{quizId}/detail`)
+- [x] Phase 34 Quiz-Details Seite: Neue Frontend-Seite mit Quiz-Auswahl + Fragen/Hinweisen/Antworten implementieren
+- [x] Phase 34 Quiz-Details Seite: Navigation/Bundling anpassen (`index.html`, `vite.config.ts`)
+- [x] Phase 34 Quiz-Details Seite: Controller-Tests ergänzen und Vollverifikation (`mvn.cmd test`) ausführen
+
 - [x] Phase 33 Follow-up: Split Team table into separate Punkte and Rang columns
 - [x] Phase 33 Follow-up: Show medals in Team rank column for ranks 1-3
 - [x] Phase 33 Follow-up: Run full verification (`mvn.cmd test`) after Team UI changes

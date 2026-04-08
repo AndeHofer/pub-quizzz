@@ -22,6 +22,8 @@ Pub Quizzz is a Spring Boot 4.x web application for managing and running pub qui
 - Bean Validation (`@Valid`) on all request DTOs; manual format checks removed from service layer
 - All `any` types replaced with proper TypeScript interfaces in `types.ts`
 - UI text is in **German**
+- Public quiz details are available for authenticated users via `GET /api/quizzes/{quizId}/detail` and rendered in a
+  dedicated `quiz-details.html` page with explicit quiz selection
 - Quiz images (hint images) stored in `${app.upload.dir}/` and served publicly via `/uploads/**`
 - Quiz documents (any file type) stored in `${app.upload.dir}/documents/` and served only to `ADMIN` users; managed in
   the quiz edit form

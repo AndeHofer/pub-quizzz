@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de-AT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quiz ansehen - Pub Quizzz</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-full sm:max-w-4xl">
+
+    <div class="mb-6">
+        <a href="/" class="text-gray-500 hover:text-gray-700 text-sm">&larr; Startseite</a>
+    </div>
+
+    <h1 class="text-xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">&#128196; Quiz ansehen</h1>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 mb-4">
+        <label for="quizSelect" class="block text-sm font-medium text-gray-700 mb-2">Quiz ausw&auml;hlen</label>
+        <select id="quizSelect"
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Bitte ausw&auml;hlen...</option>
+        </select>
+    </div>
+
+    <div id="loadingQuizzes" class="text-center py-4 text-gray-500">Quizliste wird geladen...</div>
+    <div id="loadingDetail" class="text-center py-8 text-gray-500" style="display:none;">Quiz wird geladen...</div>
+    <div id="errorMessage" class="bg-red-100 text-red-700 rounded-lg px-4 py-3 mb-4" style="display:none;"></div>
+
+    <div id="detailActions" class="mb-4" style="display:none;">
+        <button id="toggleAllButton" type="button"
+                class="rounded-md bg-slate-700 text-white px-4 py-2 text-sm sm:text-base font-medium hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
+            Alle aufdecken
+        </button>
+    </div>
+
+    <div id="emptyState" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center text-gray-500">
+        Bitte zuerst ein Quiz ausw&auml;hlen.
+    </div>
+
+    <div id="questionsContainer" class="space-y-4" style="display:none;"></div>
+
+</div>
+<script type="module" src="./js/quiz-details.ts"></script>
+</body>
+</html>

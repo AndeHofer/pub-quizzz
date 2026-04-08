@@ -1,11 +1,13 @@
 package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
+import com.ande.pubquizzz.dto.QuizDetailDTO;
 import com.ande.pubquizzz.dto.QuizResultEntry;
 import com.ande.pubquizzz.dto.QuizResultsResponse;
 import com.ande.pubquizzz.dto.QuizSummaryDTO;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
+import com.ande.pubquizzz.service.QuizService;
 import com.ande.pubquizzz.service.ResultService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ class UserQuizControllerTest {
 
     @MockitoBean
     private ResultService resultService;
+
+    @MockitoBean
+    private QuizService quizService;
 
     @Test
     @WithMockUser
@@ -97,6 +102,48 @@ class UserQuizControllerTest {
     @Test
     void getQuizResults_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/quizzes/42/results"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @WithMockUser
+    void getQuizDetail_authenticated_returnsQuizWithQuestionsHintsAndAnswers() throws Exception {
+        QuizDetailDTO.HintDetailDTO hint = new QuizDetailDTO.HintDetailDTO();
+        hint.setHintText("Hinweis 1");
+        hint.setImageUrlAtStart("/uploads/start.png");
+        hint.setImageUrlAsHint("/uploads/hint.png");
+
+        QuizDetailDTO.QuestionDetailDTO question = new QuizDetailDTO.QuestionDetailDTO();
+        question.setNumber(1);
+        question.setQuestionText("Frage 1");
+        question.setAnswer("Antwort 1");
+        question.setAnswerImageUrl("/uploads/answer.png");
+        question.setHints(List.of(hint));
+
+        QuizDetailDTO dto = new QuizDetailDTO();
+        dto.setQuizId(42L);
+        dto.setPubDate(java.time.LocalDate.of(2026, 3, 15));
+        dto.setQuestions(List.of(question));
+
+        when(quizService.getQuizDetailById(42L)).thenReturn(java.util.Optional.of(dto));
+
+        mockMvc.perform(get("/api/quizzes/42/detail"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quizId").value(42))
+                .andExpect(jsonPath("$.pubDate").value("2026-03-15"))
+                .andExpect(jsonPath("$.questions[0].number").value(1))
+                .andExpect(jsonPath("$.questions[0].questionText").value("Frage 1"))
+                .andExpect(jsonPath("$.questions[0].answer").value("Antwort 1"))
+                .andExpect(jsonPath("$.questions[0].answerImageUrl").value("/uploads/answer.png"))
+                .andExpect(jsonPath("$.questions[0].hints[0].hintText").value("Hinweis 1"))
+                .andExpect(jsonPath("$.questions[0].hints[0].imageUrlAtStart").value("/uploads/start.png"))
+                .andExpect(jsonPath("$.questions[0].hints[0].imageUrlAsHint").value("/uploads/hint.png"));
+    }
+
+    @Test
+    void getQuizDetail_unauthenticated_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/api/quizzes/42/detail"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
     }

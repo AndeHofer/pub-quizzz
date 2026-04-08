@@ -116,7 +116,6 @@ const GERMAN_MONTHS = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
 function quizDisplayTitle(quiz: QuizDTO): string {
-    if (quiz.title) return quiz.title;
     if (quiz.pubDate) {
         const parts = quiz.pubDate.split('-');
         if (parts.length >= 2) {

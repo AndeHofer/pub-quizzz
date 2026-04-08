@@ -15,11 +15,17 @@ export interface QuestionDTO {
 
 export interface QuizDTO {
     quizId: number;
-    title?: string;
     quizDate?: string;
     pubDate?: string;
     submitDate?: string;
     finished?: boolean;
+    questions?: QuestionDTO[];
+}
+
+export interface QuizDetailResponse {
+    quizId: number;
+    pubDate?: string;
+    submitDate?: string;
     questions?: QuestionDTO[];
 }
 

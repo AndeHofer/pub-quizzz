@@ -97,19 +97,19 @@ class ResultServiceQuizTest {
         assertThat(summaries.get(0).getQuizTitle()).isEqualTo("2026 März");
         assertThat(summaries.get(0).getPubDate()).isEqualTo("2026-03-15");
         assertThat(summaries.get(0).getTeamCount()).isEqualTo(3);
-        assertThat(summaries.get(1).getQuizTitle()).isEqualTo("Jahresstart 2026");
+        assertThat(summaries.get(1).getQuizTitle()).isEqualTo("2026 Jänner");
         assertThat(summaries.get(1).getTeamCount()).isEqualTo(1);
     }
 
     @Test
-    void getQuizSummaries_withExplicitTitle_usesTitle() {
+    void getQuizSummaries_ignoresStoredTitleAndUsesPubDateMonthYear() {
         List<Object[]> rows2 = new java.util.ArrayList<>();
         rows2.add(new Object[]{quiz2, 0L});
         when(quizRepository.findAllWithResultCount()).thenReturn(rows2);
 
         List<QuizSummaryDTO> summaries = resultService.getQuizSummaries();
 
-        assertThat(summaries.get(0).getQuizTitle()).isEqualTo("Jahresstart 2026");
+        assertThat(summaries.get(0).getQuizTitle()).isEqualTo("2026 Jänner");
     }
 
     // --- getResultsForQuiz tests ---
