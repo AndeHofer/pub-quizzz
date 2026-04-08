@@ -9,6 +9,7 @@ A simple webpage to archive results, quiz and answers.
 3) enhance logging
 4) fix h2-console defaults
 5) quiz mode to replay the quiz online
+6) fields for answer, hints are to small in mobile
 
 ## DONE
 
