@@ -6,9 +6,11 @@ import com.ande.pubquizzz.database.entities.ResultAnswer;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
-import com.ande.pubquizzz.dto.AllTimeLeaderboardEntry;
+import com.ande.pubquizzz.dto.PointsLeaderboardEntry;
+import com.ande.pubquizzz.dto.AverageLeaderboardEntry;
 import com.ande.pubquizzz.dto.AnswerScoreDTO;
 import com.ande.pubquizzz.dto.CreateResultRequest;
+import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
 import com.ande.pubquizzz.dto.QuizResultEntry;
 import com.ande.pubquizzz.dto.QuizResultsResponse;
 import com.ande.pubquizzz.dto.QuizSummaryDTO;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Comparator;
 import java.util.List;
 
@@ -147,17 +151,136 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
-    public List<AllTimeLeaderboardEntry> getAllTimeLeaderboard() {
+    public List<PointsLeaderboardEntry> getPointsLeaderboard() {
         log.info("Fetching all-time leaderboard");
-        List<Object[]> rows = resultRepository.findAllTimeLeaderboardRaw();
-        List<AllTimeLeaderboardEntry> leaderboard = new ArrayList<>();
+        List<Object[]> rows = resultRepository.findPointsLeaderboardRaw();
+        List<PointsLeaderboardEntry> leaderboard = new ArrayList<>();
+        int rank = 1;
         for (int i = 0; i < rows.size(); i++) {
+            if (i > 0) {
+                int previousPoints = ((Number) rows.get(i - 1)[1]).intValue();
+                int currentPoints = ((Number) rows.get(i)[1]).intValue();
+                if (currentPoints != previousPoints) {
+                    rank = i + 1;
+                }
+            }
             Object[] row = rows.get(i);
-            AllTimeLeaderboardEntry entry = new AllTimeLeaderboardEntry();
-            entry.setRank(i + 1);
+            PointsLeaderboardEntry entry = new PointsLeaderboardEntry();
+            entry.setRank(rank);
             entry.setTeamName((String) row[0]);
             entry.setTotalPoints(((Number) row[1]).intValue());
             entry.setQuizCount(((Number) row[2]).intValue());
+            leaderboard.add(entry);
+        }
+        return leaderboard;
+    }
+
+    @Transactional(readOnly = true)
+    public List<AverageLeaderboardEntry> getAverageLeaderboard() {
+        log.info("Fetching average leaderboard");
+        List<Object[]> rows = resultRepository.findAverageLeaderboardRaw();
+
+        List<AverageTeamStats> stats = rows.stream()
+                .map(row -> {
+                    String teamName = (String) row[0];
+                    int totalPoints = ((Number) row[1]).intValue();
+                    int quizCount = ((Number) row[2]).intValue();
+                    double averagePoints = quizCount == 0 ? 0.0 : (double) totalPoints / quizCount;
+                    return new AverageTeamStats(teamName, totalPoints, quizCount, averagePoints);
+                })
+                .sorted(Comparator.comparingDouble(AverageTeamStats::averagePoints).reversed())
+                .toList();
+
+        List<AverageLeaderboardEntry> leaderboard = new ArrayList<>();
+        int rank = 1;
+        for (int i = 0; i < stats.size(); i++) {
+            if (i > 0 && Double.compare(stats.get(i).averagePoints(), stats.get(i - 1).averagePoints()) != 0) {
+                rank = i + 1;
+            }
+            AverageTeamStats stat = stats.get(i);
+            AverageLeaderboardEntry entry = new AverageLeaderboardEntry();
+            entry.setRank(rank);
+            entry.setTeamName(stat.teamName());
+            entry.setAveragePoints(stat.averagePoints());
+            entry.setQuizCount(stat.quizCount());
+            leaderboard.add(entry);
+        }
+        return leaderboard;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MedalLeaderboardEntry> getMedalLeaderboard() {
+        log.info("Fetching medal leaderboard");
+        List<Object[]> rows = resultRepository.findPerQuizTeamScoreBreakdownRaw();
+
+        Map<Long, List<QuizTeamScore>> totalsByQuiz = new HashMap<>();
+        for (Object[] row : rows) {
+            Long quizId = ((Number) row[0]).longValue();
+            String teamName = (String) row[1];
+            int totalPoints = ((Number) row[2]).intValue();
+            int fiveCount = ((Number) row[3]).intValue();
+            int threeCount = ((Number) row[4]).intValue();
+            totalsByQuiz.computeIfAbsent(quizId, ignored -> new ArrayList<>())
+                    .add(new QuizTeamScore(teamName, totalPoints, fiveCount, threeCount));
+        }
+
+        Map<String, MedalAccumulator> medalsByTeam = new HashMap<>();
+        totalsByQuiz.values().forEach(quizTotals -> {
+            List<QuizTeamScore> sorted = quizTotals.stream()
+                    .sorted(Comparator.comparingInt(QuizTeamScore::totalPoints).reversed()
+                            .thenComparing(Comparator.comparingInt(QuizTeamScore::fiveCount).reversed())
+                            .thenComparing(Comparator.comparingInt(QuizTeamScore::threeCount).reversed()))
+                    .toList();
+
+            int rank = 1;
+            for (int i = 0; i < sorted.size(); i++) {
+                QuizTeamScore current = sorted.get(i);
+                if (i > 0 && !sameQuizRankMetrics(current, sorted.get(i - 1))) {
+                    rank = i + 1;
+                }
+
+                MedalAccumulator accumulator = medalsByTeam.computeIfAbsent(
+                        current.teamName(),
+                        ignored -> new MedalAccumulator()
+                );
+
+                if (rank == 1) {
+                    accumulator.goldCount++;
+                } else if (rank == 2) {
+                    accumulator.silverCount++;
+                } else if (rank == 3) {
+                    accumulator.bronzeCount++;
+                }
+            }
+        });
+
+        List<Map.Entry<String, MedalAccumulator>> sortedTeams = medalsByTeam.entrySet().stream()
+                .filter(e -> e.getValue().goldCount > 0 || e.getValue().silverCount > 0 || e.getValue().bronzeCount > 0)
+                .sorted(Comparator.<Map.Entry<String, MedalAccumulator>>comparingInt(e -> e.getValue().goldCount).reversed()
+                        .thenComparing(Comparator.comparingInt((Map.Entry<String, MedalAccumulator> e) -> e.getValue().silverCount).reversed())
+                        .thenComparing(Comparator.comparingInt((Map.Entry<String, MedalAccumulator> e) -> e.getValue().bronzeCount).reversed()))
+                .toList();
+
+        List<MedalLeaderboardEntry> leaderboard = new ArrayList<>();
+        int rank = 1;
+        for (int i = 0; i < sortedTeams.size(); i++) {
+            if (i > 0) {
+                MedalAccumulator previous = sortedTeams.get(i - 1).getValue();
+                MedalAccumulator current = sortedTeams.get(i).getValue();
+                if (current.goldCount != previous.goldCount
+                        || current.silverCount != previous.silverCount
+                        || current.bronzeCount != previous.bronzeCount) {
+                    rank = i + 1;
+                }
+            }
+            Map.Entry<String, MedalAccumulator> row = sortedTeams.get(i);
+            MedalAccumulator acc = row.getValue();
+            MedalLeaderboardEntry entry = new MedalLeaderboardEntry();
+            entry.setRank(rank);
+            entry.setTeamName(row.getKey());
+            entry.setGoldCount(acc.goldCount);
+            entry.setSilverCount(acc.silverCount);
+            entry.setBronzeCount(acc.bronzeCount);
             leaderboard.add(entry);
         }
         return leaderboard;
@@ -278,5 +401,23 @@ public class ResultService {
 
     private String quizSuffix(Long quizId) {
         return quizId != null ? " for quiz " + quizId : "";
+    }
+
+    private record AverageTeamStats(String teamName, int totalPoints, int quizCount, double averagePoints) {
+    }
+
+    private record QuizTeamScore(String teamName, int totalPoints, int fiveCount, int threeCount) {
+    }
+
+    private boolean sameQuizRankMetrics(QuizTeamScore left, QuizTeamScore right) {
+        return left.totalPoints() == right.totalPoints()
+                && left.fiveCount() == right.fiveCount()
+                && left.threeCount() == right.threeCount();
+    }
+
+    private static class MedalAccumulator {
+        private int goldCount;
+        private int silverCount;
+        private int bronzeCount;
     }
 }

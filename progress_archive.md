@@ -26,7 +26,8 @@ Older finished progress entries were moved here to keep `progress.md` short.
 - Phase 20: Admin Section Mobile-Friendly ✅ COMPLETE
 - Phase 21: Fix `hint_text` NOT NULL — Flyway removed ✅ COMPLETE
 - Phase 22: Fix Orphaned Image Files ✅ COMPLETE
-- Phase 24: "Sieger" Column on Quiz Archiv Page ✅ COMPLETE
-- Phase 28: Bildantwort fuer Fragen 5-8 ✅ COMPLETE
+- Phase 24: "Winner" Column on Quiz Archive Page ✅ COMPLETE
+- Phase 28: Image Answers for Questions 5-8 ✅ COMPLETE
+- Phase 29: Backup/Restore FK Fix for quiz_document ✅ COMPLETE
 
 Note: Phase numbering reflects original historical labels.

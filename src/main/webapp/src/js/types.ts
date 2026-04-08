@@ -57,6 +57,21 @@ export interface AllTimeLeaderboardEntry {
     quizCount: number;
 }
 
+export interface MedalLeaderboardEntry {
+    rank: number;
+    teamName: string;
+    goldCount: number;
+    silverCount: number;
+    bronzeCount: number;
+}
+
+export interface AverageLeaderboardEntry {
+    rank: number;
+    teamName: string;
+    averagePoints: number;
+    quizCount: number;
+}
+
 export interface TeamResultEntry {
     quizId: number;
     quizDate: string;

@@ -33,7 +33,32 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
             GROUP BY t.teamsId, t.teamName
             ORDER BY COALESCE(SUM(ra.points), 0) DESC
             """)
-    List<Object[]> findAllTimeLeaderboardRaw();
+    List<Object[]> findPointsLeaderboardRaw();
+
+    @Query("""
+            SELECT t.teamName,
+                   COALESCE(SUM(ra.points), 0),
+                   COUNT(DISTINCT r.quiz.quizId)
+            FROM Result r
+            JOIN r.team t
+            JOIN r.answers ra
+            GROUP BY t.teamsId, t.teamName
+            ORDER BY COALESCE(SUM(ra.points), 0) DESC, t.teamName ASC
+            """)
+    List<Object[]> findAverageLeaderboardRaw();
+
+    @Query("""
+            SELECT r.quiz.quizId,
+                   t.teamName,
+                   COALESCE(SUM(ra.points), 0),
+                   SUM(CASE WHEN ra.points = 5 THEN 1 ELSE 0 END),
+                   SUM(CASE WHEN ra.points = 3 THEN 1 ELSE 0 END)
+            FROM Result r
+            JOIN r.team t
+            JOIN r.answers ra
+            GROUP BY r.quiz.quizId, t.teamsId, t.teamName
+            """)
+    List<Object[]> findPerQuizTeamScoreBreakdownRaw();
 
     @Query("""
         SELECT DISTINCT r FROM Result r

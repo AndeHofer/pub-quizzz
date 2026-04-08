@@ -83,7 +83,7 @@ class SecurityAccessTest {
 
     @Test
     void apiPath_unauthenticated_redirectsToLogin() throws Exception {
-        mockMvc.perform(get("/api/leaderboard"))
+        mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
     }

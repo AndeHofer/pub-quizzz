@@ -81,9 +81,24 @@ async function loadTeamResults(): Promise<void> {
     const loadingEl = document.getElementById('loading');
     const tableEl = document.getElementById('resultsTable');
     const errorEl = document.getElementById('errorMessage');
+    const backLinkEl = document.getElementById('backToLeaderboardLink') as HTMLAnchorElement | null;
 
     const params = new URLSearchParams(window.location.search);
     const teamName = params.get('team');
+    const source = params.get('source');
+
+    if (backLinkEl) {
+        if (source === 'medals') {
+            backLinkEl.href = './medal-leaderboard.html';
+            backLinkEl.textContent = '← Medaillenrangliste';
+        } else if (source === 'average') {
+            backLinkEl.href = './average-leaderboard.html';
+            backLinkEl.textContent = '← Durchschnittsrangliste';
+        } else {
+            backLinkEl.href = './points-leaderboard.html';
+            backLinkEl.textContent = '← Punkterangliste';
+        }
+    }
 
     if (!teamName) {
         if (loadingEl) loadingEl.style.display = 'none';

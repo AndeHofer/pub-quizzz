@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AllTimeLeaderboardEntry {
+public class AverageLeaderboardEntry {
     private int rank;
     private String teamName;
-    private int totalPoints;
+    private double averagePoints;
     private int quizCount;
 }

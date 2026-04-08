@@ -1,6 +1,8 @@
 package com.ande.pubquizzz.controller;
 
-import com.ande.pubquizzz.dto.AllTimeLeaderboardEntry;
+import com.ande.pubquizzz.dto.PointsLeaderboardEntry;
+import com.ande.pubquizzz.dto.AverageLeaderboardEntry;
+import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
 import com.ande.pubquizzz.service.ResultService;
@@ -35,16 +37,16 @@ class UserLeaderboardControllerTest {
 
     @Test
     @WithMockUser
-    void getLeaderboard_authenticated_returnsLeaderboard() throws Exception {
-        AllTimeLeaderboardEntry entry = new AllTimeLeaderboardEntry();
+    void getPointsLeaderboard_authenticated_returnsLeaderboard() throws Exception {
+        PointsLeaderboardEntry entry = new PointsLeaderboardEntry();
         entry.setRank(1);
         entry.setTeamName("Alpha Team");
         entry.setTotalPoints(150);
         entry.setQuizCount(3);
 
-        when(resultService.getAllTimeLeaderboard()).thenReturn(List.of(entry));
+        when(resultService.getPointsLeaderboard()).thenReturn(List.of(entry));
 
-        mockMvc.perform(get("/api/leaderboard"))
+        mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].rank").value(1))
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
@@ -54,18 +56,58 @@ class UserLeaderboardControllerTest {
 
     @Test
     @WithMockUser
-    void getLeaderboard_whenEmpty_returnsEmptyArray() throws Exception {
-        when(resultService.getAllTimeLeaderboard()).thenReturn(List.of());
+    void getPointsLeaderboard_whenEmpty_returnsEmptyArray() throws Exception {
+        when(resultService.getPointsLeaderboard()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/leaderboard"))
+        mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
-    void getLeaderboard_unauthenticated_returns3xxRedirect() throws Exception {
-        mockMvc.perform(get("/api/leaderboard"))
+    void getPointsLeaderboard_unauthenticated_returns3xxRedirect() throws Exception {
+        mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser
+    void getMedalLeaderboard_authenticated_returnsLeaderboard() throws Exception {
+        MedalLeaderboardEntry entry = new MedalLeaderboardEntry();
+        entry.setRank(1);
+        entry.setTeamName("Alpha Team");
+        entry.setGoldCount(2);
+        entry.setSilverCount(1);
+        entry.setBronzeCount(0);
+
+        when(resultService.getMedalLeaderboard()).thenReturn(List.of(entry));
+
+        mockMvc.perform(get("/api/leaderboard/medals"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].rank").value(1))
+                .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
+                .andExpect(jsonPath("$[0].goldCount").value(2))
+                .andExpect(jsonPath("$[0].silverCount").value(1))
+                .andExpect(jsonPath("$[0].bronzeCount").value(0));
+    }
+
+    @Test
+    @WithMockUser
+    void getAverageLeaderboard_authenticated_returnsLeaderboard() throws Exception {
+        AverageLeaderboardEntry entry = new AverageLeaderboardEntry();
+        entry.setRank(1);
+        entry.setTeamName("Alpha Team");
+        entry.setAveragePoints(42.5);
+        entry.setQuizCount(4);
+
+        when(resultService.getAverageLeaderboard()).thenReturn(List.of(entry));
+
+        mockMvc.perform(get("/api/leaderboard/average"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].rank").value(1))
+                .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
+                .andExpect(jsonPath("$[0].averagePoints").value(42.5))
+                .andExpect(jsonPath("$[0].quizCount").value(4));
     }
 }
