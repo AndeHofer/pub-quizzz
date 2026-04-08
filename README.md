@@ -4,16 +4,16 @@ A simple webpage to archive results, quiz and answers.
 
 ## TODOS
 
-1) on the teams page also add the place of the team for each quiz
-2) edit results: change quiz should be possible, also widen the look in modal panel
-3) add rules section
-4) add quiz presentation mode
-5) enhance logging
-6) fix h2-console defaults
-7) quiz mode to replay the quiz online
+1) edit results: change quiz should be possible, also widen the look in modal panel
+2) add rules section
+3) enhance logging
+4) fix h2-console defaults
+5) quiz mode to replay the quiz online
 
 ## DONE
 
+- ~~add quiz presentation mode~~
+- ~~on the teams page also add the place of the team for each quiz~~
 - ~~2 additional rankings: olympic medals count and average points~~
 - ~~make it usable for mobile~~
 - ~~fix hint → text should not be mandatory~~

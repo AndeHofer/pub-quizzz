@@ -12,14 +12,13 @@ function questionSort(a: { number: number }, b: { number: number }): number {
     return a.number - b.number;
 }
 
-function hintImage(imageUrl: string | null | undefined, label: string): string {
+function hintImage(imageUrl: string | null | undefined): string {
     if (!imageUrl) {
         return '';
     }
     return `
         <div class="mt-2">
-            <p class="text-xs text-gray-500 mb-1">${label}</p>
-            <img src="${encodeURI(imageUrl)}" alt="${escapeHtml(label)}" class="rounded-md border border-gray-200 max-h-64 w-auto">
+            <img src="${encodeURI(imageUrl)}" class="rounded-md border border-gray-200 max-h-64 w-auto">
         </div>
     `;
 }
@@ -28,22 +27,22 @@ function createCollapsibleBlock(
     id: string,
     buttonLabel: string,
     content: string,
-    wrapperClasses = 'rounded-md border border-gray-200 bg-gray-50 p-3',
+    wrapperClasses = 'rounded-md border border-gray-200 bg-gray-50 p-1',
     revealType: 'text' | 'media' = 'text'
 ): string {
     if (revealType === 'text') {
         return `
             <div class="${wrapperClasses}">
-                <div class="h-9 grid items-center">
+                <div class="h-12 grid items-center">
                     <button type="button"
-                            class="row-start-1 col-start-1 w-full text-left text-sm leading-5 font-normal bg-white text-black border border-gray-300 rounded-md px-2 h-9 flex items-center hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                            class="row-start-1 col-start-1 w-full text-left text-sm leading-5 font-medium bg-white text-black border border-gray-300 rounded-md px-2 h-9 flex items-center hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
                             data-action="toggle-one"
                             data-target="${id}"
                             aria-controls="${id}"
                             aria-expanded="false">
                         ${buttonLabel} anzeigen
                     </button>
-                    <div id="${id}" class="row-start-1 col-start-1 h-9 px-2 text-sm leading-5 flex items-center" data-reveal-type="text" data-expanded="false" style="display:block; opacity:0; visibility:hidden; overflow:hidden; max-height:2.25rem;">
+                    <div id="${id}" class="row-start-3 col-start-1 h-9 px-2 text-sm leading-5 flex items-center" data-reveal-type="text" data-expanded="false" style="display:block; opacity:0; visibility:hidden; overflow:hidden; max-height:2.25rem;">
                         ${content}
                     </div>
                 </div>
@@ -202,13 +201,16 @@ function renderQuizDetail(quiz: QuizDetailResponse): void {
         const hintsHtml = hints.length === 0
             ? '<p class="text-gray-500 text-sm">Keine Hinweise vorhanden.</p>'
             : `<ol class="space-y-3">${hints.map((hint, idx) => {
-                const hintText = hint.hintText ? escapeHtml(hint.hintText) : '<span class="text-gray-500">(Kein Text)</span>';
                 const blockId = `collapse-q${question.number}-hint-${idx + 1}`;
-                const content = `
-                    <span class="text-sm leading-5 text-gray-800">${hintText}</span>
-                    ${hintImage(hint.imageUrlAtStart, 'Bild zu Beginn')}
-                    ${hintImage(hint.imageUrlAsHint, 'Bild als Hinweis')}
+                const content = hint.hintText ? `
+                    <span class="text-sm leading-5 text-gray-800">${escapeHtml(hint.hintText)}</span>
+                    ${hintImage(hint.imageUrlAtStart)}
+                    ${hintImage(hint.imageUrlAsHint)}
+                ` : `
+                    ${hintImage(hint.imageUrlAtStart)}
+                    ${hintImage(hint.imageUrlAsHint)}
                 `;
+
                 return `
                     <li>
                         ${createCollapsibleBlock(
@@ -224,9 +226,9 @@ function renderQuizDetail(quiz: QuizDetailResponse): void {
 
         const answerText = question.answer?.trim()
             ? escapeHtml(question.answer)
-            : '<span class="text-gray-500">Keine Textantwort vorhanden.</span>';
+            : '';
         const answerImageHtml = question.answerImageUrl
-            ? `<div class="mt-2"><p class="text-xs text-gray-500 mb-1">Antwortbild</p><img src="${encodeURI(question.answerImageUrl)}" alt="Antwortbild Frage ${question.number}" class="rounded-md border border-gray-200 max-h-72 w-auto"></div>`
+            ? `<img src="${encodeURI(question.answerImageUrl)}" alt="Antwortbild Frage ${question.number}" class="rounded-md border border-gray-200 max-h-72 w-auto"></div>`
             : '';
         const answerBlockId = `collapse-q${question.number}-answer`;
         const answerBlock = createCollapsibleBlock(
