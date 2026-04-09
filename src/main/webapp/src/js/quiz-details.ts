@@ -32,22 +32,25 @@ function createCollapsibleBlock(
 ): string {
     if (revealType === 'text') {
         return `
-            <div class="${wrapperClasses}">
-                <div class="h-12 grid items-center">
-                    <button type="button"
-                            class="row-start-1 col-start-1 w-full text-left text-sm leading-5 font-medium bg-white text-black border border-gray-300 rounded-md px-2 h-9 flex items-center hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                            data-action="toggle-one"
-                            data-target="${id}"
-                            aria-controls="${id}"
-                            aria-expanded="false">
-                        ${buttonLabel} anzeigen
-                    </button>
-                    <div id="${id}" class="row-start-3 col-start-1 h-9 px-2 text-sm leading-5 flex items-center" data-reveal-type="text" data-expanded="false" style="display:block; opacity:0; visibility:hidden; overflow:hidden; max-height:2.25rem;">
-                        ${content}
-                    </div>
+                <div class="${wrapperClasses} min-h-13">
+                        <button type="button"
+                                class="h-auto py-0.5 w-full text-left text-sm leading-5 font-medium bg-white text-black border border-gray-300 rounded-b-none px-2 flex items-center hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                style="margin:0"
+                                data-action="toggle-one"
+                                data-target="${id}"
+                                aria-controls="${id}"
+                                aria-expanded="false">
+                            ${buttonLabel} anzeigen
+                        </button>
+                        <div id="${id}" 
+                            class="h-auto min-h-fit px-2 text-sm leading-normal flex items-center justify-start text-left text" 
+                            data-reveal-type="text" 
+                            data-expanded="false" 
+                            style="display:none; opacity:0; visibility:hidden; overflow:visible;">
+                            ${content}
+                        </div>
                 </div>
-            </div>
-        `;
+            `;
     }
 
     return `
@@ -86,7 +89,7 @@ function expandContent(element: HTMLElement): void {
         element.style.visibility = 'visible';
         element.style.opacity = '1';
         element.style.maxHeight = '2.25rem';
-        element.style.overflow = 'hidden';
+        element.style.overflow = 'visible';
         element.style.transition = 'opacity 180ms ease';
         element.setAttribute('data-expanded', 'true');
         return;
@@ -112,10 +115,10 @@ function collapseContent(element: HTMLElement): void {
     const revealType = element.getAttribute('data-reveal-type');
 
     if (revealType === 'text') {
-        element.style.display = 'block';
+        element.style.display = 'none';
         element.style.visibility = 'hidden';
         element.style.opacity = '0';
-        element.style.maxHeight = '2.25rem';
+        element.style.maxHeight = '';
         element.style.overflow = 'hidden';
         element.style.transition = 'opacity 160ms ease';
         element.setAttribute('data-expanded', 'false');
