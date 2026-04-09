@@ -4,15 +4,15 @@ A simple webpage to archive results, quiz and answers.
 
 ## TODOS
 
-1) edit results: change quiz should be possible, also widen the look in modal panel
-2) add rules section
+1) add rules section
+2) edit results: change quiz should be possible, also widen the look in modal panel
 3) enhance logging
 4) fix h2-console defaults
 5) quiz mode to replay the quiz online
-6) fields for answer, hints are to small in mobile
 
 ## DONE
 
+- ~~fields for answer, hints are to small in mobile~~
 - ~~add quiz presentation mode~~
 - ~~on the teams page also add the place of the team for each quiz~~
 - ~~2 additional rankings: olympic medals count and average points~~

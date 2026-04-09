@@ -12,12 +12,12 @@ function questionSort(a: { number: number }, b: { number: number }): number {
     return a.number - b.number;
 }
 
-function hintImage(imageUrl: string | null | undefined): string {
+function hintImage(imageUrl: string | null | undefined, wrapperClasses = 'mt-2'): string {
     if (!imageUrl) {
         return '';
     }
     return `
-        <div class="mt-2">
+        <div class="${wrapperClasses}">
             <img src="${encodeURI(imageUrl)}" class="rounded-md border border-gray-200 max-h-64 w-auto">
         </div>
     `;
@@ -205,24 +205,48 @@ function renderQuizDetail(quiz: QuizDetailResponse): void {
             ? '<p class="text-gray-500 text-sm">Keine Hinweise vorhanden.</p>'
             : `<ol class="space-y-3">${hints.map((hint, idx) => {
                 const blockId = `collapse-q${question.number}-hint-${idx + 1}`;
-                const content = hint.hintText ? `
-                    <span class="text-sm leading-5 text-gray-800">${escapeHtml(hint.hintText)}</span>
-                    ${hintImage(hint.imageUrlAtStart)}
-                    ${hintImage(hint.imageUrlAsHint)}
-                ` : `
-                    ${hintImage(hint.imageUrlAtStart)}
-                    ${hintImage(hint.imageUrlAsHint)}
+                const hintText = hint.hintText?.trim() ?? '';
+                const startImageHtml = hintImage(hint.imageUrlAtStart, '');
+                const hintImageHtml = hintImage(hint.imageUrlAsHint, hintText ? 'mt-2' : '');
+                const revealContent = `${hintText ? `<span class="text-sm leading-5 text-gray-800">${escapeHtml(hintText)}</span>` : ''}${hintImageHtml}`;
+                const hasRevealContent = Boolean(hintText || hint.imageUrlAsHint);
+
+                if (!hasRevealContent && startImageHtml) {
+                    return `
+                    <li>
+                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3">
+                            ${startImageHtml}
+                        </div>
+                    </li>
                 `;
+                }
+
+                const revealBlock = createCollapsibleBlock(
+                    blockId,
+                    `Hinweis ${idx + 1}`,
+                    revealContent,
+                    startImageHtml
+                        ? 'rounded-md border border-gray-200 bg-white p-3'
+                        : 'rounded-md border border-gray-200 bg-gray-50 p-3',
+                    hint.imageUrlAsHint ? 'media' : 'text'
+                );
+
+                if (startImageHtml) {
+                    return `
+                    <li>
+                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3">
+                            ${startImageHtml}
+                            <div class="mt-3">
+                                ${revealBlock}
+                            </div>
+                        </div>
+                    </li>
+                `;
+                }
 
                 return `
                     <li>
-                        ${createCollapsibleBlock(
-                    blockId,
-                    `Hinweis ${idx + 1}`,
-                    content,
-                    'rounded-md border border-gray-200 bg-gray-50 p-3',
-                    (hint.imageUrlAtStart || hint.imageUrlAsHint) ? 'media' : 'text'
-                )}
+                        ${revealBlock}
                     </li>
                 `;
             }).join('')}</ol>`;
