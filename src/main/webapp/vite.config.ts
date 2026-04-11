@@ -22,7 +22,8 @@ export default defineConfig({
                 team: './team.html',
                 quizzes: './quizzes.html',
                 quiz: './quiz.html',
-                quiz_details: './quiz-details.html'
+                quiz_details: './quiz-details.html',
+                rules: './rules.html'
             }
         }
     },

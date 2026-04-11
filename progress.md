@@ -2,6 +2,9 @@
 
 ## Open Tasks
 
+- [x] Phase 34 Follow-up 14: Ensure `imageUrlAtStart` is always visible on quiz-details hints when present
+- [x] Phase 34 Follow-up 14: Run full verification (`npm run type-check`, `npm run build`, `mvn.cmd test`)
+
 - [x] Phase 34 Follow-up 13: Center text reveal buttons within cards using shared grid slot layout
 - [x] Phase 34 Follow-up 13: Run full verification with `mvn.cmd test`
 

@@ -4,7 +4,7 @@ A simple webpage to archive results, quiz and answers.
 
 ## TODOS
 
-1) add rules section
+1) add text for hints before hint revealed like already possible with pics
 2) edit results: change quiz should be possible, also widen the look in modal panel
 3) enhance logging
 4) fix h2-console defaults
@@ -13,6 +13,7 @@ A simple webpage to archive results, quiz and answers.
 
 ## DONE
 
+- ~~add rules section~~
 - ~~fields for answer, hints are to small in mobile~~
 - ~~add quiz presentation mode~~
 - ~~on the teams page also add the place of the team for each quiz~~

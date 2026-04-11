@@ -82,7 +82,7 @@ window.addEventListener('load', () => {
         location.href = 'register_user.html';
     });
     document.getElementById('viewUsersBtn')?.addEventListener('click', viewUsers);
-    document.getElementById('backBtn')?.addEventListener('click', goBack);
+//    document.getElementById('backBtn')?.addEventListener('click', goBack);
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeModal);
 
     const modal = document.getElementById('dataModal');
