@@ -153,7 +153,7 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<PointsLeaderboardEntry> getPointsLeaderboard() {
-        log.info("Fetching all-time leaderboard");
+        log.info("Fetching points leaderboard");
         List<Object[]> rows = new ArrayList<>(resultRepository.findLeaderboardRaw());
         // Sort rows defensively by totalPoints (DESC) and teamName (ASC)
         rows.sort(Comparator.comparingInt((Object[] row) -> ((Number) row[1]).intValue()).reversed()
