@@ -5,11 +5,13 @@ A simple webpage to archive results, quiz and answers.
 ## TODOS
 
 1) add text for hints before hint revealed like already possible with pics
-2) edit results: change quiz should be possible, also widen the look in modal panel
-3) enhance logging
-4) fix h2-console defaults
-5) quiz mode to replay the quiz online
-6) add Quizmaster to quiz
+2) at quiz make button for a modal panel to show the results from every team for a question
+3) change the color of everything from blue to black, if not a link
+4) edit results: change quiz should be possible, also widen the look in modal panel
+5) enhance logging
+6) fix h2-console defaults
+7) quiz mode to replay the quiz online
+8) add Quizmaster to quiz
 
 ## DONE
 
