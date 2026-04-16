@@ -38,7 +38,7 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
         rows.push(`
             <tr class="border-b border-gray-200 hover:bg-gray-50">
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base"><a href="/quiz.html?id=${entry.quizId}" class="text-blue-600 hover:underline">${escapeHtml(entry.quizTitle)}</a></td>
-                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-blue-700 text-xs sm:text-base">${entry.totalPoints}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-gray-900 text-xs sm:text-base">${entry.totalPoints}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-semibold text-xs sm:text-base">${rankLabel}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
                     <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"

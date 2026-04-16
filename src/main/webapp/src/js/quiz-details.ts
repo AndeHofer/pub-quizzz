@@ -1,6 +1,7 @@
-import {QuizDetailResponse, QuizSummaryDTO} from './types';
+import {QuizDetailResponse, QuizResultEntry, QuizResultsResponse, QuizSummaryDTO} from './types';
 
 let allDetailsExpanded = false;
+let currentQuizResults: QuizResultEntry[] = [];
 
 function escapeHtml(text: string): string {
     const div = document.createElement('div');
@@ -10,6 +11,74 @@ function escapeHtml(text: string): string {
 
 function questionSort(a: { number: number }, b: { number: number }): number {
     return a.number - b.number;
+}
+
+function closeQuestionPointsModal(): void {
+    const modalEl = document.getElementById('questionPointsModal');
+    if (!modalEl) return;
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+}
+
+function resetQuestionPointsModalContent(): void {
+    const modalContentEl = document.getElementById('questionPointsModalContent');
+    if (!modalContentEl) return;
+    modalContentEl.innerHTML = '';
+}
+
+function renderQuestionPointsModal(questionNumber: number): void {
+    const modalEl = document.getElementById('questionPointsModal');
+    const modalContentEl = document.getElementById('questionPointsModalContent');
+    if (!modalEl || !modalContentEl) {
+        return;
+    }
+
+    const rowsHtml = currentQuizResults.length === 0
+        ? '<tr><td colspan="2" class="text-center py-6 text-gray-500">Noch keine Team-Ergebnisse verfügbar.</td></tr>'
+        : currentQuizResults.map(entry => {
+            const matching = entry.answers?.find(answer => answer.questionNumber === questionNumber);
+            const points = matching?.points ?? 0;
+            return `
+                <tr>
+                    <td>${escapeHtml(entry.teamName ?? '')}</td>
+                    <td class="text-center font-semibold">${points}</td>
+                </tr>
+            `;
+        }).join('');
+
+    modalContentEl.innerHTML = `
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 border-0 mt-0 pb-0">Frage ${questionNumber} - Punkte pro Team</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse mt-0">
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th class="text-center">Punkte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    modalEl.style.display = 'block';
+    modalEl.setAttribute('aria-hidden', 'false');
+}
+
+async function loadQuizResultsForModal(quizId: number): Promise<void> {
+    try {
+        const response = await fetch(`/api/quizzes/${encodeURIComponent(String(quizId))}/results`);
+        if (!response.ok) {
+            currentQuizResults = [];
+            return;
+        }
+        const payload: QuizResultsResponse = await response.json();
+        currentQuizResults = Array.isArray(payload.entries) ? payload.entries : [];
+    } catch {
+        currentQuizResults = [];
+    }
 }
 
 function hintImage(imageUrl: string | null | undefined, wrapperClasses = 'mt-2'): string {
@@ -283,6 +352,15 @@ function renderQuizDetail(quiz: QuizDetailResponse): void {
                 <p class="text-sm sm:text-base text-gray-900 mb-4">${escapeHtml(question.questionText ?? '')}</p>
 
                 <div class="mb-4">
+                    <button type="button"
+                            class="rounded-md bg-slate-700 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                            data-action="show-question-points"
+                            data-question-number="${question.number}">
+                        Punkte pro Team
+                    </button>
+                </div>
+
+                <div class="mb-4">
                     <h4 class="text-sm sm:text-base font-semibold text-gray-700 mb-2">Hinweise</h4>
                     ${hintsHtml}
                 </div>
@@ -331,6 +409,8 @@ async function loadQuizDetail(quizId: number): Promise<void> {
     const detailActionsEl = document.getElementById('detailActions');
 
     clearError();
+    closeQuestionPointsModal();
+    resetQuestionPointsModalContent();
     if (loadingDetailEl) loadingDetailEl.style.display = 'block';
     if (questionsEl) {
         questionsEl.style.display = 'none';
@@ -348,12 +428,14 @@ async function loadQuizDetail(quizId: number): Promise<void> {
             throw new Error(`HTTP ${response.status}`);
         }
         const detail: QuizDetailResponse = await response.json();
+        await loadQuizResultsForModal(quizId);
         renderQuizDetail(detail);
     } catch (e) {
         const message = e instanceof Error && e.message === 'Quiz nicht gefunden.'
             ? e.message
             : 'Fehler beim Laden des Quiz. Bitte Seite neu laden.';
         setError(message);
+        currentQuizResults = [];
         if (detailActionsEl) detailActionsEl.style.display = 'none';
         if (emptyEl) {
             emptyEl.style.display = 'block';
@@ -424,6 +506,8 @@ function wireEvents(): void {
     const selectEl = document.getElementById('quizSelect') as HTMLSelectElement | null;
     const toggleAllButton = document.getElementById('toggleAllButton') as HTMLButtonElement | null;
     const questionsEl = document.getElementById('questionsContainer') as HTMLDivElement | null;
+    const questionPointsModal = document.getElementById('questionPointsModal') as HTMLDivElement | null;
+    const questionPointsModalClose = document.getElementById('questionPointsModalClose') as HTMLSpanElement | null;
 
     if (!selectEl || !questionsEl) return;
 
@@ -431,6 +515,9 @@ function wireEvents(): void {
         const selected = Number(selectEl.value);
         if (!selected || Number.isNaN(selected)) {
             clearError();
+            currentQuizResults = [];
+            closeQuestionPointsModal();
+            resetQuestionPointsModalContent();
             const detailActionsEl = document.getElementById('detailActions');
             const questionsContainerEl = document.getElementById('questionsContainer');
             const emptyEl = document.getElementById('emptyState');
@@ -454,6 +541,16 @@ function wireEvents(): void {
     questionsEl.addEventListener('click', (event) => {
         const target = event.target as HTMLElement | null;
         if (!target) return;
+
+        const pointsButton = target.closest('button[data-action="show-question-points"]') as HTMLButtonElement | null;
+        if (pointsButton) {
+            const questionNumber = Number(pointsButton.getAttribute('data-question-number'));
+            if (!Number.isNaN(questionNumber) && questionNumber > 0) {
+                renderQuestionPointsModal(questionNumber);
+            }
+            return;
+        }
+
         const button = target.closest('button[data-action="toggle-one"]') as HTMLButtonElement | null;
         if (!button) return;
 
@@ -484,6 +581,30 @@ function wireEvents(): void {
             applyGlobalExpansion(!allDetailsExpanded);
         });
     }
+
+    if (questionPointsModalClose) {
+        questionPointsModalClose.addEventListener('click', closeQuestionPointsModal);
+        questionPointsModalClose.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                closeQuestionPointsModal();
+            }
+        });
+    }
+
+    if (questionPointsModal) {
+        questionPointsModal.addEventListener('click', (event) => {
+            if (event.target === questionPointsModal) {
+                closeQuestionPointsModal();
+            }
+        });
+    }
+
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeQuestionPointsModal();
+        }
+    });
 }
 
 window.addEventListener('load', async () => {

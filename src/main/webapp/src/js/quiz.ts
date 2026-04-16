@@ -37,7 +37,7 @@ function renderResults(entries: QuizResultEntry[]): void {
                 <td class="py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-base">
                     <a href="/team.html?team=${encodeURIComponent(entry.teamName)}" class="text-blue-600 hover:underline">${escapeHtml(entry.teamName)}</a>
                 </td>
-                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-blue-700 text-xs sm:text-base">${entry.totalPoints}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-gray-900 text-xs sm:text-base">${entry.totalPoints}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
                     <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"
                         class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">&#9658; anzeigen</button>

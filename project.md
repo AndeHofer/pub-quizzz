@@ -24,6 +24,8 @@ Pub Quizzz is a Spring Boot 4.x web application for managing and running pub qui
 - UI text is in **German**
 - Public quiz details are available for authenticated users via `GET /api/quizzes/{quizId}/detail` and rendered in a
   dedicated `quiz-details.html` page with explicit quiz selection
+- Quiz detail includes a per-question `Punkte pro Team` action that opens a modal with team points for the selected
+  question (based on `GET /api/quizzes/{quizId}/results` answer scores)
 - Quiz images (hint images) stored in `${app.upload.dir}/` and served publicly via `/uploads/**`
 - Quiz documents (any file type) stored in `${app.upload.dir}/documents/` and served only to `ADMIN` users; managed in
   the quiz edit form
