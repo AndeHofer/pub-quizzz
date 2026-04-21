@@ -15,11 +15,11 @@ function setQuizHeader(title: string | null, creator: string | null | undefined)
 
     const cleanedCreator = creator?.trim() ?? '';
     if (cleanedCreator) {
-        creatorEl.textContent = `erstellt von ${cleanedCreator}`;
-        creatorEl.style.display = 'block';
+        creatorEl.textContent = `by ${cleanedCreator}`;
+        creatorEl.style.visibility = 'visible';
     } else {
         creatorEl.textContent = '';
-        creatorEl.style.display = 'none';
+        creatorEl.style.visibility = 'hidden';
     }
 }
 

@@ -4,6 +4,10 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 46: Informative Admin Controller Call Logging ✅ COMPLETE
+
+- Archived rollout of per-endpoint admin controller call logging with `@Slf4j` alignment and successful verification.
+
 ### Phase 45: Session-Cached Admin Visibility on Index ✅ COMPLETE
 
 - Archived index admin-card session-cache behavior for `/api/is-admin` with safe hidden fallback and successful

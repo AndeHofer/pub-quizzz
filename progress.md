@@ -2,6 +2,9 @@
 
 ## Open Tasks
 
+- [x] Phase 49: Reserve stable header space on quiz-details to prevent creator subtitle layout jump
+- [x] Phase 49: Switch creator subtitle visibility handling without changing layout height
+- [x] Phase 49: Run full verification (`npm run type-check`, `npm run build`, `mvn.cmd test`)
 - [x] Phase 48: Show selected quiz title in `quiz-details` header instead of default title
 - [x] Phase 48: Show optional smaller creator line as `erstellt von <creator>` when available
 - [x] Phase 48: Reset header to default when no quiz is selected
@@ -27,6 +30,13 @@
 
 ## Finished Phases
 
+### Phase 49: Stable Quiz-Details Header Height (No Creator Jump) ✅ COMPLETE
+
+- Reserved fixed visual space for title + creator subtitle in quiz-details header to prevent layout jump when creator
+  text appears.
+- Switched creator subtitle toggling from `display` changes to `visibility` changes so layout height remains stable.
+- Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.
+
 ### Phase 48: Dynamic Quiz-Details Header with Creator ✅ COMPLETE
 
 - Replaced static quiz-details heading with dynamic title handling: default `Quiz ansehen`, selected quiz title when a
@@ -44,14 +54,4 @@
 - Applied requested behavior where clearing `Urheber` in edit mode stores it as empty (`null`) by sending trimmed empty
   values as `null`.
 - Updated unit/controller coverage for creator in service and quiz endpoints.
-- Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.
-
-### Phase 46: Informative Admin Controller Call Logging ✅ COMPLETE
-
-- Added missing per-endpoint `log.info(...)` call logs in `AdminQuizController`, `AdminResultController`,
-  `AdminTeamController`, and `AdminUserController`.
-- Added `@Slf4j` to these controllers to support consistent logging.
-- Included key request context in logs (IDs, optional filters, question/file counts, and date updates) while avoiding
-  sensitive payload details.
-- Kept `DevToolsController` logging intentionally unchanged per request.
 - Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.
