@@ -187,6 +187,11 @@ function populateFormForEdit(quiz: QuizDTO) {
         pubDateInput.value = quiz.pubDate ?? '';
     }
 
+    const creatorInput = document.getElementById('creator') as HTMLInputElement | null;
+    if (creatorInput) {
+        creatorInput.value = quiz.creator ?? '';
+    }
+
     // Set the page title and submit button
     const title = document.querySelector('h1');
     if (title) {
@@ -268,6 +273,7 @@ if (quizForm) {
 
         const quizData: {
             pubDate: string | null;
+            creator: string | null;
             questions: {
                 number: number;
                 questionText: string;
@@ -278,6 +284,7 @@ if (quizForm) {
             }[]
         } = {
             pubDate: (document.getElementById('pubDate') as HTMLInputElement).value || null,
+            creator: (document.getElementById('creator') as HTMLInputElement).value.trim() || null,
             questions: []
         };
 

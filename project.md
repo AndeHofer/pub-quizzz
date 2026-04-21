@@ -29,3 +29,4 @@ Pub Quizzz is a Spring Boot 4.x web application for managing and running pub qui
 - Quiz images (hint images) stored in `${app.upload.dir}/` and served publicly via `/uploads/**`
 - Quiz documents (any file type) stored in `${app.upload.dir}/documents/` and served only to `ADMIN` users; managed in
   the quiz edit form
+- Quizzes can optionally store an author/creator (`Urheber`) as free text, editable in admin create/edit flow

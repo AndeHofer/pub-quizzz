@@ -18,6 +18,7 @@ export interface QuizDTO {
     quizDate?: string;
     pubDate?: string;
     submitDate?: string;
+    creator?: string | null;
     finished?: boolean;
     questions?: QuestionDTO[];
 }
@@ -26,6 +27,7 @@ export interface QuizDetailResponse {
     quizId: number;
     pubDate?: string;
     submitDate?: string;
+    creator?: string | null;
     questions?: QuestionDTO[];
 }
 

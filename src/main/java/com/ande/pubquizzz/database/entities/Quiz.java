@@ -33,6 +33,9 @@ public class Quiz {
     @Column(nullable = true)
     private String title;
 
+    @Column(nullable = true)
+    private String creator;
+
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("id.questionNumber ASC")
     @ToString.Exclude

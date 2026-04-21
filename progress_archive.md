@@ -4,6 +4,16 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 45: Session-Cached Admin Visibility on Index ✅ COMPLETE
+
+- Archived index admin-card session-cache behavior for `/api/is-admin` with safe hidden fallback and successful
+  verification.
+
+### Phase 42: Session-Cached Version Badge ✅ COMPLETE
+
+- Archived index version badge session-cache behavior with fallback fetch (`cache: 'no-store'`) and successful
+  verification.
+
 ### Phase 41: Smoother Page-to-Page Transitions ✅ COMPLETE
 
 - Archived global scrollbar-gutter/body fade transitions and index vertical spacing normalization with shared page

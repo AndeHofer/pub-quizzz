@@ -124,6 +124,7 @@ class UserQuizControllerTest {
         QuizDetailDTO dto = new QuizDetailDTO();
         dto.setQuizId(42L);
         dto.setPubDate(java.time.LocalDate.of(2026, 3, 15));
+        dto.setCreator("Quizmaster Klaus");
         dto.setQuestions(List.of(question));
 
         when(quizService.getQuizDetailById(42L)).thenReturn(java.util.Optional.of(dto));
@@ -132,6 +133,7 @@ class UserQuizControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quizId").value(42))
                 .andExpect(jsonPath("$.pubDate").value("2026-03-15"))
+                .andExpect(jsonPath("$.creator").value("Quizmaster Klaus"))
                 .andExpect(jsonPath("$.questions[0].number").value(1))
                 .andExpect(jsonPath("$.questions[0].questionText").value("Frage 1"))
                 .andExpect(jsonPath("$.questions[0].answer").value("Antwort 1"))

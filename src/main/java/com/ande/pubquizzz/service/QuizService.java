@@ -59,6 +59,7 @@ public class QuizService {
         Quiz quiz = new Quiz();
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : LocalDate.now());
         quiz.setSubmitDate(LocalDate.now());
+        quiz.setCreator(request.getCreator());
 
         applyQuestionsToQuiz(quiz, request.getQuestions());
 
@@ -86,6 +87,7 @@ public class QuizService {
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz nicht gefunden: " + id));
 
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : quiz.getPubDate());
+        quiz.setCreator(request.getCreator());
 
         // Snapshot old image URLs before clearing questions
         List<String> oldImageUrls = quiz.getQuestions().stream()

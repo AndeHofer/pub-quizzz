@@ -64,6 +64,7 @@ class AdminQuizControllerTest {
         dto.setQuizId(1L);
         dto.setPubDate(LocalDate.of(2026, 1, 7));
         dto.setSubmitDate(LocalDate.of(2026, 1, 7));
+        dto.setCreator("Anna Admin");
         dto.setFinished(true);
 
         when(quizService.getAllQuizzes()).thenReturn(List.of(dto));
@@ -71,6 +72,7 @@ class AdminQuizControllerTest {
         mockMvc.perform(get("/admin/quizzes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].quizId").value(1))
+                .andExpect(jsonPath("$[0].creator").value("Anna Admin"))
                 .andExpect(jsonPath("$[0].finished").value(true));
     }
 
@@ -81,13 +83,15 @@ class AdminQuizControllerTest {
         dto.setQuizId(2L);
         dto.setPubDate(LocalDate.of(2026, 2, 1));
         dto.setSubmitDate(LocalDate.of(2026, 2, 1));
+        dto.setCreator("Quiz Team");
         dto.setFinished(true);
 
         when(quizService.getQuizById(2L)).thenReturn(Optional.of(dto));
 
         mockMvc.perform(get("/admin/quiz/2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.quizId").value(2));
+                .andExpect(jsonPath("$.quizId").value(2))
+                .andExpect(jsonPath("$.creator").value("Quiz Team"));
     }
 
     @Test
@@ -106,13 +110,15 @@ class AdminQuizControllerTest {
         dto.setQuizId(3L);
         dto.setPubDate(LocalDate.of(2026, 3, 1));
         dto.setSubmitDate(LocalDate.of(2026, 3, 1));
+        dto.setCreator("Archiv Team");
         dto.setQuestions(List.of());
 
         when(quizService.getQuizDetailById(3L)).thenReturn(Optional.of(dto));
 
         mockMvc.perform(get("/admin/quiz/3/detail"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.quizId").value(3));
+                .andExpect(jsonPath("$.quizId").value(3))
+                .andExpect(jsonPath("$.creator").value("Archiv Team"));
     }
 
     @Test

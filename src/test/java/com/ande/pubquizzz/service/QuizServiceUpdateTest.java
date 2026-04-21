@@ -17,8 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class QuizServiceUpdateTest {
@@ -104,6 +108,34 @@ class QuizServiceUpdateTest {
         }
         req.setQuestions(questionList);
         return req;
+    }
+
+    @Test
+    void createQuiz_setsCreatorFromRequest() {
+        CreateQuizRequest req = minimalUpdateRequest();
+        req.setCreator("Max Mustermann");
+        when(quizMapper.toDTO(any())).thenReturn(null);
+
+        quizService.createQuiz(req);
+
+        org.mockito.ArgumentCaptor<Quiz> quizCaptor = org.mockito.ArgumentCaptor.forClass(Quiz.class);
+        verify(quizRepository).save(quizCaptor.capture());
+        assertEquals("Max Mustermann", quizCaptor.getValue().getCreator());
+    }
+
+    @Test
+    void updateQuizFull_withNullCreator_clearsExistingCreator() {
+        Quiz existing = quizWithImageUrls(null, null);
+        existing.setCreator("Vorheriger Urheber");
+        when(quizRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(quizMapper.toDTO(any())).thenReturn(null);
+
+        CreateQuizRequest req = minimalUpdateRequest();
+        req.setCreator(null);
+
+        quizService.updateQuizFull(1L, req);
+
+        assertNull(existing.getCreator());
     }
 
     @Test

@@ -10,6 +10,7 @@ public class QuizDetailDTO {
     private Long quizId;
     private LocalDate pubDate;
     private LocalDate submitDate;
+    private String creator;
     private List<QuestionDetailDTO> questions;
 
     @Data

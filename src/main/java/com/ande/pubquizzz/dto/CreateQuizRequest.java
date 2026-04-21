@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 public class CreateQuizRequest {
     private LocalDate pubDate;
+    private String creator;
 
     @NotNull(message = "Fragen dürfen nicht null sein")
     @Size(min = 8, max = 8, message = "Ein Quiz muss genau 8 Fragen enthalten")

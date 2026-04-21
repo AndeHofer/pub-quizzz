@@ -8,5 +8,6 @@ public class QuizDTO {
     private Long quizId;
     private LocalDate pubDate;
     private LocalDate submitDate;
+    private String creator;
     private boolean finished;
 }

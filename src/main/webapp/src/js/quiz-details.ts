@@ -3,6 +3,40 @@ import {QuizDetailResponse, QuizResultEntry, QuizResultsResponse, QuizSummaryDTO
 let allDetailsExpanded = false;
 let currentQuizResults: QuizResultEntry[] = [];
 
+function setQuizHeader(title: string | null, creator: string | null | undefined): void {
+    const titleEl = document.getElementById('quizDetailsTitle');
+    const creatorEl = document.getElementById('quizDetailsCreator');
+    if (!titleEl || !creatorEl) {
+        return;
+    }
+
+    const cleanedTitle = title?.trim() ?? '';
+    titleEl.textContent = cleanedTitle || 'Quiz ansehen';
+
+    const cleanedCreator = creator?.trim() ?? '';
+    if (cleanedCreator) {
+        creatorEl.textContent = `erstellt von ${cleanedCreator}`;
+        creatorEl.style.display = 'block';
+    } else {
+        creatorEl.textContent = '';
+        creatorEl.style.display = 'none';
+    }
+}
+
+function getSelectedQuizTitle(): string | null {
+    const selectEl = document.getElementById('quizSelect') as HTMLSelectElement | null;
+    if (!selectEl) {
+        return null;
+    }
+
+    const selectedOption = selectEl.selectedOptions.item(0);
+    if (!selectedOption || !selectEl.value) {
+        return null;
+    }
+
+    return selectedOption.textContent ?? null;
+}
+
 function escapeHtml(text: string): string {
     const div = document.createElement('div');
     div.textContent = text;
@@ -428,9 +462,11 @@ async function loadQuizDetail(quizId: number): Promise<void> {
             throw new Error(`HTTP ${response.status}`);
         }
         const detail: QuizDetailResponse = await response.json();
+        setQuizHeader(getSelectedQuizTitle(), detail.creator);
         await loadQuizResultsForModal(quizId);
         renderQuizDetail(detail);
     } catch (e) {
+        setQuizHeader(null, null);
         const message = e instanceof Error && e.message === 'Quiz nicht gefunden.'
             ? e.message
             : 'Fehler beim Laden des Quiz. Bitte Seite neu laden.';
@@ -514,6 +550,7 @@ function wireEvents(): void {
     selectEl.addEventListener('change', async () => {
         const selected = Number(selectEl.value);
         if (!selected || Number.isNaN(selected)) {
+            setQuizHeader(null, null);
             clearError();
             currentQuizResults = [];
             closeQuestionPointsModal();
