@@ -1,4 +1,4 @@
-const TRANSITION_DURATION_MS = 160;
+const TRANSITION_DURATION_MS = 80;
 
 const markEnter = (): void => {
     document.body.classList.remove('page-leave');
