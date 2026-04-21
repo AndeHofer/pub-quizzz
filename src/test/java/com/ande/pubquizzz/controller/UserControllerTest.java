@@ -38,7 +38,7 @@ class UserControllerTest {
 
         mockMvc.perform(get("/api/version"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.version").value("1.0.1-SNAPSHOT"));
+                .andExpect(jsonPath("$").value("1.0.1-SNAPSHOT"));
     }
 
     @Test
@@ -62,5 +62,12 @@ class UserControllerTest {
         mockMvc.perform(get("/api/is-admin"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(false));
+    }
+
+    @Test
+    @WithMockUser
+    void adminEndpoint_withUserRole_isForbidden() throws Exception {
+        mockMvc.perform(get("/admin/users"))
+                .andExpect(status().isForbidden());
     }
 }

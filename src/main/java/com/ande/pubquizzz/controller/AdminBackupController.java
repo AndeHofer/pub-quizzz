@@ -2,6 +2,7 @@ package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.service.BackupService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.zip.ZipOutputStream;
 @RequestMapping("/admin/backup")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j
 public class AdminBackupController {
 
     private final BackupService backupService;
@@ -34,6 +36,7 @@ public class AdminBackupController {
                 backupService.createBackup(zip);
             }
         };
+        log.info("GET /admin/backup/export - Backup export started");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
@@ -43,7 +46,8 @@ public class AdminBackupController {
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> importBackup(@RequestParam("file") MultipartFile file) throws IOException {
         backupService.stageRestore(file.getBytes());
+        log.info("POST /admin/backup/import - Backup import staged, file size: {} bytes", file.getSize());
         return ResponseEntity.ok(
-            "Backup bereit. Bitte starte die Anwendung neu, um die Wiederherstellung anzuwenden.");
+                "Backup bereit. Bitte starte die Anwendung neu, um die Wiederherstellung anzuwenden.");
     }
 }

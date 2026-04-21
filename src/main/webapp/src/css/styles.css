@@ -1,8 +1,25 @@
 @import "tailwindcss";
 
+html {
+    scrollbar-gutter: stable;
+}
+
 @layer components {
     body {
-        @apply font-sans mt-4 sm:mt-[50px] bg-gray-50;
+        @apply font-sans m-0 pt-4 sm:pt-[50px] bg-gray-50 opacity-100;
+        transition: opacity 160ms ease;
+    }
+
+    body.page-enter {
+        opacity: 0;
+    }
+
+    body.page-enter.page-enter-active {
+        opacity: 1;
+    }
+
+    body.page-leave {
+        opacity: 0;
     }
 
     .container {

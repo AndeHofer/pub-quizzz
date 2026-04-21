@@ -10,6 +10,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilte
 import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -86,5 +87,12 @@ class SecurityAccessTest {
         mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void adminPath_authenticatedNonAdmin_isForbidden() throws Exception {
+        mockMvc.perform(get("/admin/users"))
+                .andExpect(status().isForbidden());
     }
 }

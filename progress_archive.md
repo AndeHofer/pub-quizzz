@@ -4,6 +4,15 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 41: Smoother Page-to-Page Transitions ✅ COMPLETE
+
+- Archived global scrollbar-gutter/body fade transitions and index vertical spacing normalization with shared page
+  transition module rollout and verification.
+
+### Phase 40: Public Desktop Width Consistency (`sm:max-w-3xl`) ✅ COMPLETE
+
+- Archived desktop container width standardization to `sm:max-w-3xl` with verification.
+
 ### Phase 39: Archive Format Alignment ✅ COMPLETE
 
 - Reworked archive structure to match `progress.md` style with concise, phase-based sections.

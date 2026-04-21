@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -19,17 +19,19 @@ public class UserController {
 
     @GetMapping("/api/is-admin")
     public boolean isAdmin(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
+        boolean returnValue = false;
+        if (authentication != null && authentication.isAuthenticated()) {
+            String adminAuthority = Role.ADMIN.springSecurityAuthority();
+            returnValue = authentication.getAuthorities().stream()
+                    .anyMatch(authority -> Objects.equals(authority.getAuthority(), adminAuthority));
         }
-
-        String adminAuthority = Role.ADMIN.springSecurityAuthority();
-        return authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals(adminAuthority));
+        log.info("isAdmin returnValue={}", returnValue);
+        return returnValue;
     }
 
     @GetMapping("/api/version")
-    public Map<String, String> version() {
-        return Map.of("version", buildProperties.getVersion());
+    public String version() {
+        log.info("version returnValue={}", buildProperties.getVersion());
+        return buildProperties.getVersion();
     }
 }

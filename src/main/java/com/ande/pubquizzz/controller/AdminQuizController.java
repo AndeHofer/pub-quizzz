@@ -11,6 +11,7 @@ import com.ande.pubquizzz.service.ImageStorageService;
 import com.ande.pubquizzz.service.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -36,6 +37,7 @@ import java.util.Map;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j
 public class AdminQuizController {
 
     private final QuizService quizService;
@@ -44,6 +46,7 @@ public class AdminQuizController {
 
     @GetMapping("/quizzes")
     public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
+        log.info("GET /admin/quizzes");
         return ResponseEntity.ok(quizService.getAllQuizzes());
     }
 
@@ -51,6 +54,7 @@ public class AdminQuizController {
     public ResponseEntity<String> createQuiz(
             @RequestPart("quiz") @Valid CreateQuizRequest request,
             @RequestParam Map<String, MultipartFile> allFiles) {
+        log.info("POST /admin/create-quiz - questions={}, uploadedParts={}", request.getQuestions().size(), allFiles.size());
         injectImageUrls(request, allFiles);
         quizService.createQuiz(request);
         return ResponseEntity.ok("Quiz created successfully");
@@ -58,6 +62,7 @@ public class AdminQuizController {
 
     @GetMapping("/quiz/{id}")
     public ResponseEntity<QuizDTO> getQuizById(@PathVariable Long id) {
+        log.info("GET /admin/quiz/{}", id);
         return quizService.getQuizById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -65,6 +70,7 @@ public class AdminQuizController {
 
     @GetMapping("/quiz/{id}/detail")
     public ResponseEntity<QuizDetailDTO> getQuizDetailById(@PathVariable Long id) {
+        log.info("GET /admin/quiz/{}/detail", id);
         return quizService.getQuizDetailById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -72,6 +78,7 @@ public class AdminQuizController {
 
     @DeleteMapping("/quiz/{id}")
     public ResponseEntity<String> deleteQuiz(@PathVariable Long id) {
+        log.info("DELETE /admin/quiz/{}", id);
         if (!quizService.deleteQuiz(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -83,6 +90,7 @@ public class AdminQuizController {
             @PathVariable Long id,
             @RequestPart("quiz") @Valid CreateQuizRequest request,
             @RequestParam Map<String, MultipartFile> allFiles) {
+        log.info("PUT /admin/quiz/{} - questions={}, uploadedParts={}", id, request.getQuestions().size(), allFiles.size());
         injectImageUrls(request, allFiles);
         quizService.updateQuizFull(id, request);
         return ResponseEntity.ok("Quiz updated successfully");
@@ -90,12 +98,14 @@ public class AdminQuizController {
 
     @PatchMapping("/quiz/{id}/dates")
     public ResponseEntity<String> updateQuizDates(@PathVariable Long id, @RequestBody @Valid UpdateQuizDatesRequest request) {
+        log.info("PATCH /admin/quiz/{}/dates - pubDate={}, submitDate={}", id, request.getPubDate(), request.getSubmitDate());
         quizService.updateQuiz(id, request.getPubDate(), request.getSubmitDate());
         return ResponseEntity.ok("Quiz updated successfully");
     }
 
     @DeleteMapping("/cleanup-images")
     public ResponseEntity<CleanupResult> cleanupOrphanedImages() {
+        log.info("DELETE /admin/cleanup-images");
         return ResponseEntity.ok(quizService.cleanupOrphanedImages());
     }
 
@@ -105,12 +115,14 @@ public class AdminQuizController {
     public ResponseEntity<QuizDocumentDTO> uploadDocument(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
+        log.info("POST /admin/quiz/{}/documents - fileName={}, size={}", id, file.getOriginalFilename(), file.getSize());
         QuizDocumentDTO dto = documentStorageService.storeDocument(id, file);
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/quiz/{id}/documents")
     public ResponseEntity<List<QuizDocumentDTO>> listDocuments(@PathVariable Long id) {
+        log.info("GET /admin/quiz/{}/documents", id);
         return ResponseEntity.ok(documentStorageService.listDocuments(id));
     }
 
@@ -118,6 +130,7 @@ public class AdminQuizController {
     public ResponseEntity<org.springframework.core.io.Resource> downloadDocument(
             @PathVariable Long id,
             @PathVariable Long docId) {
+        log.info("GET /admin/quiz/{}/documents/{}", id, docId);
         DocumentStorageService.DocumentDownload download = documentStorageService.getDocumentForDownload(id, docId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(download.contentType()));
@@ -132,6 +145,7 @@ public class AdminQuizController {
     public ResponseEntity<String> deleteDocument(
             @PathVariable Long id,
             @PathVariable Long docId) {
+        log.info("DELETE /admin/quiz/{}/documents/{}", id, docId);
         documentStorageService.deleteDocument(id, docId);
         return ResponseEntity.ok("Dokument gelöscht");
     }
