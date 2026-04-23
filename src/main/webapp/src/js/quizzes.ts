@@ -16,14 +16,14 @@ function renderQuizzes(quizzes: QuizSummaryDTO[]): void {
 
     tbody.innerHTML = quizzes.map(q => {
         const winnerCell = q.winnerTeamName
-            ? `<a href="/team.html?team=${encodeURIComponent(q.winnerTeamName)}" class="text-gray-700 hover:underline">${escapeHtml(q.winnerTeamName)}</a>`
+            ? `<a href="/team.html?team=${encodeURIComponent(q.winnerTeamName)}" class="text-blue-700 hover:underline">${escapeHtml(q.winnerTeamName)}</a>`
             : `<span class="text-gray-400">&mdash;</span>`;
         return `
         <tr class="border-b border-gray-200 hover:bg-gray-50">
             <td class="py-2 px-2 sm:py-3 sm:px-4 text-xs sm:text-base font-medium">
                 <a href="/quiz.html?id=${q.quizId}" class="text-blue-600 hover:underline">${escapeHtml(q.quizTitle)}</a>
             </td>
-            <td class="py-2 px-2 sm:py-3 sm:px-4 text-center text-gray-600 text-xs sm:text-base">${winnerCell}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4 text-center text-gray-600 text-xs sm:text-base font-medium">${winnerCell}</td>
             <td class="py-2 px-2 sm:py-3 sm:px-4 text-center text-gray-600 text-xs sm:text-base">${q.teamCount}</td>
         </tr>
     `;
