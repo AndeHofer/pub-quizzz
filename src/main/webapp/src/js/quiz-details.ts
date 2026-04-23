@@ -6,7 +6,8 @@ let currentQuizResults: QuizResultEntry[] = [];
 function setQuizHeader(title: string | null, creator: string | null | undefined): void {
     const titleEl = document.getElementById('quizDetailsTitle');
     const creatorEl = document.getElementById('quizDetailsCreator');
-    if (!titleEl || !creatorEl) {
+    const upButtonEl = document.getElementById('upButton');
+    if (!titleEl || !creatorEl || !upButtonEl) {
         return;
     }
 
@@ -17,9 +18,11 @@ function setQuizHeader(title: string | null, creator: string | null | undefined)
     if (cleanedCreator) {
         creatorEl.textContent = `by ${cleanedCreator}`;
         creatorEl.style.visibility = 'visible';
+        upButtonEl.style.display = 'block';
     } else {
         creatorEl.textContent = '';
         creatorEl.style.visibility = 'hidden';
+        upButtonEl.style.display = 'none';
     }
 }
 
