@@ -1,6 +1,7 @@
 package com.ande.pubquizzz.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -34,5 +35,10 @@ public class CreateResultRequest {
         @Min(value = 0, message = "Punkte müssen >= 0 sein")
         @Max(value = 5, message = "Punkte dürfen maximal 5 sein")
         private int points;
+
+        @AssertTrue(message = "Punkte müssen einer der Werte 0, 1, 2, 3 oder 5 sein")
+        public boolean isAllowedPointsValue() {
+            return points == 0 || points == 1 || points == 2 || points == 3 || points == 5;
+        }
     }
 }

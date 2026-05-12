@@ -15,6 +15,7 @@ export default defineConfig({
                 main: './index.html',
                 admin_main: './admin/admin_main.html',
                 create_quiz: './admin/create_quiz.html',
+                create_result: './admin/create_result.html',
                 register_user: './admin/register_user.html',
                 points_leaderboard: './points-leaderboard.html',
                 medal_leaderboard: './medal-leaderboard.html',

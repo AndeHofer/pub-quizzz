@@ -104,13 +104,13 @@ class AdminResultControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void createResult_withPointsAboveMax_returnsBadRequest() throws Exception {
-        // points = 6 violates @Max(5) on AnswerSubmission.points
+    void createResult_withDisallowedPointsValue_returnsBadRequest() throws Exception {
+        // points = 4 is intentionally disallowed (allowed: 0,1,2,3,5)
         List<CreateResultRequest.AnswerSubmission> answers = new java.util.ArrayList<>();
         for (int i = 1; i <= 8; i++) {
             CreateResultRequest.AnswerSubmission a = new CreateResultRequest.AnswerSubmission();
             a.setQuestionNumber(i);
-            a.setPoints(6); // invalid — max is 5
+            a.setPoints(i == 4 ? 4 : 3);
             answers.add(a);
         }
         CreateResultRequest request = new CreateResultRequest();
@@ -197,12 +197,12 @@ class AdminResultControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void updateResult_withPointsAboveMax_returnsBadRequest() throws Exception {
+    void updateResult_withDisallowedPointsValue_returnsBadRequest() throws Exception {
         List<UpdateResultRequest.AnswerSubmission> answers = new java.util.ArrayList<>();
         for (int i = 1; i <= 8; i++) {
             UpdateResultRequest.AnswerSubmission a = new UpdateResultRequest.AnswerSubmission();
             a.setQuestionNumber(i);
-            a.setPoints(6); // invalid — max is 5
+            a.setPoints(i == 4 ? 4 : 3);
             answers.add(a);
         }
         UpdateResultRequest request = new UpdateResultRequest();

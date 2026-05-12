@@ -89,11 +89,12 @@ public class ResultServiceCreateTest {
 
         List<CreateResultRequest.AnswerSubmission> answers = new ArrayList<>();
         int total = 0;
+        int[] allowedPoints = {5, 3, 2, 1, 5, 3, 2, 1};
         for (int i = 1; i <= 8; i++) {
             CreateResultRequest.AnswerSubmission a = new CreateResultRequest.AnswerSubmission();
             a.setQuestionNumber(i);
-            a.setPoints(i);
-            total += i;
+            a.setPoints(allowedPoints[i - 1]);
+            total += allowedPoints[i - 1];
             answers.add(a);
         }
         req.setAnswers(answers);
@@ -163,5 +164,42 @@ public class ResultServiceCreateTest {
 
         BusinessValidationException ex = assertThrows(BusinessValidationException.class, () -> resultService.createResult(req));
         assertTrue(ex.getMessage().contains("Doppelte Frage"));
+    }
+
+    @Test
+    public void testCreateResultMissingQuestion() {
+        when(quizRepository.findById(anyLong())).thenReturn(Optional.of(quiz));
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(team));
+        when(resultRepository.findByTeam_TeamsIdAndQuiz_QuizId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        CreateResultRequest req = new CreateResultRequest();
+        req.setQuizId(1L);
+        req.setTeamId(5L);
+        List<CreateResultRequest.AnswerSubmission> answers = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            CreateResultRequest.AnswerSubmission a = new CreateResultRequest.AnswerSubmission();
+            a.setQuestionNumber(i);
+            a.setPoints(1);
+            answers.add(a);
+        }
+        req.setAnswers(answers);
+
+        BusinessValidationException ex = assertThrows(BusinessValidationException.class, () -> resultService.createResult(req));
+        assertTrue(ex.getMessage().contains("Fehlende Frage"));
+    }
+
+    @Test
+    public void testCreateResultDisallowedPointsValue() {
+        when(quizRepository.findById(anyLong())).thenReturn(Optional.of(quiz));
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(team));
+        when(resultRepository.findByTeam_TeamsIdAndQuiz_QuizId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        CreateResultRequest req = makeValidRequest(1L, 5L);
+        req.getAnswers().get(3).setPoints(4);
+
+        BusinessValidationException ex = assertThrows(BusinessValidationException.class, () -> resultService.createResult(req));
+        assertTrue(ex.getMessage().contains("0, 1, 2, 3 oder 5"));
     }
 }

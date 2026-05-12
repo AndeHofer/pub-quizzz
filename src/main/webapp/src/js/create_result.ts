@@ -1,0 +1,240 @@
+export {};
+
+import {goBack, showMessage} from './utils';
+import type {QuizDTO, ResultDTO, TeamDTO} from './types';
+
+type PointsValue = 0 | 1 | 2 | 3 | 5;
+
+const ALLOWED_POINTS: PointsValue[] = [5, 3, 2, 1, 0];
+const QUESTION_COUNT = 8;
+
+const quizSelect = document.getElementById('resultQuiz') as HTMLSelectElement | null;
+const teamSelect = document.getElementById('resultTeam') as HTMLSelectElement | null;
+const resultQuestionsContainer = document.getElementById('resultQuestionsContainer') as HTMLDivElement | null;
+const resultSaveBtn = document.getElementById('resultSaveBtn') as HTMLButtonElement | null;
+
+let allQuizzes: QuizDTO[] = [];
+let allTeams: TeamDTO[] = [];
+let editingResult: ResultDTO | null = null;
+
+const GERMAN_MONTHS = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+function quizDisplayTitle(quiz: QuizDTO): string {
+    if (quiz.pubDate) {
+        const parts = quiz.pubDate.split('-');
+        if (parts.length >= 2) {
+            const year = parts[0];
+            const month = Number(parts[1]);
+            if (month >= 1 && month <= 12) {
+                return `${year} ${GERMAN_MONTHS[month - 1]}`;
+            }
+        }
+    }
+    return `Quiz ${quiz.quizId}`;
+}
+
+function parsePubDateToMillis(pubDate?: string): number | null {
+    if (!pubDate) return null;
+    const parsed = Date.parse(`${pubDate}T00:00:00Z`);
+    return Number.isNaN(parsed) ? null : parsed;
+}
+
+function buildQuestionInputs(): void {
+    if (!resultQuestionsContainer) return;
+    let leftColumn = '';
+    let rightColumn = '';
+    for (let i = 1; i <= 4; i++) {
+        const options = ALLOWED_POINTS.map(value => `<option value="${value}"${value === 0 ? ' selected' : ''}>${value}</option>`).join('');
+        leftColumn += `<div class="field-group"><label for="result-q${i}">Frage ${i} Punkte:</label><select id="result-q${i}">${options}</select></div>`;
+    }
+    for (let i = 5; i <= QUESTION_COUNT; i++) {
+        const options = ALLOWED_POINTS.map(value => `<option value="${value}"${value === 0 ? ' selected' : ''}>${value}</option>`).join('');
+        rightColumn += `<div class="field-group"><label for="result-q${i}">Frage ${i} Punkte:</label><select id="result-q${i}">${options}</select></div>`;
+    }
+    resultQuestionsContainer.innerHTML = `
+        <div class="result-points-grid">
+            <div>${leftColumn}</div>
+            <div>${rightColumn}</div>
+        </div>
+    `;
+}
+
+function getResultIdFromQuery(): number | null {
+    const params = new URLSearchParams(window.location.search);
+    const idParam = params.get('resultId');
+    if (!idParam) return null;
+    const parsed = Number(idParam);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+    const response = await fetch(url);
+    if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(text || `Fehler beim Laden (${response.status})`);
+    }
+    return response.json() as Promise<T>;
+}
+
+function fillSelects(): void {
+    if (!quizSelect || !teamSelect) return;
+
+    const sortedQuizzes = [...allQuizzes].sort((left, right) => {
+        const leftDate = parsePubDateToMillis(left.pubDate);
+        const rightDate = parsePubDateToMillis(right.pubDate);
+
+        if (leftDate !== null && rightDate !== null) {
+            if (leftDate !== rightDate) return rightDate - leftDate;
+        } else if (leftDate !== null) {
+            return -1;
+        } else if (rightDate !== null) {
+            return 1;
+        }
+
+        return right.quizId - left.quizId;
+    });
+
+    quizSelect.innerHTML = '<option value="">-- Quiz auswählen --</option>' +
+        sortedQuizzes.map(quiz => `<option value="${quiz.quizId}">${quizDisplayTitle(quiz)}</option>`).join('');
+    teamSelect.innerHTML = '<option value="">-- Team auswählen --</option>' +
+        allTeams.map(team => `<option value="${team.teamsId}">${team.teamName}</option>`).join('');
+}
+
+function setEditModeUi(): void {
+    const title = document.getElementById('resultPageTitle');
+    if (title) title.textContent = 'Ergebnis bearbeiten';
+    if (resultSaveBtn) resultSaveBtn.textContent = 'Speichern';
+    if (quizSelect) quizSelect.disabled = true;
+    if (teamSelect) teamSelect.disabled = true;
+}
+
+function prefillEditValues(result: ResultDTO): void {
+    if (quizSelect) quizSelect.value = String(result.quizId);
+    if (teamSelect) teamSelect.value = String(result.teamId);
+
+    const answersMap = new Map<number, number>();
+    if (Array.isArray(result.answers)) {
+        result.answers.forEach(answer => {
+            answersMap.set(answer.questionNumber, answer.points);
+        });
+    }
+
+    for (let i = 1; i <= QUESTION_COUNT; i++) {
+        const select = document.getElementById(`result-q${i}`) as HTMLSelectElement | null;
+        if (!select) continue;
+        const points = answersMap.get(i);
+        if (points !== undefined && ALLOWED_POINTS.includes(points as PointsValue)) {
+            select.value = String(points);
+        } else {
+            select.value = '0';
+        }
+    }
+}
+
+function collectAnswers(): { questionNumber: number; points: number }[] {
+    const answers: { questionNumber: number; points: number }[] = [];
+    for (let i = 1; i <= QUESTION_COUNT; i++) {
+        const select = document.getElementById(`result-q${i}`) as HTMLSelectElement | null;
+        const raw = Number(select?.value ?? 0);
+        const points = ALLOWED_POINTS.includes(raw as PointsValue) ? raw : 0;
+        answers.push({questionNumber: i, points});
+    }
+    return answers;
+}
+
+async function saveResult(event: Event): Promise<void> {
+    event.preventDefault();
+    if (!quizSelect || !teamSelect || !resultSaveBtn) return;
+
+    const quizId = Number(quizSelect.value);
+    const teamId = Number(teamSelect.value);
+    if (!editingResult && (!quizId || !teamId)) {
+        showMessage('Bitte Quiz und Team auswählen.', 'error');
+        return;
+    }
+
+    const answers = collectAnswers();
+    resultSaveBtn.disabled = true;
+
+    try {
+        const currentEditingResult = editingResult;
+        const isEditMode = currentEditingResult !== null;
+        const url = isEditMode ? `/admin/results/${currentEditingResult.resultsId}` : '/admin/results';
+        const method = isEditMode ? 'PUT' : 'POST';
+        const body = isEditMode ? {answers} : {quizId, teamId, answers};
+
+        const response = await fetch(url, {
+            method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+            if (isEditMode) {
+                showMessage('Ergebnis erfolgreich aktualisiert!', 'success');
+                return;
+            }
+
+            const createdResult = await response.json() as ResultDTO;
+            editingResult = createdResult;
+            setEditModeUi();
+            prefillEditValues(createdResult);
+            history.replaceState(null, '', `create_result.html?resultId=${createdResult.resultsId}`);
+            showMessage('Ergebnis erfolgreich gespeichert!', 'success');
+            return;
+        }
+
+        const raw = await response.text().catch(() => '');
+        let errorMessage = 'Speichern fehlgeschlagen.';
+        if (raw) {
+            try {
+                const payload = JSON.parse(raw) as { error?: string };
+                errorMessage = payload.error || raw;
+            } catch {
+                errorMessage = raw;
+            }
+        }
+        showMessage(errorMessage, 'error');
+    } catch (error) {
+        showMessage('Netzwerkfehler: ' + error, 'error');
+    } finally {
+        resultSaveBtn.disabled = false;
+    }
+}
+
+async function loadPageData(): Promise<void> {
+    buildQuestionInputs();
+    const resultId = getResultIdFromQuery();
+
+    const [quizzes, teams] = await Promise.all([
+        fetchJson<QuizDTO[]>('/admin/quizzes'),
+        fetchJson<TeamDTO[]>('/admin/teams')
+    ]);
+    allQuizzes = quizzes;
+    allTeams = teams;
+    fillSelects();
+
+    if (!resultId) return;
+
+    const results = await fetchJson<ResultDTO[]>('/admin/results');
+    const result = results.find(r => r.resultsId === resultId);
+    if (!result) {
+        showMessage('Ergebnis nicht gefunden.', 'error');
+        return;
+    }
+
+    editingResult = result;
+    setEditModeUi();
+    prefillEditValues(result);
+}
+
+window.addEventListener('load', () => {
+    document.getElementById('backBtn')?.addEventListener('click', () => goBack('admin_main.html'));
+    document.getElementById('resultForm')?.addEventListener('submit', event => {
+        void saveResult(event);
+    });
+
+    void loadPageData().catch(error => {
+        showMessage('Fehler beim Laden der Seite: ' + error, 'error');
+    });
+});

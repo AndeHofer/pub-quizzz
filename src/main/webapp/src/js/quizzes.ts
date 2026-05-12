@@ -10,7 +10,7 @@ function renderQuizzes(quizzes: QuizSummaryDTO[]): void {
     const tbody = document.getElementById('quizzesBody') as HTMLTableSectionElement;
 
     if (quizzes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">Noch keine Quizze vorhanden.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">Keine fertigen Quizze verfügbar.</td></tr>';
         return;
     }
 
@@ -41,9 +41,10 @@ async function loadQuizzes(): Promise<void> {
             throw new Error(`HTTP ${response.status}`);
         }
         const quizzes: QuizSummaryDTO[] = await response.json();
+        const finishedQuizzes = quizzes.filter(quiz => quiz.finished === true);
         if (loadingEl) loadingEl.style.display = 'none';
         if (tableEl) tableEl.style.display = 'table';
-        renderQuizzes(quizzes);
+        renderQuizzes(finishedQuizzes);
     } catch {
         if (loadingEl) loadingEl.style.display = 'none';
         if (errorEl) {

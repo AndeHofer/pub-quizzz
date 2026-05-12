@@ -2,9 +2,16 @@
 
 ## Open Tasks
 
-- [x] Phase 55: Remove unused `/api/is-admin` and `/api/version` endpoints
-- [x] Phase 55: Keep bootstrap behavior and cache header unchanged
-- [x] Phase 55: Update tests and run full verification
+- [x] Phase 56: Plan result create/edit page flow (separate HTML/TS, quiz-page style)
+- [x] Phase 56: Implement frontend result create/edit page and admin navigation wiring
+- [x] Phase 56: Align backend result API behavior/validation for create + edit (including disallowing 4 points)
+- [x] Phase 56: Update controller/service tests for new result create/edit behavior
+- [ ] Phase 56: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+- [x] Phase 56: Keep create-result page open after first save and switch to edit mode (no quiz/team changes afterward)
+- [x] Phase 56: Refine create-result layout (non-admin template, quiz/team side-by-side, Q1-4 and Q5-8 two-column)
+- [x] Phase 56: Show only finished quizzes on `quiz-details` and `quizzes.html`
+
+- Blocker: `./mvnw.cmd test` currently cannot run in this shell because `JAVA_HOME` is not defined correctly.
 
 ## Finished Phases
 

@@ -20,6 +20,7 @@ import com.ande.pubquizzz.dto.UpdateResultRequest;
 import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.mapper.ResultMapper;
+import com.ande.pubquizzz.mapper.QuizFinishedChecker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -88,6 +89,7 @@ public class ResultService {
             dto.setQuizId(quiz.getQuizId());
             dto.setQuizTitle(deriveQuizTitle(quiz.getPubDate()));
             dto.setPubDate(quiz.getPubDate().toString());
+            dto.setFinished(QuizFinishedChecker.isFinished(quiz));
             dto.setTeamCount((int) count);
             dto.setWinnerTeamName(winnerMap.get(quiz.getQuizId()));
             return dto;
@@ -305,20 +307,14 @@ public class ResultService {
             throw new BusinessValidationException("Ergebnis für dieses Team und Quiz existiert bereits");
         }
 
-        var answers = req.getAnswers();
-        boolean[] seen = new boolean[9];
-        for (CreateResultRequest.AnswerSubmission a : answers) {
-            int qn = a.getQuestionNumber();
-            if (seen[qn]) throw new BusinessValidationException("Doppelte Frage: " + qn);
-            seen[qn] = true;
-        }
+        validateCreateAnswers(req.getAnswers());
 
         Result result = new Result();
         result.setQuiz(quizOpt.get());
         result.setTeam(teamOpt.get());
 
         List<ResultAnswer> resultAnswers = new ArrayList<>();
-        for (CreateResultRequest.AnswerSubmission a : answers) {
+        for (CreateResultRequest.AnswerSubmission a : req.getAnswers()) {
             ResultAnswer ra = new ResultAnswer();
             ra.setQuestionNumber(a.getQuestionNumber());
             ra.setPoints(a.getPoints());
@@ -346,6 +342,8 @@ public class ResultService {
         log.info("Updating result id={}", id);
         Result result = resultRepository.findByIdWithAnswers(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ergebnis nicht gefunden: " + id));
+
+        validateUpdateAnswers(req.getAnswers());
 
         for (UpdateResultRequest.AnswerSubmission submission : req.getAnswers()) {
             int newPoints = submission.getPoints();
@@ -463,6 +461,56 @@ public class ResultService {
     private String quizSuffix(Long quizId) {
         return quizId != null ? " for quiz " + quizId : "";
     }
+
+    private void validateCreateAnswers(List<CreateResultRequest.AnswerSubmission> answers) {
+        boolean[] seen = new boolean[QUESTION_COUNT + 1];
+        for (CreateResultRequest.AnswerSubmission answer : answers) {
+            int questionNumber = answer.getQuestionNumber();
+            ensureValidQuestionNumber(questionNumber);
+            ensureAllowedPoints(answer.getPoints());
+            if (seen[questionNumber]) {
+                throw new BusinessValidationException("Doppelte Frage: " + questionNumber);
+            }
+            seen[questionNumber] = true;
+        }
+        ensureAllQuestionsPresent(seen);
+    }
+
+    private void validateUpdateAnswers(List<UpdateResultRequest.AnswerSubmission> answers) {
+        boolean[] seen = new boolean[QUESTION_COUNT + 1];
+        for (UpdateResultRequest.AnswerSubmission answer : answers) {
+            int questionNumber = answer.getQuestionNumber();
+            ensureValidQuestionNumber(questionNumber);
+            ensureAllowedPoints(answer.getPoints());
+            if (seen[questionNumber]) {
+                throw new BusinessValidationException("Doppelte Frage: " + questionNumber);
+            }
+            seen[questionNumber] = true;
+        }
+        ensureAllQuestionsPresent(seen);
+    }
+
+    private void ensureValidQuestionNumber(int questionNumber) {
+        if (questionNumber < 1 || questionNumber > QUESTION_COUNT) {
+            throw new BusinessValidationException("Fragenummer muss zwischen 1 und 8 liegen");
+        }
+    }
+
+    private void ensureAllowedPoints(int points) {
+        if (points != 0 && points != 1 && points != 2 && points != 3 && points != 5) {
+            throw new BusinessValidationException("Punkte müssen einer der Werte 0, 1, 2, 3 oder 5 sein");
+        }
+    }
+
+    private void ensureAllQuestionsPresent(boolean[] seen) {
+        for (int i = 1; i <= QUESTION_COUNT; i++) {
+            if (!seen[i]) {
+                throw new BusinessValidationException("Fehlende Frage: " + i);
+            }
+        }
+    }
+
+    private static final int QUESTION_COUNT = 8;
 
     private record AverageTeamStats(String teamName, int totalPoints, int quizCount, double averagePoints) {
     }

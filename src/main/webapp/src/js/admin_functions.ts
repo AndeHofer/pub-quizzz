@@ -76,7 +76,9 @@ window.addEventListener('load', () => {
     document.getElementById('viewQuizzesBtn')?.addEventListener('click', viewQuizzes);
     document.getElementById('createTeamBtn')?.addEventListener('click', createTeam);
     document.getElementById('viewTeamsBtn')?.addEventListener('click', viewTeams);
-    document.getElementById('addResultBtn')?.addEventListener('click', showAddResultModal);
+    document.getElementById('addResultBtn')?.addEventListener('click', () => {
+        location.href = 'create_result.html';
+    });
     document.getElementById('viewResultsBtn')?.addEventListener('click', () => viewResults());
     document.getElementById('createUserBtn')?.addEventListener('click', () => {
         location.href = 'register_user.html';
@@ -376,82 +378,13 @@ async function deleteResult(resultId: number, teamName: string) {
 }
 
 async function editResult(resultId: number, teamName: string) {
-    const result = _admin_results_cache?.find(r => r.resultsId === resultId);
-    if (!result) {
-        showModal('Fehler', showError('Ergebnis nicht gefunden'));
-        return;
-    }
-
-    const answersMap: Record<number, number> = {};
-    if (Array.isArray(result.answers)) {
-        result.answers.forEach(a => { answersMap[a.questionNumber] = a.points; });
-    }
-
-    const pointOptions = [5, 3, 2, 1, 0];
-
-    let formHtml = `<h3>Ergebnis bearbeiten: ${teamName}</h3><form id="editResultForm">`;
-    for (let i = 1; i <= 8; i++) {
-        const current = answersMap[i] ?? 0;
-        const opts = pointOptions.map(v => `<option value="${v}"${v === current ? ' selected' : ''}>${v}</option>`).join('');
-        formHtml += `<div><label>Frage ${i}: <select name="q${i}">${opts}</select></label></div>`;
-    }
-    formHtml += `<button type="button" id="saveEditResultBtn">Speichern</button></form>`;
-
-    showModal(`Ergebnis bearbeiten`, formHtml);
-
-    document.getElementById('saveEditResultBtn')?.addEventListener('click', async () => {
-        const form = document.getElementById('editResultForm') as HTMLFormElement;
-        const answers = [];
-        for (let i = 1; i <= 8; i++) {
-            const select = form.querySelector(`[name="q${i}"]`) as HTMLSelectElement;
-            answers.push({questionNumber: i, points: Number(select.value)});
-        }
-        try {
-            const response = await fetch(`${API_BASE}/results/${resultId}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({answers})
-            });
-            if (response.ok) {
-                closeModal();
-                await viewResults(_admin_last_quiz_id_filter);
-            } else {
-                const message = await response.text();
-                showModal('Fehler', showError('Fehler beim Speichern: ' + message));
-            }
-        } catch (error: unknown) {
-            showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
-        }
-    });
+    location.href = `create_result.html?resultId=${resultId}`;
 }
 
 // ==================== Add Result ====================
 
 async function showAddResultModal() {
-    showModal('Ergebnis hinzufügen', showLoading());
-    try {
-        if (!_admin_quizzes_cache) {
-            const res = await apiFetch(`${API_BASE}/quizzes`);
-            _admin_quizzes_cache = await res.json();
-        }
-        if (!_admin_teams_cache) {
-            const res = await apiFetch(`${API_BASE}/teams`);
-            _admin_teams_cache = await res.json();
-        }
-        const html = buildAddResultForm();
-        showModal('Ergebnis hinzufügen', html);
-        const teamSelect = document.getElementById('add-result-team-select') as HTMLSelectElement | null;
-        if (teamSelect && _admin_teams_cache) {
-            teamSelect.innerHTML = '<option value="">-- Team auswählen --</option>' +
-                _admin_teams_cache.map(t => `<option value="${t.teamsId}">${t.teamName}</option>`).join('');
-        }
-        const saveBtn = document.getElementById('add-result-save-btn');
-        if (saveBtn) saveBtn.addEventListener('click', onSaveAddResult);
-        const cancelBtn = document.getElementById('add-result-cancel-btn');
-        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    } catch (err: unknown) {
-        showModal('Fehler', showError('Fehler beim Laden der Daten: ' + (err instanceof Error ? err.message : err)));
-    }
+    location.href = 'create_result.html';
 }
 
 function buildAddResultForm() {

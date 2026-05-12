@@ -95,9 +95,11 @@ class ResultServiceQuizTest {
 
         assertThat(summaries).hasSize(2);
         assertThat(summaries.get(0).getQuizTitle()).isEqualTo("2026 März");
+        assertThat(summaries.get(0).isFinished()).isFalse();
         assertThat(summaries.get(0).getPubDate()).isEqualTo("2026-03-15");
         assertThat(summaries.get(0).getTeamCount()).isEqualTo(3);
         assertThat(summaries.get(1).getQuizTitle()).isEqualTo("2026 Jänner");
+        assertThat(summaries.get(1).isFinished()).isFalse();
         assertThat(summaries.get(1).getTeamCount()).isEqualTo(1);
     }
 

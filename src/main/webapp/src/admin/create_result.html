@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de-AT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Neues Ergebnis</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-full sm:max-w-3xl">
+    <div class="mb-6">
+        <a href="./admin_main.html" class="text-gray-500 hover:text-gray-700 text-sm">&larr; Admin Bereich</a>
+    </div>
+
+    <h1 id="resultPageTitle" class="text-xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">Neues Ergebnis</h1>
+
+    <form id="resultForm">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 mb-4">
+            <h2 class="mt-0">Ergebnisdaten</h2>
+            <div class="result-meta-grid">
+                <div class="field-group">
+                    <label for="resultQuiz">Quiz auswählen:</label>
+                    <select id="resultQuiz"></select>
+                </div>
+                <div class="field-group">
+                    <label for="resultTeam">Team auswählen:</label>
+                    <select id="resultTeam"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 mb-4">
+            <h2 class="mt-0">Punkte</h2>
+            <div id="resultQuestionsContainer"></div>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <button type="submit" id="resultSaveBtn">Ergebnis speichern</button>
+        <button type="button" class="back-btn" id="backBtn">Zurück zum Admin Bereich</button>
+    </form>
+</div>
+
+<script type="module" src="/js/create_result.ts"></script>
+<script type="module" src="/js/page-transition.ts"></script>
+</body>
+</html>

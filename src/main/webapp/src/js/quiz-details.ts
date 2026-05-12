@@ -514,11 +514,12 @@ async function loadQuizOptions(): Promise<void> {
             throw new Error(`HTTP ${response.status}`);
         }
         const quizzes: QuizSummaryDTO[] = await response.json();
-        const sorted = quizzes.slice().sort(quizSort);
+        const finishedOnly = quizzes.filter(quiz => quiz.finished === true);
+        const sorted = finishedOnly.slice().sort(quizSort);
 
         if (sorted.length === 0) {
-            setError('Es sind keine Quizze verfügbar.');
-            selectEl.innerHTML = '<option value="">Keine Quizze verfügbar</option>';
+            setError('Es sind keine fertigen Quizze verfügbar.');
+            selectEl.innerHTML = '<option value="">Keine fertigen Quizze verfügbar</option>';
             return;
         }
 

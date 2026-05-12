@@ -7,6 +7,7 @@ import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.ResultDTO;
 import com.ande.pubquizzz.dto.UpdateResultRequest;
+import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.mapper.ResultMapper;
 import org.junit.jupiter.api.Test;
@@ -103,5 +104,86 @@ class ResultServiceDeleteUpdateTest {
         req.setAnswers(new ArrayList<>());
 
         assertThrows(ResourceNotFoundException.class, () -> resultService.updateResult(99L, req));
+    }
+
+    @Test
+    void updateResult_duplicateQuestion_throwsBusinessValidationException() {
+        Result result = new Result();
+        result.setAnswers(buildResultAnswersWithPoints(3));
+
+        when(resultRepository.findByIdWithAnswers(1L)).thenReturn(Optional.of(result));
+
+        UpdateResultRequest req = new UpdateResultRequest();
+        List<UpdateResultRequest.AnswerSubmission> submissions = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            UpdateResultRequest.AnswerSubmission a = new UpdateResultRequest.AnswerSubmission();
+            a.setQuestionNumber(i);
+            a.setPoints(3);
+            submissions.add(a);
+        }
+        UpdateResultRequest.AnswerSubmission duplicate = new UpdateResultRequest.AnswerSubmission();
+        duplicate.setQuestionNumber(7);
+        duplicate.setPoints(3);
+        submissions.add(duplicate);
+        req.setAnswers(submissions);
+
+        assertThrows(BusinessValidationException.class, () -> resultService.updateResult(1L, req));
+        verify(resultRepository, never()).save(any(Result.class));
+    }
+
+    @Test
+    void updateResult_missingQuestion_throwsBusinessValidationException() {
+        Result result = new Result();
+        result.setAnswers(buildResultAnswersWithPoints(3));
+
+        when(resultRepository.findByIdWithAnswers(1L)).thenReturn(Optional.of(result));
+
+        UpdateResultRequest req = new UpdateResultRequest();
+        List<UpdateResultRequest.AnswerSubmission> submissions = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            UpdateResultRequest.AnswerSubmission a = new UpdateResultRequest.AnswerSubmission();
+            a.setQuestionNumber(i);
+            a.setPoints(3);
+            submissions.add(a);
+        }
+        req.setAnswers(submissions);
+
+        BusinessValidationException exception = assertThrows(BusinessValidationException.class, () -> resultService.updateResult(1L, req));
+        assertTrue(exception.getMessage().contains("Fehlende Frage"));
+        verify(resultRepository, never()).save(any(Result.class));
+    }
+
+    @Test
+    void updateResult_disallowedPointsValue_throwsBusinessValidationException() {
+        Result result = new Result();
+        result.setAnswers(buildResultAnswersWithPoints(3));
+
+        when(resultRepository.findByIdWithAnswers(1L)).thenReturn(Optional.of(result));
+
+        UpdateResultRequest req = new UpdateResultRequest();
+        List<UpdateResultRequest.AnswerSubmission> submissions = new ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            UpdateResultRequest.AnswerSubmission a = new UpdateResultRequest.AnswerSubmission();
+            a.setQuestionNumber(i);
+            a.setPoints(i == 4 ? 4 : 3);
+            submissions.add(a);
+        }
+        req.setAnswers(submissions);
+
+        BusinessValidationException exception = assertThrows(BusinessValidationException.class, () -> resultService.updateResult(1L, req));
+        assertTrue(exception.getMessage().contains("0, 1, 2, 3 oder 5"));
+        verify(resultRepository, never()).save(any(Result.class));
+    }
+
+    private List<ResultAnswer> buildResultAnswersWithPoints(int points) {
+        List<ResultAnswer> answers = new ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            ResultAnswer ra = new ResultAnswer();
+            ra.setQuestionNumber(i);
+            ra.setPoints(points);
+            ra.setChanged(false);
+            answers.add(ra);
+        }
+        return answers;
     }
 }

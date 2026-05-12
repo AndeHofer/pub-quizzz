@@ -94,6 +94,7 @@ export interface QuizSummaryDTO {
     quizId: number;
     quizTitle: string;
     pubDate: string;
+    finished?: boolean;
     teamCount: number;
     winnerTeamName?: string | null;
 }
