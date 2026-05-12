@@ -4,6 +4,14 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 48: Dynamic Quiz-Details Header with Creator ✅ COMPLETE
+
+- Replaced static quiz-details heading with dynamic title handling: default `Quiz ansehen`, selected quiz title when a
+  quiz is chosen.
+- Added optional smaller subtitle `erstellt von <creator>` when detail payload contains a creator.
+- Reset heading and subtitle to default when selection is cleared or detail loading fails.
+- Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.
+
 ### Phase 47: Optional Quiz Creator (`Urheber`) in Backend + Admin Form ✅ COMPLETE
 
 - Added optional `creator` to quiz domain/API flow (`Quiz`, `CreateQuizRequest`, `QuizDTO`, `QuizDetailDTO`) and

@@ -3,10 +3,13 @@ package com.ande.pubquizzz.exception;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -36,5 +39,14 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody().get("error"));
         assertFalse(response.getBody().get("error").contains("internal details"),
                 "Server internals must not be leaked to client");
+    }
+
+    @Test
+    void handleNoResourceFound_returns404WithGenericNotFoundMessage() {
+        NoResourceFoundException ex = mock(NoResourceFoundException.class);
+        when(ex.getResourcePath()).thenReturn("/images/m.php");
+        ResponseEntity<Map<String, String>> response = handler.handleNoResourceFound(ex);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Ressource nicht gefunden.", response.getBody().get("error"));
     }
 }
