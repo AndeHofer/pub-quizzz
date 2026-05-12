@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,7 +22,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
                         // Allow static assets (favicon, Vite output, uploaded images) without login
-                        .requestMatchers("/favicon.ico", "/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**").permitAll()
+                        .requestMatchers("/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults());
@@ -35,10 +34,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/favicon.ico", "/static/**", "/css/**", "/js/**", "/assets/**", "/uploads/**");
     }
 }

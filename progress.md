@@ -2,10 +2,24 @@
 
 ## Open Tasks
 
-- [ ] Set `JAVA_HOME` correctly in local/CI environment
-- [ ] Run backend verification (`.\mvnw.cmd -Dtest=GlobalExceptionHandlerTest test` or full `.\mvnw.cmd test`)
+- [x] Phase 52: Remove `WebSecurityCustomizer` ignore rules causing startup warnings
+- [x] Phase 52: Keep public static resource access via `permitAll` matchers in `HttpSecurity`
+- [x] Phase 52: Attempt security-focused verification/tests and record environment blocker
+
+- [x] Set `JAVA_HOME` for this shell session and run full backend verification
 
 ## Finished Phases
+
+### Phase 52: Remove Spring Security Ignore Warnings for Static Paths ✅ COMPLETE
+
+- Removed `WebSecurityCustomizer` ignore configuration from `SecurityConfig` to follow Spring Security guidance and
+  eliminate startup warnings from `WebSecurity.performBuild`.
+- Kept static/public paths in `HttpSecurity.authorizeHttpRequests(...).permitAll(...)` and added `/static/**` there so
+  all previously ignored startup-warning paths remain explicitly permitted.
+- Extended `SecurityAccessTest` with a `/static/**` unauthenticated access check (no redirect to `/login`).
+- Verification passed after setting `JAVA_HOME` in the shell session:
+  - `./mvnw.cmd test` -> `BUILD SUCCESS` (202 tests, 0 failures, 0 errors, 0 skipped)
+  - no `WebSecurity.performBuild` warnings found in the Maven test output.
 
 ### Phase 51: Resource-Not-Found Handling Without Generic Error Noise ✅ COMPLETE
 
@@ -25,10 +39,3 @@
 - Updated `AdminQuizControllerTest` create endpoint tests to validate JSON response payload (`quizId`).
 - Verification: `npm run type-check`, `npm run build` passed; `.\mvnw.cmd test` blocked because `JAVA_HOME` is not
   defined correctly in this environment.
-
-### Phase 49: Stable Quiz-Details Header Height (No Creator Jump) ✅ COMPLETE
-
-- Reserved fixed visual space for title + creator subtitle in quiz-details header to prevent layout jump when creator
-  text appears.
-- Switched creator subtitle toggling from `display` changes to `visibility` changes so layout height remains stable.
-- Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.

@@ -4,6 +4,13 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 49: Stable Quiz-Details Header Height (No Creator Jump) ✅ COMPLETE
+
+- Reserved fixed visual space for title + creator subtitle in quiz-details header to prevent layout jump when creator
+  text appears.
+- Switched creator subtitle toggling from `display` changes to `visibility` changes so layout height remains stable.
+- Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.
+
 ### Phase 48: Dynamic Quiz-Details Header with Creator ✅ COMPLETE
 
 - Replaced static quiz-details heading with dynamic title handling: default `Quiz ansehen`, selected quiz title when a

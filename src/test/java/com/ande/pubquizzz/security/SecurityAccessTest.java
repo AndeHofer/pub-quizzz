@@ -58,6 +58,15 @@ class SecurityAccessTest {
     }
 
     @Test
+    void staticPath_unauthenticated_isNotRedirectedToLogin() throws Exception {
+        var result = mockMvc.perform(get("/static/does-not-exist.txt"))
+                .andReturn();
+        int status = result.getResponse().getStatus();
+        org.junit.jupiter.api.Assertions.assertNotEquals(302, status,
+                "Expected no redirect to /login but got 302");
+    }
+
+    @Test
     void uploadedImage_unauthenticated_isNotRedirectedToLogin() throws Exception {
         var result = mockMvc.perform(get("/uploads/some-uuid.jpg"))
                 .andReturn();
