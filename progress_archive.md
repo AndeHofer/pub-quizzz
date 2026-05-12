@@ -4,6 +4,17 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 52: Remove Spring Security Ignore Warnings for Static Paths ✅ COMPLETE
+
+- Removed `WebSecurityCustomizer` ignore configuration from `SecurityConfig` to follow Spring Security guidance and
+  eliminate startup warnings from `WebSecurity.performBuild`.
+- Kept static/public paths in `HttpSecurity.authorizeHttpRequests(...).permitAll(...)` and added `/static/**` there so
+  all previously ignored startup-warning paths remain explicitly permitted.
+- Extended `SecurityAccessTest` with a `/static/**` unauthenticated access check (no redirect to `/login`).
+- Verification passed after setting `JAVA_HOME` in the shell session:
+  - `./mvnw.cmd test` -> `BUILD SUCCESS` (202 tests, 0 failures, 0 errors, 0 skipped)
+  - no `WebSecurity.performBuild` warnings found in the Maven test output.
+
 ### Phase 50: Create-Quiz Save Flow Switches to Update + No Redirect on Edit Save ✅ COMPLETE
 
 - Changed `POST /admin/create-quiz` to return created `QuizDTO` so frontend can capture `quizId` after first save.

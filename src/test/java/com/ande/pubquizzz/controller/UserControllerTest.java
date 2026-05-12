@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,36 +33,33 @@ class UserControllerTest {
     private BuildProperties buildProperties;
 
     @Test
-    @WithMockUser
-    void getVersion_authenticated_returnsVersion() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    void getBootstrap_adminAuthenticated_returnsAdminAndVersionAndCacheHeader() throws Exception {
         when(buildProperties.getVersion()).thenReturn("1.0.1-SNAPSHOT");
 
-        mockMvc.perform(get("/api/version"))
+        mockMvc.perform(get("/api/bootstrap"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value("1.0.1-SNAPSHOT"));
-    }
-
-    @Test
-    void getVersion_unauthenticated_redirectsToLogin() throws Exception {
-        mockMvc.perform(get("/api/version"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void isAdmin_withAdminRole_returnsTrue() throws Exception {
-        mockMvc.perform(get("/api/is-admin"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(true));
+                .andExpect(jsonPath("$.isAdmin").value(true))
+                .andExpect(jsonPath("$.version").value("1.0.1-SNAPSHOT"))
+                .andExpect(header().string("Cache-Control", "max-age=3600, must-revalidate, private"));
     }
 
     @Test
     @WithMockUser
-    void isAdmin_withUserRole_returnsFalse() throws Exception {
-        mockMvc.perform(get("/api/is-admin"))
+    void getBootstrap_userAuthenticated_returnsNonAdminAndVersion() throws Exception {
+        when(buildProperties.getVersion()).thenReturn("1.0.1-SNAPSHOT");
+
+        mockMvc.perform(get("/api/bootstrap"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(false));
+                .andExpect(jsonPath("$.isAdmin").value(false))
+                .andExpect(jsonPath("$.version").value("1.0.1-SNAPSHOT"));
+    }
+
+    @Test
+    void getBootstrap_unauthenticated_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/api/bootstrap"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
