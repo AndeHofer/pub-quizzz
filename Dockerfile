@@ -1,11 +1,11 @@
 # Stage 1: Build
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM maven:3.9.6-eclipse-temurin-25 AS build
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 # Wir erstellen den Ordner, falls er nicht existiert
 RUN mkdir -p /data
