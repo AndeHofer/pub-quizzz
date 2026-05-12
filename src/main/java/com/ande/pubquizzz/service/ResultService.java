@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -463,25 +464,31 @@ public class ResultService {
     }
 
     private void validateCreateAnswers(List<CreateResultRequest.AnswerSubmission> answers) {
-        boolean[] seen = new boolean[QUESTION_COUNT + 1];
-        for (CreateResultRequest.AnswerSubmission answer : answers) {
-            int questionNumber = answer.getQuestionNumber();
-            ensureValidQuestionNumber(questionNumber);
-            ensureAllowedPoints(answer.getPoints());
-            if (seen[questionNumber]) {
-                throw new BusinessValidationException("Doppelte Frage: " + questionNumber);
-            }
-            seen[questionNumber] = true;
-        }
-        ensureAllQuestionsPresent(seen);
+        validateAnswers(
+                answers,
+                CreateResultRequest.AnswerSubmission::getQuestionNumber,
+                CreateResultRequest.AnswerSubmission::getPoints
+        );
     }
 
     private void validateUpdateAnswers(List<UpdateResultRequest.AnswerSubmission> answers) {
+        validateAnswers(
+                answers,
+                UpdateResultRequest.AnswerSubmission::getQuestionNumber,
+                UpdateResultRequest.AnswerSubmission::getPoints
+        );
+    }
+
+    private <T> void validateAnswers(
+            List<T> answers,
+            ToIntFunction<T> questionNumberExtractor,
+            ToIntFunction<T> pointsExtractor
+    ) {
         boolean[] seen = new boolean[QUESTION_COUNT + 1];
-        for (UpdateResultRequest.AnswerSubmission answer : answers) {
-            int questionNumber = answer.getQuestionNumber();
+        for (T answer : answers) {
+            int questionNumber = questionNumberExtractor.applyAsInt(answer);
             ensureValidQuestionNumber(questionNumber);
-            ensureAllowedPoints(answer.getPoints());
+            ensureAllowedPoints(pointsExtractor.applyAsInt(answer));
             if (seen[questionNumber]) {
                 throw new BusinessValidationException("Doppelte Frage: " + questionNumber);
             }

@@ -36,18 +36,6 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     List<Object[]> findLeaderboardRaw();
 
     @Query("""
-            SELECT t.teamName,
-                   COALESCE(SUM(ra.points), 0),
-                   COUNT(DISTINCT r.quiz.quizId)
-            FROM Result r
-            JOIN r.team t
-            JOIN r.answers ra
-            GROUP BY t.teamsId, t.teamName
-            ORDER BY COALESCE(SUM(ra.points), 0) DESC, t.teamName ASC
-            """)
-    List<Object[]> findAverageLeaderboardRaw();
-
-    @Query("""
             SELECT r.quiz.quizId,
                    t.teamName,
                    COALESCE(SUM(ra.points), 0),

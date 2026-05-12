@@ -1,4 +1,5 @@
 import {QuizSummaryDTO} from './types';
+import {sortFinishedQuizzesNewestFirst} from './quiz-utils';
 
 function escapeHtml(text: string): string {
     const div = document.createElement('div');
@@ -41,7 +42,7 @@ async function loadQuizzes(): Promise<void> {
             throw new Error(`HTTP ${response.status}`);
         }
         const quizzes: QuizSummaryDTO[] = await response.json();
-        const finishedQuizzes = quizzes.filter(quiz => quiz.finished === true);
+        const finishedQuizzes = sortFinishedQuizzesNewestFirst(quizzes);
         if (loadingEl) loadingEl.style.display = 'none';
         if (tableEl) tableEl.style.display = 'table';
         renderQuizzes(finishedQuizzes);

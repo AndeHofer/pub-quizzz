@@ -1,4 +1,5 @@
 import {QuizDetailResponse, QuizResultEntry, QuizResultsResponse, QuizSummaryDTO} from './types';
+import {sortFinishedQuizzesNewestFirst} from './quiz-utils';
 
 let allDetailsExpanded = false;
 let currentQuizResults: QuizResultEntry[] = [];
@@ -485,21 +486,6 @@ async function loadQuizDetail(quizId: number): Promise<void> {
     }
 }
 
-function quizSort(a: QuizSummaryDTO, b: QuizSummaryDTO): number {
-    const aDate = Date.parse(`${a.pubDate ?? ''}T00:00:00Z`);
-    const bDate = Date.parse(`${b.pubDate ?? ''}T00:00:00Z`);
-    const aValid = !Number.isNaN(aDate);
-    const bValid = !Number.isNaN(bDate);
-
-    if (aValid && bValid && aDate !== bDate) {
-        return bDate - aDate;
-    }
-    if (aValid !== bValid) {
-        return aValid ? -1 : 1;
-    }
-    return b.quizId - a.quizId;
-}
-
 async function loadQuizOptions(): Promise<void> {
     const loadingQuizzesEl = document.getElementById('loadingQuizzes');
     const selectEl = document.getElementById('quizSelect') as HTMLSelectElement | null;
@@ -514,8 +500,7 @@ async function loadQuizOptions(): Promise<void> {
             throw new Error(`HTTP ${response.status}`);
         }
         const quizzes: QuizSummaryDTO[] = await response.json();
-        const finishedOnly = quizzes.filter(quiz => quiz.finished === true);
-        const sorted = finishedOnly.slice().sort(quizSort);
+        const sorted = sortFinishedQuizzesNewestFirst(quizzes);
 
         if (sorted.length === 0) {
             setError('Es sind keine fertigen Quizze verfügbar.');

@@ -4,6 +4,16 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 53: Tighten Unauthenticated Access to Login + Favicon Only ✅ COMPLETE
+
+- Updated `SecurityConfig` to keep only `/favicon.ico` as `permitAll`; all other paths now require authentication unless
+  separately constrained by role.
+- Updated `SecurityAccessTest` to assert unauthenticated requests to `/assets/**`, `/static/**`, and `/uploads/**`
+  redirect to `/login`.
+- Kept existing checks that protected API/admin paths redirect unauthenticated users and remain forbidden for non-admin
+  authenticated users.
+- Verification passed: `./mvnw.cmd test` -> `BUILD SUCCESS` (202 tests, 0 failures, 0 errors, 0 skipped).
+
 ### Phase 52: Remove Spring Security Ignore Warnings for Static Paths ✅ COMPLETE
 
 - Removed `WebSecurityCustomizer` ignore configuration from `SecurityConfig` to follow Spring Security guidance and

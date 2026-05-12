@@ -2,6 +2,7 @@ export {};
 
 import {goBack, showMessage} from './utils';
 import type {QuizDTO, ResultDTO, TeamDTO} from './types';
+import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 
 type PointsValue = 0 | 1 | 2 | 3 | 5;
 
@@ -17,26 +18,12 @@ let allQuizzes: QuizDTO[] = [];
 let allTeams: TeamDTO[] = [];
 let editingResult: ResultDTO | null = null;
 
-const GERMAN_MONTHS = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-
-function quizDisplayTitle(quiz: QuizDTO): string {
-    if (quiz.pubDate) {
-        const parts = quiz.pubDate.split('-');
-        if (parts.length >= 2) {
-            const year = parts[0];
-            const month = Number(parts[1]);
-            if (month >= 1 && month <= 12) {
-                return `${year} ${GERMAN_MONTHS[month - 1]}`;
-            }
-        }
-    }
-    return `Quiz ${quiz.quizId}`;
+function pointOptionsHtml(): string {
+    return ALLOWED_POINTS.map(value => `<option value="${value}"${value === 0 ? ' selected' : ''}>${value}</option>`).join('');
 }
 
-function parsePubDateToMillis(pubDate?: string): number | null {
-    if (!pubDate) return null;
-    const parsed = Date.parse(`${pubDate}T00:00:00Z`);
-    return Number.isNaN(parsed) ? null : parsed;
+function buildQuestionInput(questionNumber: number): string {
+    return `<div class="field-group"><label for="result-q${questionNumber}">Frage ${questionNumber} Punkte:</label><select id="result-q${questionNumber}">${pointOptionsHtml()}</select></div>`;
 }
 
 function buildQuestionInputs(): void {
@@ -44,12 +31,10 @@ function buildQuestionInputs(): void {
     let leftColumn = '';
     let rightColumn = '';
     for (let i = 1; i <= 4; i++) {
-        const options = ALLOWED_POINTS.map(value => `<option value="${value}"${value === 0 ? ' selected' : ''}>${value}</option>`).join('');
-        leftColumn += `<div class="field-group"><label for="result-q${i}">Frage ${i} Punkte:</label><select id="result-q${i}">${options}</select></div>`;
+        leftColumn += buildQuestionInput(i);
     }
     for (let i = 5; i <= QUESTION_COUNT; i++) {
-        const options = ALLOWED_POINTS.map(value => `<option value="${value}"${value === 0 ? ' selected' : ''}>${value}</option>`).join('');
-        rightColumn += `<div class="field-group"><label for="result-q${i}">Frage ${i} Punkte:</label><select id="result-q${i}">${options}</select></div>`;
+        rightColumn += buildQuestionInput(i);
     }
     resultQuestionsContainer.innerHTML = `
         <div class="result-points-grid">
@@ -79,20 +64,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 function fillSelects(): void {
     if (!quizSelect || !teamSelect) return;
 
-    const sortedQuizzes = [...allQuizzes].sort((left, right) => {
-        const leftDate = parsePubDateToMillis(left.pubDate);
-        const rightDate = parsePubDateToMillis(right.pubDate);
-
-        if (leftDate !== null && rightDate !== null) {
-            if (leftDate !== rightDate) return rightDate - leftDate;
-        } else if (leftDate !== null) {
-            return -1;
-        } else if (rightDate !== null) {
-            return 1;
-        }
-
-        return right.quizId - left.quizId;
-    });
+    const sortedQuizzes = sortQuizzesNewestFirst(allQuizzes);
 
     quizSelect.innerHTML = '<option value="">-- Quiz auswählen --</option>' +
         sortedQuizzes.map(quiz => `<option value="${quiz.quizId}">${quizDisplayTitle(quiz)}</option>`).join('');
@@ -170,17 +142,17 @@ async function saveResult(event: Event): Promise<void> {
         });
 
         if (response.ok) {
-            if (isEditMode) {
-                showMessage('Ergebnis erfolgreich aktualisiert!', 'success');
+            if (!isEditMode) {
+                const createdResult = await response.json() as ResultDTO;
+                editingResult = createdResult;
+                setEditModeUi();
+                prefillEditValues(createdResult);
+                history.replaceState(null, '', `create_result.html?resultId=${createdResult.resultsId}`);
+                showMessage('Ergebnis erfolgreich gespeichert!', 'success');
                 return;
             }
 
-            const createdResult = await response.json() as ResultDTO;
-            editingResult = createdResult;
-            setEditModeUi();
-            prefillEditValues(createdResult);
-            history.replaceState(null, '', `create_result.html?resultId=${createdResult.resultsId}`);
-            showMessage('Ergebnis erfolgreich gespeichert!', 'success');
+            showMessage('Ergebnis erfolgreich aktualisiert!', 'success');
             return;
         }
 

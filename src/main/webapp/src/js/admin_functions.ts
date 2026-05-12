@@ -1,13 +1,12 @@
 export {};
 
 import type { QuizDTO, TeamDTO, ResultDTO, UserDTO } from './types';
+import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 
 const API_BASE = '/admin';
 
 // Module-level caches
-let _admin_quizzes_cache: QuizDTO[] | null = null;
 let _admin_teams_cache: TeamDTO[] | null = null;
-let _admin_results_cache: ResultDTO[] | null = null;
 let _admin_last_quiz_id_filter: string | null = null;
 
 // Helper for API fetch with basic network error handling
@@ -114,29 +113,6 @@ window.addEventListener('load', () => {
 
 // ==================== Quiz Management ====================
 
-const GERMAN_MONTHS = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni',
-    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-
-function quizDisplayTitle(quiz: QuizDTO): string {
-    if (quiz.pubDate) {
-        const parts = quiz.pubDate.split('-');
-        if (parts.length >= 2) {
-            const year = parts[0];
-            const month = parseInt(parts[1], 10);
-            if (month >= 1 && month <= 12) {
-                return `${year} ${GERMAN_MONTHS[month - 1]}`;
-            }
-        }
-    }
-    return `Quiz ${quiz.quizId}`;
-}
-
-function parsePubDateToMillis(pubDate?: string): number | null {
-    if (!pubDate) return null;
-    const parsed = Date.parse(`${pubDate}T00:00:00Z`);
-    return Number.isNaN(parsed) ? null : parsed;
-}
-
 async function viewQuizzes() {
     showModal('Alle Quizze', showLoading());
     try {
@@ -146,20 +122,7 @@ async function viewQuizzes() {
             showModal('Alle Quizze', '<p>Keine Quizze gefunden.</p>');
             return;
         }
-        const sortedQuizzes = [...quizzes].sort((a: QuizDTO, b: QuizDTO) => {
-            const aPubDate = parsePubDateToMillis(a.pubDate);
-            const bPubDate = parsePubDateToMillis(b.pubDate);
-
-            if (aPubDate !== null && bPubDate !== null) {
-                if (aPubDate !== bPubDate) return bPubDate - aPubDate;
-            } else if (aPubDate !== null) {
-                return -1;
-            } else if (bPubDate !== null) {
-                return 1;
-            }
-
-            return b.quizId - a.quizId;
-        });
+        const sortedQuizzes = sortQuizzesNewestFirst(quizzes);
         const headers = ['ID', 'Titel', 'Pub Datum', 'Archiv Datum', 'Fertig', 'Aktionen'];
         const html = renderTable(headers, sortedQuizzes, (quiz: unknown) => {
             const q = quiz as QuizDTO;
@@ -193,7 +156,6 @@ async function deleteQuiz(quizId: number) {
     try {
         const response = await fetch(`${API_BASE}/quiz/${quizId}`, {method: 'DELETE'});
         if (response.ok) {
-            _admin_quizzes_cache = null;
             await viewQuizzes();
         } else {
             showModal('Fehler', showError('Fehler beim Löschen des Quiz'));
@@ -309,7 +271,6 @@ async function viewResults(quizIdOverride?: string | null) {
         const url = quizId ? `${API_BASE}/results?quizId=${quizId}` : `${API_BASE}/results`;
         const response = await apiFetch(url);
         const results: ResultDTO[] = await response.json();
-        _admin_results_cache = results;
         if (results.length === 0) {
             showModal('Ergebnisse', '<p>Keine Ergebnisse gefunden.</p>');
             return;
@@ -354,8 +315,7 @@ async function viewResults(quizIdOverride?: string | null) {
         document.querySelectorAll('.edit-result-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = Number((btn as HTMLElement).dataset.id);
-                const name = (btn as HTMLElement).dataset.name ?? '';
-                editResult(id, name);
+                editResult(id);
             });
         });
     } catch (error: unknown) {
@@ -377,70 +337,12 @@ async function deleteResult(resultId: number, teamName: string) {
     }
 }
 
-async function editResult(resultId: number, teamName: string) {
+async function editResult(resultId: number) {
     location.href = `create_result.html?resultId=${resultId}`;
 }
 
-// ==================== Add Result ====================
-
 async function showAddResultModal() {
     location.href = 'create_result.html';
-}
-
-function buildAddResultForm() {
-    let quizOptions = '<option value="">-- Quiz auswählen --</option>';
-    if (_admin_quizzes_cache) {
-        _admin_quizzes_cache.forEach(q => {
-            quizOptions += `<option value="${q.quizId}">${quizDisplayTitle(q)}</option>`;
-        });
-    }
-    let inputs = '';
-    const pointOptions = [5, 3, 2, 1, 0].map(v => `<option value="${v}"${v === 0 ? ' selected' : ''}>${v}</option>`).join('');
-    for (let i = 1; i <= 8; i++) {
-        inputs += `<div class="form-row"><label>Frage ${i} Punkte</label><select id="add-result-q${i}">${pointOptions}</select></div>`;
-    }
-    return `
-      <div id="add-result-form">
-        <div class="form-row"><label>Quiz auswählen</label><select id="add-result-quiz">${quizOptions}</select></div>
-        <div class="form-row"><label>Team auswählen</label><select id="add-result-team-select"><option value="">-- Team auswählen --</option></select></div>
-        ${inputs}
-        <div class="form-actions">
-          <button id="add-result-save-btn" class="primary-btn">Speichern</button>
-          <button id="add-result-cancel-btn" class="secondary-btn">Abbrechen</button>
-        </div>
-        <div id="add-result-feedback" class="form-feedback"></div>
-      </div>
-    `;
-}
-
-async function onSaveAddResult() {
-    const quizId = Number((document.getElementById('add-result-quiz') as HTMLSelectElement).value);
-    const teamId = Number((document.getElementById('add-result-team-select') as HTMLSelectElement).value);
-    const feedback = document.getElementById('add-result-feedback') as HTMLElement | null;
-    if (!quizId || !teamId) {
-        if (feedback) feedback.textContent = 'Bitte Quiz und Team auswählen.';
-        return;
-    }
-    const answers: { questionNumber: number; points: number }[] = [];
-    for (let i = 1; i <= 8; i++) {
-        const val = Number((document.getElementById(`add-result-q${i}`) as HTMLInputElement).value);
-        answers.push({questionNumber: i, points: val});
-    }
-    try {
-        const res = await apiFetch(`${API_BASE}/results`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({quizId, teamId, answers})
-        });
-        if (res.ok) {
-            closeModal();
-        } else {
-            const text = await res.text();
-            if (feedback) feedback.textContent = 'Fehler: ' + text;
-        }
-    } catch (err: unknown) {
-        if (feedback) feedback.textContent = 'Fehler beim Speichern: ' + (err instanceof Error ? err.message : err);
-    }
 }
 
 async function viewUsers() {
