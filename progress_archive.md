@@ -4,6 +4,15 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 50: Create-Quiz Save Flow Switches to Update + No Redirect on Edit Save ✅ COMPLETE
+
+- Changed `POST /admin/create-quiz` to return created `QuizDTO` so frontend can capture `quizId` after first save.
+- Updated `create_quiz.ts` save handling so first save in create mode switches page into edit mode, later saves use
+  update endpoint, and edit save no longer navigates away.
+- Updated `AdminQuizControllerTest` create endpoint tests to validate JSON response payload (`quizId`).
+- Verification: `npm run type-check`, `npm run build` passed; `.\mvnw.cmd test` blocked because `JAVA_HOME` is not
+  defined correctly in this environment.
+
 ### Phase 49: Stable Quiz-Details Header Height (No Creator Jump) ✅ COMPLETE
 
 - Reserved fixed visual space for title + creator subtitle in quiz-details header to prevent layout jump when creator

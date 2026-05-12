@@ -21,8 +21,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        // Allow static assets (favicon, Vite output, uploaded images) without login
-                        .requestMatchers("/favicon.ico", "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**").permitAll()
+                        .requestMatchers("/favicon.ico", "/robots.txt").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults());

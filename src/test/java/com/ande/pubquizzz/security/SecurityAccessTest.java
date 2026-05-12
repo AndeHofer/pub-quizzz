@@ -19,17 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Verifies that Spring Security allows unauthenticated access to static assets
- * (/assets/**, /uploads/**) so Vite-built CSS/JS and hint images load correctly
- * without being redirected to /login.
- * <p>
- * In a @WebMvcTest slice there is no ResourceHttpRequestHandler, so static paths
- * return 404 — that is correct here. The critical assertion is that Security does
- * NOT return a 302 redirect to /login (which would cause the browser to receive
- * HTML instead of CSS/JS and log a MIME type error).
- * <p>
- * We narrow the slice to AdminBackupController to avoid loading all controllers
- * (which have unresolvable bean dependencies in a WebMvcTest context).
+ * Verifies tightened security policy for unauthenticated access:
+ * only favicon and Spring login are public; static/assets/uploads must redirect
+ * to /login until the user is authenticated.
  */
 @WebMvcTest(AdminBackupController.class)
 @Import({SecurityConfig.class, SecurityAutoConfiguration.class,
@@ -43,36 +35,27 @@ class SecurityAccessTest {
     @MockitoBean
     private BackupService backupService;
 
-    // --- Static assets must pass through Security without a redirect ---
+    // --- Static assets must require authentication ---
 
     @Test
-    void assetsStylesheet_unauthenticated_isNotRedirectedToLogin() throws Exception {
-        // Security must NOT redirect to /login (the bug was: 302 → /login)
-        // Any non-redirect status (200, 404, 500) is acceptable — the resource handler
-        // behaviour in the test slice is irrelevant; what matters is no security redirect.
-        var result = mockMvc.perform(get("/assets/styles-YSxDQI3P.css"))
-                .andReturn();
-        int status = result.getResponse().getStatus();
-        org.junit.jupiter.api.Assertions.assertNotEquals(302, status,
-                "Expected no redirect to /login but got 302");
+    void assetsStylesheet_unauthenticated_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/assets/styles-YSxDQI3P.css"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
-    void staticPath_unauthenticated_isNotRedirectedToLogin() throws Exception {
-        var result = mockMvc.perform(get("/static/does-not-exist.txt"))
-                .andReturn();
-        int status = result.getResponse().getStatus();
-        org.junit.jupiter.api.Assertions.assertNotEquals(302, status,
-                "Expected no redirect to /login but got 302");
+    void staticPath_unauthenticated_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/static/does-not-exist.txt"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
-    void uploadedImage_unauthenticated_isNotRedirectedToLogin() throws Exception {
-        var result = mockMvc.perform(get("/uploads/some-uuid.jpg"))
-                .andReturn();
-        int status = result.getResponse().getStatus();
-        org.junit.jupiter.api.Assertions.assertNotEquals(302, status,
-                "Expected no redirect to /login but got 302");
+    void uploadedImage_unauthenticated_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/uploads/some-uuid.jpg"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test

@@ -2,11 +2,7 @@
 
 ## Open Tasks
 
-- [x] Phase 52: Remove `WebSecurityCustomizer` ignore rules causing startup warnings
-- [x] Phase 52: Keep public static resource access via `permitAll` matchers in `HttpSecurity`
-- [x] Phase 52: Attempt security-focused verification/tests and record environment blocker
-
-- [x] Set `JAVA_HOME` for this shell session and run full backend verification
+- None.
 
 ## Finished Phases
 
@@ -21,15 +17,15 @@
   - `./mvnw.cmd test` -> `BUILD SUCCESS` (202 tests, 0 failures, 0 errors, 0 skipped)
   - no `WebSecurity.performBuild` warnings found in the Maven test output.
 
-### Phase 51: Resource-Not-Found Handling Without Generic Error Noise ✅ COMPLETE
+### Phase 53: Tighten Unauthenticated Access to Login + Favicon Only ✅ COMPLETE
 
-- Added dedicated `NoResourceFoundException` handling in `GlobalExceptionHandler` to return HTTP 404 with a safe JSON
-  message (`Ressource nicht gefunden.`).
-- Reduced log severity for missing static resources to `DEBUG` to avoid noisy `Unexpected error` stack traces from bot
-  probes like `/images/m.php`.
-- Added unit test coverage in `GlobalExceptionHandlerTest` for `NoResourceFoundException` mapping.
-- Verification: attempted targeted test run `./mvnw.cmd -Dtest=GlobalExceptionHandlerTest test`, blocked because
-  `JAVA_HOME` is not defined correctly in this environment.
+- Updated `SecurityConfig` to keep only `/favicon.ico` as `permitAll`; all other paths now require authentication unless
+  separately constrained by role.
+- Updated `SecurityAccessTest` to assert unauthenticated requests to `/assets/**`, `/static/**`, and `/uploads/**`
+  redirect to `/login`.
+- Kept existing checks that protected API/admin paths redirect unauthenticated users and remain forbidden for non-admin
+  authenticated users.
+- Verification passed: `./mvnw.cmd test` -> `BUILD SUCCESS` (202 tests, 0 failures, 0 errors, 0 skipped).
 
 ### Phase 50: Create-Quiz Save Flow Switches to Update + No Redirect on Edit Save ✅ COMPLETE
 
