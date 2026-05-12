@@ -4,6 +4,18 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 65: Full-Width Per-Result Points Mini-Table (No Clipped Q/Gesamt Columns) ✅ COMPLETE
+
+- Refactored `src/main/webapp/src/js/admin_results.ts` result block rendering to keep top-level rows at 3 columns
+  (`Team`, `Quiz Datum`, `Aktionen`) and render Q1-Q8/Gesamt in a nested full-width points table below each block.
+- Removed mixed 3+9-column row layout pressure so points headers/values no longer compete with top-level column widths.
+- Updated `src/main/webapp/src/css/styles.css` with dedicated nested points-table styles (`result-points-*`) including
+  full-width layout, compact centered numeric columns, and horizontal overflow handling only inside the points section.
+- Updated `src/main/webapp/src/admin/results.html` to remove the forced top-level table min width so desktop layout can
+  fit naturally while preserving mobile resilience.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
 ### Phase 64: Per-Result Repeated Subheader Row in Admin Results Table ✅ COMPLETE
 
 - Changed `src/main/webapp/src/admin/results.html` to keep only the first header row (`Team`, `Quiz Datum`, `Aktionen`)

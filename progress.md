@@ -2,6 +2,10 @@
 
 ## Open Tasks
 
+- [x] Phase 68: Migrate `admin/register_user.html` to public-template layout style used by non-admin pages
+- [x] Phase 68: Keep existing register form behavior/IDs and admin navigation actions unchanged
+- [x] Phase 68: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 67A: Remove `changed` usage from admin results UI and shared frontend types
 - [x] Phase 67A: Remove `changed` from API DTO mapping/serialization while keeping DB column intact
 - [x] Phase 67A: Update tests affected by removing `changed` from API contract
@@ -65,7 +69,25 @@
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
 
+- Phase 68 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
 ## Finished Phases
+
+### Phase 68: `register_user` Switched to Public-Template Layout Style ✅ COMPLETE
+
+- Reworked `src/main/webapp/src/admin/register_user.html` to use the same modern card/container layout style as the
+  non-admin/public pages (`bg-gray-50`, centered responsive container, card section blocks).
+- Added top contextual link `&larr; Admin Bereich`, favicon, and standardized page title styling consistent with recent
+  admin pages using the same template language.
+- Kept existing register workflow contract unchanged by preserving all relevant element IDs and actions
+  (`username`, `password`, `role`, `registerUserBtn`, `backBtn`, `message`) used by `register_user.ts`.
+- Kept UI text in German and aligned input placeholders/buttons with German wording.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
 
 ### Phase 67A: Remove `changed` from UI/API Contract (DB Column Kept for Safe Rollout) ✅ COMPLETE
 
@@ -90,17 +112,5 @@
 - Updated `compareResultsNewestFirst` in `src/main/webapp/src/js/admin_results.ts` so sorting now applies tie-breakers
   in this order: `quizDate` DESC, then `totalPoints` DESC, then `resultsId` DESC.
 - Added robust total-points fallback (`undefined`/non-number -> `0`) so ordering remains deterministic.
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
-  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
-
-### Phase 65: Full-Width Per-Result Points Mini-Table (No Clipped Q/Gesamt Columns) ✅ COMPLETE
-
-- Refactored `src/main/webapp/src/js/admin_results.ts` result block rendering to keep top-level rows at 3 columns
-  (`Team`, `Quiz Datum`, `Aktionen`) and render Q1-Q8/Gesamt in a nested full-width points table below each block.
-- Removed mixed 3+9-column row layout pressure so points headers/values no longer compete with top-level column widths.
-- Updated `src/main/webapp/src/css/styles.css` with dedicated nested points-table styles (`result-points-*`) including
-  full-width layout, compact centered numeric columns, and horizontal overflow handling only inside the points section.
-- Updated `src/main/webapp/src/admin/results.html` to remove the forced top-level table min width so desktop layout can
-  fit naturally while preserving mobile resilience.
 - Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
   SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
