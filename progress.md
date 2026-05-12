@@ -2,24 +2,64 @@
 
 ## Open Tasks
 
-- [x] Phase 57: Plan and execute maintainability refactor pass (shared frontend quiz helpers, admin dead-code cleanup,
-  ResultService validation dedup)
-- [x] Phase 57: Extract shared frontend quiz helper module and adopt in `create_result.ts`, `quiz-details.ts`,
-  `quizzes.ts`
-- [x] Phase 57: Remove unused/dead admin result modal remnants in `admin_functions.ts`
-- [x] Phase 57: Consolidate duplicated create/update answer validation paths in `ResultService`
-- [x] Phase 57: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+- [x] Phase 67A: Remove `changed` usage from admin results UI and shared frontend types
+- [x] Phase 67A: Remove `changed` from API DTO mapping/serialization while keeping DB column intact
+- [x] Phase 67A: Update tests affected by removing `changed` from API contract
+- [x] Phase 67A: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
 
-- [x] Phase 56: Plan result create/edit page flow (separate HTML/TS, quiz-page style)
-- [x] Phase 56: Implement frontend result create/edit page and admin navigation wiring
-- [x] Phase 56: Align backend result API behavior/validation for create + edit (including disallowing 4 points)
-- [x] Phase 56: Update controller/service tests for new result create/edit behavior
-- [x] Phase 56: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
-- [x] Phase 56: Keep create-result page open after first save and switch to edit mode (no quiz/team changes afterward)
-- [x] Phase 56: Refine create-result layout (non-admin template, quiz/team side-by-side, Q1-4 and Q5-8 two-column)
-- [x] Phase 56: Show only finished quizzes on `quiz-details` and `quizzes.html`
+- [x] Phase 66: Update admin results sorting tie-breaker so same-date entries are ordered by total points descending
+- [x] Phase 66: Keep stable fallback ordering for same date and same total points
+- [x] Phase 66: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
 
-- Phase 57 verification status:
+- [x] Phase 65: Refactor admin results row layout to render Q1-Q8/Gesamt as a full-width nested table per result block
+- [x] Phase 65: Adjust grouped table styling so desktop no longer clips points columns while keeping mobile behavior
+- [x] Phase 65: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 64: Restructure admin results table so per-result block repeats second header row (`Q1`-`Q8`, `Gesamt`)
+  inside tbody
+- [x] Phase 64: Update grouped results rendering/styles to keep all points columns visible and visually grouped
+- [x] Phase 64: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 63: Fix admin results grouped table so Q1-Q8 values are visible again
+- [x] Phase 63: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- Phase 61 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
+- Phase 62 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
+- Phase 63 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
+- Phase 64 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
+- Phase 65 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
+- Phase 66 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
+- Phase 67A verification status:
   - `npm run type-check` (in `src/main/webapp`) passed
   - `npm run build` (in `src/main/webapp`) passed
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
@@ -27,39 +67,40 @@
 
 ## Finished Phases
 
-### Phase 57: Maintainability Refactor (Shared Helpers + Dead Code Cleanup + Validation Dedup) ✅ COMPLETE
+### Phase 67A: Remove `changed` from UI/API Contract (DB Column Kept for Safe Rollout) ✅ COMPLETE
 
-- Added shared frontend quiz helper module `src/main/webapp/src/js/quiz-utils.ts` and adopted it in
-  `create_result.ts`, `quiz-details.ts`, and `quizzes.ts` for consistent newest-first sorting, finished filtering,
-  and display-title behavior.
-- Simplified `create_result.ts` question input rendering and create->edit success path without changing UX behavior
-  (first save remains on page, switches to edit mode, and locks quiz/team selection).
-- Removed unused admin result modal remnants from `admin_functions.ts` (`buildAddResultForm`, `onSaveAddResult`, and
-  stale caches) and cleaned the `editResult` signature.
-- Consolidated duplicated result answer validation in `ResultService` into a shared internal validator while
-  preserving validation rules and exception messages.
-- Removed unused repository method `findAverageLeaderboardRaw` from `ResultRepository`.
+- Removed visual changed-marker usage from `src/main/webapp/src/js/admin_results.ts` so result points render without
+  appended `*` markers.
+- Removed `changed` from shared frontend and backend answer DTO contracts:
+  `src/main/webapp/src/js/types.ts` and `src/main/java/com/ande/pubquizzz/dto/AnswerScoreDTO.java`.
+- Updated backend mapping/serialization to stop exposing `changed` in API responses:
+  `src/main/java/com/ande/pubquizzz/mapper/ResultMapper.java` and
+  `src/main/java/com/ande/pubquizzz/service/ResultService.java`.
+- Updated impacted controller/service tests to remove `changed` setter/assertion expectations while preserving behavior
+  coverage (`UserQuizControllerTest`, `UserTeamControllerTest`, `ResultServiceDeleteUpdateTest`,
+  `ResultServiceTeamResultsTest`).
+- Kept persistence field/DB column unchanged intentionally for safe phased rollout (Phase B will remove entity field +
+  DB
+  column/migration).
 - Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
   SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
 
-### Phase 55: Remove Deprecated User Endpoints (`/api/is-admin`, `/api/version`) ✅ COMPLETE
+### Phase 66: Same-Date Results Sorted by Higher Total Points First ✅ COMPLETE
 
-- Removed unused mapped endpoints `/api/is-admin` and `/api/version` from `UserController`; kept only
-  `/api/bootstrap` with unchanged payload and cache behavior.
-- Kept admin-role evaluation as an internal helper method without exposing a dedicated endpoint.
-- Updated `UserControllerTest` to remove old endpoint tests and keep bootstrap-focused coverage.
-- Verified there are no remaining source references to `/api/is-admin` or `/api/version`.
-- Verification passed: `npm run type-check`, `npm run build`, `./mvnw.cmd -Dtest=UserControllerTest test`,
-  `./mvnw.cmd test` (`BUILD SUCCESS`, 201 tests, 0 failures).
+- Updated `compareResultsNewestFirst` in `src/main/webapp/src/js/admin_results.ts` so sorting now applies tie-breakers
+  in this order: `quizDate` DESC, then `totalPoints` DESC, then `resultsId` DESC.
+- Added robust total-points fallback (`undefined`/non-number -> `0`) so ordering remains deterministic.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
 
-### Phase 54: Bootstrap Endpoint with 1-Hour HTTP Cache (No Browser Storage) ✅ COMPLETE
+### Phase 65: Full-Width Per-Result Points Mini-Table (No Clipped Q/Gesamt Columns) ✅ COMPLETE
 
-- Added `GET /api/bootstrap` in `UserController` returning both `isAdmin` and `version` via new DTO
-  `BootstrapResponse`.
-- Configured response caching with `Cache-Control: max-age=3600, must-revalidate, private` to use HTTP caching for one
-  hour without `sessionStorage`.
-- Reworked index bootstrap logic in `index.ts` to remove `sessionStorage` keys and fetch only `/api/bootstrap` for admin
-  card visibility and version badge.
-- Added controller tests for bootstrap endpoint payload, authentication behavior, and cache header.
-- Verification passed: `npm run type-check`, `npm run build`, `./mvnw.cmd -Dtest=UserControllerTest test`,
-  `./mvnw.cmd test` (`BUILD SUCCESS`, 205 tests, 0 failures).
+- Refactored `src/main/webapp/src/js/admin_results.ts` result block rendering to keep top-level rows at 3 columns
+  (`Team`, `Quiz Datum`, `Aktionen`) and render Q1-Q8/Gesamt in a nested full-width points table below each block.
+- Removed mixed 3+9-column row layout pressure so points headers/values no longer compete with top-level column widths.
+- Updated `src/main/webapp/src/css/styles.css` with dedicated nested points-table styles (`result-points-*`) including
+  full-width layout, compact centered numeric columns, and horizontal overflow handling only inside the points section.
+- Updated `src/main/webapp/src/admin/results.html` to remove the forced top-level table min width so desktop layout can
+  fit naturally while preserving mobile resilience.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).

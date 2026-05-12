@@ -41,7 +41,6 @@ class UserTeamControllerTest {
         AnswerScoreDTO a = new AnswerScoreDTO();
         a.setQuestionNumber(1);
         a.setPoints(5);
-        a.setChanged(false);
 
         TeamResultEntry entry = new TeamResultEntry();
         entry.setQuizDate("2026-03-15");

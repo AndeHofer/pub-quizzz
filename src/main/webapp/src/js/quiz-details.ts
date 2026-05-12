@@ -1,5 +1,6 @@
 import {QuizDetailResponse, QuizResultEntry, QuizResultsResponse, QuizSummaryDTO} from './types';
 import {sortFinishedQuizzesNewestFirst} from './quiz-utils';
+import {escapeHtml} from './html-utils';
 
 let allDetailsExpanded = false;
 let currentQuizResults: QuizResultEntry[] = [];
@@ -39,12 +40,6 @@ function getSelectedQuizTitle(): string | null {
     }
 
     return selectedOption.textContent ?? null;
-}
-
-function escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 function questionSort(a: { number: number }, b: { number: number }): number {

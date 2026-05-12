@@ -4,6 +4,117 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 64: Per-Result Repeated Subheader Row in Admin Results Table ✅ COMPLETE
+
+- Changed `src/main/webapp/src/admin/results.html` to keep only the first header row (`Team`, `Quiz Datum`, `Aktionen`)
+  in `thead`.
+- Updated `src/main/webapp/src/js/admin_results.ts` rendering so each result block now repeats a local second header row
+  (`Q1`-`Q8`, `Gesamt`) directly in `tbody` before the corresponding points row.
+- Updated empty-state colspan handling for the new first-level header-only table structure.
+- Added subheader row styling in `src/main/webapp/src/css/styles.css` to keep grouped blocks readable and stable.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 63: Fix Grouped Results Table Column Sizing so Q1-Q8 Values Render ✅ COMPLETE
+
+- Fixed missing Q1-Q8 value rendering on `src/main/webapp/src/admin/results.html` by changing
+  `.results-table-grouped` table layout from fixed to automatic sizing in `src/main/webapp/src/css/styles.css`.
+- Kept grouped two-row entry UX and existing filters/actions unchanged while restoring visible points columns.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 62: Admin Results Two-Row Entry Layout (`Gesamt` with Q1-Q8) + Clear Group Borders ✅ COMPLETE
+
+- Reworked `src/main/webapp/src/admin/results.html` table header and structure so each result renders as two rows:
+  summary row (`Team`, `Quiz Datum`, `Aktionen`) plus detail row (`Q1`-`Q8` and `Gesamt`).
+- Updated `src/main/webapp/src/js/admin_results.ts` row rendering to output grouped two-row entries while preserving
+  existing newest-first sorting, cascading filter behavior, and edit/delete actions.
+- Replaced packed compact styling with clearer grouped-row styling in `src/main/webapp/src/css/styles.css` using
+  `results-table-grouped` classes and visible top/bottom borders to show both rows belong together.
+- Kept mobile horizontal scrolling behavior and desktop readability expectations aligned with requested UX.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 61: Contextual Back-to-Results Navigation + Locked Select Styling on Create/Edit Result ✅ COMPLETE
+
+- Added a second conditional button `Zurück zur Ergebnisliste` on `src/main/webapp/src/admin/create_result.html` that is
+  shown only when the page was opened from the results list context.
+- Updated `src/main/webapp/src/js/admin_results.ts` edit navigation to include context/query parameters (`from=results`,
+  `quizId`, `team`) and updated `src/main/webapp/src/js/create_result.ts` to route back to `results.html` with preserved
+  filters.
+- Kept the existing `Zurück zum Admin Bereich` button unchanged to preserve direct admin navigation behavior.
+- Styled locked quiz/team dropdowns in edit mode with a light-gray disabled appearance via
+  `select.locked-select:disabled`
+  in `src/main/webapp/src/css/styles.css` and applied the class in create_result edit mode.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 59: Admin Results as Dedicated Page (No Modal) + Visible Quiz Filter ✅ COMPLETE
+
+- Replaced modal-based results listing with dedicated page `src/main/webapp/src/admin/results.html` in the same card
+  layout style as the non-admin/public templates.
+- Added page script `src/main/webapp/src/js/admin_results.ts` to load, sort (newest first by `quizDate` and tie-break by
+  `resultsId`), filter by quiz, and handle edit/delete actions.
+- Added visible quiz filter dropdown (`Alle Quizze` + newest-first quiz options), persisted selection in URL query
+  parameter (`quizId`), and reloaded results on filter changes.
+- Rewired `viewResultsBtn` in `src/main/webapp/src/js/admin_functions.ts` to navigate to `results.html` and removed
+  obsolete modal-only results code/state (`viewResults`, result delete/edit modal handlers, stale filter cache field).
+- Added new Vite entry `results` in `src/main/webapp/vite.config.ts` for the new admin results page.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 58: Complexity/Duplication Cleanup (Shared HTML + Table Toggle Helpers, Dead Code Removal, Service/Test Simplification) ✅ COMPLETE
+
+- Added shared frontend helper modules `src/main/webapp/src/js/html-utils.ts` and
+  `src/main/webapp/src/js/results-table-common.ts`; adopted shared HTML escaping in `quizzes.ts`, `quiz-details.ts`,
+  and leaderboard utilities.
+- Refactored `quiz.ts` and `team.ts` to reuse shared medal/toggle/badge helpers and switched row detail expansion from
+  global inline handlers to delegated event handling (removed global `toggleDetail` exposure).
+- Removed unused frontend code and globals: dead team cache + stale add-result function in `admin_functions.ts`, and
+  unnecessary `window` exports in `register_user.ts` and `create_quiz.ts`.
+- Simplified `ResultService` internals with shared score-comparison helpers, map-based answer updates in
+  `updateResult`, removal of unused average-stat field, and inlined one-use result loading/log suffix helpers.
+- Reduced test duplication via new `ResultServiceTestData` helper and parameterized duplicate points-leaderboard tests.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 57: Maintainability Refactor (Shared Helpers + Dead Code Cleanup + Validation Dedup) ✅ COMPLETE
+
+- Added shared frontend quiz helper module `src/main/webapp/src/js/quiz-utils.ts` and adopted it in
+  `create_result.ts`, `quiz-details.ts`, and `quizzes.ts` for consistent newest-first sorting, finished filtering,
+  and display-title behavior.
+- Simplified `create_result.ts` question input rendering and create->edit success path without changing UX behavior
+  (first save remains on page, switches to edit mode, and locks quiz/team selection).
+- Removed unused admin result modal remnants from `admin_functions.ts` (`buildAddResultForm`, `onSaveAddResult`, and
+  stale caches) and cleaned the `editResult` signature.
+- Consolidated duplicated result answer validation in `ResultService` into a shared internal validator while
+  preserving validation rules and exception messages.
+- Removed unused repository method `findAverageLeaderboardRaw` from `ResultRepository`.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 55: Remove Deprecated User Endpoints (`/api/is-admin`, `/api/version`) ✅ COMPLETE
+
+- Removed unused mapped endpoints `/api/is-admin` and `/api/version` from `UserController`; kept only
+  `/api/bootstrap` with unchanged payload and cache behavior.
+- Kept admin-role evaluation as an internal helper method without exposing a dedicated endpoint.
+- Updated `UserControllerTest` to remove old endpoint tests and keep bootstrap-focused coverage.
+- Verified there are no remaining source references to `/api/is-admin` or `/api/version`.
+- Verification passed: `npm run type-check`, `npm run build`, `./mvnw.cmd -Dtest=UserControllerTest test`,
+  `./mvnw.cmd test` (`BUILD SUCCESS`, 201 tests, 0 failures).
+
+### Phase 54: Bootstrap Endpoint with 1-Hour HTTP Cache (No Browser Storage) ✅ COMPLETE
+
+- Added `GET /api/bootstrap` in `UserController` returning both `isAdmin` and `version` via new DTO
+  `BootstrapResponse`.
+- Configured response caching with `Cache-Control: max-age=3600, must-revalidate, private` to use HTTP caching for one
+  hour without `sessionStorage`.
+- Reworked index bootstrap logic in `index.ts` to remove `sessionStorage` keys and fetch only `/api/bootstrap` for admin
+  card visibility and version badge.
+- Added controller tests for bootstrap endpoint payload, authentication behavior, and cache header.
+- Verification passed: `npm run type-check`, `npm run build`, `./mvnw.cmd -Dtest=UserControllerTest test`,
+  `./mvnw.cmd test` (`BUILD SUCCESS`, 205 tests, 0 failures).
+
 ### Phase 53: Tighten Unauthenticated Access to Login + Favicon Only ✅ COMPLETE
 
 - Updated `SecurityConfig` to keep only `/favicon.ico` as `permitAll`; all other paths now require authentication unless

@@ -9,12 +9,15 @@ import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
 import com.ande.pubquizzz.mapper.ResultMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -29,12 +32,10 @@ class ResultServiceLeaderboardTest {
 
     @InjectMocks ResultService resultService;
 
-    @Test
-    void getPointsLeaderboard_handlesUnsortedInput() {
-        Object[] row1 = {"Beta Team", 90L, 2L};
-        Object[] row2 = {"Alpha Team", 150L, 3L};
-        Object[] row3 = {"Gamma Team", 150L, 2L};
-        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
+    @ParameterizedTest
+    @MethodSource("pointsLeaderboardInputVariants")
+    void getPointsLeaderboard_ranksEntriesByPointsForAnyInputOrder(List<Object[]> rows) {
+        when(resultRepository.findLeaderboardRaw()).thenReturn(rows);
 
         List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
 
@@ -55,30 +56,14 @@ class ResultServiceLeaderboardTest {
         assertThat(result.get(2).getQuizCount()).isEqualTo(2);
     }
 
-    @Test
-    void getPointsLeaderboard_returnsEntriesRankedByPoints() {
-        Object[] row1 = {"Alpha Team", 150L, 3L};
-        Object[] row2 = {"Gamma Team", 150L, 2L};
-        Object[] row3 = {"Beta Team", 90L, 2L};
-        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
-
-        List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
-
-        assertThat(result).hasSize(3);
-        assertThat(result.get(0).getRank()).isEqualTo(1);
-        assertThat(result.get(0).getTeamName()).isEqualTo("Alpha Team");
-        assertThat(result.get(0).getTotalPoints()).isEqualTo(150);
-        assertThat(result.get(0).getQuizCount()).isEqualTo(3);
-
-        assertThat(result.get(1).getRank()).isEqualTo(1);
-        assertThat(result.get(1).getTeamName()).isEqualTo("Gamma Team");
-        assertThat(result.get(1).getTotalPoints()).isEqualTo(150);
-        assertThat(result.get(1).getQuizCount()).isEqualTo(2);
-
-        assertThat(result.get(2).getRank()).isEqualTo(3);
-        assertThat(result.get(2).getTeamName()).isEqualTo("Beta Team");
-        assertThat(result.get(2).getTotalPoints()).isEqualTo(90);
-        assertThat(result.get(2).getQuizCount()).isEqualTo(2);
+    private static Stream<List<Object[]>> pointsLeaderboardInputVariants() {
+        Object[] alpha = {"Alpha Team", 150L, 3L};
+        Object[] gamma = {"Gamma Team", 150L, 2L};
+        Object[] beta = {"Beta Team", 90L, 2L};
+        return Stream.of(
+                List.of(beta, alpha, gamma),
+                List.of(alpha, gamma, beta)
+        );
     }
 
     @Test

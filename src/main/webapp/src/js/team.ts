@@ -1,26 +1,12 @@
 import {TeamResultEntry} from './types';
-
-function escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function numberBadge(n: number): string {
-    return `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold">${n}</span>`;
-}
-
-function medalForRank(rank: number): string {
-    if (rank === 1) return '\uD83E\uDD47';
-    if (rank === 2) return '\uD83E\uDD48';
-    if (rank === 3) return '\uD83E\uDD49';
-    return '';
-}
+import {getMedal} from './leaderboard-common';
+import {escapeHtml} from './html-utils';
+import {buildToggleButtonHtml, numberBadge, wireDetailToggleButtons} from './results-table-common';
 
 function renderResults(teamName: string, entries: TeamResultEntry[]): void {
     const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement;
     const heading = document.getElementById('teamHeading') as HTMLHeadingElement;
-    heading.textContent = `\uD83C\uDFF5\uFE0F Team: ${escapeHtml(teamName)}`;
+    heading.textContent = `\uD83C\uDFF5\uFE0F Team: ${teamName}`;
 
     if (entries.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">Noch keine Ergebnisse für dieses Team.</td></tr>';
@@ -30,9 +16,8 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
     const rows: string[] = [];
     entries.forEach((entry, index) => {
         const detailRowId = `detail-${index}`;
-        const btnId = `btn-${index}`;
-        const medal = medalForRank(entry.quizRank);
-        const rankLabel = medal ? `${medal} ${entry.quizRank}/${entry.participantCount}` : `${entry.quizRank}/${entry.participantCount}`;
+        const medal = entry.quizRank <= 3 ? `${getMedal(entry.quizRank)} ` : '';
+        const rankLabel = `${medal}${entry.quizRank}/${entry.participantCount}`;
 
         // Summary row
         rows.push(`
@@ -41,8 +26,7 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-gray-900 text-xs sm:text-base">${entry.totalPoints}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-semibold text-xs sm:text-base">${rankLabel}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
-                    <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"
-                        class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">&#9658; anzeigen</button>
+                    ${buildToggleButtonHtml(detailRowId)}
                 </td>
             </tr>
         `);
@@ -76,16 +60,6 @@ function renderResults(teamName: string, entries: TeamResultEntry[]): void {
 
     tbody.innerHTML = rows.join('');
 }
-
-// Exposed to global scope for inline onclick handlers
-(window as unknown as Record<string, unknown>)['toggleDetail'] = function(rowId: string, btnId: string): void {
-    const row = document.getElementById(rowId);
-    const btn = document.getElementById(btnId);
-    if (!row || !btn) return;
-    const isHidden = row.style.display === 'none';
-    row.style.display = isHidden ? 'table-row' : 'none';
-    btn.innerHTML = isHidden ? '&#9660; schlie&szlig;en' : '&#9658; anzeigen';
-};
 
 async function loadTeamResults(): Promise<void> {
     const loadingEl = document.getElementById('loading');
@@ -141,4 +115,10 @@ async function loadTeamResults(): Promise<void> {
     }
 }
 
-window.addEventListener('load', loadTeamResults);
+window.addEventListener('load', () => {
+    const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement | null;
+    if (tbody) {
+        wireDetailToggleButtons(tbody);
+    }
+    void loadTeamResults();
+});

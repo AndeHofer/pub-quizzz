@@ -1,21 +1,7 @@
 import {QuizResultEntry, QuizResultsResponse} from './types';
-
-function escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function getMedal(rank: number): string {
-    if (rank === 1) return '\uD83E\uDD47'; // 🥇
-    if (rank === 2) return '\uD83E\uDD48'; // 🥈
-    if (rank === 3) return '\uD83E\uDD49'; // 🥉
-    return String(rank);
-}
-
-function numberBadge(n: number): string {
-    return `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold">${n}</span>`;
-}
+import {getMedal} from './leaderboard-common';
+import {escapeHtml} from './html-utils';
+import {buildToggleButtonHtml, numberBadge, wireDetailToggleButtons} from './results-table-common';
 
 function renderResults(entries: QuizResultEntry[]): void {
     const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement;
@@ -28,7 +14,6 @@ function renderResults(entries: QuizResultEntry[]): void {
     const rows: string[] = [];
     entries.forEach((entry, index) => {
         const detailRowId = `detail-${index}`;
-        const btnId = `btn-${index}`;
 
         // Summary row
         rows.push(`
@@ -39,8 +24,7 @@ function renderResults(entries: QuizResultEntry[]): void {
                 </td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-gray-900 text-xs sm:text-base">${entry.totalPoints}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
-                    <button id="${btnId}" onclick="toggleDetail('${detailRowId}','${btnId}')"
-                        class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">&#9658; anzeigen</button>
+                    ${buildToggleButtonHtml(detailRowId)}
                 </td>
             </tr>
         `);
@@ -74,16 +58,6 @@ function renderResults(entries: QuizResultEntry[]): void {
 
     tbody.innerHTML = rows.join('');
 }
-
-// Exposed to global scope for inline onclick handlers
-(window as unknown as Record<string, unknown>)['toggleDetail'] = function(rowId: string, btnId: string): void {
-    const row = document.getElementById(rowId);
-    const btn = document.getElementById(btnId);
-    if (!row || !btn) return;
-    const isHidden = row.style.display === 'none';
-    row.style.display = isHidden ? 'table-row' : 'none';
-    btn.innerHTML = isHidden ? '&#9660; schlie&szlig;en' : '&#9658; anzeigen';
-};
 
 async function loadQuizResults(): Promise<void> {
     const loadingEl = document.getElementById('loading');
@@ -124,4 +98,10 @@ async function loadQuizResults(): Promise<void> {
     }
 }
 
-window.addEventListener('load', loadQuizResults);
+window.addEventListener('load', () => {
+    const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement | null;
+    if (tbody) {
+        wireDetailToggleButtons(tbody);
+    }
+    void loadQuizResults();
+});

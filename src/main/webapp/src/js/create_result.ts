@@ -13,6 +13,7 @@ const quizSelect = document.getElementById('resultQuiz') as HTMLSelectElement | 
 const teamSelect = document.getElementById('resultTeam') as HTMLSelectElement | null;
 const resultQuestionsContainer = document.getElementById('resultQuestionsContainer') as HTMLDivElement | null;
 const resultSaveBtn = document.getElementById('resultSaveBtn') as HTMLButtonElement | null;
+const backToResultsBtn = document.getElementById('backToResultsBtn') as HTMLButtonElement | null;
 
 let allQuizzes: QuizDTO[] = [];
 let allTeams: TeamDTO[] = [];
@@ -52,6 +53,24 @@ function getResultIdFromQuery(): number | null {
     return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
+function readResultsBackLinkFromQuery(): string | null {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('from') !== 'results') return null;
+
+    const url = new URL('results.html', window.location.href);
+    const quizId = params.get('quizId');
+    const team = params.get('team');
+
+    if (quizId && quizId.trim()) {
+        url.searchParams.set('quizId', quizId.trim());
+    }
+    if (team && team.trim()) {
+        url.searchParams.set('team', team.trim());
+    }
+
+    return `${url.pathname}${url.search}`;
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url);
     if (!response.ok) {
@@ -76,8 +95,14 @@ function setEditModeUi(): void {
     const title = document.getElementById('resultPageTitle');
     if (title) title.textContent = 'Ergebnis bearbeiten';
     if (resultSaveBtn) resultSaveBtn.textContent = 'Speichern';
-    if (quizSelect) quizSelect.disabled = true;
-    if (teamSelect) teamSelect.disabled = true;
+    if (quizSelect) {
+        quizSelect.disabled = true;
+        quizSelect.classList.add('locked-select');
+    }
+    if (teamSelect) {
+        teamSelect.disabled = true;
+        teamSelect.classList.add('locked-select');
+    }
 }
 
 function prefillEditValues(result: ResultDTO): void {
@@ -202,6 +227,11 @@ async function loadPageData(): Promise<void> {
 
 window.addEventListener('load', () => {
     document.getElementById('backBtn')?.addEventListener('click', () => goBack('admin_main.html'));
+    const resultsBackLink = readResultsBackLinkFromQuery();
+    if (resultsBackLink && backToResultsBtn) {
+        backToResultsBtn.style.display = 'inline';
+        backToResultsBtn.addEventListener('click', () => goBack(resultsBackLink));
+    }
     document.getElementById('resultForm')?.addEventListener('submit', event => {
         void saveResult(event);
     });

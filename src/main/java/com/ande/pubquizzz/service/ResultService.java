@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
@@ -72,12 +73,14 @@ public class ResultService {
             for (Object[] sr : scoreRows) {
                 Long qId = ((Number) sr[0]).longValue();
                 bestRow.merge(qId, sr, (existing, candidate) -> {
-                    int cmpTotal = Long.compare(((Number) candidate[2]).longValue(), ((Number) existing[2]).longValue());
-                    if (cmpTotal != 0) return cmpTotal > 0 ? candidate : existing;
-                    int cmpFives = Long.compare(((Number) candidate[3]).longValue(), ((Number) existing[3]).longValue());
-                    if (cmpFives != 0) return cmpFives > 0 ? candidate : existing;
-                    int cmpThrees = Long.compare(((Number) candidate[4]).longValue(), ((Number) existing[4]).longValue());
-                    return cmpThrees > 0 ? candidate : existing;
+                    return compareScoresDesc(
+                            scoreValue(candidate, 2),
+                            scoreValue(candidate, 3),
+                            scoreValue(candidate, 4),
+                            scoreValue(existing, 2),
+                            scoreValue(existing, 3),
+                            scoreValue(existing, 4)
+                    ) < 0 ? candidate : existing;
                 });
             }
             bestRow.forEach((qId, sr) -> winnerMap.put(qId, (String) sr[1]));
@@ -135,7 +138,6 @@ public class ResultService {
                         AnswerScoreDTO dto = new AnswerScoreDTO();
                         dto.setQuestionNumber(a.getQuestionNumber());
                         dto.setPoints(a.getPoints());
-                        dto.setChanged(Boolean.TRUE.equals(a.getChanged()));
                         return dto;
                     })
                     .toList());
@@ -150,8 +152,11 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<ResultDTO> getResults(Long quizId) {
-        log.info("Fetching results{}", quizSuffix(quizId));
-        return loadResults(quizId).stream().map(resultMapper::toDTO).toList();
+        log.info("Fetching results{}", quizId != null ? " for quiz " + quizId : "");
+        List<Result> results = quizId != null
+                ? resultRepository.findByQuiz_QuizId(quizId)
+                : resultRepository.findAll();
+        return results.stream().map(resultMapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
@@ -191,10 +196,9 @@ public class ResultService {
         List<AverageTeamStats> stats = rows.stream()
                 .map(row -> {
                     String teamName = (String) row[0];
-                    int totalPoints = ((Number) row[1]).intValue();
                     int quizCount = ((Number) row[2]).intValue();
-                    double averagePoints = quizCount == 0 ? 0.0 : (double) totalPoints / quizCount;
-                    return new AverageTeamStats(teamName, totalPoints, quizCount, averagePoints);
+                    double averagePoints = quizCount == 0 ? 0.0 : ((Number) row[1]).doubleValue() / quizCount;
+                    return new AverageTeamStats(teamName, quizCount, averagePoints);
                 })
                 .sorted(Comparator.comparingDouble(AverageTeamStats::averagePoints).reversed())
                 .toList();
@@ -346,17 +350,16 @@ public class ResultService {
 
         validateUpdateAnswers(req.getAnswers());
 
+        Map<Integer, ResultAnswer> answersByQuestionNumber = result.getAnswers().stream()
+                .collect(Collectors.toMap(ResultAnswer::getQuestionNumber, Function.identity()));
+
         for (UpdateResultRequest.AnswerSubmission submission : req.getAnswers()) {
             int newPoints = submission.getPoints();
-            result.getAnswers().stream()
-                    .filter(ra -> ra.getQuestionNumber() == submission.getQuestionNumber())
-                    .findFirst()
-                    .ifPresent(ra -> {
-                        if (ra.getPoints() != newPoints) {
-                            ra.setPoints(newPoints);
-                            ra.setChanged(true);
-                        }
-                    });
+            ResultAnswer answer = answersByQuestionNumber.get(submission.getQuestionNumber());
+            if (answer != null && answer.getPoints() != newPoints) {
+                answer.setPoints(newPoints);
+                answer.setChanged(true);
+            }
         }
 
         Result saved = resultRepository.save(result);
@@ -393,7 +396,6 @@ public class ResultService {
                         AnswerScoreDTO dto = new AnswerScoreDTO();
                         dto.setQuestionNumber(a.getQuestionNumber());
                         dto.setPoints(a.getPoints());
-                        dto.setChanged(Boolean.TRUE.equals(a.getChanged()));
                         return dto;
                     })
                     .toList());
@@ -406,15 +408,14 @@ public class ResultService {
             }
 
             scores.sort((left, right) -> {
-                int totalCmp = Integer.compare(((Number) right[2]).intValue(), ((Number) left[2]).intValue());
-                if (totalCmp != 0) {
-                    return totalCmp;
-                }
-                int fiveCmp = Integer.compare(((Number) right[3]).intValue(), ((Number) left[3]).intValue());
-                if (fiveCmp != 0) {
-                    return fiveCmp;
-                }
-                return Integer.compare(((Number) right[4]).intValue(), ((Number) left[4]).intValue());
+                return compareScoresDesc(
+                        scoreValue(left, 2),
+                        scoreValue(left, 3),
+                        scoreValue(left, 4),
+                        scoreValue(right, 2),
+                        scoreValue(right, 3),
+                        scoreValue(right, 4)
+                );
             });
 
             entry.setParticipantCount(scores.size());
@@ -423,9 +424,7 @@ public class ResultService {
                 if (i > 0) {
                     Object[] previous = scores.get(i - 1);
                     Object[] current = scores.get(i);
-                    boolean sameRank = ((Number) previous[2]).intValue() == ((Number) current[2]).intValue()
-                            && ((Number) previous[3]).intValue() == ((Number) current[3]).intValue()
-                            && ((Number) previous[4]).intValue() == ((Number) current[4]).intValue();
+                    boolean sameRank = hasSameScore(previous, current);
                     if (!sameRank) {
                         rank = i + 1;
                     }
@@ -451,16 +450,6 @@ public class ResultService {
 
     private String deriveQuizTitle(java.time.LocalDate pubDate) {
         return pubDate.getYear() + " " + GERMAN_MONTHS[pubDate.getMonthValue() - 1];
-    }
-
-    private List<Result> loadResults(Long quizId) {
-        return quizId != null
-                ? resultRepository.findByQuiz_QuizId(quizId)
-                : resultRepository.findAll();
-    }
-
-    private String quizSuffix(Long quizId) {
-        return quizId != null ? " for quiz " + quizId : "";
     }
 
     private void validateCreateAnswers(List<CreateResultRequest.AnswerSubmission> answers) {
@@ -519,7 +508,7 @@ public class ResultService {
 
     private static final int QUESTION_COUNT = 8;
 
-    private record AverageTeamStats(String teamName, int totalPoints, int quizCount, double averagePoints) {
+    private record AverageTeamStats(String teamName, int quizCount, double averagePoints) {
     }
 
     private record QuizTeamScore(String teamName, int totalPoints, int fiveCount, int threeCount) {
@@ -529,6 +518,37 @@ public class ResultService {
         return left.totalPoints() == right.totalPoints()
                 && left.fiveCount() == right.fiveCount()
                 && left.threeCount() == right.threeCount();
+    }
+
+    private static long scoreValue(Object[] row, int index) {
+        return ((Number) row[index]).longValue();
+    }
+
+    private static int compareScoresDesc(
+            long leftTotal,
+            long leftFives,
+            long leftThrees,
+            long rightTotal,
+            long rightFives,
+            long rightThrees
+    ) {
+        int totalCmp = Long.compare(rightTotal, leftTotal);
+        if (totalCmp != 0) {
+            return totalCmp;
+        }
+
+        int fiveCmp = Long.compare(rightFives, leftFives);
+        if (fiveCmp != 0) {
+            return fiveCmp;
+        }
+
+        return Long.compare(rightThrees, leftThrees);
+    }
+
+    private static boolean hasSameScore(Object[] left, Object[] right) {
+        return scoreValue(left, 2) == scoreValue(right, 2)
+                && scoreValue(left, 3) == scoreValue(right, 3)
+                && scoreValue(left, 4) == scoreValue(right, 4);
     }
 
     private static class MedalAccumulator {

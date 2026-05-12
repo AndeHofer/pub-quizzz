@@ -20,6 +20,5 @@ public interface ResultMapper {
 
     @Mapping(target = "questionNumber", source = "questionNumber")
     @Mapping(target = "points", source = "points")
-    @Mapping(target = "changed", source = "changed")
     AnswerScoreDTO toAnswerScoreDTO(ResultAnswer resultAnswer);
 }

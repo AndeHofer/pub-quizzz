@@ -58,42 +58,25 @@ class ResultServiceDeleteUpdateTest {
     // ---- updateResult ----
 
     @Test
-    void updateResult_changesPoints_setsChangedFlag() {
+    void updateResult_changesPoints() {
         // Build a result with 8 answers, all at 3 points
         Result result = new Result();
-        List<ResultAnswer> answers = new ArrayList<>();
-        for (int i = 1; i <= 8; i++) {
-            ResultAnswer ra = new ResultAnswer();
-            ra.setQuestionNumber(i);
-            ra.setPoints(3);
-            ra.setChanged(false);
-            answers.add(ra);
-        }
-        result.setAnswers(answers);
+        result.setAnswers(ResultServiceTestData.resultAnswersWithDefaultPoints(3));
 
         when(resultRepository.findByIdWithAnswers(1L)).thenReturn(Optional.of(result));
         when(resultRepository.save(any(Result.class))).thenReturn(result);
         when(resultMapper.toDTO(any(Result.class))).thenReturn(new ResultDTO());
 
-        // Submit: question 1 → 5 (changed), questions 2-8 → 3 (unchanged)
+        // Submit: question 1 → 5, questions 2-8 → 3
         UpdateResultRequest req = new UpdateResultRequest();
-        List<UpdateResultRequest.AnswerSubmission> submissions = new ArrayList<>();
-        for (int i = 1; i <= 8; i++) {
-            UpdateResultRequest.AnswerSubmission a = new UpdateResultRequest.AnswerSubmission();
-            a.setQuestionNumber(i);
-            a.setPoints(i == 1 ? 5 : 3);
-            submissions.add(a);
-        }
-        req.setAnswers(submissions);
+        req.setAnswers(ResultServiceTestData.updateAnswerSubmissions(5, 3, 3, 3, 3, 3, 3, 3));
 
         resultService.updateResult(1L, req);
 
-        // Question 1: points changed to 5, changed=true
+        // Question 1: points changed to 5
         assertEquals(5, result.getAnswers().get(0).getPoints());
-        assertTrue(result.getAnswers().get(0).getChanged());
-        // Question 2: unchanged, changed still false
+        // Question 2: unchanged
         assertEquals(3, result.getAnswers().get(1).getPoints());
-        assertFalse(result.getAnswers().get(1).getChanged());
     }
 
     @Test
@@ -109,7 +92,7 @@ class ResultServiceDeleteUpdateTest {
     @Test
     void updateResult_duplicateQuestion_throwsBusinessValidationException() {
         Result result = new Result();
-        result.setAnswers(buildResultAnswersWithPoints(3));
+        result.setAnswers(ResultServiceTestData.resultAnswersWithDefaultPoints(3));
 
         when(resultRepository.findByIdWithAnswers(1L)).thenReturn(Optional.of(result));
 
@@ -134,7 +117,7 @@ class ResultServiceDeleteUpdateTest {
     @Test
     void updateResult_missingQuestion_throwsBusinessValidationException() {
         Result result = new Result();
-        result.setAnswers(buildResultAnswersWithPoints(3));
+        result.setAnswers(ResultServiceTestData.resultAnswersWithDefaultPoints(3));
 
         when(resultRepository.findByIdWithAnswers(1L)).thenReturn(Optional.of(result));
 
@@ -156,7 +139,7 @@ class ResultServiceDeleteUpdateTest {
     @Test
     void updateResult_disallowedPointsValue_throwsBusinessValidationException() {
         Result result = new Result();
-        result.setAnswers(buildResultAnswersWithPoints(3));
+        result.setAnswers(ResultServiceTestData.resultAnswersWithDefaultPoints(3));
 
         when(resultRepository.findByIdWithAnswers(1L)).thenReturn(Optional.of(result));
 
@@ -175,15 +158,4 @@ class ResultServiceDeleteUpdateTest {
         verify(resultRepository, never()).save(any(Result.class));
     }
 
-    private List<ResultAnswer> buildResultAnswersWithPoints(int points) {
-        List<ResultAnswer> answers = new ArrayList<>();
-        for (int i = 1; i <= 8; i++) {
-            ResultAnswer ra = new ResultAnswer();
-            ra.setQuestionNumber(i);
-            ra.setPoints(points);
-            ra.setChanged(false);
-            answers.add(ra);
-        }
-        return answers;
-    }
 }

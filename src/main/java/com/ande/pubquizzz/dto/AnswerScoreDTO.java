@@ -6,5 +6,4 @@ import lombok.Data;
 public class AnswerScoreDTO {
     private Integer questionNumber;
     private Integer points;
-    private Boolean changed;
 }

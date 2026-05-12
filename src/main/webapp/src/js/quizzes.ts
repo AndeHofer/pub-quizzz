@@ -1,11 +1,6 @@
 import {QuizSummaryDTO} from './types';
 import {sortFinishedQuizzesNewestFirst} from './quiz-utils';
-
-function escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+import {escapeHtml} from './html-utils';
 
 function renderQuizzes(quizzes: QuizSummaryDTO[]): void {
     const tbody = document.getElementById('quizzesBody') as HTMLTableSectionElement;

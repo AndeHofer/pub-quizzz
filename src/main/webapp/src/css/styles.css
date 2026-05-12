@@ -160,12 +160,82 @@ html {
         @apply w-full px-[10px] py-[10px] mb-[10px] border border-gray-300 rounded box-border;
     }
 
+    select.locked-select:disabled {
+        @apply bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed;
+    }
+
     .result-meta-grid {
         @apply grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
     }
 
     .result-points-grid {
         @apply grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
+    }
+
+    .results-table-grouped {
+        @apply table-auto;
+    }
+
+    .results-table-grouped .col-team {
+        @apply w-[35%] sm:w-[34%];
+    }
+
+    .results-table-grouped .col-date {
+        @apply w-[25%] sm:w-[24%];
+    }
+
+    .results-table-grouped .col-actions {
+        @apply w-[40%] sm:w-[42%] text-center;
+    }
+
+    .results-table-grouped .col-question,
+    .results-table-grouped .col-total {
+        @apply text-center;
+    }
+
+    .results-table-grouped .team-cell {
+        @apply font-medium;
+    }
+
+    .results-table-grouped .actions-cell {
+        @apply whitespace-nowrap;
+    }
+
+    .results-table-grouped .result-group-main td {
+        @apply border-t-2 border-gray-300 bg-white;
+    }
+
+    .results-table-grouped .result-group-detail td {
+        @apply bg-gray-50 border-b-2 border-gray-300;
+    }
+
+    .results-table-grouped .result-points-cell {
+        @apply p-2 sm:p-3;
+    }
+
+    .results-table-grouped .result-points-wrap {
+        @apply w-full overflow-x-auto;
+    }
+
+    .results-table-grouped .result-points-table {
+        @apply w-full mt-0 border-collapse min-w-[520px] sm:min-w-0;
+    }
+
+    .results-table-grouped .result-points-table th,
+    .results-table-grouped .result-points-table td {
+        @apply text-center text-sm sm:text-base;
+    }
+
+    .results-table-grouped .result-points-table thead th {
+        @apply bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold;
+    }
+
+    .results-table-grouped .result-points-table .col-question {
+        @apply w-10 sm:w-12;
+    }
+
+    .results-table-grouped .result-points-table .col-total {
+        @apply w-16 sm:w-20;
     }
 
     .message {

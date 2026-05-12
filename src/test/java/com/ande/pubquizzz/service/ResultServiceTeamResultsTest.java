@@ -55,11 +55,10 @@ class ResultServiceTeamResultsTest {
         quizNew.setSubmitDate(LocalDate.of(2026, 3, 16));
     }
 
-    private ResultAnswer makeAnswer(int questionNumber, int points, Boolean changed) {
+    private ResultAnswer makeAnswer(int questionNumber, int points) {
         ResultAnswer a = new ResultAnswer();
         a.setQuestionNumber(questionNumber);
         a.setPoints(points);
-        a.setChanged(changed);
         return a;
     }
 
@@ -74,8 +73,8 @@ class ResultServiceTeamResultsTest {
 
     @Test
     void getResultsForTeam_returnsSortedNewestFirst() {
-        Result oldResult = makeResult(quizOld, List.of(makeAnswer(1, 3, null)));
-        Result newResult = makeResult(quizNew, List.of(makeAnswer(1, 5, null)));
+        Result oldResult = makeResult(quizOld, List.of(makeAnswer(1, 3)));
+        Result newResult = makeResult(quizNew, List.of(makeAnswer(1, 5)));
         // Repository returns them already sorted (newest first per query)
         when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
             .thenReturn(List.of(newResult, oldResult));
@@ -92,7 +91,7 @@ class ResultServiceTeamResultsTest {
     @Test
     void getResultsForTeam_ignoresStoredTitleAndUsesPubDateMonthYear() {
         quizNew.setTitle("Frühjahr 2026");
-        Result result = makeResult(quizNew, List.of(makeAnswer(1, 5, null)));
+        Result result = makeResult(quizNew, List.of(makeAnswer(1, 5)));
         when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
             .thenReturn(List.of(result));
 
@@ -113,8 +112,8 @@ class ResultServiceTeamResultsTest {
 
     @Test
     void getResultsForTeam_mapsAnswersCorrectly() {
-        ResultAnswer a1 = makeAnswer(1, 4, true);
-        ResultAnswer a2 = makeAnswer(2, 2, null);  // null changed → false
+        ResultAnswer a1 = makeAnswer(1, 4);
+        ResultAnswer a2 = makeAnswer(2, 2);
         Result result = makeResult(quizNew, List.of(a1, a2));
         when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
             .thenReturn(List.of(result));
@@ -129,7 +128,5 @@ class ResultServiceTeamResultsTest {
         assertThat(entry.getParticipantCount()).isEqualTo(1);
         assertThat(entry.getAnswers().get(0).getQuestionNumber()).isEqualTo(1);
         assertThat(entry.getAnswers().get(0).getPoints()).isEqualTo(4);
-        assertThat(entry.getAnswers().get(0).getChanged()).isTrue();
-        assertThat(entry.getAnswers().get(1).getChanged()).isFalse();
     }
 }

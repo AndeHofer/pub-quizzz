@@ -64,14 +64,7 @@ public class ResultServiceCreateTest {
         CreateResultRequest req = new CreateResultRequest();
         req.setQuizId(quizId);
         req.setTeamId(teamId);
-        List<CreateResultRequest.AnswerSubmission> answers = new ArrayList<>();
-        for (int i = 1; i <= 8; i++) {
-            CreateResultRequest.AnswerSubmission a = new CreateResultRequest.AnswerSubmission();
-            a.setQuestionNumber(i);
-            a.setPoints(1);
-            answers.add(a);
-        }
-        req.setAnswers(answers);
+        req.setAnswers(ResultServiceTestData.createAnswerSubmissions(1, 1, 1, 1, 1, 1, 1, 1));
         return req;
     }
 
@@ -87,16 +80,12 @@ public class ResultServiceCreateTest {
         req.setQuizId(1L);
         req.setTeamId(5L);
 
-        List<CreateResultRequest.AnswerSubmission> answers = new ArrayList<>();
         int total = 0;
         int[] allowedPoints = {5, 3, 2, 1, 5, 3, 2, 1};
-        for (int i = 1; i <= 8; i++) {
-            CreateResultRequest.AnswerSubmission a = new CreateResultRequest.AnswerSubmission();
-            a.setQuestionNumber(i);
-            a.setPoints(allowedPoints[i - 1]);
-            total += allowedPoints[i - 1];
-            answers.add(a);
+        for (int allowedPoint : allowedPoints) {
+            total += allowedPoint;
         }
+        List<CreateResultRequest.AnswerSubmission> answers = ResultServiceTestData.createAnswerSubmissions(allowedPoints);
         req.setAnswers(answers);
 
         ResultDTO expectedDto = new ResultDTO();

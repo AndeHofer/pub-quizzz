@@ -78,7 +78,6 @@ class UserQuizControllerTest {
         AnswerScoreDTO a = new AnswerScoreDTO();
         a.setQuestionNumber(1);
         a.setPoints(10);
-        a.setChanged(false);
 
         QuizResultEntry entry = new QuizResultEntry();
         entry.setRank(1);

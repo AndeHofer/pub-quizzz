@@ -1,13 +1,9 @@
 export {};
 
-import type { QuizDTO, TeamDTO, ResultDTO, UserDTO } from './types';
+import type {QuizDTO, TeamDTO, UserDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 
 const API_BASE = '/admin';
-
-// Module-level caches
-let _admin_teams_cache: TeamDTO[] | null = null;
-let _admin_last_quiz_id_filter: string | null = null;
 
 // Helper for API fetch with basic network error handling
 async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
@@ -17,10 +13,6 @@ async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
         console.error('Netzwerkfehler:', error);
         throw error;
     }
-}
-
-function goBack() {
-    window.location.href = '/index.html';
 }
 
 function closeModal() {
@@ -50,24 +42,8 @@ function showError(message: string) {
     return `<div class="error">❌ ${message}</div>`;
 }
 
-// Ensure functions are available globally and wire up modal click-outside handler
+// Wire up admin page handlers and modal click-outside behavior
 window.addEventListener('load', () => {
-    (window as any).goBack = goBack;
-    (window as any).closeModal = closeModal;
-    (window as any).viewQuizzes = viewQuizzes;
-    (window as any).editQuiz = editQuiz;
-    (window as any).deleteQuiz = deleteQuiz;
-    (window as any).createTeam = createTeam;
-    (window as any).viewTeams = viewTeams;
-    (window as any).deleteTeam = deleteTeam;
-    (window as any).renameTeam = renameTeam;
-    (window as any).viewResults = viewResults;
-    (window as any).showAddResultModal = showAddResultModal;
-    (window as any).deleteResult = deleteResult;
-    (window as any).editResult = editResult;
-    (window as any).viewUsers = viewUsers;
-    (window as any).deleteUser = deleteUser;
-
     // Wire up admin_main.html buttons by ID
     document.getElementById('createQuizBtn')?.addEventListener('click', () => {
         location.href = 'create_quiz.html';
@@ -78,12 +54,13 @@ window.addEventListener('load', () => {
     document.getElementById('addResultBtn')?.addEventListener('click', () => {
         location.href = 'create_result.html';
     });
-    document.getElementById('viewResultsBtn')?.addEventListener('click', () => viewResults());
+    document.getElementById('viewResultsBtn')?.addEventListener('click', () => {
+        location.href = 'results.html';
+    });
     document.getElementById('createUserBtn')?.addEventListener('click', () => {
         location.href = 'register_user.html';
     });
     document.getElementById('viewUsersBtn')?.addEventListener('click', viewUsers);
-//    document.getElementById('backBtn')?.addEventListener('click', goBack);
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeModal);
 
     const modal = document.getElementById('dataModal');
@@ -127,11 +104,23 @@ async function viewQuizzes() {
         const html = renderTable(headers, sortedQuizzes, (quiz: unknown) => {
             const q = quiz as QuizDTO;
             return [`${q.quizId}`, quizDisplayTitle(q), `${q.pubDate}`, `${q.submitDate}`, q.finished ? '✅' : '❌', `
-                <button class="icon-btn" onclick="editQuiz(${q.quizId})" title="Quiz bearbeiten">✏️</button>
-                <button class="icon-btn" onclick="deleteQuiz(${q.quizId})" title="Quiz löschen">🗑️</button>
+                <button class="icon-btn edit-quiz-btn" data-id="${q.quizId}" title="Quiz bearbeiten">✏️</button>
+                <button class="icon-btn delete-quiz-btn" data-id="${q.quizId}" title="Quiz löschen">🗑️</button>
             `];
         });
         showModal('Alle Quizze', html);
+        document.querySelectorAll('.edit-quiz-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                editQuiz(id);
+            });
+        });
+        document.querySelectorAll('.delete-quiz-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = Number((btn as HTMLElement).dataset.id);
+                deleteQuiz(id);
+            });
+        });
     } catch (error: unknown) {
         showModal('Fehler', showError('Fehler beim Laden der Quizze: ' + (error instanceof Error ? error.message : error)));
     }
@@ -177,7 +166,6 @@ async function createTeam() {
             body: JSON.stringify({teamName})
         });
         if (response.ok) {
-            _admin_teams_cache = null;
             await viewTeams();
         } else {
             const message = await response.text();
@@ -230,7 +218,6 @@ async function deleteTeam(teamId: number, teamName: string) {
     try {
         const response = await fetch(`${API_BASE}/team/${teamId}`, {method: 'DELETE'});
         if (response.ok) {
-            _admin_teams_cache = null;
             await viewTeams();
         } else {
             showModal('Fehler', showError('Fehler beim Löschen des Teams'));
@@ -250,7 +237,6 @@ async function renameTeam(teamId: number, currentName: string) {
             body: JSON.stringify({teamName: newName})
         });
         if (response.ok) {
-            _admin_teams_cache = null;
             await viewTeams();
         } else {
             const message = await response.text();
@@ -259,90 +245,6 @@ async function renameTeam(teamId: number, currentName: string) {
     } catch (error: unknown) {
         showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
-}
-
-// ==================== Results Management ====================
-
-async function viewResults(quizIdOverride?: string | null) {
-    const quizId = quizIdOverride !== undefined ? quizIdOverride : prompt('Quiz ID für Ergebnisse eingeben (leer = alle):');
-    _admin_last_quiz_id_filter = quizId ?? null;
-    showModal('Ergebnisse', showLoading());
-    try {
-        const url = quizId ? `${API_BASE}/results?quizId=${quizId}` : `${API_BASE}/results`;
-        const response = await apiFetch(url);
-        const results: ResultDTO[] = await response.json();
-        if (results.length === 0) {
-            showModal('Ergebnisse', '<p>Keine Ergebnisse gefunden.</p>');
-            return;
-        }
-        let html = '<div class="overflow-x-auto"><table><thead><tr><th>Team</th><th>Quiz Datum</th>';
-        for (let i = 1; i <= 8; i++) html += `<th>Q${i}</th>`;
-        html += '<th>Gesamt</th><th>Aktionen</th></tr></thead><tbody>';
-        results.forEach((result: ResultDTO) => {
-            const answersMap: Record<number, { points: number; changed: boolean }> = {};
-            if (Array.isArray(result.answers)) {
-                result.answers.forEach(a => { answersMap[a.questionNumber] = a; });
-            }
-            html += `<tr><td>${result.teamName}</td><td>${result.quizDate}</td>`;
-            for (let i = 1; i <= 8; i++) {
-                const a = answersMap[i];
-                const points = a && typeof a.points === 'number' ? a.points : 0;
-                const changed = a && a.changed ? '*' : '';
-                html += `<td>${points}${changed}</td>`;
-            }
-            html += `<td><strong>${result.totalPoints || 0}</strong></td>`;
-            html += `<td>
-    <button class="icon-btn edit-result-btn"
-        data-id="${result.resultsId}"
-        data-name="${result.teamName}"
-        title="Ergebnis bearbeiten">✏️</button>
-    <button class="icon-btn delete-result-btn"
-        data-id="${result.resultsId}"
-        data-name="${result.teamName}"
-        title="Ergebnis löschen">🗑️</button>
-</td>`;
-            html += '</tr>';
-        });
-        html += '</tbody></table></div>';
-        showModal('Ergebnisse', html);
-        document.querySelectorAll('.delete-result-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = Number((btn as HTMLElement).dataset.id);
-                const name = (btn as HTMLElement).dataset.name ?? '';
-                deleteResult(id, name);
-            });
-        });
-        document.querySelectorAll('.edit-result-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = Number((btn as HTMLElement).dataset.id);
-                editResult(id);
-            });
-        });
-    } catch (error: unknown) {
-        showModal('Fehler', showError('Fehler beim Laden der Ergebnisse: ' + (error instanceof Error ? error.message : error)));
-    }
-}
-
-async function deleteResult(resultId: number, teamName: string) {
-    if (!confirm(`Ergebnis für Team "${teamName}" wirklich löschen?`)) return;
-    try {
-        const response = await fetch(`${API_BASE}/results/${resultId}`, {method: 'DELETE'});
-        if (response.ok) {
-            await viewResults(_admin_last_quiz_id_filter);
-        } else {
-            showModal('Fehler', showError('Fehler beim Löschen des Ergebnisses'));
-        }
-    } catch (error: unknown) {
-        showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
-    }
-}
-
-async function editResult(resultId: number) {
-    location.href = `create_result.html?resultId=${resultId}`;
-}
-
-async function showAddResultModal() {
-    location.href = 'create_result.html';
 }
 
 async function viewUsers() {

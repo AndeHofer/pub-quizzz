@@ -39,7 +39,6 @@ export interface TeamDTO {
 export interface AnswerScoreDTO {
     questionNumber: number;
     points: number;
-    changed: boolean;
 }
 
 export interface ResultDTO {

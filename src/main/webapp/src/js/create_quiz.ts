@@ -403,7 +403,6 @@ if (quizForm) {
 // ── Global wiring ─────────────────────────────────────────────────────────────
 
 window.addEventListener('load', () => {
-    (window as any).goBack = () => goBack('admin_main.html');
     document.getElementById('backBtn')?.addEventListener('click', () => goBack('admin_main.html'));
     document.getElementById('uploadDocumentBtn')?.addEventListener('click', uploadDocument);
 });
