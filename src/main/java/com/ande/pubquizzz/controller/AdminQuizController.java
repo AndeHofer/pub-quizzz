@@ -51,13 +51,12 @@ public class AdminQuizController {
     }
 
     @PostMapping(value = "/create-quiz", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createQuiz(
+    public ResponseEntity<QuizDTO> createQuiz(
             @RequestPart("quiz") @Valid CreateQuizRequest request,
             @RequestParam Map<String, MultipartFile> allFiles) {
         log.info("POST /admin/create-quiz - questions={}, uploadedParts={}", request.getQuestions().size(), allFiles.size());
         injectImageUrls(request, allFiles);
-        quizService.createQuiz(request);
-        return ResponseEntity.ok("Quiz created successfully");
+        return ResponseEntity.ok(quizService.createQuiz(request));
     }
 
     @GetMapping("/quiz/{id}")

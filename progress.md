@@ -2,6 +2,12 @@
 
 ## Open Tasks
 
+- [x] Phase 50: Return created quiz payload (incl. `quizId`) from `POST /admin/create-quiz`
+- [x] Phase 50: Keep create/edit page open after save and switch create flow to update mode after first save
+- [x] Phase 50: Update controller tests for changed create endpoint response
+- [x] Phase 50: Run frontend verification (`npm run type-check`, `npm run build`)
+- [x] Phase 50: Attempt backend verification (`.\mvnw.cmd test`) and record environment blocker
+
 - [x] Phase 49: Reserve stable header space on quiz-details to prevent creator subtitle layout jump
 - [x] Phase 49: Switch creator subtitle visibility handling without changing layout height
 - [x] Phase 49: Run full verification (`npm run type-check`, `npm run build`, `mvn.cmd test`)
@@ -30,6 +36,15 @@
 
 ## Finished Phases
 
+### Phase 50: Create-Quiz Save Flow Switches to Update + No Redirect on Edit Save ✅ COMPLETE
+
+- Changed `POST /admin/create-quiz` to return created `QuizDTO` so frontend can capture `quizId` after first save.
+- Updated `create_quiz.ts` save handling so first save in create mode switches page into edit mode, later saves use
+  update endpoint, and edit save no longer navigates away.
+- Updated `AdminQuizControllerTest` create endpoint tests to validate JSON response payload (`quizId`).
+- Verification: `npm run type-check`, `npm run build` passed; `.\mvnw.cmd test` blocked because `JAVA_HOME` is not
+  defined correctly in this environment.
+
 ### Phase 49: Stable Quiz-Details Header Height (No Creator Jump) ✅ COMPLETE
 
 - Reserved fixed visual space for title + creator subtitle in quiz-details header to prevent layout jump when creator
@@ -43,15 +58,4 @@
   quiz is chosen.
 - Added optional smaller subtitle `erstellt von <creator>` when detail payload contains a creator.
 - Reset heading and subtitle to default when selection is cleared or detail loading fails.
-- Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.
-
-### Phase 47: Optional Quiz Creator (`Urheber`) in Backend + Admin Form ✅ COMPLETE
-
-- Added optional `creator` to quiz domain/API flow (`Quiz`, `CreateQuizRequest`, `QuizDTO`, `QuizDetailDTO`) and
-  persisted it in create/full-update service paths.
-- Implemented admin create/edit form field labeled `Urheber (optional)` and wired payload + edit prefill in
-  `create_quiz.ts`.
-- Applied requested behavior where clearing `Urheber` in edit mode stores it as empty (`null`) by sending trimmed empty
-  values as `null`.
-- Updated unit/controller coverage for creator in service and quiz endpoints.
 - Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.

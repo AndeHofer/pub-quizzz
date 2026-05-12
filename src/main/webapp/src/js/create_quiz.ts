@@ -192,15 +192,7 @@ function populateFormForEdit(quiz: QuizDTO) {
         creatorInput.value = quiz.creator ?? '';
     }
 
-    // Set the page title and submit button
-    const title = document.querySelector('h1');
-    if (title) {
-        title.textContent = 'Quiz bearbeiten';
-    }
-    const submitBtn = document.querySelector('#quizForm button[type="submit"]') as HTMLButtonElement | null;
-    if (submitBtn) {
-        submitBtn.textContent = 'Speichern';
-    }
+    setEditModeUi();
 
     // Fill in questions
     if (quiz.questions) {
@@ -262,6 +254,17 @@ function populateFormForEdit(quiz: QuizDTO) {
     const docsSection = document.getElementById('documentsSection');
     if (docsSection) docsSection.style.display = 'block';
     loadDocuments();
+}
+
+function setEditModeUi(): void {
+    const title = document.querySelector('h1');
+    if (title) {
+        title.textContent = 'Quiz bearbeiten';
+    }
+    const submitBtn = document.querySelector('#quizForm button[type="submit"]') as HTMLButtonElement | null;
+    if (submitBtn) {
+        submitBtn.textContent = 'Speichern';
+    }
 }
 
 // ── Form submit ───────────────────────────────────────────────────────────────
@@ -360,31 +363,30 @@ if (quizForm) {
         })
             .then(response => {
                 if (response.ok) {
-                    return response.text().then(text => {
-                        if (editingQuizId) {
-                            // In edit mode, redirect to admin page
-                            showMessage('✅ Quiz erfolgreich aktualisiert!', 'success');
-                            setTimeout(() => {
-                                window.location.href = 'admin_main.html';
-                            }, 1000);
-                        } else {
-                            // In create mode, clear form
-                            showMessage('✅ ' + text, 'success');
-                            quizForm.reset();
-                            // Clear image previews
-                            document.querySelectorAll('img[id^="preview_"]').forEach(img => {
-                                (img as HTMLImageElement).src = '';
-                                (img as HTMLImageElement).style.display = 'none';
-                            });
-                            // Reset all status indicators
-                            for (let i = 1; i <= 8; i++) updateStatus(i);
-                            // Hide success message after 3 seconds
+                    if (editingQuizId) {
+                        showMessage('✅ Quiz erfolgreich aktualisiert!', 'success');
+                        setTimeout(() => {
+                            const msg = document.getElementById('message');
+                            if (msg) msg.style.display = 'none';
+                        }, 3000);
+                        return;
+                    }
+
+                    return response.json()
+                        .then((createdQuiz: QuizDTO) => {
+                            if (typeof createdQuiz.quizId === 'number') {
+                                editingQuizId = createdQuiz.quizId;
+                                setEditModeUi();
+                                const docsSection = document.getElementById('documentsSection');
+                                if (docsSection) docsSection.style.display = 'block';
+                                loadDocuments();
+                            }
+                            showMessage('✅ Quiz erfolgreich gespeichert!', 'success');
                             setTimeout(() => {
                                 const msg = document.getElementById('message');
                                 if (msg) msg.style.display = 'none';
                             }, 3000);
-                        }
-                    });
+                        });
                 } else {
                     return response.text().then(text => {
                         showMessage('❌ Fehler: ' + text, 'error');

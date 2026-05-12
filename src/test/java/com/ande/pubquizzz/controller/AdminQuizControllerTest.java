@@ -170,14 +170,18 @@ class AdminQuizControllerTest {
     void createQuiz_withAtStartImage_storesImageAndReturnsOk() throws Exception {
         MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
         MockMultipartFile imagePart = new MockMultipartFile("hint_atstart_q1_h1", "start.jpg", "image/jpeg", "imgdata".getBytes());
+        QuizDTO created = new QuizDTO();
+        created.setQuizId(77L);
 
         when(imageStorageService.store(imagePart)).thenReturn("/uploads/start.jpg");
+        when(quizService.createQuiz(org.mockito.ArgumentMatchers.any())).thenReturn(created);
 
         mockMvc.perform(multipart("/admin/create-quiz")
                         .file(quizPart)
                         .file(imagePart)
                         .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quizId").value(77));
     }
 
     @Test
@@ -185,14 +189,18 @@ class AdminQuizControllerTest {
     void createQuiz_withAsHintImage_storesImageAndReturnsOk() throws Exception {
         MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
         MockMultipartFile imagePart = new MockMultipartFile("hint_ashint_q1_h1", "hint.jpg", "image/jpeg", "imgdata".getBytes());
+        QuizDTO created = new QuizDTO();
+        created.setQuizId(78L);
 
         when(imageStorageService.store(imagePart)).thenReturn("/uploads/hint.jpg");
+        when(quizService.createQuiz(org.mockito.ArgumentMatchers.any())).thenReturn(created);
 
         mockMvc.perform(multipart("/admin/create-quiz")
                         .file(quizPart)
                         .file(imagePart)
                         .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quizId").value(78));
     }
 
     @Test
@@ -200,14 +208,18 @@ class AdminQuizControllerTest {
     void createQuiz_withAnswerImageOnQuestion5_storesImageAndReturnsOk() throws Exception {
         MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json", buildMinimalQuizJson().getBytes());
         MockMultipartFile answerImagePart = new MockMultipartFile("answer_image_q5", "a5.jpg", "image/jpeg", "imgdata".getBytes());
+        QuizDTO created = new QuizDTO();
+        created.setQuizId(79L);
 
         when(imageStorageService.store(answerImagePart)).thenReturn("/uploads/a5.jpg");
+        when(quizService.createQuiz(org.mockito.ArgumentMatchers.any())).thenReturn(created);
 
         mockMvc.perform(multipart("/admin/create-quiz")
                         .file(quizPart)
                         .file(answerImagePart)
                         .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quizId").value(79));
     }
 
     @Test
@@ -278,11 +290,15 @@ class AdminQuizControllerTest {
     void createQuiz_withBlankQuestionText_isAllowedAsDraft() throws Exception {
         MockMultipartFile quizPart = new MockMultipartFile("quiz", "", "application/json",
                 buildDraftQuizJson().getBytes());
+        QuizDTO created = new QuizDTO();
+        created.setQuizId(80L);
+        when(quizService.createQuiz(org.mockito.ArgumentMatchers.any())).thenReturn(created);
 
         mockMvc.perform(multipart("/admin/create-quiz")
                         .file(quizPart)
                         .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quizId").value(80));
     }
 
     @Test

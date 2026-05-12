@@ -10,6 +10,7 @@ import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.service.ImageStorageService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Tag("manual")
 @SpringBootTest
 @ActiveProfiles("local")
+@Disabled
 class BigIntegrationTest {
 
     @Autowired

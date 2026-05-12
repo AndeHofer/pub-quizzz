@@ -4,6 +4,17 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 47: Optional Quiz Creator (`Urheber`) in Backend + Admin Form ✅ COMPLETE
+
+- Added optional `creator` to quiz domain/API flow (`Quiz`, `CreateQuizRequest`, `QuizDTO`, `QuizDetailDTO`) and
+  persisted it in create/full-update service paths.
+- Implemented admin create/edit form field labeled `Urheber (optional)` and wired payload + edit prefill in
+  `create_quiz.ts`.
+- Applied requested behavior where clearing `Urheber` in edit mode stores it as empty (`null`) by sending trimmed empty
+  values as `null`.
+- Updated unit/controller coverage for creator in service and quiz endpoints.
+- Verification passed: `npm run type-check`, `npm run build`, `mvn.cmd test`.
+
 ### Phase 46: Informative Admin Controller Call Logging ✅ COMPLETE
 
 - Archived rollout of per-endpoint admin controller call logging with `@Slf4j` alignment and successful verification.
