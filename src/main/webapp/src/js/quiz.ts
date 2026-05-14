@@ -31,9 +31,6 @@ function renderResults(entries: QuizResultEntry[]): void {
 
         // Detail row (hidden by default)
         const sortedAnswers = [...entry.answers].sort((a, b) => a.questionNumber - b.questionNumber);
-        const answerHeaders = sortedAnswers
-            .map(a => `<th class="py-2 px-3 text-center">${numberBadge(a.questionNumber)}</th>`)
-            .join('');
         const answerCells = sortedAnswers
             .map(a => `<td class="py-2 px-3 text-center text-sm sm:text-base font-medium">${a.points}</td>`)
             .join('');
@@ -43,9 +40,6 @@ function renderResults(entries: QuizResultEntry[]): void {
                 <td colspan="4" class="px-3 pb-4 pt-2">
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse">
-                            <thead>
-                                <tr class="border-b border-gray-200">${answerHeaders}</tr>
-                            </thead>
                             <tbody>
                                 <tr>${answerCells}</tr>
                             </tbody>
