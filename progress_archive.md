@@ -4,6 +4,16 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 69: Directional Top Navigation on Leaderboards ✅ COMPLETE
+
+- Added a second top navigation row under `&larr; Startseite` on leaderboard pages with directional neighboring links.
+- Implemented exact flow requested:
+  - `points-leaderboard.html`: right link `Medaillenspiegel &rarr;`
+  - `medal-leaderboard.html`: left link `&larr; Punkterangliste` and right link `Durchschnittsrangliste &rarr;`
+  - `average-leaderboard.html`: left link `&larr; Medaillenspiegel`
+- Kept existing visual style/classes and responsive layout behavior unchanged.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 68: `register_user` Switched to Public-Template Layout Style ✅ COMPLETE
 
 - Reworked `src/main/webapp/src/admin/register_user.html` to use the same modern card/container layout style as the

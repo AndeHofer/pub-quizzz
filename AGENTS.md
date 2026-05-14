@@ -11,8 +11,8 @@ Guidance for AI coding agents working in this repository.
 - Document all the steps you plan to do in a "progress.md" file before you start coding. This file should be updated as
   you make progress and should include a task list of what was done, what is left to do, and any blockers you encounter.
 - Ensure to document your progress after every single step in case the agent crashes.
-- Keep only 3 finished features of less (not more than 50 lines) in progress.md and move older to progress_archive.md to
-  keep the progress.md clean and short.
+- Keep at most 3 finished features in `progress.md`; move older finished entries to `progress_archive.md` to keep
+  `progress.md` clean and short.
 - progress.md and progress_archive.md should be written in English.
 - Minimize the commands executed that need to be confirmed by user input. E.g. do not run individual tests, but run all
   tests and then fix all at once.
@@ -20,8 +20,9 @@ Guidance for AI coding agents working in this repository.
   the files afterwards again.
 - Before confirming that features are working, ensure to run all the tests performed in the CICD pipeline, as well as
   frontend type check is successful.
-- run maven always in windows style to avoid creating nul files
-- ignore folder like node_modules, target
+- Run Maven always in Windows style to avoid creating NUL files.
+- Ignore folders like `node_modules` and `target` during search and edit work.
+- `README.md` is informational; executable agent instructions are defined in `AGENTS.md`.
 
 ## Backend
 

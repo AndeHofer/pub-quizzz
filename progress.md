@@ -2,6 +2,10 @@
 
 ## Open Tasks
 
+- [x] Phase 72: Clarify and normalize `AGENTS.md` wording for agent instructions
+- [x] Phase 72: Keep instruction source explicit (`AGENTS.md` authoritative, `README.md` informational)
+- [x] Phase 72: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 71: Add extensible app usage statistics table for authentication success events
 - [x] Phase 71: Persist `AUTH_SUCCESS` events with username (string) and timestamp through authentication listener
 - [x] Phase 71: Add unit/integration tests for usage-event persistence and run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
@@ -108,7 +112,23 @@
     - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
       `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
 
+- Phase 72 verification status:
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
 ## Finished Phases
+
+### Phase 72: Instruction File Cleanup and Clarification ✅ COMPLETE
+
+- Cleaned up wording in `AGENTS.md` for clarity and consistency (progress retention, Maven/NUL wording, folder-ignore
+  wording).
+- Explicitly documented instruction-source precedence: `README.md` is informational; executable agent instructions are
+  in `AGENTS.md`.
+- Kept all existing behavioral rules unchanged (`no push/commit`, no worktrees/branches, test requirements,
+  German UI text, business rules).
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 71: Persist Authentication Usage Events in Extensible Statistics Table ✅ COMPLETE
 
@@ -136,14 +156,4 @@
   with
   `&larr; Punkterangliste` kept on second row.
 - Kept `average-leaderboard.html` navigation as previously confirmed.
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 69: Directional Top Navigation on Leaderboards ✅ COMPLETE
-
-- Added a second top navigation row under `&larr; Startseite` on leaderboard pages with directional neighboring links.
-- Implemented exact flow requested:
-    - `points-leaderboard.html`: right link `Medaillenspiegel &rarr;`
-    - `medal-leaderboard.html`: left link `&larr; Punkterangliste` and right link `Durchschnittsrangliste &rarr;`
-    - `average-leaderboard.html`: left link `&larr; Medaillenspiegel`
-- Kept existing visual style/classes and responsive layout behavior unchanged.
 - Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
