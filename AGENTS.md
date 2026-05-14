@@ -34,17 +34,23 @@ Guidance for AI coding agents working in this repository.
 - Use Lombok for reducing boilerplate code in the backend.
 - Use MapStruct for mapping between entities and DTOs in the backend.
 
-## Business Rules (Critical)
-
-- Each quiz must have exactly **8 questions**
-- Questions 1–4 must have exactly **4 hints**
-- Questions 5–8 must have exactly **3 hints**
-
 ## Frontend
 
 - UI text is in **German** — keep all user-facing strings in German
 - Use TypeScript for the frontend.
 - Use Tailwind CSS for styling the frontend.
 - Use Vite for the frontend build tool.
+
+## Business Rules (Critical)
+
+- Each quiz must have exactly **8 questions**
+- Questions 1–4 must have exactly **4 hints**
+- Questions 5–8 must have exactly **3 hints**
+
+## Superpowers rules
+
+- do not create worktrees or branches
+- do not push or commit
+
 
 
