@@ -136,12 +136,10 @@ function renderRows(results: ResultDTO[]): void {
             });
         }
 
-        let questionHeaderCells = '';
         let questionValueCells = '';
         for (let i = 1; i <= 8; i++) {
             const answer = answersMap[i];
             const points = answer && typeof answer.points === 'number' ? answer.points : 0;
-            questionHeaderCells += `<th class="col-question">Q${i}</th>`;
             questionValueCells += `<td class="text-center">${points}</td>`;
         }
 
@@ -153,21 +151,15 @@ function renderRows(results: ResultDTO[]): void {
                     <button type="button" class="icon-btn edit-result-btn" data-id="${result.resultsId}" title="Ergebnis bearbeiten">✏️</button>
                     <button type="button" class="icon-btn delete-result-btn" data-id="${result.resultsId}" data-name="${escapeHtml(result.teamName)}" title="Ergebnis löschen">🗑️</button>
                 </td>
+                <td class="text-center"><strong>${result.totalPoints || 0}</strong></td>
             </tr>
             <tr class="result-group-detail">
-                <td colspan="3" class="result-points-cell">
+                <td colspan="4" class="result-points-cell">
                     <div class="result-points-wrap">
-                        <table class="result-points-table" aria-label="Punkte für ${escapeHtml(result.teamName)} am ${escapeHtml(result.quizDate)}">
-                            <thead>
-                                <tr>
-                                    ${questionHeaderCells}
-                                    <th class="col-total">Gesamt</th>
-                                </tr>
-                            </thead>
+                        <table class="result-points-table">
                             <tbody>
                                 <tr>
                                     ${questionValueCells}
-                                    <td class="text-center"><strong>${result.totalPoints || 0}</strong></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -177,19 +177,22 @@ html {
     }
 
     .results-table-grouped .col-team {
-        @apply w-[35%] sm:w-[34%];
+        @apply w-[35%] sm:w-[35%];
     }
 
     .results-table-grouped .col-date {
-        @apply w-[25%] sm:w-[24%];
+        @apply w-[25%] sm:w-[25%];
     }
 
     .results-table-grouped .col-actions {
-        @apply w-[40%] sm:w-[42%] text-center;
+        @apply w-[25%] sm:w-[25%] text-center;
     }
 
-    .results-table-grouped .col-question,
     .results-table-grouped .col-total {
+        @apply w-[15%] sm:w-[15%] text-center;
+    }
+
+    .results-table-grouped .col-question {
         @apply text-center;
     }
 

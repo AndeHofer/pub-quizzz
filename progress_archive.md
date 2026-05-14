@@ -4,6 +4,32 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 67A: Remove `changed` from UI/API Contract (DB Column Kept for Safe Rollout) ✅ COMPLETE
+
+- Removed visual changed-marker usage from `src/main/webapp/src/js/admin_results.ts` so result points render without
+  appended `*` markers.
+- Removed `changed` from shared frontend and backend answer DTO contracts:
+  `src/main/webapp/src/js/types.ts` and `src/main/java/com/ande/pubquizzz/dto/AnswerScoreDTO.java`.
+- Updated backend mapping/serialization to stop exposing `changed` in API responses:
+  `src/main/java/com/ande/pubquizzz/mapper/ResultMapper.java` and
+  `src/main/java/com/ande/pubquizzz/service/ResultService.java`.
+- Updated impacted controller/service tests to remove `changed` setter/assertion expectations while preserving behavior
+  coverage (`UserQuizControllerTest`, `UserTeamControllerTest`, `ResultServiceDeleteUpdateTest`,
+  `ResultServiceTeamResultsTest`).
+- Kept persistence field/DB column unchanged intentionally for safe phased rollout (Phase B will remove entity field +
+  DB
+  column/migration).
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
+### Phase 66: Same-Date Results Sorted by Higher Total Points First ✅ COMPLETE
+
+- Updated `compareResultsNewestFirst` in `src/main/webapp/src/js/admin_results.ts` so sorting now applies tie-breakers
+  in this order: `quizDate` DESC, then `totalPoints` DESC, then `resultsId` DESC.
+- Added robust total-points fallback (`undefined`/non-number -> `0`) so ordering remains deterministic.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
 ### Phase 65: Full-Width Per-Result Points Mini-Table (No Clipped Q/Gesamt Columns) ✅ COMPLETE
 
 - Refactored `src/main/webapp/src/js/admin_results.ts` result block rendering to keep top-level rows at 3 columns

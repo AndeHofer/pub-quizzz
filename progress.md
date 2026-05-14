@@ -2,6 +2,17 @@
 
 ## Open Tasks
 
+- [x] Phase 70: Align leaderboard top navigation rows so available side links are shown in first line with `Startseite`
+  where requested
+- [x] Phase 70: Keep medaillen left backlink (`Punkterangliste`) on second line while moving `Durchschnittsrangliste` to
+  first line
+- [x] Phase 70: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 69: Add directional top navigation row to public leaderboard pages
+- [x] Phase 69: Keep `Startseite` top link and add page-specific left/right neighbor links (Punkte -> right Medaillen;
+  Medaillen -> left Punkte + right Durchschnitt; Durchschnitt -> left Medaillen)
+- [x] Phase 69: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 68: Migrate `admin/register_user.html` to public-template layout style used by non-admin pages
 - [x] Phase 68: Keep existing register form behavior/IDs and admin navigation actions unchanged
 - [x] Phase 68: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
@@ -75,7 +86,43 @@
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
 
+- Phase 69 verification status:
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
+- Phase 70 verification status:
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
 ## Finished Phases
+
+### Phase 70: Leaderboard Top Row Link Placement Refinement ✅ COMPLETE
+
+- Updated leaderboard navigation placement so available destination links appear in the first row with
+  `&larr; Startseite`
+  where requested.
+- `points-leaderboard.html`: first row now contains left `&larr; Startseite` and right `Medaillenspiegel &rarr;`;
+  removed
+  second-row placeholder layout.
+- `medal-leaderboard.html`: first row now contains left `&larr; Startseite` and right `Durchschnittsrangliste &rarr;`,
+  with
+  `&larr; Punkterangliste` kept on second row.
+- Kept `average-leaderboard.html` navigation as previously confirmed.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
+
+### Phase 69: Directional Top Navigation on Leaderboards ✅ COMPLETE
+
+- Added a second top navigation row under `&larr; Startseite` on leaderboard pages with directional neighboring links.
+- Implemented exact flow requested:
+    - `points-leaderboard.html`: right link `Medaillenspiegel &rarr;`
+    - `medal-leaderboard.html`: left link `&larr; Punkterangliste` and right link `Durchschnittsrangliste &rarr;`
+    - `average-leaderboard.html`: left link `&larr; Medaillenspiegel`
+- Kept existing visual style/classes and responsive layout behavior unchanged.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 68: `register_user` Switched to Public-Template Layout Style ✅ COMPLETE
 
@@ -86,31 +133,5 @@
 - Kept existing register workflow contract unchanged by preserving all relevant element IDs and actions
   (`username`, `password`, `role`, `registerUserBtn`, `backBtn`, `message`) used by `register_user.ts`.
 - Kept UI text in German and aligned input placeholders/buttons with German wording.
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
-  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
-
-### Phase 67A: Remove `changed` from UI/API Contract (DB Column Kept for Safe Rollout) ✅ COMPLETE
-
-- Removed visual changed-marker usage from `src/main/webapp/src/js/admin_results.ts` so result points render without
-  appended `*` markers.
-- Removed `changed` from shared frontend and backend answer DTO contracts:
-  `src/main/webapp/src/js/types.ts` and `src/main/java/com/ande/pubquizzz/dto/AnswerScoreDTO.java`.
-- Updated backend mapping/serialization to stop exposing `changed` in API responses:
-  `src/main/java/com/ande/pubquizzz/mapper/ResultMapper.java` and
-  `src/main/java/com/ande/pubquizzz/service/ResultService.java`.
-- Updated impacted controller/service tests to remove `changed` setter/assertion expectations while preserving behavior
-  coverage (`UserQuizControllerTest`, `UserTeamControllerTest`, `ResultServiceDeleteUpdateTest`,
-  `ResultServiceTeamResultsTest`).
-- Kept persistence field/DB column unchanged intentionally for safe phased rollout (Phase B will remove entity field +
-  DB
-  column/migration).
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
-  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
-
-### Phase 66: Same-Date Results Sorted by Higher Total Points First ✅ COMPLETE
-
-- Updated `compareResultsNewestFirst` in `src/main/webapp/src/js/admin_results.ts` so sorting now applies tie-breakers
-  in this order: `quizDate` DESC, then `totalPoints` DESC, then `resultsId` DESC.
-- Added robust total-points fallback (`undefined`/non-number -> `0`) so ordering remains deterministic.
 - Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
   SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).

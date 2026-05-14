@@ -6,10 +6,9 @@
 - Always remove unused imports.
 - Document all the steps you plan to do in a "progress.md" file before you start coding. This file should be updated as
   you make progress and should include a task list of what was done, what is left to do, and any blockers you encounter.
-- Ensure to document your progress after every single step in case copilot crashes.
+- Ensure to document your progress after every single step in case the agent crashes.
 - Keep only 3 finished features of less (not more than 50 lines) in progress.md and move older to progress_archive.md to
-  keep the progress.md clean and
-  short.
+  keep the progress.md clean and short.
 - progress.md and progress_archive.md should be written in English.
 - Minimize the commands executed that need to be confirmed by user input. E.g. do not run individual tests, but run all
   tests and then fix all at once.
