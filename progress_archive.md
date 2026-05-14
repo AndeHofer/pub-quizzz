@@ -4,6 +4,18 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 68: `register_user` Switched to Public-Template Layout Style ✅ COMPLETE
+
+- Reworked `src/main/webapp/src/admin/register_user.html` to use the same modern card/container layout style as the
+  non-admin/public pages (`bg-gray-50`, centered responsive container, card section blocks).
+- Added top contextual link `&larr; Admin Bereich`, favicon, and standardized page title styling consistent with recent
+  admin pages using the same template language.
+- Kept existing register workflow contract unchanged by preserving all relevant element IDs and actions
+  (`username`, `password`, `role`, `registerUserBtn`, `backBtn`, `message`) used by `register_user.ts`.
+- Kept UI text in German and aligned input placeholders/buttons with German wording.
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
+  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
+
 ### Phase 67A: Remove `changed` from UI/API Contract (DB Column Kept for Safe Rollout) ✅ COMPLETE
 
 - Removed visual changed-marker usage from `src/main/webapp/src/js/admin_results.ts` so result points render without

@@ -2,6 +2,10 @@
 
 ## Open Tasks
 
+- [x] Phase 71: Add extensible app usage statistics table for authentication success events
+- [x] Phase 71: Persist `AUTH_SUCCESS` events with username (string) and timestamp through authentication listener
+- [x] Phase 71: Add unit/integration tests for usage-event persistence and run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 70: Align leaderboard top navigation rows so available side links are shown in first line with `Startseite`
   where requested
 - [x] Phase 70: Keep medaillen left backlink (`Punkterangliste`) on second line while moving `Durchschnittsrangliste` to
@@ -98,7 +102,27 @@
     - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
       `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
 
+- Phase 71 verification status:
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
 ## Finished Phases
+
+### Phase 71: Persist Authentication Usage Events in Extensible Statistics Table ✅ COMPLETE
+
+- Added new generic usage-events persistence model with table `app_usage_event` via JPA entity
+  `src/main/java/com/ande/pubquizzz/database/entities/UsageEvent.java`.
+- Stored authentication success events as `AUTH_SUCCESS` with requested username string + timestamp via
+  `UsageEventService` and listener integration.
+- Wired login success path in `AuthenticationEventListener` to persist usage rows without changing login behavior.
+- Added tests for persistence and event flow:
+  - `UsageEventPersistenceTest`
+  - `UsageEventServiceTest`
+  - `AuthenticationEventListenerTest`
+  - `AuthenticationUsageEventPersistenceTest`
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 70: Leaderboard Top Row Link Placement Refinement ✅ COMPLETE
 
@@ -123,15 +147,3 @@
     - `average-leaderboard.html`: left link `&larr; Medaillenspiegel`
 - Kept existing visual style/classes and responsive layout behavior unchanged.
 - Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 68: `register_user` Switched to Public-Template Layout Style ✅ COMPLETE
-
-- Reworked `src/main/webapp/src/admin/register_user.html` to use the same modern card/container layout style as the
-  non-admin/public pages (`bg-gray-50`, centered responsive container, card section blocks).
-- Added top contextual link `&larr; Admin Bereich`, favicon, and standardized page title styling consistent with recent
-  admin pages using the same template language.
-- Kept existing register workflow contract unchanged by preserving all relevant element IDs and actions
-  (`username`, `password`, `role`, `registerUserBtn`, `backBtn`, `message`) used by `register_user.ts`.
-- Kept UI text in German and aligned input placeholders/buttons with German wording.
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test` (`BUILD
-  SUCCESS`, 206 tests, 0 failures, 0 errors, 0 skipped).
