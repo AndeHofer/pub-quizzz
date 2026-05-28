@@ -2,13 +2,28 @@
 
 A simple webpage to archive results, quiz and answers.
 
+### Tech stack
+
+:seedling:
+Spring Boot  
+Java 25  
+JUnit  
+Mockito  
+Spring Test  
+Spring Security  
+Lombok  
+MapStruct  
+TypeScript  
+Tailwind CSS  
+Vite
+
 ## How to run
 
 Set these environment variables:
 
-ADMIN_USER<br>
-ADMIN_PASSWORD<br>
-DEFAULT_USER<br>
+ADMIN_USER  
+ADMIN_PASSWORD  
+DEFAULT_USER  
 DEFAULT_PASSWORD
 
 ## TODOS
