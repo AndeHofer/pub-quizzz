@@ -4,6 +4,20 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 71: Persist Authentication Usage Events in Extensible Statistics Table ✅ COMPLETE
+
+- Added new generic usage-events persistence model with table `app_usage_event` via JPA entity
+  `src/main/java/com/ande/pubquizzz/database/entities/UsageEvent.java`.
+- Stored authentication success events as `AUTH_SUCCESS` with requested username string + timestamp via
+  `UsageEventService` and listener integration.
+- Wired login success path in `AuthenticationEventListener` to persist usage rows without changing login behavior.
+- Added tests for persistence and event flow:
+  - `UsageEventPersistenceTest`
+  - `UsageEventServiceTest`
+  - `AuthenticationEventListenerTest`
+  - `AuthenticationUsageEventPersistenceTest`
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 69: Directional Top Navigation on Leaderboards ✅ COMPLETE
 
 - Added a second top navigation row under `&larr; Startseite` on leaderboard pages with directional neighboring links.
