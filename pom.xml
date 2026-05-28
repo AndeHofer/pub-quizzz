@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.6</version>
         <relativePath />
     </parent>
     <groupId>com.ande</groupId>
@@ -94,7 +94,7 @@
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>v24.14.1</nodeVersion>
+                            <nodeVersion>v24.15.0</nodeVersion>
                         </configuration>
                     </execution>
                     <execution>

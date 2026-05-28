@@ -1,3 +1,5 @@
+import {buildVersionBadgeMarkup} from './version-badge';
+
 function setAdminCardVisible(isVisible: boolean): void {
     const adminCard = document.getElementById('adminCard') as HTMLAnchorElement | null;
     if (!adminCard) {
@@ -13,7 +15,7 @@ function setVersionBadge(version: string): void {
         return;
     }
 
-    badge.textContent = version;
+    badge.innerHTML = buildVersionBadgeMarkup(version);
 }
 
 setAdminCardVisible(false);

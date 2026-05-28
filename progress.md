@@ -2,6 +2,10 @@
 
 ## Open Tasks
 
+- [x] Phase 73: Make homepage version badge render as clickable GitHub link using `v<version>` label
+- [x] Phase 73: Add frontend unit test for version badge link markup generation (TDD red/green)
+- [x] Phase 73: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 72: Clarify and normalize `AGENTS.md` wording for agent instructions
 - [x] Phase 72: Keep instruction source explicit (`AGENTS.md` authoritative, `README.md` informational)
 - [x] Phase 72: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
@@ -118,7 +122,25 @@
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
 
+- Phase 73 verification status:
+  - `npm exec vitest run src/js/version-badge.test.ts` failed first (module missing), then passed after implementation
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+
 ## Finished Phases
+
+### Phase 73: Clickable GitHub Version Badge on Homepage ✅ COMPLETE
+
+- Updated homepage badge rendering so version is displayed as `v<version>` and links to
+  `https://github.com/AndeHofer/pub-quizzz`.
+- Added dedicated frontend unit test (`src/main/webapp/src/js/version-badge.test.ts`) covering generated link markup
+  (`href`, `target`, `rel`, and label).
+- Extracted badge markup creation into `src/main/webapp/src/js/version-badge.ts` and reused it from
+  `src/main/webapp/src/js/index.ts`.
+- Verification passed: `npm exec vitest run src/js/version-badge.test.ts`, `npm run type-check` (webapp),
+  `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 72: Instruction File Cleanup and Clarification ✅ COMPLETE
 
@@ -142,18 +164,4 @@
   - `UsageEventServiceTest`
   - `AuthenticationEventListenerTest`
   - `AuthenticationUsageEventPersistenceTest`
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 70: Leaderboard Top Row Link Placement Refinement ✅ COMPLETE
-
-- Updated leaderboard navigation placement so available destination links appear in the first row with
-  `&larr; Startseite`
-  where requested.
-- `points-leaderboard.html`: first row now contains left `&larr; Startseite` and right `Medaillenspiegel &rarr;`;
-  removed
-  second-row placeholder layout.
-- `medal-leaderboard.html`: first row now contains left `&larr; Startseite` and right `Durchschnittsrangliste &rarr;`,
-  with
-  `&larr; Punkterangliste` kept on second row.
-- Kept `average-leaderboard.html` navigation as previously confirmed.
 - Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
