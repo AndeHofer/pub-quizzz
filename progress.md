@@ -2,6 +2,11 @@
 
 ## Open Tasks
 
+- [x] Phase 74: Wire frontend `npm test` to run Vitest in CI-friendly mode
+- [x] Phase 74: Integrate frontend tests into Maven `test` phase via frontend-maven-plugin
+- [x] Phase 74: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`) and confirm Maven
+  triggers Vitest
+
 - [x] Phase 73: Make homepage version badge render as clickable GitHub link using `v<version>` label
 - [x] Phase 73: Add frontend unit test for version badge link markup generation (TDD red/green)
 - [x] Phase 73: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
@@ -129,7 +134,26 @@
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
 
+- Phase 74 verification status:
+    - `./mvnw.cmd test` failed first after Maven integration because `npm test` still used placeholder script (
+      `Error: no test specified`)
+    - `npm run test` (in `src/main/webapp`) passed after switching script to `vitest run` (1 test file, 1 test)
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed and now includes frontend step `frontend:2.0.0:npm (npm run test)` invoking Vitest
+
 ## Finished Phases
+
+### Phase 74: Integrate Frontend Vitest into Maven `test` Lifecycle ✅ COMPLETE
+
+- Replaced placeholder frontend test script with real Vitest execution by setting
+  `"test": "vitest run"` in `src/main/webapp/package.json`.
+- Added frontend Maven execution `npm run test` bound to `test` phase in `pom.xml` so
+  `./mvnw.cmd test` now runs backend JUnit tests and frontend Vitest tests together.
+- Verified TDD red/green flow for wiring: Maven `test` failed before script fix, then passed
+  after script update.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and
+  `./mvnw.cmd test` (including frontend plugin test execution).
 
 ### Phase 73: Clickable GitHub Version Badge on Homepage ✅ COMPLETE
 
@@ -150,18 +174,4 @@
   in `AGENTS.md`.
 - Kept all existing behavioral rules unchanged (`no push/commit`, no worktrees/branches, test requirements,
   German UI text, business rules).
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 71: Persist Authentication Usage Events in Extensible Statistics Table ✅ COMPLETE
-
-- Added new generic usage-events persistence model with table `app_usage_event` via JPA entity
-  `src/main/java/com/ande/pubquizzz/database/entities/UsageEvent.java`.
-- Stored authentication success events as `AUTH_SUCCESS` with requested username string + timestamp via
-  `UsageEventService` and listener integration.
-- Wired login success path in `AuthenticationEventListener` to persist usage rows without changing login behavior.
-- Added tests for persistence and event flow:
-  - `UsageEventPersistenceTest`
-  - `UsageEventServiceTest`
-  - `AuthenticationEventListenerTest`
-  - `AuthenticationUsageEventPersistenceTest`
 - Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
