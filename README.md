@@ -4,8 +4,7 @@ A simple webpage to archive results, quiz and answers.
 
 ### Tech stack
 
-:seedling:
-Spring Boot  
+:seedling:Spring Boot 4.x
 Java 25  
 JUnit  
 Mockito  
