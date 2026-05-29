@@ -170,6 +170,20 @@ class AdminUserControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    void registerUser_withoutCsrf_isForbidden() throws Exception {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setUsername("newuser");
+        request.setPassword("secret");
+        request.setRole(Role.USER);
+
+        mockMvc.perform(post("/admin/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void registerUser_withDuplicateUsername_returnsBadRequest() throws Exception {
         doThrow(new BusinessValidationException("Username already exists: dup"))
                 .when(userService).register(any(CreateUserRequest.class));

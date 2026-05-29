@@ -3,6 +3,7 @@ export {};
 import {goBack, showMessage} from './utils';
 import type {QuizDTO, ResultDTO, TeamDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
+import {withEnsuredCsrfHeaders} from './csrf';
 
 type PointsValue = 0 | 1 | 2 | 3 | 5;
 
@@ -162,7 +163,7 @@ async function saveResult(event: Event): Promise<void> {
 
         const response = await fetch(url, {
             method,
-            headers: {'Content-Type': 'application/json'},
+            headers: await withEnsuredCsrfHeaders({'Content-Type': 'application/json'}),
             body: JSON.stringify(body)
         });
 

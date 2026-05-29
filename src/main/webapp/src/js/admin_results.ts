@@ -4,6 +4,7 @@ import type {QuizDTO, ResultDTO} from './types';
 import {goBack, showMessage} from './utils';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 import {escapeHtml} from './html-utils';
+import {withEnsuredCsrfHeaders} from './csrf';
 
 const quizFilterSelect = document.getElementById('resultFilterQuiz') as HTMLSelectElement | null;
 const teamFilterSelect = document.getElementById('resultFilterTeam') as HTMLSelectElement | null;
@@ -248,7 +249,10 @@ async function deleteResult(resultId: number, teamName: string): Promise<void> {
     if (!confirm(`Ergebnis für Team "${teamName}" wirklich löschen?`)) return;
 
     try {
-        const response = await fetch(`/admin/results/${resultId}`, {method: 'DELETE'});
+        const response = await fetch(`/admin/results/${resultId}`, {
+            method: 'DELETE',
+            headers: await withEnsuredCsrfHeaders()
+        });
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }

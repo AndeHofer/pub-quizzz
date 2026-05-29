@@ -4,6 +4,78 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 77B: Frontend CSRF Header Wiring for Admin Mutation Fetch Calls ✅ COMPLETE
+
+- Added shared frontend CSRF helper `src/main/webapp/src/js/csrf.ts` that resolves the token from cookie
+  (`XSRF-TOKEN` -> `X-XSRF-TOKEN`) with fallback to Spring meta tags (`_csrf`, `_csrf_header`).
+- Extended `csrf.ts` with `withEnsuredCsrfHeaders(...)` to proactively bootstrap token availability via
+  `GET /api/bootstrap` when no CSRF token source exists yet, then retry cookie/meta extraction before mutation calls.
+- Added frontend unit coverage in `src/main/webapp/src/js/csrf.test.ts` for cookie extraction, meta fallback, and
+  preserving existing headers when no token source exists, plus bootstrap fallback behavior.
+- Wired CSRF headers into admin mutation requests in:
+  `src/main/webapp/src/js/admin_functions.ts`,
+  `src/main/webapp/src/js/admin_results.ts`,
+  `src/main/webapp/src/js/create_result.ts`,
+  `src/main/webapp/src/js/create_quiz.ts`, and
+  `src/main/webapp/src/js/register_user.ts`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
+### Phase 77: Re-enable CSRF Protection for Session-Based Admin Mutations ✅ COMPLETE
+
+- Enabled Spring Security CSRF protection in `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` and kept
+  `h2-console` excluded from CSRF checks to preserve local admin tooling behavior.
+- Added explicit missing-CSRF regression coverage for admin mutation endpoints in
+  `src/test/java/com/ande/pubquizzz/security/SecurityAccessTest.java`,
+  `src/test/java/com/ande/pubquizzz/controller/AdminUserControllerTest.java`, and
+  `src/test/java/com/ande/pubquizzz/controller/AdminResultControllerTest.java`.
+- Updated legacy controller tests in `src/test/java/com/ande/pubquizzz/controller/AdminQuizControllerTest.java` and
+  `src/test/java/com/ande/pubquizzz/controller/AdminBackupControllerTest.java` to include `.with(csrf())` on mutating
+  requests now that CSRF is enforced globally.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
+### Phase 76A: Multiline Log Event Grouping for Stacktraces ✅ COMPLETE
+
+- Updated `AdminLogService` to group log lines into full events using header-line detection, so stacktrace continuation
+  lines stay attached to their originating ERROR event.
+- Changed filtering behavior to operate on full event text (`rawLine` now contains full multiline event), enabling
+  stacktrace search while keeping level/time filtering based on parsed event header.
+- Added backend TDD coverage for multiline grouping and stacktrace search in
+  `src/test/java/com/ande/pubquizzz/service/AdminLogServiceTest.java` and expanded controller JSON assertions in
+  `src/test/java/com/ande/pubquizzz/controller/AdminUserControllerTest.java`.
+- Added frontend unit coverage in `src/main/webapp/src/js/admin_logs.test.ts` to assert multiline raw rendering in
+  log-stream details.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
+### Phase 76: Admin Log-Stream Page from Logback File with Search/Filter/Line Amount ✅ COMPLETE
+
+- Added new admin-only backend endpoint `GET /admin/logs` in `AdminUserController` returning explicit DTO response
+  (`AdminLogResponseDTO`) with log entries (`AdminLogEntryDTO`), applied limit, and returned count.
+- Implemented `AdminLogService` to read only active Logback file (`/logs/pub-quizzz.log`), parse log lines, and apply
+  server-side filters (`q`, `level`, `from`, `to`) plus line amount (`limit`, default 200, max 1000).
+- Added backend tests:
+  `AdminLogServiceTest` (business logic unit coverage) and `AdminUserControllerTest` endpoint/security/validation
+  coverage for `/admin/logs`.
+- Added new admin page `src/main/webapp/src/admin/logs.html` with log-stream UI (not table), German filter controls,
+  and script `src/main/webapp/src/js/admin_logs.ts` including URL query sync and safe rendering.
+- Wired admin navigation under `Wartung` (`viewLogsBtn`) and added Vite entry `logs`; added frontend unit tests in
+  `src/main/webapp/src/js/admin_logs.test.ts`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
+### Phase 75: Admin Monthly Login Statistics by Role (`USER`/`ADMIN`) ✅ COMPLETE
+
+- Added monthly login stats API for admins at `GET /admin/login-stats/monthly`, grouped by month and current user role,
+  based on persisted `AUTH_SUCCESS` usage events.
+- Added explicit backend DTO + service mapping and native repository aggregation query joining usage events to users by
+  username.
+- Added backend tests:
+  `MonthlyLoginStatsPersistenceTest`, `UsageEventServiceTest` extension, and `AdminUserControllerTest` endpoint/security
+  coverage.
+- Added new admin page `src/main/webapp/src/admin/login_stats.html` + script
+  `src/main/webapp/src/js/admin_login_stats.ts`, plus navigation wiring from admin main page and Vite entry.
+- Added frontend unit tests for login stats rendering helpers in
+  `src/main/webapp/src/js/admin_login_stats.test.ts`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 74: Integrate Frontend Vitest into Maven `test` Lifecycle ✅ COMPLETE
 
 - Replaced placeholder frontend test script with real Vitest execution by setting

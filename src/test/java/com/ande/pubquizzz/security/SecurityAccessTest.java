@@ -10,11 +10,14 @@ import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilte
 import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,5 +89,35 @@ class SecurityAccessTest {
     void adminPath_authenticatedNonAdmin_isForbidden() throws Exception {
         mockMvc.perform(get("/admin/users"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminImportBackup_withoutCsrf_isForbidden() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "backup.zip",
+                "application/zip",
+                "dummy".getBytes()
+        );
+
+        mockMvc.perform(multipart("/admin/backup/import").file(file))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminImportBackup_withCsrf_isOk() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "backup.zip",
+                "application/zip",
+                "dummy".getBytes()
+        );
+
+        mockMvc.perform(multipart("/admin/backup/import")
+                        .file(file)
+                        .with(csrf()))
+                .andExpect(status().isOk());
     }
 }

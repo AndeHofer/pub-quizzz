@@ -2,13 +2,20 @@ export {};
 
 import type {QuizDTO, TeamDTO, UserDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
+import {withEnsuredCsrfHeaders} from './csrf';
 
 const API_BASE = '/admin';
 
 // Helper for API fetch with basic network error handling
 async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
     try {
-        return await fetch(url, options);
+        const method = (options?.method ?? 'GET').toUpperCase();
+        const requiresCsrf = !['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method);
+        const requestOptions: RequestInit = options ?? {};
+        if (requiresCsrf) {
+            requestOptions.headers = await withEnsuredCsrfHeaders(options?.headers);
+        }
+        return await fetch(url, requestOptions);
     } catch (error) {
         console.error('Netzwerkfehler:', error);
         throw error;
@@ -134,7 +141,7 @@ async function viewQuizzes() {
 
 async function editQuiz(quizId: number) {
     try {
-        const response = await fetch(`${API_BASE}/quiz/${quizId}/detail`);
+        const response = await apiFetch(`${API_BASE}/quiz/${quizId}/detail`);
         if (!response.ok) {
             showModal('Fehler', showError('Quiz nicht gefunden'));
             return;
@@ -149,7 +156,7 @@ async function editQuiz(quizId: number) {
 async function deleteQuiz(quizId: number) {
     if (!confirm(`Quiz ${quizId} wirklich löschen?\n\nACHTUNG: Alle Ergebnisse dieses Quiz werden unwiderruflich gelöscht!`)) return;
     try {
-        const response = await fetch(`${API_BASE}/quiz/${quizId}`, {method: 'DELETE'});
+        const response = await apiFetch(`${API_BASE}/quiz/${quizId}`, {method: 'DELETE'});
         if (response.ok) {
             await viewQuizzes();
         } else {
@@ -166,7 +173,7 @@ async function createTeam() {
     const teamName = prompt('Team-Namen eingeben:');
     if (!teamName) return;
     try {
-        const response = await fetch(`${API_BASE}/team`, {
+        const response = await apiFetch(`${API_BASE}/team`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({teamName})
@@ -222,7 +229,7 @@ async function viewTeams() {
 async function deleteTeam(teamId: number, teamName: string) {
     if (!confirm(`Team "${teamName}" wirklich löschen?\n\nACHTUNG: Alle Ergebnisse dieses Teams werden unwiderruflich gelöscht!`)) return;
     try {
-        const response = await fetch(`${API_BASE}/team/${teamId}`, {method: 'DELETE'});
+        const response = await apiFetch(`${API_BASE}/team/${teamId}`, {method: 'DELETE'});
         if (response.ok) {
             await viewTeams();
         } else {
@@ -237,7 +244,7 @@ async function renameTeam(teamId: number, currentName: string) {
     const newName = prompt('Team-Namen ändern:', currentName);
     if (!newName || newName === currentName) return;
     try {
-        const response = await fetch(`${API_BASE}/team/${teamId}`, {
+        const response = await apiFetch(`${API_BASE}/team/${teamId}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({teamName: newName})
@@ -281,7 +288,7 @@ async function viewUsers() {
 async function deleteUser(userId: number, username: string) {
     if (!confirm(`Sind Sie sicher, dass Sie den Benutzer "${username}" löschen möchten?`)) return;
     try {
-        const response = await fetch(`${API_BASE}/user/${userId}`, {method: 'DELETE'});
+        const response = await apiFetch(`${API_BASE}/user/${userId}`, {method: 'DELETE'});
         if (response.ok) await viewUsers();
         else alert('Fehler beim Löschen');
     } catch (error: unknown) {

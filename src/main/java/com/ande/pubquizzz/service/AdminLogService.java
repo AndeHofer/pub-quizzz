@@ -229,10 +229,7 @@ public class AdminLogService {
         if (fromTime != null && timestamp.isBefore(fromTime)) {
             return false;
         }
-        if (toTime != null && timestamp.isAfter(toTime)) {
-            return false;
-        }
-        return true;
+        return toTime == null || !timestamp.isAfter(toTime);
     }
 
     private record ParsedLogEvent(LocalDateTime timestamp, String level, String source, String message,

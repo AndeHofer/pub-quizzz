@@ -2,6 +2,26 @@
 
 ## Open Tasks
 
+- [x] Phase 79: Fix CSRF header/cookie validation mismatch for authenticated SPA multipart admin requests
+- [x] Phase 79: Resolve 403 warn logging user identity from Spring Security context (avoid false `anonymous`)
+- [x] Phase 79: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 78: Add security-layer warn logging for all HTTP 403 responses (including CSRF denials)
+- [x] Phase 78: Add backend test coverage for access-denied logging behavior and keep existing 403 response contract
+- [x] Phase 78: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 77C: Expose CSRF token source to browser clients so admin mutation fetch calls can send valid CSRF headers
+- [x] Phase 77C: Add backend test coverage proving authenticated admin GET responses issue an `XSRF-TOKEN` cookie
+- [x] Phase 77C: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 77B: Add frontend CSRF token helper and wire all admin mutation fetch calls
+- [x] Phase 77B: Add frontend unit tests for CSRF header helper behavior (cookie + meta fallback)
+- [x] Phase 77B: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 77: Re-enable CSRF protection for session-based security and align backend tests with enforced CSRF
+- [x] Phase 77: Add backend security regression tests proving admin mutation endpoints reject missing CSRF tokens
+- [x] Phase 77: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 76A: Group Logback lines into multiline log events so stacktraces stay attached to error entries
 - [x] Phase 76A: Extend admin log DTO/frontend rendering to expose and display full multiline raw event content
 - [x] Phase 76A: Add/adjust backend and frontend tests for multiline grouping + stacktrace search behavior
@@ -195,47 +215,97 @@
       `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
     - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
 
+- Phase 77 verification status:
+  - `./mvnw.cmd "-Dtest=SecurityAccessTest,AdminUserControllerTest,AdminResultControllerTest" test` failed first
+    after adding missing-CSRF assertions (expected TDD red with CSRF still disabled), then passed after enabling CSRF
+    in `SecurityConfig`
+  - `./mvnw.cmd test` failed once after enabling CSRF because legacy controller tests missed `.with(csrf())`
+    (`AdminQuizControllerTest`, `AdminBackupControllerTest`), then passed after updating tests
+  - `npm run test` (in `src/main/webapp`) passed (3 files, 9 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+  - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 77B verification status:
+  - `npm run test -- src/js/csrf.test.ts` failed first (`Cannot find module './csrf'`) as expected TDD red,
+    then passed after implementing `csrf.ts`
+  - `npm run test` (in `src/main/webapp`) passed (4 files, 12 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+  - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 77C verification status:
+  - `./mvnw.cmd "-Dtest=AdminQuizControllerTest" test` failed first (`No cookie with name 'XSRF-TOKEN'`) after
+    adding the new cookie assertion test (expected TDD red), then passed after updating `SecurityConfig`
+  - `npm run test` (in `src/main/webapp`) passed (4 files, 12 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+  - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+  - After real-browser repro still showed `403 /admin/create-quiz`, added frontend fallback bootstrap token fetch in
+    `csrf.ts` and re-ran verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`) —
+    all passed
+
+- Phase 78 verification status:
+  - `./mvnw.cmd "-Dtest=LoggingAccessDeniedHandlerTest" test` failed first (expected TDD red because handler class
+    was not implemented yet), then passed after adding `LoggingAccessDeniedHandler`
+  -
+  `./mvnw.cmd "-Dtest=LoggingAccessDeniedHandlerTest,SecurityAccessTest,AdminUserControllerTest,AdminResultControllerTest" test`
+  passed after wiring custom `AccessDeniedHandler` in `SecurityConfig`
+  - `npm run test` (in `src/main/webapp`) passed (4 files, 14 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+  - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 79 verification status:
+  - `./mvnw.cmd "-Dtest=LoggingAccessDeniedHandlerTest,AdminQuizControllerTest" test` failed first (expected TDD
+    red from new assertions), then passed after CSRF request-handler and logging identity fixes
+  - `npm run test` (in `src/main/webapp`) passed (4 files, 14 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+    `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+  - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
 ## Finished Phases
 
-### Phase 76A: Multiline Log Event Grouping for Stacktraces ✅ COMPLETE
+### Phase 79: CSRF Request-Handler Compatibility + Accurate 403 User Logging ✅ COMPLETE
 
-- Updated `AdminLogService` to group log lines into full events using header-line detection, so stacktrace continuation
-  lines stay attached to their originating ERROR event.
-- Changed filtering behavior to operate on full event text (`rawLine` now contains full multiline event), enabling
-  stacktrace search while keeping level/time filtering based on parsed event header.
-- Added backend TDD coverage for multiline grouping and stacktrace search in
-  `src/test/java/com/ande/pubquizzz/service/AdminLogServiceTest.java` and expanded controller JSON assertions in
-  `src/test/java/com/ande/pubquizzz/controller/AdminUserControllerTest.java`.
-- Added frontend unit coverage in `src/main/webapp/src/js/admin_logs.test.ts` to assert multiline raw rendering in
-  log-stream details.
+- Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use a stable
+  `CsrfTokenRequestAttributeHandler` with `CookieCsrfTokenRepository.withHttpOnlyFalse()` and token materialization in
+  `CsrfCookieFilter`, resolving the live `InvalidCsrfTokenException` mismatch for SPA header/cookie submissions.
+- Updated `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java` to resolve username from Spring
+  Security context first (fallback to request principal), avoiding false `user=anonymous` when authentication exists.
+- Added/extended backend test coverage in
+  `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` for security-context username
+  resolution.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
-### Phase 76: Admin Log-Stream Page from Logback File with Search/Filter/Line Amount ✅ COMPLETE
+### Phase 78: WARN Logging for All HTTP 403 Access Denials ✅ COMPLETE
 
-- Added new admin-only backend endpoint `GET /admin/logs` in `AdminUserController` returning explicit DTO response
-  (`AdminLogResponseDTO`) with log entries (`AdminLogEntryDTO`), applied limit, and returned count.
-- Implemented `AdminLogService` to read only active Logback file (`/logs/pub-quizzz.log`), parse log lines, and apply
-  server-side filters (`q`, `level`, `from`, `to`) plus line amount (`limit`, default 200, max 1000).
-- Added backend tests:
-  `AdminLogServiceTest` (business logic unit coverage) and `AdminUserControllerTest` endpoint/security/validation
-  coverage for `/admin/logs`.
-- Added new admin page `src/main/webapp/src/admin/logs.html` with log-stream UI (not table), German filter controls,
-  and script `src/main/webapp/src/js/admin_logs.ts` including URL query sync and safe rendering.
-- Wired admin navigation under `Wartung` (`viewLogsBtn`) and added Vite entry `logs`; added frontend unit tests in
-  `src/main/webapp/src/js/admin_logs.test.ts`.
+- Added new `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java` to emit `WARN` log entries for
+  every security-layer 403 with method/path/user/exception details while preserving HTTP 403 response behavior.
+- Wired the handler in `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` via
+  `.exceptionHandling(...).accessDeniedHandler(new LoggingAccessDeniedHandler())` so CSRF and role-based denials are
+  logged consistently.
+- Added backend unit test coverage in
+  `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` asserting warn log content and status.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
-### Phase 75: Admin Monthly Login Statistics by Role (`USER`/`ADMIN`) ✅ COMPLETE
+### Phase 77C: Emit Browser-Readable CSRF Cookie on Authenticated Requests ✅ COMPLETE
 
-- Added monthly login stats API for admins at `GET /admin/login-stats/monthly`, grouped by month and current user role,
-  based on persisted `AUTH_SUCCESS` usage events.
-- Added explicit backend DTO + service mapping and native repository aggregation query joining usage events to users by
-  username.
-- Added backend tests:
-  `MonthlyLoginStatsPersistenceTest`, `UsageEventServiceTest` extension, and `AdminUserControllerTest` endpoint/security
-  coverage.
-- Added new admin page `src/main/webapp/src/admin/login_stats.html` + script
-  `src/main/webapp/src/js/admin_login_stats.ts`, plus navigation wiring from admin main page and Vite entry.
-- Added frontend unit tests for login stats rendering helpers in
-  `src/main/webapp/src/js/admin_login_stats.test.ts`.
+- Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use
+  `CookieCsrfTokenRepository.withHttpOnlyFalse()` so browser clients can read/send CSRF tokens for fetch-based admin
+  mutations.
+- Added a post-CSRF filter (`CsrfCookieFilter`) in `SecurityConfig` that generates/saves an `XSRF-TOKEN` cookie when
+  missing, ensuring token availability on authenticated requests before mutation calls.
+- Added backend controller test coverage in `src/test/java/com/ande/pubquizzz/controller/AdminQuizControllerTest.java`
+  asserting that authenticated admin GET responses expose `XSRF-TOKEN`.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.

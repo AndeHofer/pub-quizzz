@@ -2,6 +2,7 @@ export {};
 
 import { showMessage, goBack } from './utils';
 import type {QuizDTO, QuizDocumentDTO} from './types';
+import {withEnsuredCsrfHeaders} from './csrf';
 
 const questionsContainer = document.getElementById('questionsContainer') as HTMLDivElement | null;
 
@@ -271,7 +272,7 @@ function setEditModeUi(): void {
 
 const quizForm = document.getElementById('quizForm') as HTMLFormElement | null;
 if (quizForm) {
-    quizForm.addEventListener('submit', function (e) {
+    quizForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const quizData: {
@@ -358,6 +359,7 @@ if (quizForm) {
 
         fetch(url, {
             method: method,
+            headers: await withEnsuredCsrfHeaders(),
             body: formData
             // No Content-Type header — browser sets it with boundary automatically
         })
@@ -484,7 +486,11 @@ async function uploadDocument(): Promise<void> {
         msgEl.style.display = 'block';
     }
     try {
-        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents`, {method: 'POST', body: formData});
+        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents`, {
+            method: 'POST',
+            headers: await withEnsuredCsrfHeaders(),
+            body: formData
+        });
         if (resp.ok) {
             fileInput.value = '';
             if (msgEl) {
@@ -512,7 +518,10 @@ async function deleteDocument(docId: number): Promise<void> {
     if (!editingQuizId) return;
     if (!confirm('Dokument wirklich löschen?')) return;
     try {
-        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents/${docId}`, {method: 'DELETE'});
+        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents/${docId}`, {
+            method: 'DELETE',
+            headers: await withEnsuredCsrfHeaders()
+        });
         if (resp.ok) {
             await loadDocuments();
         } else {

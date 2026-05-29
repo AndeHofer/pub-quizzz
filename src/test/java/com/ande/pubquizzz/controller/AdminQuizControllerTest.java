@@ -126,7 +126,7 @@ class AdminQuizControllerTest {
     void deleteQuiz_whenFound_returnsOk() throws Exception {
         when(quizService.deleteQuiz(1L)).thenReturn(true);
 
-        mockMvc.perform(delete("/admin/quiz/1"))
+        mockMvc.perform(delete("/admin/quiz/1").with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -135,7 +135,7 @@ class AdminQuizControllerTest {
     void deleteQuiz_whenNotFound_returns404() throws Exception {
         when(quizService.deleteQuiz(anyLong())).thenReturn(false);
 
-        mockMvc.perform(delete("/admin/quiz/999"))
+        mockMvc.perform(delete("/admin/quiz/999").with(csrf()))
                 .andExpect(status().isNotFound());
     }
 

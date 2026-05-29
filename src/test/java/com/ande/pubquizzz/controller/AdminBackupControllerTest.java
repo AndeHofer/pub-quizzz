@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -70,7 +71,7 @@ class AdminBackupControllerTest {
         MockMultipartFile zipFile = new MockMultipartFile(
                 "file", "backup.zip", "application/zip", "PK fake zip".getBytes());
 
-        mockMvc.perform(multipart("/admin/backup/import").file(zipFile))
+        mockMvc.perform(multipart("/admin/backup/import").file(zipFile).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Backup bereit")));
     }
@@ -84,7 +85,7 @@ class AdminBackupControllerTest {
         MockMultipartFile zipFile = new MockMultipartFile(
                 "file", "backup.zip", "application/zip", "not a real zip".getBytes());
 
-        mockMvc.perform(multipart("/admin/backup/import").file(zipFile))
+        mockMvc.perform(multipart("/admin/backup/import").file(zipFile).with(csrf()))
                 .andExpect(status().isBadRequest());
     }
 }

@@ -104,6 +104,28 @@ class AdminResultControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    void createResult_withoutCsrf_isForbidden() throws Exception {
+        int[] validPoints = {5, 3, 5, 3, 5, 3, 5, 0};
+        List<CreateResultRequest.AnswerSubmission> answers = new java.util.ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            CreateResultRequest.AnswerSubmission a = new CreateResultRequest.AnswerSubmission();
+            a.setQuestionNumber(i);
+            a.setPoints(validPoints[i - 1]);
+            answers.add(a);
+        }
+        CreateResultRequest request = new CreateResultRequest();
+        request.setQuizId(1L);
+        request.setTeamId(1L);
+        request.setAnswers(answers);
+
+        mockMvc.perform(post("/admin/results")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void createResult_withDisallowedPointsValue_returnsBadRequest() throws Exception {
         // points = 4 is intentionally disallowed (allowed: 0,1,2,3,5)
         List<CreateResultRequest.AnswerSubmission> answers = new java.util.ArrayList<>();
