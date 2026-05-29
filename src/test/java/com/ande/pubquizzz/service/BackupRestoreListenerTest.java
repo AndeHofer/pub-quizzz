@@ -9,6 +9,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,6 +53,7 @@ public class BackupRestoreListenerTest {
         return new BackupRestoreListener(
                 sharedDs,
                 mockQuizService,
+                backupService(),
                 tempDir.resolve("uploads").toString(),
                 tempDir.resolve("restore").toString());
     }
@@ -233,6 +235,85 @@ public class BackupRestoreListenerTest {
                     """);
             quizDocumentTable.next();
             assertEquals(1, quizDocumentTable.getInt(1), "Legacy restore must create quiz_document table");
+        }
+    }
+
+    @Test
+    void applyRestore_whenRunscriptFails_rollsBackToPreviousDatabaseState() throws Exception {
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE IF NOT EXISTS appUser (id BIGINT PRIMARY KEY, username VARCHAR(255))");
+            stmt.execute("INSERT INTO quiz VALUES (100, 'Original Quiz')");
+        }
+
+        String brokenSql = "INSERT INTO quiz VALUES ('broken', 'Broken Quiz');";
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("database.sql"));
+            zip.write(brokenSql.getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        backupService().stageRestore(new ByteArrayInputStream(baos.toByteArray()));
+        listener().onApplicationStarted();
+
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            ResultSet originalQuizCount = stmt.executeQuery("SELECT COUNT(*) FROM quiz WHERE id = 100");
+            originalQuizCount.next();
+            assertEquals(1, originalQuizCount.getInt(1),
+                    "Original live quiz row must remain after failed restore rollback");
+        }
+    }
+
+    @Test
+    void applyRestore_whenUploadSwapFails_rollsBackPreviousUploadsAndDatabase() throws Exception {
+        Files.writeString(tempDir.resolve("uploads").resolve("original.txt"), "original");
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("INSERT INTO quiz VALUES (100, 'Original Quiz')");
+        }
+
+        String validSql = "INSERT INTO quiz VALUES (200, 'Restored Quiz');";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("database.sql"));
+            zip.write(validSql.getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+
+            zip.putNextEntry(new java.util.zip.ZipEntry("uploads/restored.txt"));
+            zip.write("restored".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        backupService().stageRestore(new ByteArrayInputStream(baos.toByteArray()));
+
+        BackupRestoreListener failingUploadSwapListener = new BackupRestoreListener(
+                sharedDs,
+                mockQuizService,
+                backupService(),
+                tempDir.resolve("uploads").toString(),
+                tempDir.resolve("restore").toString()) {
+            @Override
+            protected void replaceUploads(Path pendingUploads) throws Exception {
+                throw new IOException("simulated upload swap failure");
+            }
+        };
+
+        failingUploadSwapListener.onApplicationStarted();
+
+        assertTrue(Files.exists(tempDir.resolve("uploads").resolve("original.txt")),
+                "Original upload should be restored after rollback");
+        assertFalse(Files.exists(tempDir.resolve("uploads").resolve("restored.txt")),
+                "Restored upload should not remain after rollback");
+
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            ResultSet originalQuizCount = stmt.executeQuery("SELECT COUNT(*) FROM quiz WHERE id = 100");
+            originalQuizCount.next();
+            assertEquals(1, originalQuizCount.getInt(1),
+                    "Original database rows should be restored after rollback");
         }
     }
 }

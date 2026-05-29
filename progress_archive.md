@@ -4,6 +4,16 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 80: XSS Hardening for `admin_functions.ts` Rendering Paths ✅ COMPLETE
+
+- Hardened `src/main/webapp/src/js/admin_functions.ts` by escaping untrusted modal titles/messages/table content and
+  switching backup/cleanup status rendering to safe `textContent` updates instead of interpolated `innerHTML`.
+- Added trusted-html boundary helper for action-button markup (`trustedHtml(...)`) so button rendering still works while
+  default table cells are escaped.
+- Added frontend unit tests in `src/main/webapp/src/js/admin_functions.test.ts` covering escaped headers/cells,
+  trusted-action markup passthrough, and escaped error message content.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 79: CSRF Request-Handler Compatibility + Accurate 403 User Logging ✅ COMPLETE
 
 - Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use a stable

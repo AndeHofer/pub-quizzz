@@ -2,6 +2,11 @@
 
 ## Open Tasks
 
+- [x] Phase 83: Add rollback-based restore safety so startup restore is fail-safe (restore all-or-rollback)
+- [x] Phase 83: Add failing backend tests for DB-restore failure and upload-swap failure rollback behavior
+- [x] Phase 83: Keep pending restore diagnostics behavior while ensuring rollback snapshot cleanup on success
+- [x] Phase 83: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 82: Stream backup import in controller/service (`InputStream` instead of `byte[]`) to remove heap-heavy
   buffering
 - [x] Phase 82: Enforce restore archive limits (entry count, single entry size, total uncompressed size) with validation
@@ -319,11 +324,40 @@
   - `npm run test` (in `src/main/webapp`) passed (6 files, 18 tests)
   - `npm run type-check` (in `src/main/webapp`) passed
   - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 83 verification status:
+  -
+  `./mvnw.cmd "-Dtest=BackupRestoreListenerTest#applyRestore_whenRunscriptFails_rollsBackToPreviousDatabaseState+applyRestore_whenUploadSwapFails_rollsBackPreviousUploadsAndDatabase" test`
+  initially failed in test-compile (expected TDD red) because `BackupRestoreListener` had no `replaceUploads(...)`
+  override point yet
+  - `./mvnw.cmd "-Dtest=BackupRestoreListenerTest,BackupServiceTest,AdminBackupControllerTest" test` passed after
+    implementing rollback snapshot orchestration and helper methods
+  - `npm run test` (in `src/main/webapp`) passed (6 files, 18 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
   - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
 
 ## Finished Phases
+
+### Phase 83: Fail-Safe Restore with Automatic Rollback Snapshot ✅ COMPLETE
+
+- Hardened `src/main/java/com/ande/pubquizzz/listener/BackupRestoreListener.java` to create a rollback snapshot before
+  applying pending restore, then automatically roll back to previous DB/uploads state when restore fails.
+- Added rollback orchestration helpers (`prepareRollbackSnapshot`, `applyRollbackSnapshot`,
+  `applyDatabaseRestore`, `replaceUploads`) and kept startup behavior non-fatal (app continues running).
+- Extended `src/main/java/com/ande/pubquizzz/service/BackupService.java` with reusable
+  `stageRestoreToDirectory(...)` so rollback ZIP extraction reuses the same validation/guardrail path as normal restore
+  staging.
+- Added rollback-focused backend tests in
+  `src/test/java/com/ande/pubquizzz/service/BackupRestoreListenerTest.java` for DB restore failure rollback and
+  upload-swap failure rollback.
+- Updated listener test wiring to inject `BackupService` and use new restore APIs.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 82: Streamed Backup Import + Restore Archive Guardrails ✅ COMPLETE
 
@@ -353,14 +387,4 @@
   interpolation of raw `doc.originalFilename`.
 - Added frontend unit coverage in `src/main/webapp/src/js/create_quiz_documents.test.ts` proving malicious filenames are
   escaped in both visible text and `download` attribute context.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 80: XSS Hardening for `admin_functions.ts` Rendering Paths ✅ COMPLETE
-
-- Hardened `src/main/webapp/src/js/admin_functions.ts` by escaping untrusted modal titles/messages/table content and
-  switching backup/cleanup status rendering to safe `textContent` updates instead of interpolated `innerHTML`.
-- Added trusted-html boundary helper for action-button markup (`trustedHtml(...)`) so button rendering still works while
-  default table cells are escaped.
-- Added frontend unit tests in `src/main/webapp/src/js/admin_functions.test.ts` covering escaped headers/cells,
-  trusted-action markup passthrough, and escaped error message content.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.

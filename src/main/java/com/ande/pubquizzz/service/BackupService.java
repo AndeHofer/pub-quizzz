@@ -82,7 +82,11 @@ public class BackupService {
     }
 
     public void stageRestore(InputStream zipInputStream) throws IOException {
-        Files.createDirectories(restoreDir);
+        stageRestoreToDirectory(zipInputStream, restoreDir);
+    }
+
+    public void stageRestoreToDirectory(InputStream zipInputStream, Path targetRestoreDir) throws IOException {
+        Files.createDirectories(targetRestoreDir);
         boolean hasDatabaseSql = false;
         long entryCount = 0;
         long totalBytes = 0;
@@ -97,8 +101,8 @@ public class BackupService {
                     if ("database.sql".equals(entry.getName())) {
                         hasDatabaseSql = true;
                     }
-                    Path target = restoreDir.resolve(entry.getName()).normalize();
-                    if (!target.startsWith(restoreDir)) {
+                    Path target = targetRestoreDir.resolve(entry.getName()).normalize();
+                    if (!target.startsWith(targetRestoreDir)) {
                         log.warn("Skipping zip-slip attempt: {}", entry.getName());
                         continue;
                     }
@@ -118,13 +122,13 @@ public class BackupService {
                 throw new BusinessValidationException("Ungültiges Backup: database.sql nicht gefunden.");
             }
         } catch (BusinessValidationException e) {
-            deleteDirectoryQuietly(restoreDir);
+            deleteDirectoryQuietly(targetRestoreDir);
             throw e;
         } catch (IOException e) {
-            deleteDirectoryQuietly(restoreDir);
+            deleteDirectoryQuietly(targetRestoreDir);
             throw e;
         }
-        log.info("Restore staged to {}", restoreDir);
+        log.info("Restore staged to {}", targetRestoreDir);
     }
 
     private long copyBounded(InputStream in, OutputStream out, long currentTotalBytes) throws IOException {

@@ -7,9 +7,12 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import com.ande.pubquizzz.service.QuizService;
+import com.ande.pubquizzz.service.BackupService;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,18 +27,23 @@ public class BackupRestoreListener {
 
     private final DataSource dataSource;
     private final QuizService quizService;
+    private final BackupService backupService;
     private final Path uploadDir;
     private final Path restoreDir;
+    private final Path rollbackDir;
 
     public BackupRestoreListener(
             DataSource dataSource,
             QuizService quizService,
+            BackupService backupService,
             @Value("${app.upload.dir:/data/uploads}") String uploadDirPath,
             @Value("${app.backup.restore-dir:/data/pending-restore}") String restoreDirPath) {
         this.dataSource = dataSource;
         this.quizService = quizService;
+        this.backupService = backupService;
         this.uploadDir = Paths.get(uploadDirPath);
         this.restoreDir = Paths.get(restoreDirPath);
+        this.rollbackDir = this.restoreDir.resolveSibling(this.restoreDir.getFileName() + "-rollback");
     }
 
     @EventListener(ApplicationStartedEvent.class)
@@ -47,18 +55,32 @@ public class BackupRestoreListener {
 
         log.info("Pending restore detected at {}. Applying...", restoreDir);
         try {
-            applyRestore(pendingSql);
+            prepareRollbackSnapshot();
+            applyRestore(pendingSql, restoreDir.resolve("uploads"));
             deleteDirectory(restoreDir);
+            deleteDirectory(rollbackDir);
             log.info("Restore applied successfully.");
             var cleanup = quizService.cleanupOrphanedImages();
             log.info("Post-restore cleanup: {} orphaned image(s) removed", cleanup.getDeletedCount());
         } catch (Exception e) {
-            log.error("Restore FAILED — leaving {} in place for diagnosis. Application continues with old state.", restoreDir, e);
+            log.error("Restore failed. Attempting rollback from {}.", rollbackDir, e);
+            try {
+                applyRollbackSnapshot();
+                log.error("Rollback succeeded. Application continues with previous state.");
+            } catch (Exception rollbackEx) {
+                log.error("Rollback FAILED. Manual intervention required.", rollbackEx);
+            }
+            log.error("Restore FAILED — leaving {} in place for diagnosis. Application continues with old state.", restoreDir);
             // Do NOT rethrow — application must continue running
         }
     }
 
-    private void applyRestore(Path sqlFile) throws Exception {
+    private void applyRestore(Path sqlFile, Path pendingUploads) throws Exception {
+        applyDatabaseRestore(sqlFile);
+        replaceUploads(pendingUploads);
+    }
+
+    private void applyDatabaseRestore(Path sqlFile) throws Exception {
         String sqlPath = sqlFile.toAbsolutePath().toString().replace("\\", "/");
 
         try (Connection conn = dataSource.getConnection();
@@ -77,9 +99,9 @@ public class BackupRestoreListener {
             stmt.execute("RUNSCRIPT FROM '" + sqlPath + "'");
             ensureSchemaCompatibility(stmt);
         }
+    }
 
-        // Replace uploads directory
-        Path pendingUploads = restoreDir.resolve("uploads");
+    protected void replaceUploads(Path pendingUploads) throws Exception {
         if (Files.exists(uploadDir)) {
             deleteDirectory(uploadDir);
         }
@@ -89,6 +111,30 @@ public class BackupRestoreListener {
             // Backup contained no images — create empty directory
             Files.createDirectories(uploadDir);
         }
+    }
+
+    private void prepareRollbackSnapshot() throws Exception {
+        deleteDirectory(rollbackDir);
+        Files.createDirectories(rollbackDir);
+
+        Path rollbackZip = rollbackDir.resolve("rollback.zip");
+        try (OutputStream out = Files.newOutputStream(rollbackZip);
+             java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(out)) {
+            backupService.createBackup(zip);
+        }
+    }
+
+    private void applyRollbackSnapshot() throws Exception {
+        Path rollbackZip = rollbackDir.resolve("rollback.zip");
+        Path rollbackStageDir = rollbackDir.resolve("staged");
+        deleteDirectory(rollbackStageDir);
+        Files.createDirectories(rollbackStageDir);
+
+        try (InputStream in = Files.newInputStream(rollbackZip)) {
+            backupService.stageRestoreToDirectory(in, rollbackStageDir);
+        }
+
+        applyRestore(rollbackStageDir.resolve("database.sql"), rollbackStageDir.resolve("uploads"));
     }
 
     private void ensureSchemaCompatibility(Statement stmt) throws Exception {
