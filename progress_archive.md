@@ -4,6 +4,38 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 74: Integrate Frontend Vitest into Maven `test` Lifecycle ✅ COMPLETE
+
+- Replaced placeholder frontend test script with real Vitest execution by setting
+  `"test": "vitest run"` in `src/main/webapp/package.json`.
+- Added frontend Maven execution `npm run test` bound to `test` phase in `pom.xml` so
+  `./mvnw.cmd test` now runs backend JUnit tests and frontend Vitest tests together.
+- Verified TDD red/green flow for wiring: Maven `test` failed before script fix, then passed
+  after script update.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and
+  `./mvnw.cmd test` (including frontend plugin test execution).
+
+### Phase 73: Clickable GitHub Version Badge on Homepage ✅ COMPLETE
+
+- Updated homepage badge rendering so version is displayed as `v<version>` and links to
+  `https://github.com/AndeHofer/pub-quizzz`.
+- Added dedicated frontend unit test (`src/main/webapp/src/js/version-badge.test.ts`) covering generated link markup
+  (`href`, `target`, `rel`, and label).
+- Extracted badge markup creation into `src/main/webapp/src/js/version-badge.ts` and reused it from
+  `src/main/webapp/src/js/index.ts`.
+- Verification passed: `npm exec vitest run src/js/version-badge.test.ts`, `npm run type-check` (webapp),
+  `npm run build` (webapp), and `./mvnw.cmd test`.
+
+### Phase 72: Instruction File Cleanup and Clarification ✅ COMPLETE
+
+- Cleaned up wording in `AGENTS.md` for clarity and consistency (progress retention, Maven/NUL wording, folder-ignore
+  wording).
+- Explicitly documented instruction-source precedence: `README.md` is informational; executable agent instructions are
+  in `AGENTS.md`.
+- Kept all existing behavioral rules unchanged (`no push/commit`, no worktrees/branches, test requirements,
+  German UI text, business rules).
+- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 71: Persist Authentication Usage Events in Extensible Statistics Table ✅ COMPLETE
 
 - Added new generic usage-events persistence model with table `app_usage_event` via JPA entity

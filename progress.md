@@ -2,6 +2,25 @@
 
 ## Open Tasks
 
+- [x] Phase 76A: Group Logback lines into multiline log events so stacktraces stay attached to error entries
+- [x] Phase 76A: Extend admin log DTO/frontend rendering to expose and display full multiline raw event content
+- [x] Phase 76A: Add/adjust backend and frontend tests for multiline grouping + stacktrace search behavior
+- [x] Phase 76A: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 76: Add admin API endpoint for live Logback log-stream with server-side search/filter/limit
+- [x] Phase 76: Add admin Wartung log-stream page (`logs.html`) with German UI and URL-synced filters
+- [x] Phase 76: Add backend/frontend tests for log API + log-stream rendering behavior
+- [x] Phase 76: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 75B: Move monthly login stats admin navigation from `Ergebnisse & Auswertung` to `Benutzerverwaltung`
+- [x] Phase 75B: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 75: Add backend admin endpoint for monthly login stats grouped by role (`USER`, `ADMIN`) using persisted
+  `AUTH_SUCCESS` events
+- [x] Phase 75: Add backend unit + integration tests for monthly login role aggregation and admin API contract
+- [x] Phase 75: Add new admin page for monthly login stats by role and wire navigation + Vite entry
+- [x] Phase 75: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 74: Wire frontend `npm test` to run Vitest in CI-friendly mode
 - [x] Phase 74: Integrate frontend tests into Maven `test` phase via frontend-maven-plugin
 - [x] Phase 74: Run full verification (`npm run type-check`, `npm run build`, `./mvnw.cmd test`) and confirm Maven
@@ -142,36 +161,81 @@
     - `npm run build` (in `src/main/webapp`) passed
     - `./mvnw.cmd test` passed and now includes frontend step `frontend:2.0.0:npm (npm run test)` invoking Vitest
 
+- Phase 75 verification status:
+    - `npm run test` (in `src/main/webapp`) passed (2 files, 4 tests)
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 75B verification status:
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 76 verification status:
+    - `npm run test` (in `src/main/webapp`) initially failed (`document is not defined` in `admin_logs.test.ts`);
+      fixed by making `escapeHtml` Node-test-safe without DOM dependency
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 76A verification status:
+    - `./mvnw.cmd "-Dtest=AdminLogServiceTest,AdminUserControllerTest" test` failed first after adding multiline
+      tests (expected TDD red), then passed after implementing event grouping
+    - `npm run test` (in `src/main/webapp`) passed (3 files, 9 tests)
+    - `npm run type-check` (in `src/main/webapp`) passed
+    - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
 ## Finished Phases
 
-### Phase 74: Integrate Frontend Vitest into Maven `test` Lifecycle ✅ COMPLETE
+### Phase 76A: Multiline Log Event Grouping for Stacktraces ✅ COMPLETE
 
-- Replaced placeholder frontend test script with real Vitest execution by setting
-  `"test": "vitest run"` in `src/main/webapp/package.json`.
-- Added frontend Maven execution `npm run test` bound to `test` phase in `pom.xml` so
-  `./mvnw.cmd test` now runs backend JUnit tests and frontend Vitest tests together.
-- Verified TDD red/green flow for wiring: Maven `test` failed before script fix, then passed
-  after script update.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and
-  `./mvnw.cmd test` (including frontend plugin test execution).
+- Updated `AdminLogService` to group log lines into full events using header-line detection, so stacktrace continuation
+  lines stay attached to their originating ERROR event.
+- Changed filtering behavior to operate on full event text (`rawLine` now contains full multiline event), enabling
+  stacktrace search while keeping level/time filtering based on parsed event header.
+- Added backend TDD coverage for multiline grouping and stacktrace search in
+  `src/test/java/com/ande/pubquizzz/service/AdminLogServiceTest.java` and expanded controller JSON assertions in
+  `src/test/java/com/ande/pubquizzz/controller/AdminUserControllerTest.java`.
+- Added frontend unit coverage in `src/main/webapp/src/js/admin_logs.test.ts` to assert multiline raw rendering in
+  log-stream details.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
-### Phase 73: Clickable GitHub Version Badge on Homepage ✅ COMPLETE
+### Phase 76: Admin Log-Stream Page from Logback File with Search/Filter/Line Amount ✅ COMPLETE
 
-- Updated homepage badge rendering so version is displayed as `v<version>` and links to
-  `https://github.com/AndeHofer/pub-quizzz`.
-- Added dedicated frontend unit test (`src/main/webapp/src/js/version-badge.test.ts`) covering generated link markup
-  (`href`, `target`, `rel`, and label).
-- Extracted badge markup creation into `src/main/webapp/src/js/version-badge.ts` and reused it from
-  `src/main/webapp/src/js/index.ts`.
-- Verification passed: `npm exec vitest run src/js/version-badge.test.ts`, `npm run type-check` (webapp),
-  `npm run build` (webapp), and `./mvnw.cmd test`.
+- Added new admin-only backend endpoint `GET /admin/logs` in `AdminUserController` returning explicit DTO response
+  (`AdminLogResponseDTO`) with log entries (`AdminLogEntryDTO`), applied limit, and returned count.
+- Implemented `AdminLogService` to read only active Logback file (`/logs/pub-quizzz.log`), parse log lines, and apply
+  server-side filters (`q`, `level`, `from`, `to`) plus line amount (`limit`, default 200, max 1000).
+- Added backend tests:
+  `AdminLogServiceTest` (business logic unit coverage) and `AdminUserControllerTest` endpoint/security/validation
+  coverage for `/admin/logs`.
+- Added new admin page `src/main/webapp/src/admin/logs.html` with log-stream UI (not table), German filter controls,
+  and script `src/main/webapp/src/js/admin_logs.ts` including URL query sync and safe rendering.
+- Wired admin navigation under `Wartung` (`viewLogsBtn`) and added Vite entry `logs`; added frontend unit tests in
+  `src/main/webapp/src/js/admin_logs.test.ts`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
-### Phase 72: Instruction File Cleanup and Clarification ✅ COMPLETE
+### Phase 75: Admin Monthly Login Statistics by Role (`USER`/`ADMIN`) ✅ COMPLETE
 
-- Cleaned up wording in `AGENTS.md` for clarity and consistency (progress retention, Maven/NUL wording, folder-ignore
-  wording).
-- Explicitly documented instruction-source precedence: `README.md` is informational; executable agent instructions are
-  in `AGENTS.md`.
-- Kept all existing behavioral rules unchanged (`no push/commit`, no worktrees/branches, test requirements,
-  German UI text, business rules).
-- Verification passed: `npm run type-check` (webapp), `npm run build` (webapp), and `./mvnw.cmd test`.
+- Added monthly login stats API for admins at `GET /admin/login-stats/monthly`, grouped by month and current user role,
+  based on persisted `AUTH_SUCCESS` usage events.
+- Added explicit backend DTO + service mapping and native repository aggregation query joining usage events to users by
+  username.
+- Added backend tests:
+  `MonthlyLoginStatsPersistenceTest`, `UsageEventServiceTest` extension, and `AdminUserControllerTest` endpoint/security
+  coverage.
+- Added new admin page `src/main/webapp/src/admin/login_stats.html` + script
+  `src/main/webapp/src/js/admin_login_stats.ts`, plus navigation wiring from admin main page and Vite entry.
+- Added frontend unit tests for login stats rendering helpers in
+  `src/main/webapp/src/js/admin_login_stats.test.ts`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.

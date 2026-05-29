@@ -57,6 +57,9 @@ window.addEventListener('load', () => {
     document.getElementById('viewResultsBtn')?.addEventListener('click', () => {
         location.href = 'results.html';
     });
+    document.getElementById('viewLoginStatsBtn')?.addEventListener('click', () => {
+        location.href = 'login_stats.html';
+    });
     document.getElementById('createUserBtn')?.addEventListener('click', () => {
         location.href = 'register_user.html';
     });
@@ -86,6 +89,9 @@ window.addEventListener('load', () => {
     }
 
     document.getElementById('cleanupImagesBtn')?.addEventListener('click', cleanupImages);
+    document.getElementById('viewLogsBtn')?.addEventListener('click', () => {
+        location.href = 'logs.html';
+    });
 });
 
 // ==================== Quiz Management ====================

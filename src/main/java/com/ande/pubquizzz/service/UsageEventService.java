@@ -1,11 +1,14 @@
 package com.ande.pubquizzz.service;
 
 import com.ande.pubquizzz.database.entities.UsageEvent;
+import com.ande.pubquizzz.database.entities.Role;
 import com.ande.pubquizzz.database.repositories.UsageEventRepository;
+import com.ande.pubquizzz.dto.AdminMonthlyLoginStatDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,5 +24,15 @@ public class UsageEventService {
         usageEvent.setUsername(username);
         usageEvent.setOccurredAt(Instant.now());
         usageEventRepository.save(usageEvent);
+    }
+
+    public List<AdminMonthlyLoginStatDTO> getMonthlyLoginStatsByRole() {
+        return usageEventRepository.findMonthlyLoginStatsByRole().stream()
+                .map(row -> new AdminMonthlyLoginStatDTO(
+                        row.getMonthKey(),
+                        Role.valueOf(row.getRole()),
+                        row.getLoginCount()
+                ))
+                .toList();
     }
 }

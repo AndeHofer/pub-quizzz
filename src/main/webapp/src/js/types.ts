@@ -57,6 +57,26 @@ export interface UserDTO {
     role: string;
 }
 
+export interface AdminMonthlyLoginStatDTO {
+    month: string;
+    role: string;
+    loginCount: number;
+}
+
+export interface AdminLogEntryDTO {
+    timestamp: string | null;
+    level: string;
+    source: string | null;
+    message: string | null;
+    rawLine: string;
+}
+
+export interface AdminLogResponseDTO {
+    entries: AdminLogEntryDTO[];
+    appliedLimit: number;
+    returnedCount: number;
+}
+
 export interface AllTimeLeaderboardEntry {
     rank: number;
     teamName: string;
