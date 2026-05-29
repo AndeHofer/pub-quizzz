@@ -16,6 +16,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.InputStream;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -66,7 +68,7 @@ class AdminBackupControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void import_withValidZip_returns200WithGermanMessage() throws Exception {
-        doNothing().when(backupService).stageRestore(any(byte[].class));
+        doNothing().when(backupService).stageRestore(any(InputStream.class));
 
         MockMultipartFile zipFile = new MockMultipartFile(
                 "file", "backup.zip", "application/zip", "PK fake zip".getBytes());
@@ -80,7 +82,7 @@ class AdminBackupControllerTest {
     @WithMockUser(roles = "ADMIN")
     void import_withInvalidZip_returns400() throws Exception {
         doThrow(new BusinessValidationException("Ungültige Backup-Datei"))
-                .when(backupService).stageRestore(any(byte[].class));
+                .when(backupService).stageRestore(any(InputStream.class));
 
         MockMultipartFile zipFile = new MockMultipartFile(
                 "file", "backup.zip", "application/zip", "not a real zip".getBytes());

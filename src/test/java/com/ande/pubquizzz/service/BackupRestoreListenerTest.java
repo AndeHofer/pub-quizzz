@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,7 +60,10 @@ public class BackupRestoreListenerTest {
         return new BackupService(
                 sharedDs,
                 tempDir.resolve("uploads").toString(),
-                tempDir.resolve("restore").toString());
+                tempDir.resolve("restore").toString(),
+                5000,
+                50L * 1024 * 1024,
+                500L * 1024 * 1024);
     }
 
     @Test
@@ -77,7 +81,7 @@ public class BackupRestoreListenerTest {
         try (ZipOutputStream zip = new ZipOutputStream(baos)) {
             svc.createBackup(zip);
         }
-        svc.stageRestore(baos.toByteArray());
+        svc.stageRestore(new ByteArrayInputStream(baos.toByteArray()));
 
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
@@ -106,7 +110,7 @@ public class BackupRestoreListenerTest {
         try (ZipOutputStream zip = new ZipOutputStream(baos)) {
             svc.createBackup(zip);
         }
-        svc.stageRestore(baos.toByteArray());
+        svc.stageRestore(new ByteArrayInputStream(baos.toByteArray()));
 
         listener().onApplicationStarted();
 
@@ -133,7 +137,7 @@ public class BackupRestoreListenerTest {
         try (ZipOutputStream zip = new ZipOutputStream(baos)) {
             svc.createBackup(zip);
         }
-        svc.stageRestore(baos.toByteArray());
+        svc.stageRestore(new ByteArrayInputStream(baos.toByteArray()));
 
         // Mutate current DB so we can prove restore re-applies backup state.
         try (var conn = sharedDs.getConnection();
@@ -209,7 +213,7 @@ public class BackupRestoreListenerTest {
             zip.closeEntry();
         }
 
-        backupService().stageRestore(baos.toByteArray());
+        backupService().stageRestore(new ByteArrayInputStream(baos.toByteArray()));
         listener().onApplicationStarted();
 
         try (var conn = sharedDs.getConnection();

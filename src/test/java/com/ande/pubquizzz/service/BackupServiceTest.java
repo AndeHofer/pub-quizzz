@@ -47,7 +47,23 @@ public class BackupServiceTest {
     }
 
     private BackupService service() {
-        return new BackupService(sharedDs, tempDir.resolve("uploads").toString(), tempDir.resolve("restore").toString());
+        return new BackupService(
+                sharedDs,
+                tempDir.resolve("uploads").toString(),
+                tempDir.resolve("restore").toString(),
+                5000,
+                50L * 1024 * 1024,
+                500L * 1024 * 1024);
+    }
+
+    private BackupService serviceWithLimits(long maxEntries, long maxEntrySizeBytes, long maxTotalBytes) {
+        return new BackupService(
+                sharedDs,
+                tempDir.resolve("uploads").toString(),
+                tempDir.resolve("restore").toString(),
+                maxEntries,
+                maxEntrySizeBytes,
+                maxTotalBytes);
     }
 
     private Map<String, byte[]> readZipEntries(byte[] zipBytes) throws Exception {
@@ -118,7 +134,7 @@ public class BackupServiceTest {
             zip.closeEntry();
         }
 
-        service().stageRestore(baos.toByteArray());
+        service().stageRestore(new ByteArrayInputStream(baos.toByteArray()));
 
         Path restoredFile = tempDir.resolve("restore").resolve("database.sql");
         assertTrue(Files.exists(restoredFile), "restoreDir/database.sql should exist after stageRestore");
@@ -135,7 +151,7 @@ public class BackupServiceTest {
             zip.closeEntry();
         }
 
-        assertThrows(BusinessValidationException.class, () -> service().stageRestore(baos.toByteArray()),
+        assertThrows(BusinessValidationException.class, () -> service().stageRestore(new ByteArrayInputStream(baos.toByteArray())),
                 "Should throw BusinessValidationException when database.sql is missing from ZIP");
     }
 
@@ -188,10 +204,83 @@ public class BackupServiceTest {
             zout.closeEntry();
         }
 
-        service().stageRestore(buf.toByteArray());
+        service().stageRestore(new ByteArrayInputStream(buf.toByteArray()));
 
         // The evil file must NOT exist outside restoreDir
         assertFalse(Files.exists(tempDir.resolve("evil.txt")),
                 "Zip-slip file must not be written outside restoreDir");
+    }
+
+    @Test
+    void stageRestore_withTooManyEntries_throwsValidationException() throws Exception {
+        BackupService limited = serviceWithLimits(2, 1024 * 1024, 1024 * 1024);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            zip.putNextEntry(new ZipEntry("database.sql"));
+            zip.write("-- H2 script".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+
+            zip.putNextEntry(new ZipEntry("uploads/a.txt"));
+            zip.write("a".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+
+            zip.putNextEntry(new ZipEntry("uploads/b.txt"));
+            zip.write("b".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        assertThrows(BusinessValidationException.class,
+                () -> limited.stageRestore(new ByteArrayInputStream(baos.toByteArray())));
+    }
+
+    @Test
+    void stageRestore_withEntryExceedingLimit_throwsValidationException() throws Exception {
+        BackupService limited = serviceWithLimits(10, 5, 1024);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            zip.putNextEntry(new ZipEntry("database.sql"));
+            zip.write("123456".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        assertThrows(BusinessValidationException.class,
+                () -> limited.stageRestore(new ByteArrayInputStream(baos.toByteArray())));
+    }
+
+    @Test
+    void stageRestore_withTotalUncompressedSizeExceedingLimit_throwsValidationException() throws Exception {
+        BackupService limited = serviceWithLimits(10, 1024, 8);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            zip.putNextEntry(new ZipEntry("database.sql"));
+            zip.write("12345".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+
+            zip.putNextEntry(new ZipEntry("uploads/a.txt"));
+            zip.write("12345".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        assertThrows(BusinessValidationException.class,
+                () -> limited.stageRestore(new ByteArrayInputStream(baos.toByteArray())));
+    }
+
+    @Test
+    void stageRestore_withMissingDatabaseSql_cleansRestoreDir() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            zip.putNextEntry(new ZipEntry("uploads/photo.jpg"));
+            zip.write("imgdata".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        assertThrows(BusinessValidationException.class,
+                () -> service().stageRestore(new ByteArrayInputStream(baos.toByteArray())));
+
+        Path stagedFile = tempDir.resolve("restore").resolve("uploads/photo.jpg");
+        assertFalse(Files.exists(stagedFile), "Staged restore files should be cleaned after failed validation");
     }
 }

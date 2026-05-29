@@ -4,6 +4,18 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 79: CSRF Request-Handler Compatibility + Accurate 403 User Logging ✅ COMPLETE
+
+- Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use a stable
+  `CsrfTokenRequestAttributeHandler` with `CookieCsrfTokenRepository.withHttpOnlyFalse()` and token materialization in
+  `CsrfCookieFilter`, resolving the live `InvalidCsrfTokenException` mismatch for SPA header/cookie submissions.
+- Updated `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java` to resolve username from Spring
+  Security context first (fallback to request principal), avoiding false `user=anonymous` when authentication exists.
+- Added/extended backend test coverage in
+  `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` for security-context username
+  resolution.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 78: WARN Logging for All HTTP 403 Access Denials ✅ COMPLETE
 
 - Added new `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java` to emit `WARN` log entries for

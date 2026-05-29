@@ -45,7 +45,9 @@ public class AdminBackupController {
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> importBackup(@RequestParam("file") MultipartFile file) throws IOException {
-        backupService.stageRestore(file.getBytes());
+        try (var inputStream = file.getInputStream()) {
+            backupService.stageRestore(inputStream);
+        }
         log.info("POST /admin/backup/import - Backup import staged, file size: {} bytes", file.getSize());
         return ResponseEntity.ok(
                 "Backup bereit. Bitte starte die Anwendung neu, um die Wiederherstellung anzuwenden.");

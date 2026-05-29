@@ -2,6 +2,14 @@
 
 ## Open Tasks
 
+- [x] Phase 82: Stream backup import in controller/service (`InputStream` instead of `byte[]`) to remove heap-heavy
+  buffering
+- [x] Phase 82: Enforce restore archive limits (entry count, single entry size, total uncompressed size) with validation
+  errors
+- [x] Phase 82: Ensure staged restore directory is cleaned on all restore-staging failures
+- [x] Phase 82: Add/adjust backend tests (controller + service) for streamed restore and archive guardrails
+- [x] Phase 82: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 81: Re-run full project audit and capture findings in `findings.md`
 - [x] Phase 81: Fix Finding 1 (stored XSS via unescaped document filename rendering in `create_quiz.ts`)
 - [x] Phase 81: Add frontend unit tests that fail on unescaped document filenames/attributes in document list rendering
@@ -299,11 +307,41 @@
   - `npm run test` (in `src/main/webapp`) passed (6 files, 18 tests)
   - `npm run type-check` (in `src/main/webapp`) passed
   - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 82 verification status:
+  - `./mvnw.cmd "-Dtest=AdminBackupControllerTest,BackupServiceTest" test` produced expected TDD red at first due to
+    restore API contract change (InputStream vs byte[] usage in tests/callers)
+  - `./mvnw.cmd "-Dtest=BackupServiceTest,AdminBackupControllerTest,BackupRestoreListenerTest" test` passed after
+    updating restore callers/tests and implementing streamed restore guardrails
+  - `npm run test` (in `src/main/webapp`) passed (6 files, 18 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
   - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
 
 ## Finished Phases
+
+### Phase 82: Streamed Backup Import + Restore Archive Guardrails ✅ COMPLETE
+
+- Updated `src/main/java/com/ande/pubquizzz/controller/AdminBackupController.java` to stream upload content with
+  `file.getInputStream()` into backup restore staging, removing heap-heavy `file.getBytes()` buffering.
+- Refactored `src/main/java/com/ande/pubquizzz/service/BackupService.java` restore staging to accept `InputStream`,
+  stream ZIP extraction with bounded copy, and enforce configurable archive limits (entry count, per-entry size,
+  total uncompressed size).
+- Added restore import safety configuration in `src/main/resources/application.properties`:
+  `app.backup.import.max-entries`, `app.backup.import.max-entry-size-bytes`,
+  `app.backup.import.max-total-uncompressed-size-bytes` (kept multipart 500MB as requested).
+- Ensured staged restore directory cleanup on validation and I/O failures during restore staging.
+- Updated backend tests in
+  `src/test/java/com/ande/pubquizzz/controller/AdminBackupControllerTest.java`,
+  `src/test/java/com/ande/pubquizzz/service/BackupServiceTest.java`, and
+  `src/test/java/com/ande/pubquizzz/service/BackupRestoreListenerTest.java` for InputStream contract and new guardrail
+  behaviors.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 81: Rebuilt Audit + Findings Register + Finding #1 XSS Fix ✅ COMPLETE
 
@@ -325,16 +363,4 @@
   default table cells are escaped.
 - Added frontend unit tests in `src/main/webapp/src/js/admin_functions.test.ts` covering escaped headers/cells,
   trusted-action markup passthrough, and escaped error message content.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 79: CSRF Request-Handler Compatibility + Accurate 403 User Logging ✅ COMPLETE
-
-- Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use a stable
-  `CsrfTokenRequestAttributeHandler` with `CookieCsrfTokenRepository.withHttpOnlyFalse()` and token materialization in
-  `CsrfCookieFilter`, resolving the live `InvalidCsrfTokenException` mismatch for SPA header/cookie submissions.
-- Updated `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java` to resolve username from Spring
-  Security context first (fallback to request principal), avoiding false `user=anonymous` when authentication exists.
-- Added/extended backend test coverage in
-  `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` for security-context username
-  resolution.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
