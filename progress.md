@@ -2,6 +2,10 @@
 
 ## Open Tasks
 
+- [x] Phase 80: Harden `admin_functions.ts` against XSS in modal/table/status-message rendering paths
+- [x] Phase 80: Add frontend tests that fail on unescaped HTML/script injection in admin helper rendering
+- [x] Phase 80: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 79: Fix CSRF header/cookie validation mismatch for authenticated SPA multipart admin requests
 - [x] Phase 79: Resolve 403 warn logging user identity from Spring Security context (avoid false `anonymous`)
 - [x] Phase 79: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
@@ -270,11 +274,30 @@
   - `npm run test` (in `src/main/webapp`) passed (4 files, 14 tests)
   - `npm run type-check` (in `src/main/webapp`) passed
   - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 80 verification status:
+  - `npm run test -- src/js/admin_functions.test.ts` passed after adding admin rendering XSS safety tests
+  - `npm run test` (in `src/main/webapp`) passed (5 files, 17 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
   - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
 
 ## Finished Phases
+
+### Phase 80: XSS Hardening for `admin_functions.ts` Rendering Paths ✅ COMPLETE
+
+- Hardened `src/main/webapp/src/js/admin_functions.ts` by escaping untrusted modal titles/messages/table content and
+  switching backup/cleanup status rendering to safe `textContent` updates instead of interpolated `innerHTML`.
+- Added trusted-html boundary helper for action-button markup (`trustedHtml(...)`) so button rendering still works while
+  default table cells are escaped.
+- Added frontend unit tests in `src/main/webapp/src/js/admin_functions.test.ts` covering escaped headers/cells,
+  trusted-action markup passthrough, and escaped error message content.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 79: CSRF Request-Handler Compatibility + Accurate 403 User Logging ✅ COMPLETE
 
@@ -297,15 +320,4 @@
   logged consistently.
 - Added backend unit test coverage in
   `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` asserting warn log content and status.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 77C: Emit Browser-Readable CSRF Cookie on Authenticated Requests ✅ COMPLETE
-
-- Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use
-  `CookieCsrfTokenRepository.withHttpOnlyFalse()` so browser clients can read/send CSRF tokens for fetch-based admin
-  mutations.
-- Added a post-CSRF filter (`CsrfCookieFilter`) in `SecurityConfig` that generates/saves an `XSRF-TOKEN` cookie when
-  missing, ensuring token availability on authenticated requests before mutation calls.
-- Added backend controller test coverage in `src/test/java/com/ande/pubquizzz/controller/AdminQuizControllerTest.java`
-  asserting that authenticated admin GET responses expose `XSRF-TOKEN`.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.

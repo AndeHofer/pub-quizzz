@@ -3,6 +3,7 @@ export {};
 import type {QuizDTO, TeamDTO, UserDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 import {withEnsuredCsrfHeaders} from './csrf';
+import {escapeHtml} from './html-utils';
 
 const API_BASE = '/admin';
 
@@ -27,11 +28,17 @@ function closeModal() {
     if (modal) modal.style.display = 'none';
 }
 
+type TrustedHtml = { html: string; trustedHtml: true };
+
+export function trustedHtml(html: string): TrustedHtml {
+    return {html, trustedHtml: true};
+}
+
 function showModal(title: string, content: string) {
     const modal = document.getElementById('dataModal') as HTMLElement | null;
     const modalContent = document.getElementById('modalContent') as HTMLElement | null;
     if (modal && modalContent) {
-        modalContent.innerHTML = `<h2>${title}</h2>${content}`;
+        modalContent.innerHTML = `<h2>${escapeHtml(title)}</h2>${content}`;
         modal.style.display = 'block';
     }
 }
@@ -45,11 +52,23 @@ function loadCreateQuizPage(quiz: QuizDTO) {
     window.location.href = 'create_quiz.html';
 }
 
-function showError(message: string) {
-    return `<div class="error">❌ ${message}</div>`;
+export function showError(message: string) {
+    return `<div class="error">❌ ${escapeHtml(message)}</div>`;
+}
+
+function setStatusMessage(msgDiv: HTMLElement | null, text: string, color: 'red' | 'green' | 'neutral') {
+    if (!msgDiv) return;
+
+    if (color === 'neutral') {
+        msgDiv.style.color = '';
+    } else {
+        msgDiv.style.color = color;
+    }
+    msgDiv.textContent = text;
 }
 
 // Wire up admin page handlers and modal click-outside behavior
+if (typeof window !== 'undefined') {
 window.addEventListener('load', () => {
     // Wire up admin_main.html buttons by ID
     document.getElementById('createQuizBtn')?.addEventListener('click', () => {
@@ -100,6 +119,7 @@ window.addEventListener('load', () => {
         location.href = 'logs.html';
     });
 });
+}
 
 // ==================== Quiz Management ====================
 
@@ -116,10 +136,18 @@ async function viewQuizzes() {
         const headers = ['ID', 'Titel', 'Pub Datum', 'Archiv Datum', 'Fertig', 'Aktionen'];
         const html = renderTable(headers, sortedQuizzes, (quiz: unknown) => {
             const q = quiz as QuizDTO;
-            return [`${q.quizId}`, quizDisplayTitle(q), `${q.pubDate}`, `${q.submitDate}`, q.finished ? '✅' : '❌', `
+            const safeQuizId = escapeHtml(String(q.quizId));
+            return [
+                String(q.quizId),
+                quizDisplayTitle(q),
+                String(q.pubDate),
+                String(q.submitDate),
+                q.finished ? '✅' : '❌',
+                trustedHtml(`
                 <button class="icon-btn edit-quiz-btn" data-id="${q.quizId}" title="Quiz bearbeiten">✏️</button>
                 <button class="icon-btn delete-quiz-btn" data-id="${q.quizId}" title="Quiz löschen">🗑️</button>
-            `];
+            `)
+            ];
         });
         showModal('Alle Quizze', html);
         document.querySelectorAll('.edit-quiz-btn').forEach(btn => {
@@ -201,10 +229,14 @@ async function viewTeams() {
         const headers = ['ID', 'Team-Name', 'Aktionen'];
         const html = renderTable(headers, teams, (team: unknown) => {
             const t = team as TeamDTO;
-            return [`${t.teamsId}`, `${t.teamName}`, `
-                <button class="icon-btn rename-team-btn" data-id="${t.teamsId}" data-name="${t.teamName}" title="Team umbenennen">✏️</button>
-                <button class="icon-btn delete-team-btn" data-id="${t.teamsId}" data-name="${t.teamName}" title="Team löschen">🗑️</button>
-            `];
+            return [
+                String(t.teamsId),
+                t.teamName,
+                trustedHtml(`
+                <button class="icon-btn rename-team-btn" data-id="${escapeHtml(String(t.teamsId))}" data-name="${escapeHtml(t.teamName)}" title="Team umbenennen">✏️</button>
+                <button class="icon-btn delete-team-btn" data-id="${escapeHtml(String(t.teamsId))}" data-name="${escapeHtml(t.teamName)}" title="Team löschen">🗑️</button>
+            `)
+            ];
         });
         showModal('Alle Teams', html);
         document.querySelectorAll('.rename-team-btn').forEach(btn => {
@@ -268,9 +300,14 @@ async function viewUsers() {
         const headers = ['ID', 'Benutzername', 'Rolle', ''];
         const html = renderTable(headers, users, (user: unknown) => {
             const u = user as UserDTO;
-            return [`${u.userId}`, `${u.username}`, `${u.role}`, `
-                <button class="icon-btn delete-user-btn" data-id="${u.userId}" data-name="${u.username}" title="Benutzer löschen">🗑️</button>
-            `];
+            return [
+                String(u.userId),
+                u.username,
+                u.role,
+                trustedHtml(`
+                <button class="icon-btn delete-user-btn" data-id="${escapeHtml(String(u.userId))}" data-name="${escapeHtml(u.username)}" title="Benutzer löschen">🗑️</button>
+            `)
+            ];
         });
         showModal('Alle Benutzer', html);
         document.querySelectorAll('.delete-user-btn').forEach(btn => {
@@ -306,32 +343,32 @@ async function importBackup() {
     const input = document.getElementById('backupFileInput') as HTMLInputElement | null;
     const msgDiv = document.getElementById('backupMessage') as HTMLElement | null;
     if (!input || !input.files || input.files.length === 0) {
-        if (msgDiv) msgDiv.innerHTML = '<span style="color:red;">Bitte eine ZIP-Datei auswählen.</span>';
+        setStatusMessage(msgDiv, 'Bitte eine ZIP-Datei auswählen.', 'red');
         return;
     }
     const file = input.files[0];
     const formData = new FormData();
     formData.append('file', file);
 
-    if (msgDiv) msgDiv.innerHTML = '<span>Hochladen...</span>';
+    setStatusMessage(msgDiv, 'Hochladen...', 'neutral');
 
     try {
         const resp = await apiFetch('/admin/backup/import', { method: 'POST', body: formData });
         if (resp.ok) {
             const msg = await resp.text();
-            if (msgDiv) msgDiv.innerHTML = `<span style="color:green;">${msg}</span>`;
+            setStatusMessage(msgDiv, msg, 'green');
         } else {
             const err = await resp.json().catch(() => ({ error: 'Unbekannter Fehler' }));
-            if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Fehler: ${err.error}</span>`;
+            setStatusMessage(msgDiv, `Fehler: ${String(err.error ?? 'Unbekannter Fehler')}`, 'red');
         }
     } catch (error: unknown) {
-        if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Netzwerkfehler: ${error instanceof Error ? error.message : error}</span>`;
+        setStatusMessage(msgDiv, `Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, 'red');
     }
 }
 
 async function cleanupImages() {
     const msgDiv = document.getElementById('cleanupMessage') as HTMLElement | null;
-    if (msgDiv) msgDiv.innerHTML = '<span>Bereinigung läuft...</span>';
+    setStatusMessage(msgDiv, 'Bereinigung läuft...', 'neutral');
 
     try {
         const resp = await apiFetch('/admin/cleanup-images', {method: 'DELETE'});
@@ -339,28 +376,35 @@ async function cleanupImages() {
             const result = await resp.json() as { deletedCount: number; deletedFiles: string[] };
             if (msgDiv) {
                 if (result.deletedCount === 0) {
-                    msgDiv.innerHTML = '<span style="color:green;">Keine verwaisten Bilder gefunden.</span>';
+                    setStatusMessage(msgDiv, 'Keine verwaisten Bilder gefunden.', 'green');
                 } else {
-                    msgDiv.innerHTML = `<span style="color:green;">${result.deletedCount} verwaiste(s) Bild(er) gelöscht.</span>`;
+                    setStatusMessage(msgDiv, `${result.deletedCount} verwaiste(s) Bild(er) gelöscht.`, 'green');
                 }
             }
         } else {
             const err = await resp.json().catch(() => ({error: 'Unbekannter Fehler'}));
-            if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Fehler: ${err.error}</span>`;
+            setStatusMessage(msgDiv, `Fehler: ${String(err.error ?? 'Unbekannter Fehler')}`, 'red');
         }
     } catch (error: unknown) {
-        if (msgDiv) msgDiv.innerHTML = `<span style="color:red;">Netzwerkfehler: ${error instanceof Error ? error.message : error}</span>`;
+        setStatusMessage(msgDiv, `Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, 'red');
     }
 }
 
-function renderTable(headers: string[], rows: unknown[], rowFn: (row: unknown) => string[]) {
+function renderCell(cell: string | TrustedHtml): string {
+    if (typeof cell === 'string') {
+        return escapeHtml(cell);
+    }
+    return cell.html;
+}
+
+export function renderTable(headers: string[], rows: unknown[], rowFn: (row: unknown) => Array<string | TrustedHtml>) {
     let html = '<table><thead><tr>';
-    headers.forEach(h => html += `<th>${h}</th>`);
+    headers.forEach(h => html += `<th>${escapeHtml(h)}</th>`);
     html += '</tr></thead><tbody>';
     rows.forEach(r => {
         const cells = rowFn(r);
         html += '<tr>';
-        cells.forEach(c => html += `<td>${c}</td>`);
+        cells.forEach(c => html += `<td>${renderCell(c)}</td>`);
         html += '</tr>';
     });
     html += '</tbody></table>';

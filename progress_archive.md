@@ -4,6 +4,17 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 77C: Emit Browser-Readable CSRF Cookie on Authenticated Requests ✅ COMPLETE
+
+- Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use
+  `CookieCsrfTokenRepository.withHttpOnlyFalse()` so browser clients can read/send CSRF tokens for fetch-based admin
+  mutations.
+- Added a post-CSRF filter (`CsrfCookieFilter`) in `SecurityConfig` that generates/saves an `XSRF-TOKEN` cookie when
+  missing, ensuring token availability on authenticated requests before mutation calls.
+- Added backend controller test coverage in `src/test/java/com/ande/pubquizzz/controller/AdminQuizControllerTest.java`
+  asserting that authenticated admin GET responses expose `XSRF-TOKEN`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 77B: Frontend CSRF Header Wiring for Admin Mutation Fetch Calls ✅ COMPLETE
 
 - Added shared frontend CSRF helper `src/main/webapp/src/js/csrf.ts` that resolves the token from cookie
