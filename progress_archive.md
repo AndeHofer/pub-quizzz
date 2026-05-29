@@ -4,6 +4,17 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 78: WARN Logging for All HTTP 403 Access Denials ✅ COMPLETE
+
+- Added new `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java` to emit `WARN` log entries for
+  every security-layer 403 with method/path/user/exception details while preserving HTTP 403 response behavior.
+- Wired the handler in `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` via
+  `.exceptionHandling(...).accessDeniedHandler(new LoggingAccessDeniedHandler())` so CSRF and role-based denials are
+  logged consistently.
+- Added backend unit test coverage in
+  `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` asserting warn log content and status.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 77C: Emit Browser-Readable CSRF Cookie on Authenticated Requests ✅ COMPLETE
 
 - Updated `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` to use

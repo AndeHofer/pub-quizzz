@@ -2,6 +2,11 @@
 
 ## Open Tasks
 
+- [x] Phase 81: Re-run full project audit and capture findings in `findings.md`
+- [x] Phase 81: Fix Finding 1 (stored XSS via unescaped document filename rendering in `create_quiz.ts`)
+- [x] Phase 81: Add frontend unit tests that fail on unescaped document filenames/attributes in document list rendering
+- [x] Phase 81: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 80: Harden `admin_functions.ts` against XSS in modal/table/status-message rendering paths
 - [x] Phase 80: Add frontend tests that fail on unescaped HTML/script injection in admin helper rendering
 - [x] Phase 80: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
@@ -283,11 +288,34 @@
   - `npm run test` (in `src/main/webapp`) passed (5 files, 17 tests)
   - `npm run type-check` (in `src/main/webapp`) passed
   - `npm run build` (in `src/main/webapp`) passed
+    - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
+      `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
+    - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
+
+- Phase 81 verification status:
+  - `npm run test -- src/js/create_quiz_documents.test.ts` failed first (`Cannot find module './create_quiz_documents'`)
+    as expected TDD red,
+    then passed after implementing the rendering helper
+  - `npm run test` (in `src/main/webapp`) passed (6 files, 18 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
   - `./mvnw.cmd test` passed after setting `JAVA_HOME` in-command to
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
   - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
 
 ## Finished Phases
+
+### Phase 81: Rebuilt Audit + Findings Register + Finding #1 XSS Fix ✅ COMPLETE
+
+- Re-ran a full project audit and persisted the current ranked backlog to `findings.md` so findings are no longer lost
+  between sessions.
+- Added `src/main/webapp/src/js/create_quiz_documents.ts` to centralize quiz-document list markup and enforce escaping
+  of untrusted filenames before injecting into HTML attributes/text.
+- Updated `src/main/webapp/src/js/create_quiz.ts` to use the new helper in `loadDocuments()` instead of inline string
+  interpolation of raw `doc.originalFilename`.
+- Added frontend unit coverage in `src/main/webapp/src/js/create_quiz_documents.test.ts` proving malicious filenames are
+  escaped in both visible text and `download` attribute context.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
 
 ### Phase 80: XSS Hardening for `admin_functions.ts` Rendering Paths ✅ COMPLETE
 
@@ -309,15 +337,4 @@
 - Added/extended backend test coverage in
   `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` for security-context username
   resolution.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
-
-### Phase 78: WARN Logging for All HTTP 403 Access Denials ✅ COMPLETE
-
-- Added new `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java` to emit `WARN` log entries for
-  every security-layer 403 with method/path/user/exception details while preserving HTTP 403 response behavior.
-- Wired the handler in `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java` via
-  `.exceptionHandling(...).accessDeniedHandler(new LoggingAccessDeniedHandler())` so CSRF and role-based denials are
-  logged consistently.
-- Added backend unit test coverage in
-  `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` asserting warn log content and status.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
