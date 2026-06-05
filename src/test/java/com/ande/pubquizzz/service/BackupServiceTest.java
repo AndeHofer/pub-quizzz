@@ -42,6 +42,8 @@ public class BackupServiceTest {
             stmt.execute("CREATE TABLE IF NOT EXISTS result (id BIGINT PRIMARY KEY, quiz_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS result_answer (id BIGINT PRIMARY KEY, result_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS quiz_document (id BIGINT PRIMARY KEY, quiz_id BIGINT NOT NULL, FOREIGN KEY (quiz_id) REFERENCES quiz(id))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS news (news_id BIGINT PRIMARY KEY, title VARCHAR(200) NOT NULL, text VARCHAR(5000) NOT NULL, created_at TIMESTAMP NOT NULL)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS app_usage_event (usage_event_id BIGINT PRIMARY KEY, event_type VARCHAR(64) NOT NULL, username VARCHAR(255) NOT NULL, occurred_at TIMESTAMP NOT NULL, entity_type VARCHAR(64), entity_id VARCHAR(128), metadata_json CLOB)");
         }
         Files.createDirectories(tempDir.resolve("uploads"));
     }
@@ -189,6 +191,34 @@ public class BackupServiceTest {
         String sqlContent = new String(entries.get("database.sql"), StandardCharsets.UTF_8).toUpperCase();
         assertTrue(sqlContent.contains("QUIZ_DOCUMENT"),
                 "SQL dump must contain QUIZ_DOCUMENT table");
+    }
+
+    @Test
+    void createBackup_sqlDump_containsNewsTable() throws Exception {
+        BackupService svc = service();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            svc.createBackup(zip);
+        }
+
+        Map<String, byte[]> entries = readZipEntries(baos.toByteArray());
+        String sqlContent = new String(entries.get("database.sql"), StandardCharsets.UTF_8).toUpperCase();
+        assertTrue(sqlContent.contains("NEWS"),
+                "SQL dump must contain NEWS table");
+    }
+
+    @Test
+    void createBackup_sqlDump_containsAppUsageEventTable() throws Exception {
+        BackupService svc = service();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            svc.createBackup(zip);
+        }
+
+        Map<String, byte[]> entries = readZipEntries(baos.toByteArray());
+        String sqlContent = new String(entries.get("database.sql"), StandardCharsets.UTF_8).toUpperCase();
+        assertTrue(sqlContent.contains("APP_USAGE_EVENT"),
+                "SQL dump must contain APP_USAGE_EVENT table");
     }
 
     @Test

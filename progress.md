@@ -2,6 +2,12 @@
 
 ## Open Tasks
 
+- [x] Phase 92: Verify backup/restore scope for `news` and `app_usage_event` tables
+- [x] Phase 92: Add RED tests proving `database.sql` includes `NEWS` and `APP_USAGE_EVENT`
+- [x] Phase 92: Add RED restore-cycle test proving `news` and `app_usage_event` are restored from staged backup
+- [x] Phase 92: Implement backup/export + restore-drop changes for `news` and `app_usage_event`
+- [x] Phase 92: Run verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 91: Confirm homepage Neuigkeiten should be first section and display only date (no time)
 - [x] Phase 91: Add/adjust frontend test to enforce date-only rendering for news timestamps
 - [x] Phase 91: Move Neuigkeiten section to first card on homepage and switch formatter to date-only
@@ -397,7 +403,34 @@
     `C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot`
   - Maven output includes frontend Vitest step `frontend:2.0.0:npm (npm run test)`
 
+- Phase 92 verification status:
+  -
+  `./mvnw.cmd "-Dtest=BackupServiceTest#createBackup_sqlDump_containsNewsTable+createBackup_sqlDump_containsAppUsageEventTable" test`
+  failed first (expected TDD red) because backup export did not include `news` and `app_usage_event` tables
+  - `./mvnw.cmd "-Dtest=BackupRestoreListenerTest#applyRestore_restoresNewsAndUsageEventsFromBackup" test` failed first
+    (expected TDD red) because restore cycle did not restore `news`/`app_usage_event` from backup
+  -
+  `./mvnw.cmd "-Dtest=BackupServiceTest#createBackup_sqlDump_containsNewsTable+createBackup_sqlDump_containsAppUsageEventTable,BackupRestoreListenerTest#applyRestore_restoresNewsAndUsageEventsFromBackup" test`
+  passed after implementing backup/restore table coverage changes
+  - `npm run test` (in `src/main/webapp`) passed (8 files, 38 tests)
+  - `npm run type-check` (in `src/main/webapp`) passed
+  - `npm run build` (in `src/main/webapp`) passed
+  - `./mvnw.cmd test` passed (`BUILD SUCCESS`, 263 backend tests + frontend Vitest)
+
 ## Finished Phases
+
+### Phase 92: Include Neuigkeiten + Usage Events in Backup/Restore ✅ COMPLETE
+
+- Updated backup DB export in `src/main/java/com/ande/pubquizzz/service/BackupService.java` to include both
+  `news` and `app_usage_event` in the `SCRIPT TO ... TABLE ...` dump list.
+- Updated restore DB reset in `src/main/java/com/ande/pubquizzz/listener/BackupRestoreListener.java` to drop
+  `news` and `app_usage_event` before `RUNSCRIPT`, ensuring restore replaces these tables with backup state.
+- Extended `src/test/java/com/ande/pubquizzz/service/BackupServiceTest.java` with explicit SQL dump assertions for
+  `NEWS` and `APP_USAGE_EVENT` presence.
+- Extended `src/test/java/com/ande/pubquizzz/service/BackupRestoreListenerTest.java` with restore-cycle coverage proving
+  backed-up `news`/`app_usage_event` rows are restored and mutated post-backup rows are removed.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (in `src/main/webapp`) and
+  `./mvnw.cmd test`.
 
 ### Phase 91: Neuigkeiten First on Homepage + Date-Only Timestamp ✅ COMPLETE
 
@@ -414,60 +447,5 @@
 - Moved the `Neuigkeiten` section in `src/main/webapp/src/index.html` to sit directly below the leaderboard row (
   `Punkte`, `Medaillen`, `Durchschnitt`) and above the remaining main navigation cards.
 - Kept all existing IDs/classes (`newsSection`, `newsList`) unchanged so no JavaScript logic changes were required.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (in `src/main/webapp`) and
-  `./mvnw.cmd test`.
-
-### Phase 89: Neuigkeiten Frontend Quality Hardening + Shared Admin UI Helpers ✅ COMPLETE
-
-- Extracted shared admin UI primitives into `src/main/webapp/src/js/admin_ui.ts` (`showModal`, `showError`,
-  `showLoading`, `trustedHtml`, `renderTable`) and reused them from both `admin_functions.ts` and `admin_news.ts` to
-  reduce duplicated modal/table helper logic.
-- Fixed trusted action markup in `src/main/webapp/src/js/admin_functions.ts` to use escaped `safeQuizId` in quiz action
-  button `data-id` attributes.
-- Hardened admin list error handling in `src/main/webapp/src/js/admin_functions.ts` by checking `response.ok` before
-  JSON parsing for quizzes/teams/users and surfacing meaningful German status/body errors.
-- Expanded `src/main/webapp/src/js/admin_news.test.ts` with unhappy-path coverage for create/update/delete plus
-  prompt/confirm helper behavior.
-- Expanded `src/main/webapp/src/js/news.test.ts` with invalid-date fallback, newline-to-`<br>` rendering, and
-  same-timestamp tie-break sorting assertions.
-- Final frontend alignment fixes: neutral news-load fallback class in `src/main/webapp/src/js/news.ts`, non-duplicated
-  admin load error messaging in `src/main/webapp/src/js/admin_news.ts`, and German `Admin-Bereich` label in
-  `src/main/webapp/src/index.html`.
-- Verification passed: `npm run test -- src/js/news.test.ts src/js/admin_news.test.ts`, `npm run type-check`,
-  `npm run test`, `npm run build`, and `./mvnw.cmd test`.
-
-### Phase 88: Neuigkeiten Frontend Spec-Compliance Refactor (Button-Driven Admin Flow) ✅ COMPLETE
-
-- Refactored public news rendering in `src/main/webapp/src/js/news.ts` to enforce newest-first ordering and max 3 items
-  via `sortAndLimitNews(...)` before markup generation.
-- Reworked `src/main/webapp/src/admin/admin_main.html` Neuigkeiten block to explicit admin actions (`createNewsBtn`,
-  `viewNewsBtn`) matching approved button-driven flow.
-- Reworked `src/main/webapp/src/js/admin_news.ts` to modal/table management style (load, create, edit, delete via
-  `/admin/news`) aligned with existing admin UX patterns.
-- Updated `src/main/webapp/src/js/admin_functions.ts` to initialize Neuigkeiten action wiring through
-  `initAdminNewsActions()`.
-- Added/updated focused frontend tests in `src/main/webapp/src/js/news.test.ts` and
-  `src/main/webapp/src/js/admin_news.test.ts` for sort/limit, escaping, and helper/action request behavior.
-- Verification passed: `npm run test -- src/js/news.test.ts src/js/admin_news.test.ts` and `npm run type-check`.
-
-### Phase 84: Neuigkeiten End-to-End (Backend + Frontend + Tests) ✅ COMPLETE
-
-- Added backend Neuigkeiten vertical slice: `src/main/java/com/ande/pubquizzz/database/entities/News.java`,
-  `src/main/java/com/ande/pubquizzz/database/repositories/NewsRepository.java`,
-  `src/main/java/com/ande/pubquizzz/service/NewsService.java`,
-  `src/main/java/com/ande/pubquizzz/controller/UserNewsController.java`,
-  `src/main/java/com/ande/pubquizzz/controller/AdminNewsController.java`, and DTOs
-  `src/main/java/com/ande/pubquizzz/dto/NewsDTO.java`, `src/main/java/com/ande/pubquizzz/dto/CreateNewsRequest.java`,
-  `src/main/java/com/ande/pubquizzz/dto/UpdateNewsRequest.java`.
-- Implemented authenticated user read endpoint (`GET /api/news`) with newest-first and max/default 3 behavior;
-  implemented admin CRUD endpoints (`GET/POST/PUT/DELETE /admin/news`) with validation and admin-only authorization.
-- Added/expanded backend tests: `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java`,
-  `src/test/java/com/ande/pubquizzz/controller/AdminNewsControllerTest.java`,
-  `src/test/java/com/ande/pubquizzz/controller/UserNewsControllerTest.java`.
-- Added homepage Neuigkeiten section in `src/main/webapp/src/index.html` and loading/render integration in
-  `src/main/webapp/src/js/index.ts` via `/api/news?limit=3`.
-- Added frontend news/admin modules and tests: `src/main/webapp/src/js/news.ts`, `src/main/webapp/src/js/admin_news.ts`,
-  `src/main/webapp/src/js/news.test.ts`, `src/main/webapp/src/js/admin_news.test.ts`, plus `NewsDTO` in
-  `src/main/webapp/src/js/types.ts`.
 - Verification passed: `npm run test`, `npm run type-check`, `npm run build` (in `src/main/webapp`) and
   `./mvnw.cmd test`.

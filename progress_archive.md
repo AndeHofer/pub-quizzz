@@ -4,6 +4,61 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 89: Neuigkeiten Frontend Quality Hardening + Shared Admin UI Helpers ✅ COMPLETE
+
+- Extracted shared admin UI primitives into `src/main/webapp/src/js/admin_ui.ts` (`showModal`, `showError`,
+  `showLoading`, `trustedHtml`, `renderTable`) and reused them from both `admin_functions.ts` and `admin_news.ts` to
+  reduce duplicated modal/table helper logic.
+- Fixed trusted action markup in `src/main/webapp/src/js/admin_functions.ts` to use escaped `safeQuizId` in quiz action
+  button `data-id` attributes.
+- Hardened admin list error handling in `src/main/webapp/src/js/admin_functions.ts` by checking `response.ok` before
+  JSON parsing for quizzes/teams/users and surfacing meaningful German status/body errors.
+- Expanded `src/main/webapp/src/js/admin_news.test.ts` with unhappy-path coverage for create/update/delete plus
+  prompt/confirm helper behavior.
+- Expanded `src/main/webapp/src/js/news.test.ts` with invalid-date fallback, newline-to-`<br>` rendering, and
+  same-timestamp tie-break sorting assertions.
+- Final frontend alignment fixes: neutral news-load fallback class in `src/main/webapp/src/js/news.ts`, non-duplicated
+  admin load error messaging in `src/main/webapp/src/js/admin_news.ts`, and German `Admin-Bereich` label in
+  `src/main/webapp/src/index.html`.
+- Verification passed: `npm run test -- src/js/news.test.ts src/js/admin_news.test.ts`, `npm run type-check`,
+  `npm run test`, `npm run build`, and `./mvnw.cmd test`.
+
+### Phase 88: Neuigkeiten Frontend Spec-Compliance Refactor (Button-Driven Admin Flow) ✅ COMPLETE
+
+- Refactored public news rendering in `src/main/webapp/src/js/news.ts` to enforce newest-first ordering and max 3 items
+  via `sortAndLimitNews(...)` before markup generation.
+- Reworked `src/main/webapp/src/admin/admin_main.html` Neuigkeiten block to explicit admin actions (`createNewsBtn`,
+  `viewNewsBtn`) matching approved button-driven flow.
+- Reworked `src/main/webapp/src/js/admin_news.ts` to modal/table management style (load, create, edit, delete via
+  `/admin/news`) aligned with existing admin UX patterns.
+- Updated `src/main/webapp/src/js/admin_functions.ts` to initialize Neuigkeiten action wiring through
+  `initAdminNewsActions()`.
+- Added/updated focused frontend tests in `src/main/webapp/src/js/news.test.ts` and
+  `src/main/webapp/src/js/admin_news.test.ts` for sort/limit, escaping, and helper/action request behavior.
+- Verification passed: `npm run test -- src/js/news.test.ts src/js/admin_news.test.ts` and `npm run type-check`.
+
+### Phase 84: Neuigkeiten End-to-End (Backend + Frontend + Tests) ✅ COMPLETE
+
+- Added backend Neuigkeiten vertical slice: `src/main/java/com/ande/pubquizzz/database/entities/News.java`,
+  `src/main/java/com/ande/pubquizzz/database/repositories/NewsRepository.java`,
+  `src/main/java/com/ande/pubquizzz/service/NewsService.java`,
+  `src/main/java/com/ande/pubquizzz/controller/UserNewsController.java`,
+  `src/main/java/com/ande/pubquizzz/controller/AdminNewsController.java`, and DTOs
+  `src/main/java/com/ande/pubquizzz/dto/NewsDTO.java`, `src/main/java/com/ande/pubquizzz/dto/CreateNewsRequest.java`,
+  `src/main/java/com/ande/pubquizzz/dto/UpdateNewsRequest.java`.
+- Implemented authenticated user read endpoint (`GET /api/news`) with newest-first and max/default 3 behavior;
+  implemented admin CRUD endpoints (`GET/POST/PUT/DELETE /admin/news`) with validation and admin-only authorization.
+- Added/expanded backend tests: `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java`,
+  `src/test/java/com/ande/pubquizzz/controller/AdminNewsControllerTest.java`,
+  `src/test/java/com/ande/pubquizzz/controller/UserNewsControllerTest.java`.
+- Added homepage Neuigkeiten section in `src/main/webapp/src/index.html` and loading/render integration in
+  `src/main/webapp/src/js/index.ts` via `/api/news?limit=3`.
+- Added frontend news/admin modules and tests: `src/main/webapp/src/js/news.ts`, `src/main/webapp/src/js/admin_news.ts`,
+  `src/main/webapp/src/js/news.test.ts`, `src/main/webapp/src/js/admin_news.test.ts`, plus `NewsDTO` in
+  `src/main/webapp/src/js/types.ts`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (in `src/main/webapp`) and
+  `./mvnw.cmd test`.
+
 ### Phase 86: Neuigkeiten Backend Quality Fixes (Repository List + Safe Delete + 201 Create) ✅ COMPLETE
 
 - Updated `src/main/java/com/ande/pubquizzz/database/repositories/NewsRepository.java` with a dedicated full-list method

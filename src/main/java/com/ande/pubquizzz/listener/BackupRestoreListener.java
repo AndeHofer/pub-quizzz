@@ -93,6 +93,8 @@ public class BackupRestoreListener {
             stmt.execute("DROP TABLE IF EXISTS question_hints");
             stmt.execute("DROP TABLE IF EXISTS question");
             stmt.execute("DROP TABLE IF EXISTS quiz_document");
+            stmt.execute("DROP TABLE IF EXISTS news");
+            stmt.execute("DROP TABLE IF EXISTS app_usage_event");
             stmt.execute("DROP TABLE IF EXISTS quiz");
             stmt.execute("DROP TABLE IF EXISTS team");
             stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");

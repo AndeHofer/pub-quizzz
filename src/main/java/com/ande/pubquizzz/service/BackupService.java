@@ -54,7 +54,7 @@ public class BackupService {
             String sqlPath = tempSql.toAbsolutePath().toString().replace("\\", "/");
             try (Connection conn = dataSource.getConnection();
                  Statement stmt = conn.createStatement()) {
-                stmt.execute("SCRIPT TO '" + sqlPath + "' TABLE quiz, question, question_hints, team, result, result_answer, quiz_document");
+                stmt.execute("SCRIPT TO '" + sqlPath + "' TABLE quiz, question, question_hints, team, result, result_answer, quiz_document, news, app_usage_event");
             } catch (Exception e) {
                 throw new RuntimeException("Failed to dump H2 database: " + e.getMessage(), e);
             }

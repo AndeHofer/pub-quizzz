@@ -43,6 +43,8 @@ public class BackupRestoreListenerTest {
             stmt.execute("CREATE TABLE IF NOT EXISTS result (id BIGINT PRIMARY KEY, quiz_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS result_answer (id BIGINT PRIMARY KEY, result_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS quiz_document (id BIGINT PRIMARY KEY, quiz_id BIGINT NOT NULL, FOREIGN KEY (quiz_id) REFERENCES quiz(id))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS news (news_id BIGINT PRIMARY KEY, title VARCHAR(200) NOT NULL, text VARCHAR(5000) NOT NULL, created_at TIMESTAMP NOT NULL)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS app_usage_event (usage_event_id BIGINT PRIMARY KEY, event_type VARCHAR(64) NOT NULL, username VARCHAR(255) NOT NULL, occurred_at TIMESTAMP NOT NULL, entity_type VARCHAR(64), entity_id VARCHAR(128), metadata_json CLOB)");
         }
         Files.createDirectories(tempDir.resolve("uploads"));
         mockQuizService = mock(QuizService.class);
@@ -314,6 +316,51 @@ public class BackupRestoreListenerTest {
             originalQuizCount.next();
             assertEquals(1, originalQuizCount.getInt(1),
                     "Original database rows should be restored after rollback");
+        }
+    }
+
+    @Test
+    void applyRestore_restoresNewsAndUsageEventsFromBackup() throws Exception {
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("INSERT INTO news VALUES (1, 'Original News', 'Original Text', TIMESTAMP '2026-06-01 10:00:00')");
+            stmt.execute("INSERT INTO app_usage_event VALUES (1, 'AUTH_SUCCESS', 'alice', TIMESTAMP '2026-06-01 10:05:00', NULL, NULL, NULL)");
+        }
+
+        BackupService svc = backupService();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(baos)) {
+            svc.createBackup(zip);
+        }
+        svc.stageRestore(new ByteArrayInputStream(baos.toByteArray()));
+
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("DELETE FROM news");
+            stmt.execute("DELETE FROM app_usage_event");
+            stmt.execute("INSERT INTO news VALUES (2, 'Mutated News', 'Mutated Text', TIMESTAMP '2026-06-02 10:00:00')");
+            stmt.execute("INSERT INTO app_usage_event VALUES (2, 'AUTH_SUCCESS', 'bob', TIMESTAMP '2026-06-02 10:05:00', NULL, NULL, NULL)");
+        }
+
+        listener().onApplicationStarted();
+
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            ResultSet originalNews = stmt.executeQuery("SELECT COUNT(*) FROM news WHERE news_id = 1");
+            originalNews.next();
+            assertEquals(1, originalNews.getInt(1), "Original news row from backup should be restored");
+
+            ResultSet mutatedNews = stmt.executeQuery("SELECT COUNT(*) FROM news WHERE news_id = 2");
+            mutatedNews.next();
+            assertEquals(0, mutatedNews.getInt(1), "Mutated news row should not remain after restore");
+
+            ResultSet originalUsageEvent = stmt.executeQuery("SELECT COUNT(*) FROM app_usage_event WHERE usage_event_id = 1");
+            originalUsageEvent.next();
+            assertEquals(1, originalUsageEvent.getInt(1), "Original usage event row from backup should be restored");
+
+            ResultSet mutatedUsageEvent = stmt.executeQuery("SELECT COUNT(*) FROM app_usage_event WHERE usage_event_id = 2");
+            mutatedUsageEvent.next();
+            assertEquals(0, mutatedUsageEvent.getInt(1), "Mutated usage event row should not remain after restore");
         }
     }
 }
