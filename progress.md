@@ -2,6 +2,61 @@
 
 ## Open Tasks
 
+- [x] Phase 91: Confirm homepage Neuigkeiten should be first section and display only date (no time)
+- [x] Phase 91: Add/adjust frontend test to enforce date-only rendering for news timestamps
+- [x] Phase 91: Move Neuigkeiten section to first card on homepage and switch formatter to date-only
+- [x] Phase 91: Run verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 90: Confirm homepage placement target for Neuigkeiten directly below leaderboard row
+- [x] Phase 90: Move Neuigkeiten section in `index.html` to directly under Punkte/Medaillen/Durchschnitt row
+- [x] Phase 90: Run verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 89: Review frontend review-fix scope and identify shared admin helper extraction points (
+  `admin_functions.ts`, `admin_news.ts`, related tests)
+- [x] Phase 89: Apply frontend fixes (escaped quiz action IDs, robust response.ok handling, shared helper reuse without
+  circular imports)
+- [x] Phase 89: Expand frontend tests (`admin_news.test.ts`, `news.test.ts`) for requested unhappy
+  paths/date-newline-tie-break coverage
+- [x] Phase 89: Run targeted frontend verification (`npm run test -- src/js/news.test.ts src/js/admin_news.test.ts` and
+  `npm run type-check`)
+
+- [x] Phase 88: Add failing frontend tests for Neuigkeiten sort+limit helper and admin news action/request helper
+  coverage
+- [x] Phase 88: Refactor Neuigkeiten public/admin frontend flow (button-driven admin actions + modal/table management)
+- [x] Phase 88: Run targeted frontend verification (`npm run test -- src/js/news.test.ts src/js/admin_news.test.ts`)
+
+- [x] Phase 87: Add RED frontend tests for Neuigkeiten public/admin modules (`news.test.ts`, `admin_news.test.ts`)
+- [x] Phase 87: Implement Neuigkeiten frontend modules and wire homepage/admin UI (`news.ts`, `admin_news.ts`,
+  `types.ts`, `index.ts`, `index.html`, `admin_main.html`, `admin_functions.ts`)
+- [x] Phase 87: Run targeted frontend tests (`npm run test -- src/js/news.test.ts src/js/admin_news.test.ts`)
+
+- [x] Phase 86: Add/adjust failing Neuigkeiten backend tests for admin create `201`, admin full-list repository usage,
+  and safe delete flow
+- [x] Phase 86: Implement Neuigkeiten backend quality fixes in service/repository/controller (sorted full list + delete
+  by loaded entity + create returns `201`)
+- [x] Phase 86: Run targeted Neuigkeiten backend test command (
+  `./mvnw.cmd "-Dtest=NewsServiceTest,AdminNewsControllerTest,UserNewsControllerTest" test`)
+
+- [x] Phase 85: Expand Neuigkeiten backend tests for admin CRUD/security/404 behavior and service
+  clamp/preserve-createdAt rules
+- [x] Phase 85: Run targeted Neuigkeiten backend test command (
+  `./mvnw.cmd "-Dtest=NewsServiceTest,AdminNewsControllerTest,UserNewsControllerTest" test`)
+
+- [x] Phase 84: Brainstorm and lock Neuigkeiten scope (logged-in users can read, only admins can create/edit/delete)
+- [x] Phase 84: Define Neuigkeiten data shape and display constraints (`Titel`, `Text`, `Erstellt am`; newest first;
+  limit 3 on homepage)
+- [x] Phase 84: Write approved Neuigkeiten design spec and implementation plan
+- [x] Phase 84: Implement backend Neuigkeiten entity/repository/service/controllers with admin CRUD and user read
+  endpoint
+- [x] Phase 84: Implement frontend Neuigkeiten section on homepage and admin management actions
+- [x] Phase 84: Add/update backend integration tests, backend unit tests, and frontend unit tests for Neuigkeiten
+- [x] Phase 84: Run full verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
+- [x] Phase 84 (Task 2+3): Add failing backend tests for `NewsService`, `AdminNewsController`, and `UserNewsController`
+- [x] Phase 84 (Task 2+3): Run targeted backend subset and capture RED failure evidence
+- [x] Phase 84 (Task 2+3): Implement backend Neuigkeiten entity/repository/DTOs/service/controllers
+- [x] Phase 84 (Task 2+3): Re-run targeted backend subset and capture GREEN pass evidence
+
 - [x] Phase 83: Add rollback-based restore safety so startup restore is fail-safe (restore all-or-rollback)
 - [x] Phase 83: Add failing backend tests for DB-restore failure and upload-swap failure rollback behavior
 - [x] Phase 83: Keep pending restore diagnostics behavior while ensuring rollback snapshot cleanup on success
@@ -344,47 +399,75 @@
 
 ## Finished Phases
 
-### Phase 83: Fail-Safe Restore with Automatic Rollback Snapshot ✅ COMPLETE
+### Phase 91: Neuigkeiten First on Homepage + Date-Only Timestamp ✅ COMPLETE
 
-- Hardened `src/main/java/com/ande/pubquizzz/listener/BackupRestoreListener.java` to create a rollback snapshot before
-  applying pending restore, then automatically roll back to previous DB/uploads state when restore fails.
-- Added rollback orchestration helpers (`prepareRollbackSnapshot`, `applyRollbackSnapshot`,
-  `applyDatabaseRestore`, `replaceUploads`) and kept startup behavior non-fatal (app continues running).
-- Extended `src/main/java/com/ande/pubquizzz/service/BackupService.java` with reusable
-  `stageRestoreToDirectory(...)` so rollback ZIP extraction reuses the same validation/guardrail path as normal restore
-  staging.
-- Added rollback-focused backend tests in
-  `src/test/java/com/ande/pubquizzz/service/BackupRestoreListenerTest.java` for DB restore failure rollback and
-  upload-swap failure rollback.
-- Updated listener test wiring to inject `BackupService` and use new restore APIs.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+- Moved `Neuigkeiten` to the first card position in `src/main/webapp/src/index.html` (now directly below header/version
+  and above leaderboard links).
+- Updated news timestamp formatting in `src/main/webapp/src/js/news.ts` to render date only (`de-AT` medium date),
+  removing time display.
+- Added frontend test coverage in `src/main/webapp/src/js/news.test.ts` to enforce date-only rendering (no `HH:mm`).
+- Verification passed: `npm run test -- src/js/news.test.ts`, `npm run test`, `npm run type-check`, `npm run build` (in
+  `src/main/webapp`), and `./mvnw.cmd test`.
 
-### Phase 82: Streamed Backup Import + Restore Archive Guardrails ✅ COMPLETE
+### Phase 90: Move Neuigkeiten Below Leaderboard Row ✅ COMPLETE
 
-- Updated `src/main/java/com/ande/pubquizzz/controller/AdminBackupController.java` to stream upload content with
-  `file.getInputStream()` into backup restore staging, removing heap-heavy `file.getBytes()` buffering.
-- Refactored `src/main/java/com/ande/pubquizzz/service/BackupService.java` restore staging to accept `InputStream`,
-  stream ZIP extraction with bounded copy, and enforce configurable archive limits (entry count, per-entry size,
-  total uncompressed size).
-- Added restore import safety configuration in `src/main/resources/application.properties`:
-  `app.backup.import.max-entries`, `app.backup.import.max-entry-size-bytes`,
-  `app.backup.import.max-total-uncompressed-size-bytes` (kept multipart 500MB as requested).
-- Ensured staged restore directory cleanup on validation and I/O failures during restore staging.
-- Updated backend tests in
-  `src/test/java/com/ande/pubquizzz/controller/AdminBackupControllerTest.java`,
-  `src/test/java/com/ande/pubquizzz/service/BackupServiceTest.java`, and
-  `src/test/java/com/ande/pubquizzz/service/BackupRestoreListenerTest.java` for InputStream contract and new guardrail
-  behaviors.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+- Moved the `Neuigkeiten` section in `src/main/webapp/src/index.html` to sit directly below the leaderboard row (
+  `Punkte`, `Medaillen`, `Durchschnitt`) and above the remaining main navigation cards.
+- Kept all existing IDs/classes (`newsSection`, `newsList`) unchanged so no JavaScript logic changes were required.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (in `src/main/webapp`) and
+  `./mvnw.cmd test`.
 
-### Phase 81: Rebuilt Audit + Findings Register + Finding #1 XSS Fix ✅ COMPLETE
+### Phase 89: Neuigkeiten Frontend Quality Hardening + Shared Admin UI Helpers ✅ COMPLETE
 
-- Re-ran a full project audit and persisted the current ranked backlog to `findings.md` so findings are no longer lost
-  between sessions.
-- Added `src/main/webapp/src/js/create_quiz_documents.ts` to centralize quiz-document list markup and enforce escaping
-  of untrusted filenames before injecting into HTML attributes/text.
-- Updated `src/main/webapp/src/js/create_quiz.ts` to use the new helper in `loadDocuments()` instead of inline string
-  interpolation of raw `doc.originalFilename`.
-- Added frontend unit coverage in `src/main/webapp/src/js/create_quiz_documents.test.ts` proving malicious filenames are
-  escaped in both visible text and `download` attribute context.
-- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+- Extracted shared admin UI primitives into `src/main/webapp/src/js/admin_ui.ts` (`showModal`, `showError`,
+  `showLoading`, `trustedHtml`, `renderTable`) and reused them from both `admin_functions.ts` and `admin_news.ts` to
+  reduce duplicated modal/table helper logic.
+- Fixed trusted action markup in `src/main/webapp/src/js/admin_functions.ts` to use escaped `safeQuizId` in quiz action
+  button `data-id` attributes.
+- Hardened admin list error handling in `src/main/webapp/src/js/admin_functions.ts` by checking `response.ok` before
+  JSON parsing for quizzes/teams/users and surfacing meaningful German status/body errors.
+- Expanded `src/main/webapp/src/js/admin_news.test.ts` with unhappy-path coverage for create/update/delete plus
+  prompt/confirm helper behavior.
+- Expanded `src/main/webapp/src/js/news.test.ts` with invalid-date fallback, newline-to-`<br>` rendering, and
+  same-timestamp tie-break sorting assertions.
+- Final frontend alignment fixes: neutral news-load fallback class in `src/main/webapp/src/js/news.ts`, non-duplicated
+  admin load error messaging in `src/main/webapp/src/js/admin_news.ts`, and German `Admin-Bereich` label in
+  `src/main/webapp/src/index.html`.
+- Verification passed: `npm run test -- src/js/news.test.ts src/js/admin_news.test.ts`, `npm run type-check`,
+  `npm run test`, `npm run build`, and `./mvnw.cmd test`.
+
+### Phase 88: Neuigkeiten Frontend Spec-Compliance Refactor (Button-Driven Admin Flow) ✅ COMPLETE
+
+- Refactored public news rendering in `src/main/webapp/src/js/news.ts` to enforce newest-first ordering and max 3 items
+  via `sortAndLimitNews(...)` before markup generation.
+- Reworked `src/main/webapp/src/admin/admin_main.html` Neuigkeiten block to explicit admin actions (`createNewsBtn`,
+  `viewNewsBtn`) matching approved button-driven flow.
+- Reworked `src/main/webapp/src/js/admin_news.ts` to modal/table management style (load, create, edit, delete via
+  `/admin/news`) aligned with existing admin UX patterns.
+- Updated `src/main/webapp/src/js/admin_functions.ts` to initialize Neuigkeiten action wiring through
+  `initAdminNewsActions()`.
+- Added/updated focused frontend tests in `src/main/webapp/src/js/news.test.ts` and
+  `src/main/webapp/src/js/admin_news.test.ts` for sort/limit, escaping, and helper/action request behavior.
+- Verification passed: `npm run test -- src/js/news.test.ts src/js/admin_news.test.ts` and `npm run type-check`.
+
+### Phase 84: Neuigkeiten End-to-End (Backend + Frontend + Tests) ✅ COMPLETE
+
+- Added backend Neuigkeiten vertical slice: `src/main/java/com/ande/pubquizzz/database/entities/News.java`,
+  `src/main/java/com/ande/pubquizzz/database/repositories/NewsRepository.java`,
+  `src/main/java/com/ande/pubquizzz/service/NewsService.java`,
+  `src/main/java/com/ande/pubquizzz/controller/UserNewsController.java`,
+  `src/main/java/com/ande/pubquizzz/controller/AdminNewsController.java`, and DTOs
+  `src/main/java/com/ande/pubquizzz/dto/NewsDTO.java`, `src/main/java/com/ande/pubquizzz/dto/CreateNewsRequest.java`,
+  `src/main/java/com/ande/pubquizzz/dto/UpdateNewsRequest.java`.
+- Implemented authenticated user read endpoint (`GET /api/news`) with newest-first and max/default 3 behavior;
+  implemented admin CRUD endpoints (`GET/POST/PUT/DELETE /admin/news`) with validation and admin-only authorization.
+- Added/expanded backend tests: `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java`,
+  `src/test/java/com/ande/pubquizzz/controller/AdminNewsControllerTest.java`,
+  `src/test/java/com/ande/pubquizzz/controller/UserNewsControllerTest.java`.
+- Added homepage Neuigkeiten section in `src/main/webapp/src/index.html` and loading/render integration in
+  `src/main/webapp/src/js/index.ts` via `/api/news?limit=3`.
+- Added frontend news/admin modules and tests: `src/main/webapp/src/js/news.ts`, `src/main/webapp/src/js/admin_news.ts`,
+  `src/main/webapp/src/js/news.test.ts`, `src/main/webapp/src/js/admin_news.test.ts`, plus `NewsDTO` in
+  `src/main/webapp/src/js/types.ts`.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (in `src/main/webapp`) and
+  `./mvnw.cmd test`.

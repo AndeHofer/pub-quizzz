@@ -4,6 +4,10 @@ import type {QuizDTO, TeamDTO, UserDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 import {withEnsuredCsrfHeaders} from './csrf';
 import {escapeHtml} from './html-utils';
+import {initAdminNewsActions} from './admin_news';
+import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
+
+export {renderTable, showError, trustedHtml};
 
 const API_BASE = '/admin';
 
@@ -28,32 +32,15 @@ function closeModal() {
     if (modal) modal.style.display = 'none';
 }
 
-type TrustedHtml = { html: string; trustedHtml: true };
-
-export function trustedHtml(html: string): TrustedHtml {
-    return {html, trustedHtml: true};
-}
-
-function showModal(title: string, content: string) {
-    const modal = document.getElementById('dataModal') as HTMLElement | null;
-    const modalContent = document.getElementById('modalContent') as HTMLElement | null;
-    if (modal && modalContent) {
-        modalContent.innerHTML = `<h2>${escapeHtml(title)}</h2>${content}`;
-        modal.style.display = 'block';
-    }
-}
-
-function showLoading() {
-    return '<div class="loading">Laden...</div>';
-}
-
 function loadCreateQuizPage(quiz: QuizDTO) {
     sessionStorage.setItem('editingQuiz', JSON.stringify(quiz));
     window.location.href = 'create_quiz.html';
 }
 
-export function showError(message: string) {
-    return `<div class="error">❌ ${escapeHtml(message)}</div>`;
+async function readHttpErrorMessage(response: Response, fallback: string): Promise<string> {
+    const bodyText = await response.text().catch(() => '');
+    const details = bodyText.trim() || `${response.status} ${response.statusText}`.trim() || `HTTP ${response.status}`;
+    return `${fallback}: ${details}`;
 }
 
 function setStatusMessage(msgDiv: HTMLElement | null, text: string, color: 'red' | 'green' | 'neutral') {
@@ -118,6 +105,8 @@ window.addEventListener('load', () => {
     document.getElementById('viewLogsBtn')?.addEventListener('click', () => {
         location.href = 'logs.html';
     });
+
+    initAdminNewsActions();
 });
 }
 
@@ -127,6 +116,10 @@ async function viewQuizzes() {
     showModal('Alle Quizze', showLoading());
     try {
         const response = await apiFetch(`${API_BASE}/quizzes`);
+        if (!response.ok) {
+            showModal('Fehler', showError(await readHttpErrorMessage(response, 'Fehler beim Laden der Quizze')));
+            return;
+        }
         const quizzes: QuizDTO[] = await response.json();
         if (quizzes.length === 0) {
             showModal('Alle Quizze', '<p>Keine Quizze gefunden.</p>');
@@ -144,8 +137,8 @@ async function viewQuizzes() {
                 String(q.submitDate),
                 q.finished ? '✅' : '❌',
                 trustedHtml(`
-                <button class="icon-btn edit-quiz-btn" data-id="${q.quizId}" title="Quiz bearbeiten">✏️</button>
-                <button class="icon-btn delete-quiz-btn" data-id="${q.quizId}" title="Quiz löschen">🗑️</button>
+                <button class="icon-btn edit-quiz-btn" data-id="${safeQuizId}" title="Quiz bearbeiten">✏️</button>
+                <button class="icon-btn delete-quiz-btn" data-id="${safeQuizId}" title="Quiz löschen">🗑️</button>
             `)
             ];
         });
@@ -221,6 +214,10 @@ async function viewTeams() {
     showModal('Alle Teams', showLoading());
     try {
         const response = await apiFetch(`${API_BASE}/teams`);
+        if (!response.ok) {
+            showModal('Fehler', showError(await readHttpErrorMessage(response, 'Fehler beim Laden der Teams')));
+            return;
+        }
         const teams: TeamDTO[] = await response.json();
         if (teams.length === 0) {
             showModal('Alle Teams', '<p>Keine Teams gefunden.</p>');
@@ -296,6 +293,10 @@ async function viewUsers() {
     showModal('Alle Benutzer', showLoading());
     try {
         const response = await apiFetch(`${API_BASE}/users`);
+        if (!response.ok) {
+            showModal('Fehler', showError(await readHttpErrorMessage(response, 'Fehler beim Laden der Benutzer')));
+            return;
+        }
         const users: UserDTO[] = await response.json();
         const headers = ['ID', 'Benutzername', 'Rolle', ''];
         const html = renderTable(headers, users, (user: unknown) => {
@@ -388,25 +389,4 @@ async function cleanupImages() {
     } catch (error: unknown) {
         setStatusMessage(msgDiv, `Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, 'red');
     }
-}
-
-function renderCell(cell: string | TrustedHtml): string {
-    if (typeof cell === 'string') {
-        return escapeHtml(cell);
-    }
-    return cell.html;
-}
-
-export function renderTable(headers: string[], rows: unknown[], rowFn: (row: unknown) => Array<string | TrustedHtml>) {
-    let html = '<table><thead><tr>';
-    headers.forEach(h => html += `<th>${escapeHtml(h)}</th>`);
-    html += '</tr></thead><tbody>';
-    rows.forEach(r => {
-        const cells = rowFn(r);
-        html += '<tr>';
-        cells.forEach(c => html += `<td>${renderCell(c)}</td>`);
-        html += '</tr>';
-    });
-    html += '</tbody></table>';
-    return `<div class="overflow-x-auto">${html}</div>`;
 }

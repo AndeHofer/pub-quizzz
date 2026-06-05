@@ -4,6 +4,44 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 86: Neuigkeiten Backend Quality Fixes (Repository List + Safe Delete + 201 Create) ✅ COMPLETE
+
+- Updated `src/main/java/com/ande/pubquizzz/database/repositories/NewsRepository.java` with a dedicated full-list method
+  `findAllByOrderByCreatedAtDescNewsIdDesc()` and removed the now-unneeded custom `@Query` import/annotation.
+- Updated `src/main/java/com/ande/pubquizzz/service/NewsService.java` so admin listing uses the new repository method
+  instead of `PageRequest.of(0, Integer.MAX_VALUE)`.
+- Updated `src/main/java/com/ande/pubquizzz/service/NewsService.java` delete flow to load via `findById` (or throw) and
+  then `delete(entity)`, removing the `existsById` + `deleteById` race window.
+- Updated `src/main/java/com/ande/pubquizzz/controller/AdminNewsController.java` create endpoint to return HTTP
+  `201 Created` (`ResponseEntity.status(HttpStatus.CREATED)`), not `200 OK`.
+- Extended tests in `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java` for admin full-list path and safe
+  delete behavior, and in `src/test/java/com/ande/pubquizzz/controller/AdminNewsControllerTest.java` for create `201`
+  status.
+- Verification passed: `./mvnw.cmd "-Dtest=NewsServiceTest,AdminNewsControllerTest,UserNewsControllerTest" test`.
+
+### Phase 85: Neuigkeiten Spec-Compliance Test Expansion ✅ COMPLETE
+
+- Expanded `src/test/java/com/ande/pubquizzz/controller/AdminNewsControllerTest.java` with admin GET/PUT/DELETE success
+  coverage, non-admin `403`, and service-thrown not-found `404` coverage for update/delete.
+- Expanded `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java` with default/clamp limit behavior tests (`0`,
+  negative, and `>3`) plus `updateNews` createdAt-preservation assertion.
+- Expanded `src/test/java/com/ande/pubquizzz/controller/UserNewsControllerTest.java` with `GET /api/news?limit=99`
+  asserting `200` and verifying service receives `99` (service clamps).
+- Verification passed: `./mvnw.cmd "-Dtest=NewsServiceTest,AdminNewsControllerTest,UserNewsControllerTest" test`.
+
+### Phase 83: Fail-Safe Restore with Automatic Rollback Snapshot ✅ COMPLETE
+
+- Hardened `src/main/java/com/ande/pubquizzz/listener/BackupRestoreListener.java` to create a rollback snapshot before
+  applying pending restore, then automatically roll back to previous DB/uploads state when restore fails.
+- Added rollback orchestration helpers (`prepareRollbackSnapshot`, `applyRollbackSnapshot`, `applyDatabaseRestore`,
+  `replaceUploads`) and kept startup behavior non-fatal (app continues running).
+- Extended `src/main/java/com/ande/pubquizzz/service/BackupService.java` with reusable `stageRestoreToDirectory(...)` so
+  rollback ZIP extraction reuses the same validation/guardrail path as normal restore staging.
+- Added rollback-focused backend tests in `src/test/java/com/ande/pubquizzz/service/BackupRestoreListenerTest.java` for
+  DB restore failure rollback and upload-swap failure rollback.
+- Updated listener test wiring to inject `BackupService` and use new restore APIs.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build` (webapp), and `./mvnw.cmd test`.
+
 ### Phase 80: XSS Hardening for `admin_functions.ts` Rendering Paths ✅ COMPLETE
 
 - Hardened `src/main/webapp/src/js/admin_functions.ts` by escaping untrusted modal titles/messages/table content and

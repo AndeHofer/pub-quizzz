@@ -7,9 +7,7 @@ RUN mvn clean package -DskipTests
 # Stage 2: Runtime
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
-# Wir erstellen den Ordner, falls er nicht existiert
 RUN mkdir -p /data
 COPY --from=build /app/target/*.jar app.jar
 
-# Wir lassen den USER-Wechsel hier weg, um den Build-Fehler zu vermeiden
 ENTRYPOINT ["java", "-jar", "app.jar"]

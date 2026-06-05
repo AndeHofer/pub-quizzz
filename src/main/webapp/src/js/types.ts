@@ -138,3 +138,10 @@ export interface QuizDocumentDTO {
     fileSize: number;
     uploadedAt: string;
 }
+
+export interface NewsDTO {
+    newsId: number;
+    title: string;
+    text: string;
+    createdAt: string;
+}

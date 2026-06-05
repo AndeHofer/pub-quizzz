@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -160,7 +157,7 @@ public class QuizService {
                         java.util.stream.Stream.of(q.getAnswerImageUrl()),
                         q.getHints().stream().flatMap(h -> java.util.stream.Stream.of(h.getImageUrlAtStart(), h.getImageUrlAsHint()))
                 ))
-                .filter(url -> url != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         CleanupResult result = imageStorageService.cleanupOrphanedImages(referencedUrls);
         log.info("Cleanup complete: {} file(s) deleted", result.getDeletedCount());
