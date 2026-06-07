@@ -14,7 +14,6 @@
         <connection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</connection>
         <developerConnection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</developerConnection>
         <url>https://github.com/AndeHofer/pub-quizzz</url>
-        <tag>v26.5.1</tag>
     </scm>
     <properties>
         <java.version>25</java.version>
@@ -133,6 +132,7 @@
                 <configuration>
                     <goals>install</goals>
                     <arguments>-DskipTests</arguments>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
             <plugin>
