@@ -1,6 +1,7 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {
     buildAdminNewsTableMarkup,
+    buildNewsAuthoringHintMarkup,
     buildNewsCreateRequestInit,
     buildNewsDeleteRequestInit,
     buildNewsPayload,
@@ -70,6 +71,16 @@ afterEach(() => {
 });
 
 describe('admin_news helpers', () => {
+    it('renders german tooltip with event-date marker and hidden metadata example', () => {
+        const markup = buildNewsAuthoringHintMarkup();
+
+        expect(markup).toContain('Kalender-Event-Hinweis');
+        expect(markup).toContain('[event-date:sept]2. September 2026[/event-date]');
+        expect(markup).toContain('&lt;!--event {&quot;events&quot;:{&quot;sept&quot;:{&quot;title&quot;:&quot;Pub Quiz September&quot;');
+        expect(markup).toContain('&quot;text&quot;:&quot;Optionaler Kalendertext&quot;');
+        expect(markup).toContain('<code>text</code> ist optional');
+    });
+
     it('escapes untrusted title/text and keeps trusted action buttons', () => {
         const markup = buildAdminNewsTableMarkup([
             {

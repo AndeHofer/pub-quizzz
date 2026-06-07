@@ -59,6 +59,20 @@ export function buildNewsDeleteRequestInit(): RequestInit {
     };
 }
 
+export function buildNewsAuthoringHintMarkup(): string {
+    return '<details class="mt-2 text-sm text-gray-600">' +
+        '<summary class="cursor-pointer select-none">Kalender-Event-Hinweis</summary>' +
+        '<div class="mt-2 space-y-2">' +
+        '<p>Im Neuigkeiten-Text koennen Sie klickbare Kalender-Termine setzen.</p>' +
+        '<p><strong>Marker im sichtbaren Text:</strong> <code>[event-date:sept]2. September 2026[/event-date]</code></p>' +
+        '<p><strong>Versteckte Event-Metadaten:</strong></p>' +
+        '<pre class="whitespace-pre-wrap rounded bg-gray-100 p-2 text-xs"><code>&lt;!--event {&quot;events&quot;:{&quot;sept&quot;:{&quot;title&quot;:&quot;Pub Quiz September&quot;,&quot;start&quot;:&quot;2026-09-02T19:00&quot;,&quot;end&quot;:&quot;2026-09-02T22:00&quot;,&quot;location&quot;:&quot;Pub XY, Wien&quot;,&quot;text&quot;:&quot;Optionaler Kalendertext&quot;}}}--&gt;</code></pre>' +
+        '<p>Pflichtfelder pro Event: <code>title</code>, <code>start</code>, <code>end</code>, <code>location</code>.</p>' +
+        '<p><code>text</code> ist optional und wird nur fuer den Kalendertext verwendet. Ohne <code>text</code> wird kein Kalendertext gesetzt.</p>' +
+        '</div>' +
+        '</details>';
+}
+
 export function buildAdminNewsTableMarkup(items: NewsDTO[]): string {
     if (items.length === 0) {
         return '<p>Keine Neuigkeiten gefunden.</p>';
@@ -236,9 +250,14 @@ async function createNewsFromPrompt(): Promise<void> {
 export function initAdminNewsActions(): void {
     const createNewsButton = document.getElementById('createNewsBtn');
     const viewNewsButton = document.getElementById('viewNewsBtn');
+    const hintContainer = document.getElementById('newsAuthoringHint');
 
     if (!createNewsButton || !viewNewsButton) {
         return;
+    }
+
+    if (hintContainer) {
+        hintContainer.innerHTML = buildNewsAuthoringHintMarkup();
     }
 
     createNewsButton.addEventListener('click', () => {

@@ -1,5 +1,12 @@
 import {describe, expect, it} from 'vitest';
-import {buildNewsErrorMarkup, buildNewsSectionMarkup, sortAndLimitNews} from './news';
+import {
+    buildGoogleCalendarUrl,
+    buildIcsContent,
+    buildNewsErrorMarkup,
+    buildNewsSectionMarkup,
+    extractEventMetaFromText,
+    sortAndLimitNews
+} from './news';
 
 describe('news helpers', () => {
     it('renders empty-state text when no entries exist', () => {
@@ -60,6 +67,111 @@ describe('news helpers', () => {
         ]);
 
         expect(markup).toContain('Erste Zeile<br>&lt;script&gt;alert(1)&lt;/script&gt;');
+    });
+
+    it('extracts hidden event metadata and strips it from visible text', () => {
+        const input = 'Text davor.<!--event {"events":{"sept":{"title":"Quiz","start":"2026-09-02T19:00","end":"2026-09-02T22:00","location":"Wien"}}}-->Text danach.';
+
+        const result = extractEventMetaFromText(input);
+
+        expect(result.visibleText).toBe('Text davor.Text danach.');
+        expect(result.events.sept?.title).toBe('Quiz');
+    });
+
+    it('renders clickable inline event-date label in text body when metadata is valid', () => {
+        const markup = buildNewsSectionMarkup([
+            {
+                newsId: 21,
+                title: 'Ankuendigung',
+                text: 'Unser naechstes Quiz ist am [event-date:sept]2. September 2026[/event-date].<!--event {"events":{"sept":{"title":"Pub Quiz September","start":"2026-09-02T19:00","end":"2026-09-02T22:00","location":"Pub XY, Wien"}}}-->',
+                createdAt: '2026-08-30T10:00:00Z'
+            }
+        ]);
+
+        expect(markup).not.toContain('[event-date:sept]');
+        expect(markup).toContain('2. September 2026');
+        expect(markup).toContain('Google Kalender');
+        expect(markup).toContain('ICS herunterladen');
+    });
+
+    it('renders plain inline label when marker id has no valid event mapping', () => {
+        const markup = buildNewsSectionMarkup([
+            {
+                newsId: 22,
+                title: 'Ankuendigung',
+                text: 'Termin: [event-date:missing]2. September 2026[/event-date].<!--event {"events":{"other":{"title":"Pub Quiz September","start":"2026-09-02T19:00","end":"2026-09-02T22:00","location":"Pub XY, Wien"}}}-->',
+                createdAt: '2026-08-30T10:00:00Z'
+            }
+        ]);
+
+        expect(markup).toContain('2. September 2026');
+        expect(markup).not.toContain('Google Kalender');
+        expect(markup).not.toContain('ICS herunterladen');
+    });
+
+    it('requires event title and does not fallback to news title', () => {
+        const markup = buildNewsSectionMarkup([
+            {
+                newsId: 23,
+                title: 'Fallback Titel',
+                text: 'Termin: [event-date:sept]2. September 2026[/event-date].<!--event {"events":{"sept":{"start":"2026-09-02T19:00","end":"2026-09-02T22:00","location":"Pub XY, Wien"}}}-->',
+                createdAt: '2026-08-30T10:00:00Z'
+            }
+        ]);
+
+        expect(markup).toContain('2. September 2026');
+        expect(markup).not.toContain('Google Kalender');
+        expect(markup).not.toContain('ICS herunterladen');
+    });
+
+    it('builds google calendar URL using Europe/Vienna for floating local times', () => {
+        const url = buildGoogleCalendarUrl({
+            title: 'Pub Quiz September',
+            start: '2026-09-02T19:00',
+            end: '2026-09-02T22:00',
+            location: 'Pub XY, Wien',
+            text: 'Quizabend'
+        });
+
+        expect(url).toContain('https://calendar.google.com/calendar/render');
+        expect(url).toContain('ctz=Europe%2FVienna');
+        expect(url).toContain('dates=20260902T190000%2F20260902T220000');
+    });
+
+    it('builds ICS content with Europe/Vienna timezone for floating local times', () => {
+        const ics = buildIcsContent({
+            title: 'Pub Quiz September',
+            start: '2026-09-02T19:00',
+            end: '2026-09-02T22:00',
+            location: 'Pub XY, Wien',
+            text: 'Quizabend'
+        });
+
+        expect(ics).toContain('BEGIN:VCALENDAR');
+        expect(ics).toContain('BEGIN:VEVENT');
+        expect(ics).toContain('SUMMARY:Pub Quiz September');
+        expect(ics).toContain('DTSTART;TZID=Europe/Vienna:20260902T190000');
+        expect(ics).toContain('DTEND;TZID=Europe/Vienna:20260902T220000');
+        expect(ics).toContain('LOCATION:Pub XY\\, Wien');
+    });
+
+    it('omits calendar description when metadata text is missing', () => {
+        const url = buildGoogleCalendarUrl({
+            title: 'Pub Quiz September',
+            start: '2026-09-02T19:00',
+            end: '2026-09-02T22:00',
+            location: 'Pub XY, Wien'
+        });
+
+        const ics = buildIcsContent({
+            title: 'Pub Quiz September',
+            start: '2026-09-02T19:00',
+            end: '2026-09-02T22:00',
+            location: 'Pub XY, Wien'
+        });
+
+        expect(url).not.toContain('details=');
+        expect(ics).not.toContain('DESCRIPTION:');
     });
 
     it('renders German fallback for fetch errors', () => {
