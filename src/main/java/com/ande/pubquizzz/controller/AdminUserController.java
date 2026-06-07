@@ -43,13 +43,13 @@ public class AdminUserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
-        log.info("GET /admin/users");
+        log.debug("GET /admin/users");
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/login-stats/monthly")
     public ResponseEntity<List<AdminMonthlyLoginStatDTO>> getMonthlyLoginStatsByRole() {
-        log.info("GET /admin/login-stats/monthly");
+        log.debug("GET /admin/login-stats/monthly");
         return ResponseEntity.ok(usageEventService.getMonthlyLoginStatsByRole());
     }
 
@@ -59,7 +59,7 @@ public class AdminUserController {
                                                        @RequestParam(required = false) String from,
                                                        @RequestParam(required = false) String to,
                                                        @RequestParam(required = false) Integer limit) {
-        log.info("GET /admin/logs - level={}, from={}, to={}, limit={}", level, from, to, limit);
+        log.debug("GET /admin/logs - level={}, from={}, to={}, limit={}", level, from, to, limit);
         return ResponseEntity.ok(adminLogService.getLogs(q, level, from, to, limit));
     }
 

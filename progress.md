@@ -2,6 +2,10 @@
 
 ## Open Tasks
 
+- [x] Phase 93: Add security integration tests for `/login` cache headers and login CSRF enforcement
+- [x] Phase 93: Implement security hardening so `/login` responses are explicitly non-cacheable
+- [x] Phase 93: Run verification (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`)
+
 - [x] Phase 92: Verify backup/restore scope for `news` and `app_usage_event` tables
 - [x] Phase 92: Add RED tests proving `database.sql` includes `NEWS` and `APP_USAGE_EVENT`
 - [x] Phase 92: Add RED restore-cycle test proving `news` and `app_usage_event` are restored from staged backup

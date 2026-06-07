@@ -22,19 +22,19 @@ public class UserLeaderboardController {
 
     @GetMapping("/leaderboard/points")
     public List<PointsLeaderboardEntry> getPointsLeaderboard() {
-        log.info("GET /api/leaderboard/points");
+        log.debug("GET /api/leaderboard/points");
         return resultService.getPointsLeaderboard();
     }
 
     @GetMapping("/leaderboard/medals")
     public List<MedalLeaderboardEntry> getMedalLeaderboard() {
-        log.info("GET /api/leaderboard/medals");
+        log.debug("GET /api/leaderboard/medals");
         return resultService.getMedalLeaderboard();
     }
 
     @GetMapping("/leaderboard/average")
     public List<AverageLeaderboardEntry> getAverageLeaderboard() {
-        log.info("GET /api/leaderboard/average");
+        log.debug("GET /api/leaderboard/average");
         return resultService.getAverageLeaderboard();
     }
 }

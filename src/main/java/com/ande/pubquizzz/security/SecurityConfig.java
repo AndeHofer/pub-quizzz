@@ -43,7 +43,8 @@ public class SecurityConfig {
                 ).formLogin(Customizer.withDefaults())
                 .exceptionHandling(exceptions -> exceptions
                         .accessDeniedHandler(new LoggingAccessDeniedHandler()))
-                .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
+                .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
+                .addFilterAfter(new LoginNoStoreFilter(), CsrfFilter.class);
 
         return http.build();
     }
@@ -68,6 +69,22 @@ public class SecurityConfig {
                 csrfToken.getToken();
             }
             filterChain.doFilter(request, response);
+        }
+    }
+
+    private static final class LoginNoStoreFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        FilterChain filterChain) throws ServletException, IOException {
+            filterChain.doFilter(request, response);
+
+            if (!"/login".equals(request.getRequestURI())) {
+                return;
+            }
+            response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
+            response.setHeader("Pragma", "no-cache");
+            response.setDateHeader("Expires", 0);
         }
     }
 

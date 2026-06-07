@@ -26,19 +26,19 @@ public class UserQuizController {
 
     @GetMapping
     public List<QuizSummaryDTO> getQuizSummaries() {
-        log.info("GET /api/quizzes");
+        log.debug("GET /api/quizzes");
         return resultService.getQuizSummaries();
     }
 
     @GetMapping("/{quizId}/results")
     public QuizResultsResponse getQuizResults(@PathVariable Long quizId) {
-        log.info("GET /api/quizzes/{}/results", quizId);
+        log.debug("GET /api/quizzes/{}/results", quizId);
         return resultService.getResultsForQuiz(quizId);
     }
 
     @GetMapping("/{quizId}/detail")
     public ResponseEntity<QuizDetailDTO> getQuizDetail(@PathVariable Long quizId) {
-        log.info("GET /api/quizzes/{}/detail", quizId);
+        log.debug("GET /api/quizzes/{}/detail", quizId);
         return quizService.getQuizDetailById(quizId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

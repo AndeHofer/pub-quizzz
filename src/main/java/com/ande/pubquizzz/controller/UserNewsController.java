@@ -22,7 +22,7 @@ public class UserNewsController {
 
     @GetMapping("/news")
     public ResponseEntity<List<NewsDTO>> getLatestNews(@RequestParam(defaultValue = "3") int limit) {
-        log.info("GET /api/news - limit={}", limit);
+        log.debug("GET /api/news - limit={}", limit);
         return ResponseEntity.ok(newsService.getLatestNews(limit));
     }
 }

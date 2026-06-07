@@ -31,13 +31,13 @@ public class AdminTeamController {
 
     @GetMapping("/teams")
     public ResponseEntity<List<TeamDTO>> getAllTeams() {
-        log.info("GET /admin/teams");
+        log.debug("GET /admin/teams");
         return ResponseEntity.ok(teamService.getAllTeams());
     }
 
     @GetMapping("/team/{id}")
     public ResponseEntity<TeamDTO> getTeamById(@PathVariable Long id) {
-        log.info("GET /admin/team/{}", id);
+        log.debug("GET /admin/team/{}", id);
         return teamService.getTeamById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

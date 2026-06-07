@@ -46,7 +46,7 @@ public class AdminQuizController {
 
     @GetMapping("/quizzes")
     public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
-        log.info("GET /admin/quizzes");
+        log.debug("GET /admin/quizzes");
         return ResponseEntity.ok(quizService.getAllQuizzes());
     }
 
@@ -61,7 +61,7 @@ public class AdminQuizController {
 
     @GetMapping("/quiz/{id}")
     public ResponseEntity<QuizDTO> getQuizById(@PathVariable Long id) {
-        log.info("GET /admin/quiz/{}", id);
+        log.debug("GET /admin/quiz/{}", id);
         return quizService.getQuizById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -69,7 +69,7 @@ public class AdminQuizController {
 
     @GetMapping("/quiz/{id}/detail")
     public ResponseEntity<QuizDetailDTO> getQuizDetailById(@PathVariable Long id) {
-        log.info("GET /admin/quiz/{}/detail", id);
+        log.debug("GET /admin/quiz/{}/detail", id);
         return quizService.getQuizDetailById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -121,7 +121,7 @@ public class AdminQuizController {
 
     @GetMapping("/quiz/{id}/documents")
     public ResponseEntity<List<QuizDocumentDTO>> listDocuments(@PathVariable Long id) {
-        log.info("GET /admin/quiz/{}/documents", id);
+        log.debug("GET /admin/quiz/{}/documents", id);
         return ResponseEntity.ok(documentStorageService.listDocuments(id));
     }
 
@@ -129,7 +129,7 @@ public class AdminQuizController {
     public ResponseEntity<org.springframework.core.io.Resource> downloadDocument(
             @PathVariable Long id,
             @PathVariable Long docId) {
-        log.info("GET /admin/quiz/{}/documents/{}", id, docId);
+        log.debug("GET /admin/quiz/{}/documents/{}", id, docId);
         DocumentStorageService.DocumentDownload download = documentStorageService.getDocumentForDownload(id, docId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(download.contentType()));

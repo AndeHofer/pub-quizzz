@@ -32,25 +32,25 @@ public class AdminNewsController {
 
     @GetMapping("/news")
     public ResponseEntity<List<NewsDTO>> getAllNews() {
-        log.info("GET /admin/news");
+        log.debug("GET /admin/news");
         return ResponseEntity.ok(newsService.getAllNewsForAdmin());
     }
 
     @PostMapping("/news")
     public ResponseEntity<NewsDTO> createNews(@RequestBody @Valid CreateNewsRequest request) {
-        log.info("POST /admin/news - title={}", request.getTitle());
+        log.debug("POST /admin/news - title={}", request.getTitle());
         return ResponseEntity.status(HttpStatus.CREATED).body(newsService.createNews(request));
     }
 
     @PutMapping("/news/{id}")
     public ResponseEntity<NewsDTO> updateNews(@PathVariable Long id, @RequestBody @Valid UpdateNewsRequest request) {
-        log.info("PUT /admin/news/{}", id);
+        log.debug("PUT /admin/news/{}", id);
         return ResponseEntity.ok(newsService.updateNews(id, request));
     }
 
     @DeleteMapping("/news/{id}")
     public ResponseEntity<String> deleteNews(@PathVariable Long id) {
-        log.info("DELETE /admin/news/{}", id);
+        log.debug("DELETE /admin/news/{}", id);
         newsService.deleteNews(id);
         return ResponseEntity.ok("Neuigkeit gelöscht");
     }

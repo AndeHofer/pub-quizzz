@@ -18,7 +18,7 @@ public class UserTeamController {
 
     @GetMapping("/{teamName}/results")
     public List<TeamResultEntry> getTeamResults(@PathVariable String teamName) {
-        log.info("GET /api/teams/{}/results", teamName);
+        log.debug("GET /api/teams/{}/results", teamName);
         return resultService.getResultsForTeam(teamName);
     }
 }

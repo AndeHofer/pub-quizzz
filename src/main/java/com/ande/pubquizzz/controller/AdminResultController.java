@@ -34,7 +34,7 @@ public class AdminResultController {
 
     @GetMapping("/results")
     public ResponseEntity<List<ResultDTO>> getAllResults(@RequestParam(required = false) Long quizId) {
-        log.info("GET /admin/results - quizId={}", quizId);
+        log.debug("GET /admin/results - quizId={}", quizId);
         return ResponseEntity.ok(resultService.getResults(quizId));
     }
 

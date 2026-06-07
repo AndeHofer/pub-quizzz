@@ -4,6 +4,7 @@ Guidance for AI coding agents working in this repository.
 
 # Instructions:
 
+- Communicate in the CLI always in English.
 - Do not write markdown files or text files with implementation summaries unless you are instructed to do so!!!
 - All APIs need to have integration tests.
 - All business logic needs to have unit tests.
@@ -12,7 +13,7 @@ Guidance for AI coding agents working in this repository.
   you make progress and should include a task list of what was done, what is left to do, and any blockers you encounter.
 - Ensure to document your progress after every single step in case the agent crashes.
 - Keep at most 3 finished features in `progress.md`; move older finished entries to `progress_archive.md` to keep
-  `progress.md` clean and short.
+  `progress.md` clean and short (max. 100 lines)
 - progress.md and progress_archive.md should be written in English.
 - Minimize the commands executed that need to be confirmed by user input. E.g. do not run individual tests, but run all
   tests and then fix all at once.

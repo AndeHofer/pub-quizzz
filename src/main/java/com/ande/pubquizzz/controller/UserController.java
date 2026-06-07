@@ -35,7 +35,7 @@ public class UserController {
     public ResponseEntity<BootstrapResponse> bootstrap(Authentication authentication) {
         boolean admin = hasAdminRole(authentication);
         String version = buildProperties.getVersion();
-        log.info("bootstrap returnValue=isAdmin={}, version={}", admin, version);
+        log.debug("bootstrap returnValue=isAdmin={}, version={}", admin, version);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(Duration.ofHours(1)).cachePrivate().mustRevalidate())
                 .body(new BootstrapResponse(admin, version));
