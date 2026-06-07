@@ -4,6 +4,7 @@ import {goBack, showMessage} from './utils';
 import type {QuizDTO, ResultDTO, TeamDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 import {withEnsuredCsrfHeaders} from './csrf';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 type PointsValue = 0 | 1 | 2 | 3 | 5;
 
@@ -74,6 +75,9 @@ function readResultsBackLinkFromQuery(): string | null {
 
 async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url);
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         const text = await response.text().catch(() => '');
         throw new Error(text || `Fehler beim Laden (${response.status})`);
@@ -167,6 +171,10 @@ async function saveResult(event: Event): Promise<void> {
             body: JSON.stringify(body)
         });
 
+        if (await handleAuthExpiredIfNeeded(response.clone())) {
+            return;
+        }
+
         if (response.ok) {
             if (!isEditMode) {
                 const createdResult = await response.json() as ResultDTO;
@@ -238,6 +246,9 @@ window.addEventListener('load', () => {
     });
 
     void loadPageData().catch(error => {
+        if (error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT') {
+            return;
+        }
         showMessage('Fehler beim Laden der Seite: ' + error, 'error');
     });
 });

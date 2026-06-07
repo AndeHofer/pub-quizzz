@@ -18,35 +18,50 @@ type MockFetchResponse = {
     status: number;
     statusText: string;
     text: () => Promise<string>;
+    clone: () => MockFetchResponse;
 };
+
+function createMockResponse(overrides: {
+    ok: boolean;
+    status: number;
+    statusText: string;
+    text: () => Promise<string>;
+}): MockFetchResponse {
+    return {
+        ...overrides,
+        clone() {
+            return createMockResponse(overrides);
+        }
+    };
+}
 
 function mockFetchForMutationFailure(failingUrl: string, errorText: string): ReturnType<typeof vi.fn> {
     return vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input);
         if (url === '/api/bootstrap') {
-            return {
+            return createMockResponse({
                 ok: true,
                 status: 200,
                 statusText: 'OK',
                 text: async () => ''
-            } as MockFetchResponse;
+            });
         }
 
         if (url === failingUrl) {
-            return {
+            return createMockResponse({
                 ok: false,
                 status: 400,
                 statusText: 'Bad Request',
                 text: async () => errorText
-            } as MockFetchResponse;
+            });
         }
 
-        return {
+        return createMockResponse({
             ok: true,
             status: 200,
             statusText: 'OK',
             text: async () => ''
-        } as MockFetchResponse;
+        });
     });
 }
 

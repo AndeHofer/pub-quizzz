@@ -5,6 +5,7 @@ import {goBack, showMessage} from './utils';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 import {escapeHtml} from './html-utils';
 import {withEnsuredCsrfHeaders} from './csrf';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 const quizFilterSelect = document.getElementById('resultFilterQuiz') as HTMLSelectElement | null;
 const teamFilterSelect = document.getElementById('resultFilterTeam') as HTMLSelectElement | null;
@@ -14,6 +15,10 @@ const tableEl = document.getElementById('resultsTable') as HTMLTableElement | nu
 const tbodyEl = document.getElementById('resultsBody') as HTMLTableSectionElement | null;
 
 let allResults: ResultDTO[] = [];
+
+function isAuthExpiredRedirectError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT';
+}
 
 function parseDateToMillis(value?: string): number | null {
     if (!value) return null;
@@ -113,6 +118,9 @@ function setLoading(loading: boolean): void {
 
 async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url);
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         const text = await response.text().catch(() => '');
         throw new Error(text || `HTTP ${response.status}`);
@@ -220,6 +228,9 @@ async function loadResults(): Promise<void> {
         const filtered = applyActiveFilters(allResults);
         renderRows(filtered);
     } catch (error) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         setError('Fehler beim Laden der Ergebnisse. Bitte Seite neu laden.');
         if (tbodyEl) {
             tbodyEl.innerHTML = '';
@@ -253,6 +264,9 @@ async function deleteResult(resultId: number, teamName: string): Promise<void> {
             method: 'DELETE',
             headers: await withEnsuredCsrfHeaders()
         });
+        if (await handleAuthExpiredIfNeeded(response.clone())) {
+            return;
+        }
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
@@ -261,6 +275,9 @@ async function deleteResult(resultId: number, teamName: string): Promise<void> {
         showMessage('Ergebnis gelöscht.', 'success');
         await loadResults();
     } catch (error) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showMessage('Fehler beim Löschen des Ergebnisses.', 'error');
         console.error(error);
     }

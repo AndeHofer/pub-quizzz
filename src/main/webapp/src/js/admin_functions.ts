@@ -7,8 +7,13 @@ import {escapeHtml} from './html-utils';
 import {initAdminNewsActions} from './admin_news';
 import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
 import {readHttpErrorMessage} from './http-utils';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 export {renderTable, showError, trustedHtml};
+
+function isAuthExpiredRedirectError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT';
+}
 
 const API_BASE = '/admin';
 
@@ -21,8 +26,15 @@ async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
         if (requiresCsrf) {
             requestOptions.headers = await withEnsuredCsrfHeaders(options?.headers);
         }
-        return await fetch(url, requestOptions);
+        const response = await fetch(url, requestOptions);
+        if (await handleAuthExpiredIfNeeded(response.clone())) {
+            throw new Error('AUTH_EXPIRED_REDIRECT');
+        }
+        return response;
     } catch (error) {
+        if (isAuthExpiredRedirectError(error)) {
+            throw error;
+        }
         console.error('Netzwerkfehler:', error);
         throw error;
     }
@@ -151,6 +163,9 @@ async function viewQuizzes() {
             });
         });
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler beim Laden der Quizze: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -165,6 +180,9 @@ async function editQuiz(quizId: number) {
         const quiz: QuizDTO = await response.json();
         loadCreateQuizPage(quiz);
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -179,6 +197,9 @@ async function deleteQuiz(quizId: number) {
             showModal('Fehler', showError('Fehler beim Löschen des Quiz'));
         }
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -201,6 +222,9 @@ async function createTeam() {
             showModal('Fehler', showError('Fehler: ' + message));
         }
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -246,6 +270,9 @@ async function viewTeams() {
             });
         });
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler beim Laden der Teams: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -260,6 +287,9 @@ async function deleteTeam(teamId: number, teamName: string) {
             showModal('Fehler', showError('Fehler beim Löschen des Teams'));
         }
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -280,6 +310,9 @@ async function renameTeam(teamId: number, currentName: string) {
             showModal('Fehler', showError('Fehler: ' + message));
         }
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -314,6 +347,9 @@ async function viewUsers() {
             });
         });
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler beim Laden der Benutzer: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -328,6 +364,9 @@ async function deleteUser(userId: number, username: string) {
         }
         showModal('Fehler', showError(await readHttpErrorMessage(response, 'Fehler beim Löschen des Benutzers')));
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError('Fehler beim Löschen des Benutzers: ' + (error instanceof Error ? error.message : error)));
     }
 }
@@ -361,6 +400,9 @@ async function importBackup() {
             setStatusMessage(msgDiv, `Fehler: ${String(err.error ?? 'Unbekannter Fehler')}`, 'red');
         }
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         setStatusMessage(msgDiv, `Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, 'red');
     }
 }
@@ -385,6 +427,9 @@ async function cleanupImages() {
             setStatusMessage(msgDiv, `Fehler: ${String(err.error ?? 'Unbekannter Fehler')}`, 'red');
         }
     } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         setStatusMessage(msgDiv, `Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, 'red');
     }
 }

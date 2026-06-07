@@ -2,6 +2,7 @@ export {};
 
 import { showMessage, goBack } from './utils';
 import {withEnsuredCsrfHeaders} from './csrf';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 window.addEventListener('load', () => {
     document.getElementById('registerUserBtn')?.addEventListener('click', registerUser);
@@ -32,6 +33,10 @@ async function registerUser() {
             }),
             body: JSON.stringify(userData)
         });
+
+        if (await handleAuthExpiredIfNeeded(response.clone())) {
+            return;
+        }
 
         if (response.ok) {
             showMessage('Benutzer erfolgreich registriert!', 'success');

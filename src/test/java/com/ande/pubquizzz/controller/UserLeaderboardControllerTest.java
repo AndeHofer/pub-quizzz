@@ -66,9 +66,9 @@ class UserLeaderboardControllerTest {
     }
 
     @Test
-    void getPointsLeaderboard_unauthenticated_returns3xxRedirect() throws Exception {
+    void getPointsLeaderboard_unauthenticated_returnsJson401() throws Exception {
         mockMvc.perform(get("/api/leaderboard/points"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

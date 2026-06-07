@@ -3,6 +3,7 @@ export {};
 import type {AdminLogEntryDTO, AdminLogResponseDTO} from './types';
 import {goBack, showMessage} from './utils';
 import {escapeHtml} from './html-utils';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 const doc = typeof document === 'undefined' ? null : document;
 
@@ -126,6 +127,9 @@ function hydrateFiltersFromUrl(): void {
 
 async function fetchLogs(params: URLSearchParams): Promise<AdminLogResponseDTO> {
     const response = await fetch(`/admin/logs?${params.toString()}`);
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         const errorBody = await response.json().catch(() => ({error: ''}));
         const message = typeof errorBody.error === 'string' && errorBody.error.trim()
@@ -150,6 +154,9 @@ async function loadLogs(): Promise<void> {
             logMetaEl.textContent = `${response.returnedCount} Eintraege angezeigt (Limit: ${response.appliedLimit})`;
         }
     } catch (error) {
+        if (error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT') {
+            return;
+        }
         const message = error instanceof Error ? error.message : 'Unbekannter Fehler';
         setError(`Fehler beim Laden der Log-Eintraege: ${message}`);
         streamEl.innerHTML = '';

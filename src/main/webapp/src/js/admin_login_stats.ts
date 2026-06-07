@@ -2,6 +2,7 @@ export {};
 
 import type {AdminMonthlyLoginStatDTO} from './types';
 import {goBack} from './utils';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 const doc = typeof document === 'undefined' ? null : document;
 const loadingEl = doc?.getElementById('loading') ?? null;
@@ -48,6 +49,9 @@ function setLoading(loading: boolean): void {
 
 async function fetchLoginStats(): Promise<AdminMonthlyLoginStatDTO[]> {
     const response = await fetch('/admin/login-stats/monthly');
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         const text = await response.text().catch(() => '');
         throw new Error(text || `HTTP ${response.status}`);
@@ -65,6 +69,9 @@ async function loadLoginStats(): Promise<void> {
         const stats = await fetchLoginStats();
         tbodyEl.innerHTML = buildLoginStatsRows(stats);
     } catch (error) {
+        if (error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT') {
+            return;
+        }
         setError('Fehler beim Laden der Login-Statistik. Bitte Seite neu laden.');
         tbodyEl.innerHTML = '';
         console.error(error);

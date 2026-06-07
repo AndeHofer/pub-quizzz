@@ -4,6 +4,7 @@ import { showMessage, goBack } from './utils';
 import type {QuizDTO, QuizDocumentDTO} from './types';
 import {withEnsuredCsrfHeaders} from './csrf';
 import {buildDocumentListMarkup} from './create_quiz_documents';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 const questionsContainer = document.getElementById('questionsContainer') as HTMLDivElement | null;
 
@@ -364,7 +365,10 @@ if (quizForm) {
             body: formData
             // No Content-Type header — browser sets it with boundary automatically
         })
-            .then(response => {
+            .then(async response => {
+                if (await handleAuthExpiredIfNeeded(response.clone())) {
+                    return;
+                }
                 if (response.ok) {
                     if (editingQuizId) {
                         showMessage('✅ Quiz erfolgreich aktualisiert!', 'success');
@@ -418,6 +422,9 @@ async function loadDocuments(): Promise<void> {
     if (!listEl) return;
     try {
         const resp = await fetch(`/admin/quiz/${editingQuizId}/documents`);
+        if (await handleAuthExpiredIfNeeded(resp.clone())) {
+            return;
+        }
         if (!resp.ok) {
             listEl.innerHTML = '<span style="color:red;">Fehler beim Laden der Dokumente.</span>';
             return;
@@ -464,6 +471,9 @@ async function uploadDocument(): Promise<void> {
             headers: await withEnsuredCsrfHeaders(),
             body: formData
         });
+        if (await handleAuthExpiredIfNeeded(resp.clone())) {
+            return;
+        }
         if (resp.ok) {
             fileInput.value = '';
             if (msgEl) {
@@ -495,6 +505,9 @@ async function deleteDocument(docId: number): Promise<void> {
             method: 'DELETE',
             headers: await withEnsuredCsrfHeaders()
         });
+        if (await handleAuthExpiredIfNeeded(resp.clone())) {
+            return;
+        }
         if (resp.ok) {
             await loadDocuments();
         } else {

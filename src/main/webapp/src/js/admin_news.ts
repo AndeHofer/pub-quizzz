@@ -3,6 +3,7 @@ import {withEnsuredCsrfHeaders} from './csrf';
 import {escapeHtml} from './html-utils';
 import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
 import {readHttpErrorMessage} from './http-utils';
+import {handleAuthExpiredIfNeeded} from './auth-session';
 
 const API_BASE = '/admin/news';
 
@@ -19,6 +20,10 @@ function formatNewsDate(createdAt: string): string {
 
 function asText(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
+}
+
+function isAuthExpiredRedirectError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT';
 }
 
 export function buildNewsPayload(title: string, text: string): { title: string; text: string } {
@@ -77,6 +82,9 @@ export function buildAdminNewsTableMarkup(items: NewsDTO[]): string {
 
 async function loadAllNews(): Promise<NewsDTO[]> {
     const response = await fetch(API_BASE);
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         throw new Error(await readHttpErrorMessage(response, 'Laden fehlgeschlagen'));
     }
@@ -87,6 +95,9 @@ export async function createNews(payload: { title: string; text: string }): Prom
     const requestInit = buildNewsCreateRequestInit(payload);
     requestInit.headers = await withEnsuredCsrfHeaders(requestInit.headers);
     const response = await fetch(API_BASE, requestInit);
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         const text = await response.text();
         throw new Error(text || `HTTP ${response.status}`);
@@ -97,6 +108,9 @@ export async function updateNews(id: number, payload: { title: string; text: str
     const requestInit = buildNewsUpdateRequestInit(payload);
     requestInit.headers = await withEnsuredCsrfHeaders(requestInit.headers);
     const response = await fetch(buildNewsUrl(id), requestInit);
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         const text = await response.text();
         throw new Error(text || `HTTP ${response.status}`);
@@ -107,6 +121,9 @@ export async function deleteNews(id: number): Promise<void> {
     const requestInit = buildNewsDeleteRequestInit();
     requestInit.headers = await withEnsuredCsrfHeaders(requestInit.headers);
     const response = await fetch(buildNewsUrl(id), requestInit);
+    if (await handleAuthExpiredIfNeeded(response.clone())) {
+        throw new Error('AUTH_EXPIRED_REDIRECT');
+    }
     if (!response.ok) {
         const text = await response.text();
         throw new Error(text || `HTTP ${response.status}`);
@@ -147,6 +164,9 @@ async function viewNews(): Promise<void> {
         showModal('Neuigkeiten verwalten', buildAdminNewsTableMarkup(items));
         wireRowActions(items);
     } catch (error) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError(`Fehler beim Laden der Neuigkeiten: ${asText(error)}`));
     }
 }
@@ -169,6 +189,9 @@ function wireRowActions(items: NewsDTO[]): void {
                 await updateNews(id, payload);
                 await viewNews();
             } catch (error) {
+                if (isAuthExpiredRedirectError(error)) {
+                    return;
+                }
                 showModal('Fehler', showError(`Fehler beim Aktualisieren: ${asText(error)}`));
             }
         });
@@ -184,6 +207,9 @@ function wireRowActions(items: NewsDTO[]): void {
                 await deleteNews(id);
                 await viewNews();
             } catch (error) {
+                if (isAuthExpiredRedirectError(error)) {
+                    return;
+                }
                 showModal('Fehler', showError(`Fehler beim Löschen: ${asText(error)}`));
             }
         });
@@ -200,6 +226,9 @@ async function createNewsFromPrompt(): Promise<void> {
         await createNews(payload);
         await viewNews();
     } catch (error) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showModal('Fehler', showError(`Fehler beim Erstellen: ${asText(error)}`));
     }
 }
