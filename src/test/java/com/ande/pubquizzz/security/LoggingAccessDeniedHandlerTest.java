@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.csrf.DefaultCsrfToken;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -33,7 +35,7 @@ class LoggingAccessDeniedHandlerTest {
     @Test
     void handle_logsWarnWithMethodPathUserAndExceptionData() throws Exception {
         LoggingAccessDeniedHandler handler = new LoggingAccessDeniedHandler();
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/create-quiz");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/create-quiz");
         request.setUserPrincipal(() -> "admin");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -51,7 +53,7 @@ class LoggingAccessDeniedHandlerTest {
         String message = event.getFormattedMessage();
         assertNotNull(message);
         assertTrue(message.contains("403 Forbidden"));
-        assertTrue(message.contains("method=POST"));
+        assertTrue(message.contains("method=GET"));
         assertTrue(message.contains("path=/admin/create-quiz"));
         assertTrue(message.contains("user=admin"));
         assertTrue(message.contains("exceptionType=AccessDeniedException"));
@@ -80,5 +82,32 @@ class LoggingAccessDeniedHandlerTest {
         String message = event.getFormattedMessage();
         assertNotNull(message);
         assertTrue(message.contains("user=admin-from-context"));
+    }
+
+    @Test
+    void handle_postLoginWithInvalidCsrf_redirectsToLoginWithoutForward() throws Exception {
+        LoggingAccessDeniedHandler handler = new LoggingAccessDeniedHandler();
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/login");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        var expectedToken = new DefaultCsrfToken("X-XSRF-TOKEN", "_csrf", "expected-token");
+        handler.handle(request, response, new InvalidCsrfTokenException(expectedToken, "actual-token"));
+
+        assertEquals(302, response.getStatus());
+        assertEquals("/login", response.getRedirectedUrl());
+        assertEquals(null, response.getForwardedUrl());
+    }
+
+    @Test
+    void handle_postNonLoginForbidden_returns403WithoutForward() throws Exception {
+        LoggingAccessDeniedHandler handler = new LoggingAccessDeniedHandler();
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/results");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        handler.handle(request, response, new AccessDeniedException("Forbidden"));
+
+        assertEquals(403, response.getStatus());
+        assertEquals(null, response.getForwardedUrl());
+        assertEquals("Forbidden", response.getErrorMessage());
     }
 }

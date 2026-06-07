@@ -55,7 +55,7 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<QuizSummaryDTO> getQuizSummaries() {
-        log.info("Fetching quiz summaries");
+        log.debug("Fetching quiz summaries");
         List<Object[]> rows = quizRepository.findAllWithResultCount();
 
         // Collect quiz IDs that have at least one result, then fetch scores in one query
@@ -102,7 +102,7 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public QuizResultsResponse getResultsForQuiz(Long quizId) {
-        log.info("Fetching results for quiz {}", quizId);
+        log.debug("Fetching results for quiz {}", quizId);
         List<Result> results = resultRepository.findByQuizIdWithTeamAndAnswers(quizId);
 
         // Derive quiz title — from results if any, otherwise look up the quiz directly
@@ -152,7 +152,7 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<ResultDTO> getResults(Long quizId) {
-        log.info("Fetching results{}", quizId != null ? " for quiz " + quizId : "");
+        log.debug("Fetching results{}", quizId != null ? " for quiz " + quizId : "");
         List<Result> results = quizId != null
                 ? resultRepository.findByQuiz_QuizId(quizId)
                 : resultRepository.findAll();
@@ -161,7 +161,7 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<PointsLeaderboardEntry> getPointsLeaderboard() {
-        log.info("Fetching points leaderboard");
+        log.debug("Fetching points leaderboard");
         List<Object[]> rows = new ArrayList<>(resultRepository.findLeaderboardRaw());
         // Sort rows defensively by totalPoints (DESC) and teamName (ASC)
         rows.sort(Comparator.comparingInt((Object[] row) -> ((Number) row[1]).intValue()).reversed()
@@ -190,7 +190,7 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<AverageLeaderboardEntry> getAverageLeaderboard() {
-        log.info("Fetching average leaderboard");
+        log.debug("Fetching average leaderboard");
         List<Object[]> rows = resultRepository.findLeaderboardRaw();
 
         List<AverageTeamStats> stats = rows.stream()
@@ -222,7 +222,7 @@ public class ResultService {
 
     @Transactional(readOnly = true)
     public List<MedalLeaderboardEntry> getMedalLeaderboard() {
-        log.info("Fetching medal leaderboard");
+        log.debug("Fetching medal leaderboard");
         List<Object[]> rows = resultRepository.findPerQuizTeamScoreBreakdownRaw();
 
         Map<Long, List<QuizTeamScore>> totalsByQuiz = new HashMap<>();

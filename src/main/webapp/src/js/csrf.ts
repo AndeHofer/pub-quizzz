@@ -115,3 +115,22 @@ export async function withEnsuredCsrfHeaders(
     headers = withCsrfHeaders(existingHeaders, getCookieString(), getDocument());
     return headers;
 }
+
+export async function withRefreshedCsrfHeaders(
+    existingHeaders?: HeadersInit,
+    sources?: CsrfSources
+): Promise<Record<string, string>> {
+    const getCookieString = sources?.getCookieString
+        ?? (() => (typeof document !== 'undefined' ? document.cookie : ''));
+    const getDocument = sources?.getDocument
+        ?? (() => (typeof document !== 'undefined' ? document : null));
+    const bootstrapToken = sources?.bootstrapToken ?? defaultBootstrapToken;
+
+    try {
+        await bootstrapToken();
+    } catch {
+        return withCsrfHeaders(existingHeaders, getCookieString(), getDocument());
+    }
+
+    return withCsrfHeaders(existingHeaders, getCookieString(), getDocument());
+}

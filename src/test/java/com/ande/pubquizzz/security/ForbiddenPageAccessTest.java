@@ -45,6 +45,7 @@ class ForbiddenPageAccessTest {
                 .andExpect(content().string(containsString("bg-gray-50 min-h-screen")))
                 .andExpect(content().string(containsString("Zugriff verweigert")))
                 .andExpect(content().string(containsString("Zur Startseite")))
+                .andExpect(content().string(containsString("Neu Anmelden")))
                 .andExpect(content().string(not(containsString("Whitelabel Error Page"))));
     }
 }

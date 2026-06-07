@@ -7,10 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -43,6 +47,7 @@ public class SecurityConfig {
                 ).formLogin(Customizer.withDefaults())
                 .exceptionHandling(exceptions -> exceptions
                         .accessDeniedHandler(new LoggingAccessDeniedHandler()))
+                .addFilterBefore(new AuthenticatedLoginRedirectFilter(), DefaultLoginPageGeneratingFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
                 .addFilterAfter(new LoginNoStoreFilter(), CsrfFilter.class);
 
@@ -85,6 +90,31 @@ public class SecurityConfig {
             response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
             response.setHeader("Pragma", "no-cache");
             response.setDateHeader("Expires", 0);
+        }
+    }
+
+    private static final class AuthenticatedLoginRedirectFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        FilterChain filterChain) throws ServletException, IOException {
+            if (isAuthenticatedLoginGet(request)) {
+                response.sendRedirect("/");
+                return;
+            }
+
+            filterChain.doFilter(request, response);
+        }
+
+        private boolean isAuthenticatedLoginGet(HttpServletRequest request) {
+            if (!"GET".equalsIgnoreCase(request.getMethod()) || !"/login".equals(request.getRequestURI())) {
+                return false;
+            }
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            return authentication != null
+                    && authentication.isAuthenticated()
+                    && !(authentication instanceof AnonymousAuthenticationToken);
         }
     }
 

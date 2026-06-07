@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException ex) {
-        log.warn("Resource not found: {}", ex.getMessage());
+        log.warn("Resource not found", ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
                 .map(e -> e.getDefaultMessage())
                 .findFirst()
                 .orElse("Ungültige Eingabe");
-        log.warn("Validation error: {}", message);
+        log.warn("Validation error: {}", message, ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", message));
     }
@@ -46,21 +46,21 @@ public class GlobalExceptionHandler {
                 .map(cv -> cv.getMessage())
                 .findFirst()
                 .orElse("Ungültige Eingabe");
-        log.warn("Constraint violation: {}", message);
+        log.warn("Constraint violation: {}", message, ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", message));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("Illegal argument: {}", ex.getMessage());
+        log.warn("Illegal argument: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Map<String, String>> handleNoResourceFound(NoResourceFoundException ex) {
-        log.warn("Resource not found for request: {}", ex.getResourcePath());
+        log.warn("Resource not found for request: {}", ex.getResourcePath(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "Ressource nicht gefunden."));
     }

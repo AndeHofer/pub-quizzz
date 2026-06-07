@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
@@ -42,8 +43,29 @@ public class LoggingAccessDeniedHandler implements AccessDeniedHandler {
                 accessDeniedException.getMessage()
         );
 
+        if (isLoginPostWithInvalidCsrf(request, accessDeniedException)) {
+            response.sendRedirect("/login");
+            return;
+        }
+
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        request.getRequestDispatcher("/403.html").forward(request, response);
+        if (isGetOrHeadRequest(request)) {
+            request.getRequestDispatcher("/403.html").forward(request, response);
+            return;
+        }
+
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+    }
+
+    private boolean isLoginPostWithInvalidCsrf(HttpServletRequest request, AccessDeniedException exception) {
+        return "POST".equalsIgnoreCase(request.getMethod())
+                && "/login".equals(request.getRequestURI())
+                && exception instanceof InvalidCsrfTokenException;
+    }
+
+    private boolean isGetOrHeadRequest(HttpServletRequest request) {
+        String method = request.getMethod();
+        return "GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method);
     }
 
     private String tokenPreview(String token) {

@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {withCsrfHeaders, withEnsuredCsrfHeaders} from './csrf';
+import {withCsrfHeaders, withEnsuredCsrfHeaders, withRefreshedCsrfHeaders} from './csrf';
 
 describe('csrf helper', () => {
     it('adds csrf header from XSRF-TOKEN cookie and keeps existing headers', () => {
@@ -73,6 +73,25 @@ describe('csrf helper', () => {
         expect(headers).toMatchObject({
             'Content-Type': 'application/json',
             'X-XSRF-TOKEN': 'bootstrapped123'
+        });
+    });
+
+    it('forces bootstrap and refreshes csrf header even when cookie token already exists', async () => {
+        let cookieValue = 'XSRF-TOKEN=old-token';
+        const headers = await withRefreshedCsrfHeaders(
+            {'Content-Type': 'application/json'},
+            {
+                getCookieString: () => cookieValue,
+                getDocument: () => null,
+                bootstrapToken: async () => {
+                    cookieValue = 'XSRF-TOKEN=new-token';
+                }
+            }
+        );
+
+        expect(headers).toMatchObject({
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': 'new-token'
         });
     });
 });

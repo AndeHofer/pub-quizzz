@@ -96,11 +96,29 @@ class SecurityAccessTest {
     }
 
     @Test
+    @WithMockUser
+    void loginPage_authenticated_redirectsToIndex() throws Exception {
+        mockMvc.perform(get("/login"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+    }
+
+    @Test
     void loginPost_withoutCsrf_isForbidden() throws Exception {
         mockMvc.perform(post("/login")
                         .param("username", "admin")
                         .param("password", "admin123"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void loginPost_withInvalidCsrf_redirectsToLogin() throws Exception {
+        mockMvc.perform(post("/login")
+                        .with(csrf().useInvalidToken())
+                        .param("username", "admin")
+                        .param("password", "admin123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
