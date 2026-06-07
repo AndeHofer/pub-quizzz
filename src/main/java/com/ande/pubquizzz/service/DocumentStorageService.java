@@ -40,7 +40,7 @@ public class DocumentStorageService {
         Files.createDirectories(this.documentDir);
         this.documentRepository = documentRepository;
         this.quizRepository = quizRepository;
-        log.info("Document directory: {}", this.documentDir.toAbsolutePath());
+        log.debug("Document directory: {}", this.documentDir.toAbsolutePath());
     }
 
     @Transactional
@@ -61,6 +61,7 @@ public class DocumentStorageService {
         try {
             Files.copy(file.getInputStream(), target);
         } catch (IOException e) {
+            log.error("Error sorting file: {}", e.getMessage());
             throw new ImageStorageException("Fehler beim Speichern der Datei", e);
         }
 
@@ -83,6 +84,7 @@ public class DocumentStorageService {
     @Transactional(readOnly = true)
     public List<QuizDocumentDTO> listDocuments(Long quizId) {
         if (!quizRepository.existsById(quizId)) {
+            log.error("Quiz not found for listing documents: {}", quizId);
             throw new ResourceNotFoundException("Quiz nicht gefunden: " + quizId);
         }
         return documentRepository.findByQuiz_QuizId(quizId)

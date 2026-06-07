@@ -4,6 +4,31 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 93: Login Security Hardening ✅ COMPLETE
+
+- Added security integration tests for `/login` cache headers and login CSRF enforcement.
+- Implemented explicit non-cache headers on `/login` responses.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`.
+
+### Phase 92: Include Neuigkeiten + Usage Events in Backup/Restore ✅ COMPLETE
+
+- Updated backup export and restore reset flow to include `news` and `app_usage_event`.
+- Added RED/GREEN tests for SQL dump table coverage and restore-cycle data restoration.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`.
+
+### Phase 91: Neuigkeiten First on Homepage + Date-Only Timestamp ✅ COMPLETE
+
+- Moved homepage `Neuigkeiten` section to first card position.
+- Switched Neuigkeiten timestamp rendering to date-only output and added frontend test coverage.
+- Verification passed: `npm run test -- src/js/news.test.ts`, `npm run test`, `npm run type-check`, `npm run build`,
+  `./mvnw.cmd test`.
+
+### Phase 90: Move Neuigkeiten Below Leaderboard Row ✅ COMPLETE
+
+- Repositioned `Neuigkeiten` section in homepage layout to directly below leaderboard links.
+- Kept existing IDs/classes to avoid JS behavior changes.
+- Verification passed: `npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd test`.
+
 ### Phase 89: Neuigkeiten Frontend Quality Hardening + Shared Admin UI Helpers ✅ COMPLETE
 
 - Extracted shared admin UI primitives into `src/main/webapp/src/js/admin_ui.ts` (`showModal`, `showError`,

@@ -42,7 +42,8 @@ public class LoggingAccessDeniedHandler implements AccessDeniedHandler {
                 accessDeniedException.getMessage()
         );
 
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        request.getRequestDispatcher("/403.html").forward(request, response);
     }
 
     private String tokenPreview(String token) {

@@ -26,7 +26,7 @@ public class ImageStorageService {
     public ImageStorageService(@Value("${app.upload.dir:/data/uploads}") String uploadDirPath) throws IOException {
         this.uploadDir = Paths.get(uploadDirPath);
         Files.createDirectories(this.uploadDir);
-        log.info("Upload directory: {}", this.uploadDir.toAbsolutePath());
+        log.debug("Upload directory: {}", this.uploadDir.toAbsolutePath());
     }
 
     /**
@@ -36,6 +36,7 @@ public class ImageStorageService {
     public String store(MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
+            log.error("Invalid image file: {}", file.getOriginalFilename());
             throw new IllegalArgumentException("Only image files are accepted. Got: " + contentType);
         }
 

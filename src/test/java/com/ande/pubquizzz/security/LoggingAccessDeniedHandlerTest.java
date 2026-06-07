@@ -55,6 +55,7 @@ class LoggingAccessDeniedHandlerTest {
         assertTrue(message.contains("path=/admin/create-quiz"));
         assertTrue(message.contains("user=admin"));
         assertTrue(message.contains("exceptionType=AccessDeniedException"));
+        assertEquals("/403.html", response.getForwardedUrl());
     }
 
     @Test
