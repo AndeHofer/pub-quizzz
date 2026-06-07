@@ -1,5 +1,6 @@
 import {AverageLeaderboardEntry} from './types';
-import {getMedal, escapeHtml, renderLeaderboard, loadLeaderboard} from './leaderboard-common';
+import {getMedal, renderLeaderboard, loadLeaderboard} from './leaderboard-common';
+import {escapeHtml} from './html-utils';
 
 window.addEventListener('load', () => {
     loadLeaderboard<AverageLeaderboardEntry>(

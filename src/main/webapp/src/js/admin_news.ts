@@ -2,6 +2,7 @@ import type {NewsDTO} from './types';
 import {withEnsuredCsrfHeaders} from './csrf';
 import {escapeHtml} from './html-utils';
 import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
+import {readHttpErrorMessage} from './http-utils';
 
 const API_BASE = '/admin/news';
 
@@ -18,12 +19,6 @@ function formatNewsDate(createdAt: string): string {
 
 function asText(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
-}
-
-async function readHttpErrorMessage(response: Response, fallback: string): Promise<string> {
-    const bodyText = await response.text().catch(() => '');
-    const details = bodyText.trim() || `${response.status} ${response.statusText}`.trim() || `HTTP ${response.status}`;
-    return `${fallback}: ${details}`;
 }
 
 export function buildNewsPayload(title: string, text: string): { title: string; text: string } {

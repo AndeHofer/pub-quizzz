@@ -1,15 +1,10 @@
 // Shared utility functions and modules for leaderboard rendering
-import {escapeHtml as escapeHtmlShared} from './html-utils';
 
 export function getMedal(rank: number): string {
     if (rank === 1) return '\uD83E\uDD47'; // Gold
     if (rank === 2) return '\uD83E\uDD48'; // Silver
     if (rank === 3) return '\uD83E\uDD49'; // Bronze
     return String(rank);
-}
-
-export function escapeHtml(text: string): string {
-    return escapeHtmlShared(text);
 }
 
 export function renderLeaderboard<T>(

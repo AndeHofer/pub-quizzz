@@ -30,8 +30,9 @@ SPRING_DATASOURCE_URL
 
 ## TODOS
 
-1) add text for hints before hint revealed like already possible with pics
-2) merging teams should be possible
-3) usage statistics for admin
+1) resource not found → index.html?
+2) add text for hints before hint revealed like already possible with pics
+3) merging teams should be possible
+4) usage statistics for admin
 
 

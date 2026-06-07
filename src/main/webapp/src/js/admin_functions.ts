@@ -6,6 +6,7 @@ import {withEnsuredCsrfHeaders} from './csrf';
 import {escapeHtml} from './html-utils';
 import {initAdminNewsActions} from './admin_news';
 import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
+import {readHttpErrorMessage} from './http-utils';
 
 export {renderTable, showError, trustedHtml};
 
@@ -35,12 +36,6 @@ function closeModal() {
 function loadCreateQuizPage(quiz: QuizDTO) {
     sessionStorage.setItem('editingQuiz', JSON.stringify(quiz));
     window.location.href = 'create_quiz.html';
-}
-
-async function readHttpErrorMessage(response: Response, fallback: string): Promise<string> {
-    const bodyText = await response.text().catch(() => '');
-    const details = bodyText.trim() || `${response.status} ${response.statusText}`.trim() || `HTTP ${response.status}`;
-    return `${fallback}: ${details}`;
 }
 
 function setStatusMessage(msgDiv: HTMLElement | null, text: string, color: 'red' | 'green' | 'neutral') {
@@ -327,10 +322,13 @@ async function deleteUser(userId: number, username: string) {
     if (!confirm(`Sind Sie sicher, dass Sie den Benutzer "${username}" löschen möchten?`)) return;
     try {
         const response = await apiFetch(`${API_BASE}/user/${userId}`, {method: 'DELETE'});
-        if (response.ok) await viewUsers();
-        else alert('Fehler beim Löschen');
+        if (response.ok) {
+            await viewUsers();
+            return;
+        }
+        showModal('Fehler', showError(await readHttpErrorMessage(response, 'Fehler beim Löschen des Benutzers')));
     } catch (error: unknown) {
-        alert('Fehler: ' + (error instanceof Error ? error.message : error));
+        showModal('Fehler', showError('Fehler beim Löschen des Benutzers: ' + (error instanceof Error ? error.message : error)));
     }
 }
 

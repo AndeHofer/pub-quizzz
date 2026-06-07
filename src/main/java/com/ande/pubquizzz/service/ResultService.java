@@ -133,14 +133,7 @@ public class ResultService {
             entry.setRank(rank);
             entry.setTeamName(r.getTeam().getTeamName());
             entry.setTotalPoints(r.calculateTotalPoints());
-            entry.setAnswers(r.getAnswers().stream()
-                    .map(a -> {
-                        AnswerScoreDTO dto = new AnswerScoreDTO();
-                        dto.setQuestionNumber(a.getQuestionNumber());
-                        dto.setPoints(a.getPoints());
-                        return dto;
-                    })
-                    .toList());
+            entry.setAnswers(mapAnswerScores(r));
             entries.add(entry);
         }
 
@@ -391,14 +384,7 @@ public class ResultService {
             entry.setQuizDate(r.getQuiz().getPubDate().toString());
             entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getPubDate()));
             entry.setTotalPoints(r.calculateTotalPoints());
-            entry.setAnswers(r.getAnswers().stream()
-                    .map(a -> {
-                        AnswerScoreDTO dto = new AnswerScoreDTO();
-                        dto.setQuestionNumber(a.getQuestionNumber());
-                        dto.setPoints(a.getPoints());
-                        return dto;
-                    })
-                    .toList());
+            entry.setAnswers(mapAnswerScores(r));
 
             List<Object[]> scores = new ArrayList<>(quizScores.getOrDefault(r.getQuiz().getQuizId(), List.of()));
             if (scores.isEmpty()) {
@@ -407,16 +393,7 @@ public class ResultService {
                 return entry;
             }
 
-            scores.sort((left, right) -> {
-                return compareScoresDesc(
-                        scoreValue(left, 2),
-                        scoreValue(left, 3),
-                        scoreValue(left, 4),
-                        scoreValue(right, 2),
-                        scoreValue(right, 3),
-                        scoreValue(right, 4)
-                );
-            });
+            scores.sort(ResultService::compareScoreRowsDesc);
 
             entry.setParticipantCount(scores.size());
             int rank = 1;
@@ -450,6 +427,17 @@ public class ResultService {
 
     private String deriveQuizTitle(java.time.LocalDate pubDate) {
         return pubDate.getYear() + " " + GERMAN_MONTHS[pubDate.getMonthValue() - 1];
+    }
+
+    private List<AnswerScoreDTO> mapAnswerScores(Result result) {
+        return result.getAnswers().stream()
+                .map(a -> {
+                    AnswerScoreDTO dto = new AnswerScoreDTO();
+                    dto.setQuestionNumber(a.getQuestionNumber());
+                    dto.setPoints(a.getPoints());
+                    return dto;
+                })
+                .toList();
     }
 
     private void validateCreateAnswers(List<CreateResultRequest.AnswerSubmission> answers) {
@@ -549,6 +537,17 @@ public class ResultService {
         return scoreValue(left, 2) == scoreValue(right, 2)
                 && scoreValue(left, 3) == scoreValue(right, 3)
                 && scoreValue(left, 4) == scoreValue(right, 4);
+    }
+
+    private static int compareScoreRowsDesc(Object[] left, Object[] right) {
+        return compareScoresDesc(
+                scoreValue(left, 2),
+                scoreValue(left, 3),
+                scoreValue(left, 4),
+                scoreValue(right, 2),
+                scoreValue(right, 3),
+                scoreValue(right, 4)
+        );
     }
 
     private static class MedalAccumulator {

@@ -32,7 +32,7 @@ public class QuizService {
 
     @Transactional(readOnly = true)
     public List<QuizDTO> getAllQuizzes() {
-        log.info("Fetching all quizzes");
+        log.debug("Fetching all quizzes");
         return quizRepository.findAll().stream()
                 .map(quizMapper::toDTO)
                 .toList();
@@ -40,19 +40,18 @@ public class QuizService {
 
     @Transactional(readOnly = true)
     public Optional<QuizDTO> getQuizById(Long id) {
-        log.info("Fetching quiz with ID: {}", id);
+        log.debug("Fetching quiz with ID: {}", id);
         return quizRepository.findById(id).map(quizMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
     public Optional<QuizDetailDTO> getQuizDetailById(Long id) {
-        log.info("Fetching quiz detail with ID: {}", id);
+        log.debug("Fetching quiz detail with ID: {}", id);
         return quizRepository.findById(id).map(quizMapper::toDetailDTO);
     }
 
     @Transactional
     public QuizDTO createQuiz(CreateQuizRequest request) {
-        log.info("Creating new quiz entry");
         Quiz quiz = new Quiz();
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : LocalDate.now());
         quiz.setSubmitDate(LocalDate.now());
@@ -67,7 +66,6 @@ public class QuizService {
 
     @Transactional
     public QuizDTO updateQuiz(Long id, LocalDate pubDate, LocalDate submitDate) {
-        log.info("Updating quiz with ID: {}", id);
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz nicht gefunden: " + id));
         quiz.setPubDate(pubDate);
@@ -123,7 +121,6 @@ public class QuizService {
 
     @Transactional
     public boolean deleteQuiz(Long id) {
-        log.info("Deleting quiz with ID: {}", id);
         Quiz quiz = quizRepository.findById(id).orElse(null);
         if (quiz == null) {
             return false;
