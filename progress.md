@@ -90,6 +90,34 @@
   - `npm --prefix src/main/webapp run build`
   - `./mvnw.cmd clean verify` (BUILD SUCCESS)
 
+### Phase 107: Logout Action Option Injection Removal ✅ COMPLETE
+
+- Step 1 done: Removed unused runtime option injection from frontend relogin flow while preserving behavior.
+  - Target runtime file:
+    - `src/main/webapp/src/js/logout-action.ts`
+  - Adapted tests to concrete dependencies (`httpClient`, `window.location.replace`):
+    - `src/main/webapp/src/js/logout-action.test.ts`
+    - `src/main/webapp/src/js/403.test.ts`
+- Step 2 done: Kept click wiring behavior unchanged in index/403 entrypoints.
+- Step 3 done: Full verification commands passed:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
+### Phase 108: 403 Module Export Simplification ✅ COMPLETE
+
+- Step 1 done: Removed redundant re-export from `403.ts` and kept behavior-only wiring.
+  - Target file:
+    - `src/main/webapp/src/js/403.ts`
+  - Test updates in:
+    - `src/main/webapp/src/js/403.test.ts`
+- Step 2 done: Verified frontend + backend full pipelines after simplification.
+  - `npm --prefix src/main/webapp run test` (PASS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+  - `npm --prefix src/main/webapp run build` (PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
 ## Finished Phases
 
 ### Phase 104: Low-Risk Axios CSRF Migration ✅ COMPLETE

@@ -1,57 +1,119 @@
-import {describe, expect, it, vi} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {httpClient} from './http-client';
 import {triggerRelogin} from './logout-action';
 
+vi.mock('./http-client', () => ({
+    httpClient: {
+        post: vi.fn(),
+        get: vi.fn()
+    }
+}));
+
 describe('logout action', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('tries logout and then redirects to /login', async () => {
-        const logoutMock = vi.fn(async () => ({ok: true, status: 200}));
-        const redirectMock = vi.fn();
-        const refreshCsrfMock = vi.fn(async () => {
+        const postMock = vi.mocked(httpClient.post);
+        const getMock = vi.mocked(httpClient.get);
+        const replaceMock = vi.fn();
+        postMock.mockResolvedValue({status: 200});
+        getMock.mockResolvedValue({status: 200});
+
+        const originalWindow = globalThis.window;
+        const fakeWindow = {
+            location: {
+                replace: replaceMock
+            }
+        } as unknown as Window & typeof globalThis;
+        Object.defineProperty(globalThis, 'window', {
+            configurable: true,
+            writable: true,
+            value: fakeWindow
         });
 
-        await triggerRelogin({
-            logoutExecutor: logoutMock,
-            redirect: redirectMock,
-            refreshCsrfExecutor: refreshCsrfMock
-        });
+        try {
+            await triggerRelogin();
+        } finally {
+            Object.defineProperty(globalThis, 'window', {
+                configurable: true,
+                writable: true,
+                value: originalWindow
+            });
+        }
 
-        expect(logoutMock).toHaveBeenCalledTimes(1);
-        expect(refreshCsrfMock).not.toHaveBeenCalled();
-        expect(redirectMock).toHaveBeenCalledWith('/login?relogin=1');
+        expect(postMock).toHaveBeenCalledTimes(1);
+        expect(getMock).not.toHaveBeenCalled();
+        expect(replaceMock).toHaveBeenCalledWith('/login?relogin=1');
     });
 
     it('still redirects to /login when logout request fails', async () => {
-        const logoutMock = vi.fn(async () => {
-            throw new Error('network');
-        });
-        const redirectMock = vi.fn();
-        const refreshCsrfMock = vi.fn(async () => {
+        const postMock = vi.mocked(httpClient.post);
+        const getMock = vi.mocked(httpClient.get);
+        const replaceMock = vi.fn();
+        postMock.mockRejectedValue(new Error('network'));
+
+        const originalWindow = globalThis.window;
+        const fakeWindow = {
+            location: {
+                replace: replaceMock
+            }
+        } as unknown as Window & typeof globalThis;
+        Object.defineProperty(globalThis, 'window', {
+            configurable: true,
+            writable: true,
+            value: fakeWindow
         });
 
-        await triggerRelogin({
-            logoutExecutor: logoutMock,
-            redirect: redirectMock,
-            refreshCsrfExecutor: refreshCsrfMock
-        });
+        try {
+            await triggerRelogin();
+        } finally {
+            Object.defineProperty(globalThis, 'window', {
+                configurable: true,
+                writable: true,
+                value: originalWindow
+            });
+        }
 
-        expect(redirectMock).toHaveBeenCalledWith('/login?relogin=1');
+        expect(postMock).toHaveBeenCalledTimes(1);
+        expect(getMock).not.toHaveBeenCalled();
+        expect(replaceMock).toHaveBeenCalledWith('/login?relogin=1');
     });
 
     it('retries logout after csrf refresh when first logout returns 403', async () => {
-        const logoutMock = vi.fn()
-            .mockResolvedValueOnce({ok: false, status: 403})
-            .mockResolvedValueOnce({ok: true, status: 200});
-        const redirectMock = vi.fn();
-        const refreshCsrfMock = vi.fn(async () => {
+        const postMock = vi.mocked(httpClient.post);
+        const getMock = vi.mocked(httpClient.get);
+        const replaceMock = vi.fn();
+        postMock
+            .mockResolvedValueOnce({status: 403})
+            .mockResolvedValueOnce({status: 200});
+        getMock.mockResolvedValue({status: 200});
+
+        const originalWindow = globalThis.window;
+        const fakeWindow = {
+            location: {
+                replace: replaceMock
+            }
+        } as unknown as Window & typeof globalThis;
+        Object.defineProperty(globalThis, 'window', {
+            configurable: true,
+            writable: true,
+            value: fakeWindow
         });
 
-        await triggerRelogin({
-            logoutExecutor: logoutMock,
-            redirect: redirectMock,
-            refreshCsrfExecutor: refreshCsrfMock
-        });
+        try {
+            await triggerRelogin();
+        } finally {
+            Object.defineProperty(globalThis, 'window', {
+                configurable: true,
+                writable: true,
+                value: originalWindow
+            });
+        }
 
-        expect(logoutMock).toHaveBeenCalledTimes(2);
-        expect(refreshCsrfMock).toHaveBeenCalledTimes(1);
-        expect(redirectMock).toHaveBeenCalledWith('/login?relogin=1');
+        expect(postMock).toHaveBeenCalledTimes(2);
+        expect(getMock).toHaveBeenCalledTimes(1);
+        expect(replaceMock).toHaveBeenCalledWith('/login?relogin=1');
     });
 });

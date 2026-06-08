@@ -1,14 +1,5 @@
 import {httpClient} from './http-client';
 
-type LogoutExecutor = () => Promise<{ ok: boolean; status: number }>;
-type CsrfRefreshExecutor = () => Promise<void>;
-
-type ReloginOptions = {
-    logoutExecutor?: LogoutExecutor;
-    redirect?: (url: string) => void;
-    refreshCsrfExecutor?: CsrfRefreshExecutor;
-};
-
 async function logoutOnce(): Promise<{ ok: boolean; status: number }> {
     const response = await httpClient.post('/logout');
     return {
@@ -21,25 +12,19 @@ async function refreshCsrfToken(): Promise<void> {
     await httpClient.get('/api/bootstrap', {headers: {'Cache-Control': 'no-store'}});
 }
 
-export async function triggerRelogin(options: ReloginOptions = {}): Promise<void> {
-    const logoutExecutor = options.logoutExecutor ?? logoutOnce;
-    const redirect = options.redirect ?? ((url: string) => {
-        if (typeof window !== 'undefined') {
-            window.location.replace(url);
-        }
-    });
-    const refreshCsrfExecutor = options.refreshCsrfExecutor ?? refreshCsrfToken;
-
+export async function triggerRelogin(): Promise<void> {
     try {
-        const initialResponse = await logoutExecutor();
+        const initialResponse = await logoutOnce();
 
         if (!initialResponse.ok && initialResponse.status === 403) {
-            await refreshCsrfExecutor();
-            await logoutExecutor();
+            await refreshCsrfToken();
+            await logoutOnce();
         }
     } catch {
         // Intentionally ignored: always continue to login.
     } finally {
-        redirect('/login?relogin=1');
+        if (typeof window !== 'undefined') {
+            window.location.replace('/login?relogin=1');
+        }
     }
 }

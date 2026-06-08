@@ -1,7 +1,5 @@
 import {triggerRelogin} from './logout-action';
 
-export {triggerRelogin};
-
 if (typeof document !== 'undefined') {
     const reloginButton = document.getElementById('reloginBtn');
     if (reloginButton) {
