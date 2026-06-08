@@ -15,6 +15,7 @@ export default defineConfig({
                 main: './index.html',
                 403: './403.html',
                 admin_main: './admin/admin_main.html',
+                admin_news: './admin/news.html',
                 create_quiz: './admin/create_quiz.html',
                 create_result: './admin/create_result.html',
                 results: './admin/results.html',

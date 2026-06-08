@@ -14,4 +14,5 @@ public class NewsDTO {
     private String title;
     private String text;
     private Instant createdAt;
+    private boolean showOnHomePage;
 }

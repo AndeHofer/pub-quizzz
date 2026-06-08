@@ -28,7 +28,7 @@ public class NewsService {
     @Transactional(readOnly = true)
     public List<NewsDTO> getLatestNews(int requestedLimit) {
         int effectiveLimit = requestedLimit > 0 ? Math.min(requestedLimit, MAX_LIMIT) : DEFAULT_LIMIT;
-        return newsRepository.findAllByOrderByCreatedAtDescNewsIdDesc(PageRequest.of(0, effectiveLimit))
+        return newsRepository.findAllByShowOnHomePageTrueOrderByCreatedAtDescNewsIdDesc(PageRequest.of(0, effectiveLimit))
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -47,6 +47,7 @@ public class NewsService {
         News news = new News();
         news.setTitle(request.getTitle().trim());
         news.setText(request.getText().trim());
+        news.setShowOnHomePage(request.getShowOnHomePage());
         news.setCreatedAt(Instant.now());
 
         return toDto(newsRepository.save(news));
@@ -58,6 +59,7 @@ public class NewsService {
                 .orElseThrow(() -> new ResourceNotFoundException("Neuigkeit nicht gefunden: " + id));
         news.setTitle(request.getTitle().trim());
         news.setText(request.getText().trim());
+        news.setShowOnHomePage(request.getShowOnHomePage());
         return toDto(newsRepository.save(news));
     }
 
@@ -69,6 +71,6 @@ public class NewsService {
     }
 
     private NewsDTO toDto(News news) {
-        return new NewsDTO(news.getNewsId(), news.getTitle(), news.getText(), news.getCreatedAt());
+        return new NewsDTO(news.getNewsId(), news.getTitle(), news.getText(), news.getCreatedAt(), news.isShowOnHomePage());
     }
 }

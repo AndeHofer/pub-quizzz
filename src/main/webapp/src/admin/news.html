@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de-AT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Neuigkeiten verwalten</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-full sm:max-w-3xl">
+    <div class="mb-6">
+        <a href="./admin_main.html" class="text-gray-500 hover:text-gray-700 text-sm">&larr; Admin Bereich</a>
+    </div>
+
+    <h1 class="text-xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">Neuigkeiten verwalten</h1>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 mb-4">
+        <h2 id="newsFormHeading" class="mt-0 pt-0 border-b border-gray-200 pb-2 mb-4 text-gray-700">Neuigkeit
+            erstellen</h2>
+        <form id="newsForm">
+            <div class="field-group">
+                <label for="newsTitle">Titel:</label>
+                <input type="text" id="newsTitle" maxlength="200" placeholder="Titel der Neuigkeit" required>
+            </div>
+
+            <div class="field-group">
+                <label for="newsText">Text:</label>
+                <textarea id="newsText" maxlength="5000" rows="6" placeholder="Text der Neuigkeit" required></textarea>
+            </div>
+
+            <div class="field-group">
+                <label class="inline-flex items-center gap-2 cursor-pointer" for="newsShowOnHomePage">
+                    <input type="checkbox" id="newsShowOnHomePage">
+                    <span>Auf Startseite anzeigen</span>
+                </label>
+            </div>
+
+            <div id="newsAuthoringHint"></div>
+
+            <div class="flex flex-col sm:flex-row gap-2">
+                <button type="submit" id="newsSubmitBtn">Neuigkeit erstellen</button>
+                <button type="button" id="newsCancelEditBtn" class="secondary-btn hidden">Bearbeitung abbrechen</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="newsMessage" class="message"></div>
+
+    <div class="overflow-x-auto mt-4">
+        <table class="w-full bg-white rounded-lg shadow-sm">
+            <thead>
+            <tr>
+                <th>Titel</th>
+                <th>Erstellt am</th>
+                <th>Startseite</th>
+                <th>Aktionen</th>
+            </tr>
+            </thead>
+            <tbody id="newsTableBody">
+            <tr>
+                <td colspan="4" class="text-sm text-gray-500">Laden...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module" src="../js/admin_news_page.ts"></script>
+<script type="module" src="../js/page-transition.ts"></script>
+</body>
+</html>

@@ -20,7 +20,8 @@ describe('news helpers', () => {
                 newsId: 1,
                 title: '<script>alert(1)</script>',
                 text: '<img src=x onerror=alert(1)>',
-                createdAt: '2026-06-01T10:00:00Z'
+                createdAt: '2026-06-01T10:00:00Z',
+                showOnHomePage: true
             }
         ]);
 
@@ -36,7 +37,8 @@ describe('news helpers', () => {
                 newsId: 10,
                 title: 'Titel',
                 text: 'Text',
-                createdAt: 'kein-datum'
+                createdAt: 'kein-datum',
+                showOnHomePage: true
             }
         ]);
 
@@ -49,7 +51,8 @@ describe('news helpers', () => {
                 newsId: 12,
                 title: 'Datum',
                 text: 'Nur Datum',
-                createdAt: '2026-06-01T18:45:00Z'
+                createdAt: '2026-06-01T18:45:00Z',
+                showOnHomePage: true
             }
         ]);
 
@@ -62,7 +65,8 @@ describe('news helpers', () => {
                 newsId: 11,
                 title: 'Zeilen',
                 text: 'Erste Zeile\n<script>alert(1)</script>',
-                createdAt: '2026-06-01T10:00:00Z'
+                createdAt: '2026-06-01T10:00:00Z',
+                showOnHomePage: true
             }
         ]);
 
@@ -84,7 +88,8 @@ describe('news helpers', () => {
                 newsId: 21,
                 title: 'Ankuendigung',
                 text: 'Unser naechstes Quiz ist am [event-date:sept]2. September 2026[/event-date].<!--event {"events":{"sept":{"title":"Pub Quiz September","start":"2026-09-02T19:00","end":"2026-09-02T22:00","location":"Pub XY, Wien"}}}-->',
-                createdAt: '2026-08-30T10:00:00Z'
+                createdAt: '2026-08-30T10:00:00Z',
+                showOnHomePage: true
             }
         ]);
 
@@ -100,7 +105,8 @@ describe('news helpers', () => {
                 newsId: 22,
                 title: 'Ankuendigung',
                 text: 'Termin: [event-date:missing]2. September 2026[/event-date].<!--event {"events":{"other":{"title":"Pub Quiz September","start":"2026-09-02T19:00","end":"2026-09-02T22:00","location":"Pub XY, Wien"}}}-->',
-                createdAt: '2026-08-30T10:00:00Z'
+                createdAt: '2026-08-30T10:00:00Z',
+                showOnHomePage: true
             }
         ]);
 
@@ -115,7 +121,8 @@ describe('news helpers', () => {
                 newsId: 23,
                 title: 'Fallback Titel',
                 text: 'Termin: [event-date:sept]2. September 2026[/event-date].<!--event {"events":{"sept":{"start":"2026-09-02T19:00","end":"2026-09-02T22:00","location":"Pub XY, Wien"}}}-->',
-                createdAt: '2026-08-30T10:00:00Z'
+                createdAt: '2026-08-30T10:00:00Z',
+                showOnHomePage: true
             }
         ]);
 
@@ -181,10 +188,10 @@ describe('news helpers', () => {
 
     it('sorts news newest-first and limits to three entries', () => {
         const result = sortAndLimitNews([
-            {newsId: 1, title: 'Alt', text: 'A', createdAt: '2026-06-01T10:00:00Z'},
-            {newsId: 2, title: 'Neu', text: 'B', createdAt: '2026-06-04T10:00:00Z'},
-            {newsId: 3, title: 'Mitte', text: 'C', createdAt: '2026-06-03T10:00:00Z'},
-            {newsId: 4, title: 'Sehr alt', text: 'D', createdAt: '2026-05-30T10:00:00Z'}
+            {newsId: 1, title: 'Alt', text: 'A', createdAt: '2026-06-01T10:00:00Z', showOnHomePage: true},
+            {newsId: 2, title: 'Neu', text: 'B', createdAt: '2026-06-04T10:00:00Z', showOnHomePage: true},
+            {newsId: 3, title: 'Mitte', text: 'C', createdAt: '2026-06-03T10:00:00Z', showOnHomePage: true},
+            {newsId: 4, title: 'Sehr alt', text: 'D', createdAt: '2026-05-30T10:00:00Z', showOnHomePage: false}
         ]);
 
         expect(result).toHaveLength(3);
@@ -193,8 +200,8 @@ describe('news helpers', () => {
 
     it('does not mutate the original array when sorting and limiting', () => {
         const input = [
-            {newsId: 1, title: 'A', text: 'A', createdAt: '2026-06-01T10:00:00Z'},
-            {newsId: 2, title: 'B', text: 'B', createdAt: '2026-06-02T10:00:00Z'}
+            {newsId: 1, title: 'A', text: 'A', createdAt: '2026-06-01T10:00:00Z', showOnHomePage: true},
+            {newsId: 2, title: 'B', text: 'B', createdAt: '2026-06-02T10:00:00Z', showOnHomePage: true}
         ];
 
         const originalOrder = input.map(item => item.newsId);
@@ -205,9 +212,9 @@ describe('news helpers', () => {
 
     it('uses newsId descending tie-break for equal createdAt', () => {
         const result = sortAndLimitNews([
-            {newsId: 3, title: 'A', text: 'A', createdAt: '2026-06-01T10:00:00Z'},
-            {newsId: 9, title: 'B', text: 'B', createdAt: '2026-06-01T10:00:00Z'},
-            {newsId: 5, title: 'C', text: 'C', createdAt: '2026-06-01T10:00:00Z'}
+            {newsId: 3, title: 'A', text: 'A', createdAt: '2026-06-01T10:00:00Z', showOnHomePage: true},
+            {newsId: 9, title: 'B', text: 'B', createdAt: '2026-06-01T10:00:00Z', showOnHomePage: true},
+            {newsId: 5, title: 'C', text: 'C', createdAt: '2026-06-01T10:00:00Z', showOnHomePage: false}
         ]);
 
         expect(result.map(item => item.newsId)).toEqual([9, 5, 3]);

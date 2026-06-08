@@ -2,146 +2,110 @@
 
 ## Open Tasks
 
-### Phase 104: Low-Risk Axios CSRF Migration (In Progress)
+### Phase 105: News Section Rebuild (In Progress)
 
-- Step 1 done: Planned incremental frontend-only migration; backend Spring Security CSRF unchanged.
-- Step 2 done (TDD RED/GREEN): Migrated `admin_news.ts` to axios/http client.
-- Step 3 done (TDD RED/GREEN): Introduced shared `admin-api.ts` and migrated `admin_functions.ts` to shared `apiFetch`.
-- Step 4 done (TDD RED/GREEN): Migrated remaining CSRF-helper consumers:
-  - `create_quiz.ts`
-  - `create_result.ts`
-  - `register_user.ts`
-  - `admin_results.ts`
-  - `403.ts`
-- Step 5 done: Removed obsolete frontend CSRF helper files:
-  - deleted `src/main/webapp/src/js/csrf.ts`
-  - deleted `src/main/webapp/src/js/csrf.test.ts`
-- Step 6 done: Full verification passed:
-  - `npm --prefix src/main/webapp run test`
-  - `npm --prefix src/main/webapp run type-check`
-  - `npm --prefix src/main/webapp run build`
-  - `./mvnw.cmd clean verify`
-- Step 7 done: Cleaned up project progress tracking structure to keep `progress.md` short and focused (active + last 3
-  finished phases).
-- Step 8 done: Verification after cleanup passed:
-  - `npm --prefix src/main/webapp run test`
-  - `npm --prefix src/main/webapp run type-check`
-  - `npm --prefix src/main/webapp run build`
-  - `./mvnw.cmd clean verify`
-- Step 9 started: Optimize frontend bundle impact after axios migration.
-  - Goal: avoid loading axios bundle on pages that do not use admin API logic.
-  - Plan: lazy-load `admin-api` inside admin-only modules that currently import it at top-level.
-- Step 9 done (TDD RED/GREEN): Added lazy admin API loader and migrated admin modules to runtime-loading.
-  - RED verification:
-    - Added `src/main/webapp/src/js/admin-api-loader.test.ts`.
-    - `npm --prefix src/main/webapp run test -- src/js/admin-api-loader.test.ts` (FAIL expected: missing module before
-      implementation).
-  - GREEN implementation:
-    - Added `src/main/webapp/src/js/admin-api-loader.ts` with cached dynamic import for `apiFetch`.
-    - Updated modules to use lazy `getApiFetch()` instead of top-level `apiFetch` import:
-      - `src/main/webapp/src/js/create_quiz.ts`
-      - `src/main/webapp/src/js/create_result.ts`
-      - `src/main/webapp/src/js/register_user.ts`
-      - `src/main/webapp/src/js/admin_results.ts`
-  - Focused test verification:
-    -
-    `npm --prefix src/main/webapp run test -- src/js/admin-api-loader.test.ts src/js/admin-api.test.ts src/js/403.test.ts` (
-    PASS)
-- Step 10 done: Full verification passed after bundle optimization work.
+- Step 1 done: Finalized design decisions with user.
+  - New dedicated page: `src/main/webapp/src/admin/news.html`
+  - No modals for news CRUD.
+  - New boolean flag: `showOnHomePage`
+  - Homepage behavior: show latest 3 entries where `showOnHomePage=true`
+- Step 2 done: Prepared implementation todo list and identified impacted backend/frontend/tests files.
+- Step 3 done (TDD RED/GREEN): Backend contract and business logic updated for `showOnHomePage`.
+  - RED: Added/updated failing tests first in:
+    - `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java`
+    - `src/test/java/com/ande/pubquizzz/controller/AdminNewsControllerTest.java`
+    - `src/test/java/com/ande/pubquizzz/controller/UserNewsControllerTest.java`
+  - GREEN: Implemented backend changes in:
+    - `src/main/java/com/ande/pubquizzz/database/entities/News.java`
+    - `src/main/java/com/ande/pubquizzz/dto/NewsDTO.java`
+    - `src/main/java/com/ande/pubquizzz/dto/CreateNewsRequest.java`
+    - `src/main/java/com/ande/pubquizzz/dto/UpdateNewsRequest.java`
+    - `src/main/java/com/ande/pubquizzz/database/repositories/NewsRepository.java`
+    - `src/main/java/com/ande/pubquizzz/service/NewsService.java`
+  - Result: homepage news query now returns latest 3 where `showOnHomePage=true`; admin CRUD reads/writes flag.
+- Step 4 done (TDD RED/GREEN): Rebuilt news admin UI to dedicated one-page flow without modals.
+  - RED: Added failing frontend tests first in `src/main/webapp/src/js/admin_news_page.test.ts`.
+  - GREEN:
+    - Added new page `src/main/webapp/src/admin/news.html`.
+    - Added new module `src/main/webapp/src/js/admin_news_page.ts`.
+    - Wired admin dashboard news navigation in:
+      - `src/main/webapp/src/admin/admin_main.html`
+      - `src/main/webapp/src/js/admin_functions.ts`
+    - Removed legacy modal-based news module/tests:
+      - deleted `src/main/webapp/src/js/admin_news.ts`
+      - deleted `src/main/webapp/src/js/admin_news.test.ts`
+    - Added Vite entry for new page in `src/main/webapp/vite.config.ts`.
+    - Extended TS news type with boolean flag in `src/main/webapp/src/js/types.ts`.
+- Step 5 done: Backup/restore compatibility aligned with new news column.
+  - Updated test schemas and inserts in:
+    - `src/test/java/com/ande/pubquizzz/service/BackupServiceTest.java`
+    - `src/test/java/com/ande/pubquizzz/service/BackupRestoreListenerTest.java`
+  - Added compatibility migration safeguard in:
+    - `src/main/java/com/ande/pubquizzz/listener/BackupRestoreListener.java`
+- Step 6 done: Full verification passed.
   - `npm --prefix src/main/webapp run test` (PASS)
   - `npm --prefix src/main/webapp run type-check` (PASS)
   - `npm --prefix src/main/webapp run build` (PASS)
   - `./mvnw.cmd clean verify` (BUILD SUCCESS)
-- Step 11 started: Final admin consistency pass.
-  - Migrate `admin_login_stats.ts` and `admin_logs.ts` from direct `fetch` to shared `apiFetch` loader path.
-  - Simplify `403.ts` trigger API to named dependency object while preserving behavior.
-- Step 11 done (TDD RED/GREEN): Completed final consistency pass.
-  - RED verification:
-    - Updated `403.test.ts` to named dependency object invocation.
-    - `npm --prefix src/main/webapp run test -- src/js/403.test.ts` (FAIL expected against old positional API).
-  - GREEN implementation:
-    - `403.ts`: simplified `triggerRelogin` to use one options object (`logoutExecutor`, `redirect`,
-      `refreshCsrfExecutor`).
-    - `admin_login_stats.ts`: replaced direct `fetch` with lazy `getApiFetch()` shared path.
-    - `admin_logs.ts`: replaced direct `fetch` with lazy `getApiFetch()` shared path.
-  - Focused verification:
-    -
-    `npm --prefix src/main/webapp run test -- src/js/403.test.ts src/js/admin_logs.test.ts src/js/admin_login_stats.test.ts` (
-    PASS)
-- Step 12 done: Full verification passed after final consistency pass.
-  - `npm --prefix src/main/webapp run test` (PASS)
-  - `npm --prefix src/main/webapp run type-check` (PASS)
-  - `npm --prefix src/main/webapp run build` (PASS)
-  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
-- Step 13 started: Homepage logout button rollout with shared relogin/logout action.
-  - Plan: add visible logout button in `index.html`, wire in `index.ts`, extract shared logout action from `403.ts`, and
-    cover with unit tests via TDD.
-- Step 13 RED: Added failing frontend tests first for shared logout action + homepage button wiring.
-  - Added `src/main/webapp/src/js/logout-action.test.ts` and initial homepage wiring test (
-    `src/main/webapp/src/js/index.test.ts`,
-    later replaced by `src/main/webapp/src/js/index-logout.test.ts` after adapting to non-DOM unit-test pattern).
-  - `npm --prefix src/main/webapp run test -- src/js/logout-action.test.ts src/js/index.test.ts` (FAIL expected: missing
-    `logout-action` module and missing DOM environment setup before implementation).
-- Step 13 GREEN: Implemented shared logout action and homepage wiring.
-  - Added `src/main/webapp/src/js/logout-action.ts` and migrated `src/main/webapp/src/js/403.ts` to reuse it.
-  - Added visible homepage logout button in `src/main/webapp/src/index.html` (German label: `Abmelden`).
-  - Updated `src/main/webapp/src/js/index.ts` to wire the new logout button via shared `triggerRelogin` logic.
-  - Added/adjusted frontend unit tests:
-    - `src/main/webapp/src/js/logout-action.test.ts`
-    - `src/main/webapp/src/js/index-logout.test.ts`
-    - `src/main/webapp/src/js/403.test.ts` (kept passing against re-exported shared action)
-  - Focused verification:
-    -
-    `npm --prefix src/main/webapp run test -- src/js/logout-action.test.ts src/js/index-logout.test.ts src/js/403.test.ts`
-    (PASS)
-- Step 13 done: Full verification passed for logout button rollout.
-  - `npm --prefix src/main/webapp run test` (PASS)
-  - `npm --prefix src/main/webapp run type-check` (PASS)
-  - `npm --prefix src/main/webapp run build` (PASS)
-  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
-- Step 14 started: Homepage logout button visual polish.
-  - Goal: keep logout button dark grey (not red) and improve end-of-page spacing/alignment consistency.
-- Step 14 done: Updated homepage logout button style and spacing.
-  - Changed logout button from red (`danger-btn`) to dark grey (`secondary-btn`) and wrapped it in end-aligned spacing
-    container.
-  - Updated `src/main/webapp/src/index.html` only; behavior unchanged.
+- Step 7 done (hotfix): Added startup-safe schema guard for legacy DBs missing `news.show_on_home_page`.
+  - Root cause observed in runtime logs: live DB schema lacked `show_on_home_page` while JPA query expected it.
+  - Added guard component:
+    - `src/main/java/com/ande/pubquizzz/config/SchemaCompatibilityGuard.java`
+  - Added unit test first (RED/GREEN):
+    - `src/test/java/com/ande/pubquizzz/config/SchemaCompatibilityGuardTest.java`
   - Verification:
+    - `./mvnw.cmd -Dtest=SchemaCompatibilityGuardTest test` (PASS)
     - `npm --prefix src/main/webapp run test` (PASS)
     - `npm --prefix src/main/webapp run type-check` (PASS)
     - `npm --prefix src/main/webapp run build` (PASS)
-- Step 15 started: Invalidate stale `/api/bootstrap` auth state via server-side cache policy.
-  - Goal: ensure admin visibility state is never reused from HTTP cache across login/logout transitions.
-  - Plan: add backend integration test first (RED), then set `/api/bootstrap` to `Cache-Control: no-store` (GREEN).
-- Step 15 RED: Added failing backend integration assertion for bootstrap cache policy.
-  - Updated `src/test/java/com/ande/pubquizzz/controller/UserControllerTest.java` to expect `Cache-Control: no-store`.
-  - `./mvnw.cmd -Dtest=UserControllerTest test` (FAIL expected: controller still returned `max-age=3600, must-revalidate,
-    private`).
-- Step 15 GREEN: Made bootstrap auth-state endpoint non-cacheable.
-  - Updated `src/main/java/com/ande/pubquizzz/controller/UserController.java` to return `Cache-Control: no-store` for
-    `/api/bootstrap`.
-  - `./mvnw.cmd -Dtest=UserControllerTest test` (PASS)
-- Step 15 done: Full verification passed after bootstrap cache invalidation.
-  - `npm --prefix src/main/webapp run test` (PASS)
-  - `npm --prefix src/main/webapp run type-check` (PASS)
-  - `npm --prefix src/main/webapp run build` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+- Step 8 done (hotfix): Restored missing event-field authoring description on new news admin page.
+  - Root cause: during migration from modal-based news UI to dedicated page, the `newsAuthoringHint` block was not
+    carried over.
+  - RED/GREEN:
+    - Added failing test in `src/main/webapp/src/js/admin_news_page.test.ts` for hint markup rendering.
+    - Implemented `buildNewsAuthoringHintMarkup()` and wired it in `src/main/webapp/src/js/admin_news_page.ts`.
+    - Added hint container to `src/main/webapp/src/admin/news.html`.
+  - Verification:
+    - `npm --prefix src/main/webapp run test -- src/js/admin_news_page.test.ts` (PASS)
+    - `npm --prefix src/main/webapp run test` (PASS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+    - `npm --prefix src/main/webapp run build` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
+### Phase 106: Security Log Correlation Fields ✅ COMPLETE
+
+- Step 1 done: Added additional request correlation fields to 401/403 security logs.
+  - Target handlers:
+    - `src/main/java/com/ande/pubquizzz/security/LoggingAuthenticationEntryPoint.java`
+    - `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java`
+  - Fields: `sessionId`, `sessionValid`, `remoteAddr`, `userAgent`, `forwardedFor`, `forwardedProto`, `forwardedHost`.
+- Step 2 done (TDD RED/GREEN): Added/extended unit tests for logging output in:
+  - `src/test/java/com/ande/pubquizzz/security/LoggingAuthenticationEntryPointTest.java`
+  - `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java`
+- Step 3 done: Implemented logging changes in production handlers.
+- Step 4 done: Full verification commands passed:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
   - `./mvnw.cmd clean verify` (BUILD SUCCESS)
 
 ## Finished Phases
 
+### Phase 104: Low-Risk Axios CSRF Migration ✅ COMPLETE
+
+- Migrated frontend admin/API paths to shared HTTP client and lazy admin API loading.
+- Removed obsolete CSRF helper frontend files.
+- Full verification passed (`npm test`, `npm type-check`, `npm build`, `./mvnw.cmd clean verify`).
+
 ### Phase 103: Neuigkeiten Inline Multi-Event Calendar Actions ✅ COMPLETE
 
-- Added hidden metadata + inline marker support for multiple events.
-- Added Google/ICS inline actions with strict validation and safe fallback behavior.
-- Added/updated frontend tests and passed full verification.
+- Added hidden metadata + inline marker support for multiple calendar events.
+- Added Google/ICS inline actions with validation and fallback behavior.
+- Frontend tests and full verification passed.
 
 ### Phase 102: Frontend Auth-Expiry Rollout ✅ COMPLETE
 
-- Rolled out centralized auth-expiry handling across high-risk admin/frontend fetch paths.
+- Rolled out centralized auth-expiry handling across high-risk frontend/admin paths.
 - Prevented duplicate error UI when redirect is already scheduled.
-- Passed full backend+frontend verification pipeline.
-
-### Phase 101: Session Expiry UX + API/Auth Response Consistency ✅ COMPLETE
-
-- Implemented API-style unauthenticated JSON `401` handling while preserving browser redirect behavior.
-- Added auth-expiry helper in frontend and wired create-result save flow.
-- Set `server.servlet.session.timeout=4h` and verified full pipeline.
+- Full backend+frontend verification passed.

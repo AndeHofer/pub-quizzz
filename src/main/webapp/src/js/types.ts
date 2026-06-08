@@ -144,4 +144,5 @@ export interface NewsDTO {
     title: string;
     text: string;
     createdAt: string;
+    showOnHomePage: boolean;
 }

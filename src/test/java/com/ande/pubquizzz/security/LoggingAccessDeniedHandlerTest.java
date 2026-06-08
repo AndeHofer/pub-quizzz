@@ -37,6 +37,11 @@ class LoggingAccessDeniedHandlerTest {
         LoggingAccessDeniedHandler handler = new LoggingAccessDeniedHandler();
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/create-quiz");
         request.setUserPrincipal(() -> "admin");
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("User-Agent", "JUnit-Agent");
+        request.addHeader("X-Forwarded-For", "198.51.100.55");
+        request.addHeader("X-Forwarded-Proto", "https");
+        request.addHeader("X-Forwarded-Host", "quiz.example.com");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         appender.start();
@@ -56,6 +61,13 @@ class LoggingAccessDeniedHandlerTest {
         assertTrue(message.contains("method=GET"));
         assertTrue(message.contains("path=/admin/create-quiz"));
         assertTrue(message.contains("user=admin"));
+        assertTrue(message.contains("sessionId=-"));
+        assertTrue(message.contains("sessionValid=-"));
+        assertTrue(message.contains("remoteAddr=127.0.0.1"));
+        assertTrue(message.contains("userAgent=JUnit-Agent"));
+        assertTrue(message.contains("forwardedFor=198.51.100.55"));
+        assertTrue(message.contains("forwardedProto=https"));
+        assertTrue(message.contains("forwardedHost=quiz.example.com"));
         assertTrue(message.contains("exceptionType=AccessDeniedException"));
         assertEquals("/403.html", response.getForwardedUrl());
     }

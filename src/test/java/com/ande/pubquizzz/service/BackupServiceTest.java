@@ -42,7 +42,7 @@ public class BackupServiceTest {
             stmt.execute("CREATE TABLE IF NOT EXISTS result (id BIGINT PRIMARY KEY, quiz_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS result_answer (id BIGINT PRIMARY KEY, result_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS quiz_document (id BIGINT PRIMARY KEY, quiz_id BIGINT NOT NULL, FOREIGN KEY (quiz_id) REFERENCES quiz(id))");
-            stmt.execute("CREATE TABLE IF NOT EXISTS news (news_id BIGINT PRIMARY KEY, title VARCHAR(200) NOT NULL, text VARCHAR(5000) NOT NULL, created_at TIMESTAMP NOT NULL)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS news (news_id BIGINT PRIMARY KEY, title VARCHAR(200) NOT NULL, text VARCHAR(5000) NOT NULL, show_on_home_page BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMP NOT NULL)");
             stmt.execute("CREATE TABLE IF NOT EXISTS app_usage_event (usage_event_id BIGINT PRIMARY KEY, event_type VARCHAR(64) NOT NULL, username VARCHAR(255) NOT NULL, occurred_at TIMESTAMP NOT NULL, entity_type VARCHAR(64), entity_id VARCHAR(128), metadata_json CLOB)");
         }
         Files.createDirectories(tempDir.resolve("uploads"));

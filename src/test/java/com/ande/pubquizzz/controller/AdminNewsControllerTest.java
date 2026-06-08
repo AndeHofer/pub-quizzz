@@ -48,20 +48,21 @@ class AdminNewsControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getAllNews_admin_returnsOkWithPayload() throws Exception {
         when(newsService.getAllNewsForAdmin()).thenReturn(List.of(
-                new NewsDTO(2L, "Neu 2", "Text 2", Instant.parse("2026-06-06T10:15:30Z")),
-                new NewsDTO(1L, "Neu 1", "Text 1", Instant.parse("2026-06-05T10:15:30Z"))
+                new NewsDTO(2L, "Neu 2", "Text 2", Instant.parse("2026-06-06T10:15:30Z"), true),
+                new NewsDTO(1L, "Neu 1", "Text 1", Instant.parse("2026-06-05T10:15:30Z"), false)
         ));
 
         mockMvc.perform(get("/admin/news"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].newsId").value(2))
-                .andExpect(jsonPath("$[0].title").value("Neu 2"));
+                .andExpect(jsonPath("$[0].title").value("Neu 2"))
+                .andExpect(jsonPath("$[0].showOnHomePage").value(true));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void createNews_validRequest_returnsCreated() throws Exception {
-        NewsDTO dto = new NewsDTO(1L, "Titel", "Text", Instant.parse("2026-06-05T10:15:30Z"));
+        NewsDTO dto = new NewsDTO(1L, "Titel", "Text", Instant.parse("2026-06-05T10:15:30Z"), true);
         when(newsService.createNews(any(CreateNewsRequest.class))).thenReturn(dto);
 
         mockMvc.perform(post("/admin/news")
@@ -69,9 +70,11 @@ class AdminNewsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{" +
                                 "\"title\":\"Titel\"," +
-                                "\"text\":\"Text\"}"))
+                                "\"text\":\"Text\"," +
+                                "\"showOnHomePage\":true}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Titel"));
+                .andExpect(jsonPath("$.title").value("Titel"))
+                .andExpect(jsonPath("$.showOnHomePage").value(true));
     }
 
     @Test
@@ -82,6 +85,19 @@ class AdminNewsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{" +
                                 "\"title\":\"\"," +
+                                "\"text\":\"Text\"," +
+                                "\"showOnHomePage\":true}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void createNews_missingShowOnHomePage_returnsBadRequest() throws Exception {
+        mockMvc.perform(post("/admin/news")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{" +
+                                "\"title\":\"Titel\"," +
                                 "\"text\":\"Text\"}"))
                 .andExpect(status().isBadRequest());
     }
@@ -89,7 +105,7 @@ class AdminNewsControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateNews_validRequest_returnsOk() throws Exception {
-        NewsDTO dto = new NewsDTO(1L, "Neuer Titel", "Neuer Text", Instant.parse("2026-06-05T10:15:30Z"));
+        NewsDTO dto = new NewsDTO(1L, "Neuer Titel", "Neuer Text", Instant.parse("2026-06-05T10:15:30Z"), false);
         when(newsService.updateNews(eq(1L), any())).thenReturn(dto);
 
         mockMvc.perform(put("/admin/news/1")
@@ -97,9 +113,11 @@ class AdminNewsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{" +
                                 "\"title\":\"Neuer Titel\"," +
-                                "\"text\":\"Neuer Text\"}"))
+                                "\"text\":\"Neuer Text\"," +
+                                "\"showOnHomePage\":false}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Neuer Titel"));
+                .andExpect(jsonPath("$.title").value("Neuer Titel"))
+                .andExpect(jsonPath("$.showOnHomePage").value(false));
     }
 
     @Test
@@ -127,7 +145,8 @@ class AdminNewsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{" +
                                 "\"title\":\"Titel\"," +
-                                "\"text\":\"Text\"}"))
+                                "\"text\":\"Text\"," +
+                                "\"showOnHomePage\":true}"))
                 .andExpect(status().isNotFound());
     }
 

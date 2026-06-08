@@ -3,7 +3,6 @@ export {};
 import type {QuizDTO, TeamDTO, UserDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 import {escapeHtml} from './html-utils';
-import {initAdminNewsActions} from './admin_news';
 import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
 import {readHttpErrorMessage} from './http-utils';
 import {apiFetch} from './admin-api';
@@ -60,6 +59,9 @@ window.addEventListener('load', () => {
         location.href = 'register_user.html';
     });
     document.getElementById('viewUsersBtn')?.addEventListener('click', viewUsers);
+    document.getElementById('manageNewsBtn')?.addEventListener('click', () => {
+        location.href = 'news.html';
+    });
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeModal);
 
     const modal = document.getElementById('dataModal');
@@ -88,8 +90,6 @@ window.addEventListener('load', () => {
     document.getElementById('viewLogsBtn')?.addEventListener('click', () => {
         location.href = 'logs.html';
     });
-
-    initAdminNewsActions();
 });
 }
 

@@ -43,7 +43,7 @@ public class BackupRestoreListenerTest {
             stmt.execute("CREATE TABLE IF NOT EXISTS result (id BIGINT PRIMARY KEY, quiz_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS result_answer (id BIGINT PRIMARY KEY, result_id BIGINT)");
             stmt.execute("CREATE TABLE IF NOT EXISTS quiz_document (id BIGINT PRIMARY KEY, quiz_id BIGINT NOT NULL, FOREIGN KEY (quiz_id) REFERENCES quiz(id))");
-            stmt.execute("CREATE TABLE IF NOT EXISTS news (news_id BIGINT PRIMARY KEY, title VARCHAR(200) NOT NULL, text VARCHAR(5000) NOT NULL, created_at TIMESTAMP NOT NULL)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS news (news_id BIGINT PRIMARY KEY, title VARCHAR(200) NOT NULL, text VARCHAR(5000) NOT NULL, show_on_home_page BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMP NOT NULL)");
             stmt.execute("CREATE TABLE IF NOT EXISTS app_usage_event (usage_event_id BIGINT PRIMARY KEY, event_type VARCHAR(64) NOT NULL, username VARCHAR(255) NOT NULL, occurred_at TIMESTAMP NOT NULL, entity_type VARCHAR(64), entity_id VARCHAR(128), metadata_json CLOB)");
         }
         Files.createDirectories(tempDir.resolve("uploads"));
@@ -323,7 +323,7 @@ public class BackupRestoreListenerTest {
     void applyRestore_restoresNewsAndUsageEventsFromBackup() throws Exception {
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
-            stmt.execute("INSERT INTO news VALUES (1, 'Original News', 'Original Text', TIMESTAMP '2026-06-01 10:00:00')");
+            stmt.execute("INSERT INTO news VALUES (1, 'Original News', 'Original Text', TRUE, TIMESTAMP '2026-06-01 10:00:00')");
             stmt.execute("INSERT INTO app_usage_event VALUES (1, 'AUTH_SUCCESS', 'alice', TIMESTAMP '2026-06-01 10:05:00', NULL, NULL, NULL)");
         }
 
@@ -338,7 +338,7 @@ public class BackupRestoreListenerTest {
              var stmt = conn.createStatement()) {
             stmt.execute("DELETE FROM news");
             stmt.execute("DELETE FROM app_usage_event");
-            stmt.execute("INSERT INTO news VALUES (2, 'Mutated News', 'Mutated Text', TIMESTAMP '2026-06-02 10:00:00')");
+            stmt.execute("INSERT INTO news VALUES (2, 'Mutated News', 'Mutated Text', FALSE, TIMESTAMP '2026-06-02 10:00:00')");
             stmt.execute("INSERT INTO app_usage_event VALUES (2, 'AUTH_SUCCESS', 'bob', TIMESTAMP '2026-06-02 10:05:00', NULL, NULL, NULL)");
         }
 

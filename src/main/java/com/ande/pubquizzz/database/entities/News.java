@@ -33,5 +33,8 @@ public class News {
     private String text;
 
     @Column(nullable = false)
+    private boolean showOnHomePage;
+
+    @Column(nullable = false)
     private Instant createdAt;
 }
