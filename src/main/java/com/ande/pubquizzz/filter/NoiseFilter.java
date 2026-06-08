@@ -30,7 +30,7 @@ public class NoiseFilter implements Filter {
         String lowerUri = httpRequest.getRequestURI().toLowerCase();
         if (SILENT_PAGES.contains(lowerUri)) {
             httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
-            log.debug("NoiseFilter: Ignoring request for '{}'", httpRequest.getRequestURI());
+            log.debug("Ignoring request for '{}'", httpRequest.getRequestURI());
             return;
         }
 
@@ -41,7 +41,7 @@ public class NoiseFilter implements Filter {
                 || lowerUri.contains("/manager/html")
                 || lowerUri.contains("/actuator/")) {
             httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND); // 404
-            log.debug("NoiseFilter: Blocking suspicious request for '{}'", httpRequest.getRequestURI());
+            log.debug("Blocking suspicious request for '{}'", httpRequest.getRequestURI());
             return;
         }
 
