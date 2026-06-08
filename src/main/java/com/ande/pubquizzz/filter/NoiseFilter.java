@@ -3,10 +3,12 @@ package com.ande.pubquizzz.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Set;
 
+@Slf4j
 public class NoiseFilter implements Filter {
 
     private static final Set<String> SILENT_PAGES = Set.of(
@@ -26,9 +28,9 @@ public class NoiseFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         String lowerUri = httpRequest.getRequestURI().toLowerCase();
-
         if (SILENT_PAGES.contains(lowerUri)) {
             httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
+            log.debug("NoiseFilter: Ignoring request for '{}'", httpRequest.getRequestURI());
             return;
         }
 
@@ -39,6 +41,7 @@ public class NoiseFilter implements Filter {
                 || lowerUri.contains("/manager/html")
                 || lowerUri.contains("/actuator/")) {
             httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND); // 404
+            log.debug("NoiseFilter: Blocking suspicious request for '{}'", httpRequest.getRequestURI());
             return;
         }
 
