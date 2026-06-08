@@ -1,9 +1,12 @@
 import {buildVersionBadgeMarkup} from './version-badge';
 import type {NewsDTO} from './types';
 import {renderNewsError, renderNewsSection} from './news';
+import {triggerRelogin} from './logout-action';
 
-function setAdminCardVisible(isVisible: boolean): void {
-    const adminCard = document.getElementById('adminCard') as HTMLAnchorElement | null;
+type ReloginTrigger = () => Promise<void>;
+
+function setAdminCardVisible(isVisible: boolean, doc: Document = document): void {
+    const adminCard = doc.getElementById('adminCard') as HTMLAnchorElement | null;
     if (!adminCard) {
         return;
     }
@@ -11,8 +14,8 @@ function setAdminCardVisible(isVisible: boolean): void {
     adminCard.style.display = isVisible ? 'block' : 'none';
 }
 
-function setVersionBadge(version: string): void {
-    const badge = document.getElementById('versionBadge');
+function setVersionBadge(version: string, doc: Document = document): void {
+    const badge = doc.getElementById('versionBadge');
     if (!badge) {
         return;
     }
@@ -20,12 +23,12 @@ function setVersionBadge(version: string): void {
     badge.innerHTML = buildVersionBadgeMarkup(version);
 }
 
-function getNewsContainer(): HTMLElement | null {
-    return document.getElementById('newsList');
+function getNewsContainer(doc: Document = document): HTMLElement | null {
+    return doc.getElementById('newsList');
 }
 
-async function loadNews(): Promise<void> {
-    const container = getNewsContainer();
+async function loadNews(doc: Document = document): Promise<void> {
+    const container = getNewsContainer(doc);
     if (!container) {
         return;
     }
@@ -42,20 +45,42 @@ async function loadNews(): Promise<void> {
     }
 }
 
-setAdminCardVisible(false);
+export function wireLogoutButton(
+    doc: Document = document,
+    reloginTrigger: ReloginTrigger = triggerRelogin
+): void {
+    const logoutButton = doc.getElementById('logoutBtn');
+    if (!logoutButton) {
+        return;
+    }
 
-fetch('/api/bootstrap')
-    .then(response => response.ok ? response.json() : null)
-    .then((bootstrap: { isAdmin: boolean; version: string } | null) => {
-        if (!bootstrap) {
-            return;
-        }
-        setAdminCardVisible(bootstrap.isAdmin);
-        setVersionBadge(bootstrap.version);
-    })
-    .catch(() => {
-        setAdminCardVisible(false);
-        // Keep badge empty if request fails
+    logoutButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+        await reloginTrigger();
     });
+}
 
-void loadNews();
+export function initIndex(doc: Document = document): void {
+    setAdminCardVisible(false, doc);
+    wireLogoutButton(doc);
+
+    fetch('/api/bootstrap')
+        .then(response => response.ok ? response.json() : null)
+        .then((bootstrap: { isAdmin: boolean; version: string } | null) => {
+            if (!bootstrap) {
+                return;
+            }
+            setAdminCardVisible(bootstrap.isAdmin, doc);
+            setVersionBadge(bootstrap.version, doc);
+        })
+        .catch(() => {
+            setAdminCardVisible(false, doc);
+            // Keep badge empty if request fails
+        });
+
+    void loadNews(doc);
+}
+
+if (typeof document !== 'undefined') {
+    initIndex(document);
+}

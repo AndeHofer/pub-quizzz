@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Duration;
 import java.util.Objects;
 
 @Slf4j
@@ -37,7 +36,7 @@ public class UserController {
         String version = buildProperties.getVersion();
         log.debug("bootstrap returnValue=isAdmin={}, version={}", admin, version);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(Duration.ofHours(1)).cachePrivate().mustRevalidate())
+                .cacheControl(CacheControl.noStore())
                 .body(new BootstrapResponse(admin, version));
     }
 }

@@ -76,6 +76,55 @@
 - Step 13 started: Homepage logout button rollout with shared relogin/logout action.
   - Plan: add visible logout button in `index.html`, wire in `index.ts`, extract shared logout action from `403.ts`, and
     cover with unit tests via TDD.
+- Step 13 RED: Added failing frontend tests first for shared logout action + homepage button wiring.
+  - Added `src/main/webapp/src/js/logout-action.test.ts` and initial homepage wiring test (
+    `src/main/webapp/src/js/index.test.ts`,
+    later replaced by `src/main/webapp/src/js/index-logout.test.ts` after adapting to non-DOM unit-test pattern).
+  - `npm --prefix src/main/webapp run test -- src/js/logout-action.test.ts src/js/index.test.ts` (FAIL expected: missing
+    `logout-action` module and missing DOM environment setup before implementation).
+- Step 13 GREEN: Implemented shared logout action and homepage wiring.
+  - Added `src/main/webapp/src/js/logout-action.ts` and migrated `src/main/webapp/src/js/403.ts` to reuse it.
+  - Added visible homepage logout button in `src/main/webapp/src/index.html` (German label: `Abmelden`).
+  - Updated `src/main/webapp/src/js/index.ts` to wire the new logout button via shared `triggerRelogin` logic.
+  - Added/adjusted frontend unit tests:
+    - `src/main/webapp/src/js/logout-action.test.ts`
+    - `src/main/webapp/src/js/index-logout.test.ts`
+    - `src/main/webapp/src/js/403.test.ts` (kept passing against re-exported shared action)
+  - Focused verification:
+    -
+    `npm --prefix src/main/webapp run test -- src/js/logout-action.test.ts src/js/index-logout.test.ts src/js/403.test.ts`
+    (PASS)
+- Step 13 done: Full verification passed for logout button rollout.
+  - `npm --prefix src/main/webapp run test` (PASS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+  - `npm --prefix src/main/webapp run build` (PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+- Step 14 started: Homepage logout button visual polish.
+  - Goal: keep logout button dark grey (not red) and improve end-of-page spacing/alignment consistency.
+- Step 14 done: Updated homepage logout button style and spacing.
+  - Changed logout button from red (`danger-btn`) to dark grey (`secondary-btn`) and wrapped it in end-aligned spacing
+    container.
+  - Updated `src/main/webapp/src/index.html` only; behavior unchanged.
+  - Verification:
+    - `npm --prefix src/main/webapp run test` (PASS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+    - `npm --prefix src/main/webapp run build` (PASS)
+- Step 15 started: Invalidate stale `/api/bootstrap` auth state via server-side cache policy.
+  - Goal: ensure admin visibility state is never reused from HTTP cache across login/logout transitions.
+  - Plan: add backend integration test first (RED), then set `/api/bootstrap` to `Cache-Control: no-store` (GREEN).
+- Step 15 RED: Added failing backend integration assertion for bootstrap cache policy.
+  - Updated `src/test/java/com/ande/pubquizzz/controller/UserControllerTest.java` to expect `Cache-Control: no-store`.
+  - `./mvnw.cmd -Dtest=UserControllerTest test` (FAIL expected: controller still returned `max-age=3600, must-revalidate,
+    private`).
+- Step 15 GREEN: Made bootstrap auth-state endpoint non-cacheable.
+  - Updated `src/main/java/com/ande/pubquizzz/controller/UserController.java` to return `Cache-Control: no-store` for
+    `/api/bootstrap`.
+  - `./mvnw.cmd -Dtest=UserControllerTest test` (PASS)
+- Step 15 done: Full verification passed after bootstrap cache invalidation.
+  - `npm --prefix src/main/webapp run test` (PASS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+  - `npm --prefix src/main/webapp run build` (PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
 
 ## Finished Phases
 

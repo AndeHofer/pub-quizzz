@@ -34,14 +34,14 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void getBootstrap_adminAuthenticated_returnsAdminAndVersionAndCacheHeader() throws Exception {
+    void getBootstrap_adminAuthenticated_returnsAdminAndVersionAndNoStoreCacheHeader() throws Exception {
         when(buildProperties.getVersion()).thenReturn("1.0.1-SNAPSHOT");
 
         mockMvc.perform(get("/api/bootstrap"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isAdmin").value(true))
                 .andExpect(jsonPath("$.version").value("1.0.1-SNAPSHOT"))
-                .andExpect(header().string("Cache-Control", "max-age=3600, must-revalidate, private"));
+                .andExpect(header().string("Cache-Control", "no-store"));
     }
 
     @Test
