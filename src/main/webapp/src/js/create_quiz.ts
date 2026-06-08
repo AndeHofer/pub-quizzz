@@ -2,9 +2,8 @@ export {};
 
 import { showMessage, goBack } from './utils';
 import type {QuizDTO, QuizDocumentDTO} from './types';
-import {withEnsuredCsrfHeaders} from './csrf';
 import {buildDocumentListMarkup} from './create_quiz_documents';
-import {handleAuthExpiredIfNeeded} from './auth-session';
+import {getApiFetch} from './admin-api-loader';
 
 const questionsContainer = document.getElementById('questionsContainer') as HTMLDivElement | null;
 
@@ -15,6 +14,10 @@ let editingQuizId: number | null = null;
 // Key format: "atstart_q{q}_h{h}" or "ashint_q{q}_h{h}"
 const existingImageUrls = new Map<string, string>();
 const existingAnswerImageUrls = new Map<number, string>();
+
+function isAuthExpiredRedirectError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT';
+}
 
 // ── Readiness helpers ────────────────────────────────────────────────────────
 
@@ -359,16 +362,13 @@ if (quizForm) {
         const url = editingQuizId ? `/admin/quiz/${editingQuizId}` : '/admin/create-quiz';
         const method = editingQuizId ? 'PUT' : 'POST';
 
-        fetch(url, {
+        const apiFetch = await getApiFetch();
+        apiFetch(url, {
             method: method,
-            headers: await withEnsuredCsrfHeaders(),
             body: formData
             // No Content-Type header — browser sets it with boundary automatically
         })
-            .then(async response => {
-                if (await handleAuthExpiredIfNeeded(response.clone())) {
-                    return;
-                }
+            .then(async (response: Response) => {
                 if (response.ok) {
                     if (editingQuizId) {
                         showMessage('✅ Quiz erfolgreich aktualisiert!', 'success');
@@ -395,12 +395,15 @@ if (quizForm) {
                             }, 3000);
                         });
                 } else {
-                    return response.text().then(text => {
+                    return response.text().then((text: string) => {
                         showMessage('❌ Fehler: ' + text, 'error');
                     });
                 }
             })
-            .catch(error => {
+            .catch((error: unknown) => {
+                if (isAuthExpiredRedirectError(error)) {
+                    return;
+                }
                 showMessage('❌ Netzwerkfehler: ' + error, 'error');
                 console.error('Error:', error);
             });
@@ -421,10 +424,8 @@ async function loadDocuments(): Promise<void> {
     const listEl = document.getElementById('documentList');
     if (!listEl) return;
     try {
-        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents`);
-        if (await handleAuthExpiredIfNeeded(resp.clone())) {
-            return;
-        }
+        const apiFetch = await getApiFetch();
+        const resp = await apiFetch(`/admin/quiz/${editingQuizId}/documents`);
         if (!resp.ok) {
             listEl.innerHTML = '<span style="color:red;">Fehler beim Laden der Dokumente.</span>';
             return;
@@ -442,6 +443,9 @@ async function loadDocuments(): Promise<void> {
             });
         });
     } catch (err) {
+        if (isAuthExpiredRedirectError(err)) {
+            return;
+        }
         if (listEl) listEl.innerHTML = '<span style="color:red;">Netzwerkfehler beim Laden.</span>';
         console.error('loadDocuments error:', err);
     }
@@ -466,14 +470,11 @@ async function uploadDocument(): Promise<void> {
         msgEl.style.display = 'block';
     }
     try {
-        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents`, {
+        const apiFetch = await getApiFetch();
+        const resp = await apiFetch(`/admin/quiz/${editingQuizId}/documents`, {
             method: 'POST',
-            headers: await withEnsuredCsrfHeaders(),
             body: formData
         });
-        if (await handleAuthExpiredIfNeeded(resp.clone())) {
-            return;
-        }
         if (resp.ok) {
             fileInput.value = '';
             if (msgEl) {
@@ -489,6 +490,9 @@ async function uploadDocument(): Promise<void> {
             }
         }
     } catch (err) {
+        if (isAuthExpiredRedirectError(err)) {
+            return;
+        }
         if (msgEl) {
             msgEl.textContent = 'Netzwerkfehler: ' + err;
             msgEl.style.display = 'block';
@@ -501,13 +505,10 @@ async function deleteDocument(docId: number): Promise<void> {
     if (!editingQuizId) return;
     if (!confirm('Dokument wirklich löschen?')) return;
     try {
-        const resp = await fetch(`/admin/quiz/${editingQuizId}/documents/${docId}`, {
-            method: 'DELETE',
-            headers: await withEnsuredCsrfHeaders()
+        const apiFetch = await getApiFetch();
+        const resp = await apiFetch(`/admin/quiz/${editingQuizId}/documents/${docId}`, {
+            method: 'DELETE'
         });
-        if (await handleAuthExpiredIfNeeded(resp.clone())) {
-            return;
-        }
         if (resp.ok) {
             await loadDocuments();
         } else {
@@ -515,6 +516,9 @@ async function deleteDocument(docId: number): Promise<void> {
             console.error('deleteDocument error:', text);
         }
     } catch (err) {
+        if (isAuthExpiredRedirectError(err)) {
+            return;
+        }
         console.error('deleteDocument network error:', err);
     }
 }

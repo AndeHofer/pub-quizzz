@@ -2,7 +2,7 @@ export {};
 
 import type {AdminMonthlyLoginStatDTO} from './types';
 import {goBack} from './utils';
-import {handleAuthExpiredIfNeeded} from './auth-session';
+import {getApiFetch} from './admin-api-loader';
 
 const doc = typeof document === 'undefined' ? null : document;
 const loadingEl = doc?.getElementById('loading') ?? null;
@@ -48,10 +48,8 @@ function setLoading(loading: boolean): void {
 }
 
 async function fetchLoginStats(): Promise<AdminMonthlyLoginStatDTO[]> {
-    const response = await fetch('/admin/login-stats/monthly');
-    if (await handleAuthExpiredIfNeeded(response.clone())) {
-        throw new Error('AUTH_EXPIRED_REDIRECT');
-    }
+    const apiFetch = await getApiFetch();
+    const response = await apiFetch('/admin/login-stats/monthly');
     if (!response.ok) {
         const text = await response.text().catch(() => '');
         throw new Error(text || `HTTP ${response.status}`);

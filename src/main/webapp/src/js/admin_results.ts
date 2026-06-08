@@ -4,8 +4,7 @@ import type {QuizDTO, ResultDTO} from './types';
 import {goBack, showMessage} from './utils';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
 import {escapeHtml} from './html-utils';
-import {withEnsuredCsrfHeaders} from './csrf';
-import {handleAuthExpiredIfNeeded} from './auth-session';
+import {getApiFetch} from './admin-api-loader';
 
 const quizFilterSelect = document.getElementById('resultFilterQuiz') as HTMLSelectElement | null;
 const teamFilterSelect = document.getElementById('resultFilterTeam') as HTMLSelectElement | null;
@@ -117,10 +116,8 @@ function setLoading(loading: boolean): void {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-    const response = await fetch(url);
-    if (await handleAuthExpiredIfNeeded(response.clone())) {
-        throw new Error('AUTH_EXPIRED_REDIRECT');
-    }
+    const apiFetch = await getApiFetch();
+    const response = await apiFetch(url);
     if (!response.ok) {
         const text = await response.text().catch(() => '');
         throw new Error(text || `HTTP ${response.status}`);
@@ -260,13 +257,10 @@ async function deleteResult(resultId: number, teamName: string): Promise<void> {
     if (!confirm(`Ergebnis für Team "${teamName}" wirklich löschen?`)) return;
 
     try {
-        const response = await fetch(`/admin/results/${resultId}`, {
-            method: 'DELETE',
-            headers: await withEnsuredCsrfHeaders()
+        const apiFetch = await getApiFetch();
+        const response = await apiFetch(`/admin/results/${resultId}`, {
+            method: 'DELETE'
         });
-        if (await handleAuthExpiredIfNeeded(response.clone())) {
-            return;
-        }
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }

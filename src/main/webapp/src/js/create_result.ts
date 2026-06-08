@@ -3,8 +3,7 @@ export {};
 import {goBack, showMessage} from './utils';
 import type {QuizDTO, ResultDTO, TeamDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
-import {withEnsuredCsrfHeaders} from './csrf';
-import {handleAuthExpiredIfNeeded} from './auth-session';
+import {getApiFetch} from './admin-api-loader';
 
 type PointsValue = 0 | 1 | 2 | 3 | 5;
 
@@ -20,6 +19,10 @@ const backToResultsBtn = document.getElementById('backToResultsBtn') as HTMLButt
 let allQuizzes: QuizDTO[] = [];
 let allTeams: TeamDTO[] = [];
 let editingResult: ResultDTO | null = null;
+
+function isAuthExpiredRedirectError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT';
+}
 
 function pointOptionsHtml(): string {
     return ALLOWED_POINTS.map(value => `<option value="${value}"${value === 0 ? ' selected' : ''}>${value}</option>`).join('');
@@ -74,10 +77,8 @@ function readResultsBackLinkFromQuery(): string | null {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-    const response = await fetch(url);
-    if (await handleAuthExpiredIfNeeded(response.clone())) {
-        throw new Error('AUTH_EXPIRED_REDIRECT');
-    }
+    const apiFetch = await getApiFetch();
+    const response = await apiFetch(url);
     if (!response.ok) {
         const text = await response.text().catch(() => '');
         throw new Error(text || `Fehler beim Laden (${response.status})`);
@@ -159,21 +160,18 @@ async function saveResult(event: Event): Promise<void> {
     resultSaveBtn.disabled = true;
 
     try {
+        const apiFetch = await getApiFetch();
         const currentEditingResult = editingResult;
         const isEditMode = currentEditingResult !== null;
         const url = isEditMode ? `/admin/results/${currentEditingResult.resultsId}` : '/admin/results';
         const method = isEditMode ? 'PUT' : 'POST';
         const body = isEditMode ? {answers} : {quizId, teamId, answers};
 
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
             method,
-            headers: await withEnsuredCsrfHeaders({'Content-Type': 'application/json'}),
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body)
         });
-
-        if (await handleAuthExpiredIfNeeded(response.clone())) {
-            return;
-        }
 
         if (response.ok) {
             if (!isEditMode) {
@@ -202,6 +200,9 @@ async function saveResult(event: Event): Promise<void> {
         }
         showMessage(errorMessage, 'error');
     } catch (error) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
         showMessage('Netzwerkfehler: ' + error, 'error');
     } finally {
         resultSaveBtn.disabled = false;

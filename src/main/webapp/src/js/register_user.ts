@@ -1,8 +1,7 @@
 export {};
 
 import { showMessage, goBack } from './utils';
-import {withEnsuredCsrfHeaders} from './csrf';
-import {handleAuthExpiredIfNeeded} from './auth-session';
+import {getApiFetch} from './admin-api-loader';
 
 window.addEventListener('load', () => {
     document.getElementById('registerUserBtn')?.addEventListener('click', registerUser);
@@ -26,17 +25,14 @@ async function registerUser() {
     };
 
     try {
-        const response = await fetch('/admin/register', {
+        const apiFetch = await getApiFetch();
+        const response = await apiFetch('/admin/register', {
             method: 'POST',
-            headers: await withEnsuredCsrfHeaders({
+            headers: {
                 'Content-Type': 'application/json',
-            }),
+            },
             body: JSON.stringify(userData)
         });
-
-        if (await handleAuthExpiredIfNeeded(response.clone())) {
-            return;
-        }
 
         if (response.ok) {
             showMessage('Benutzer erfolgreich registriert!', 'success');

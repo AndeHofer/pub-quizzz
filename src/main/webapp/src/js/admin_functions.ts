@@ -2,12 +2,11 @@ export {};
 
 import type {QuizDTO, TeamDTO, UserDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';
-import {withEnsuredCsrfHeaders} from './csrf';
 import {escapeHtml} from './html-utils';
 import {initAdminNewsActions} from './admin_news';
 import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
 import {readHttpErrorMessage} from './http-utils';
-import {handleAuthExpiredIfNeeded} from './auth-session';
+import {apiFetch} from './admin-api';
 
 export {renderTable, showError, trustedHtml};
 
@@ -16,29 +15,6 @@ function isAuthExpiredRedirectError(error: unknown): boolean {
 }
 
 const API_BASE = '/admin';
-
-// Helper for API fetch with basic network error handling
-async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
-    try {
-        const method = (options?.method ?? 'GET').toUpperCase();
-        const requiresCsrf = !['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method);
-        const requestOptions: RequestInit = options ?? {};
-        if (requiresCsrf) {
-            requestOptions.headers = await withEnsuredCsrfHeaders(options?.headers);
-        }
-        const response = await fetch(url, requestOptions);
-        if (await handleAuthExpiredIfNeeded(response.clone())) {
-            throw new Error('AUTH_EXPIRED_REDIRECT');
-        }
-        return response;
-    } catch (error) {
-        if (isAuthExpiredRedirectError(error)) {
-            throw error;
-        }
-        console.error('Netzwerkfehler:', error);
-        throw error;
-    }
-}
 
 function closeModal() {
     const modal = document.getElementById('dataModal') as HTMLElement | null;

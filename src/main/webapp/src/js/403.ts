@@ -1,32 +1,42 @@
-import {withEnsuredCsrfHeaders, withRefreshedCsrfHeaders} from './csrf';
+import {httpClient} from './http-client';
 
-type CsrfHeadersProvider = () => Promise<Record<string, string>>;
+type LogoutExecutor = () => Promise<{ ok: boolean; status: number }>;
+type CsrfRefreshExecutor = () => Promise<void>;
+type ReloginOptions = {
+    logoutExecutor?: LogoutExecutor;
+    redirect?: (url: string) => void;
+    refreshCsrfExecutor?: CsrfRefreshExecutor;
+};
 
-async function logoutOnce(fetchImpl: typeof fetch, headers: Record<string, string>): Promise<Response> {
-    return fetchImpl('/logout', {
-        method: 'POST',
-        headers,
-        credentials: 'same-origin'
-    });
+async function logoutOnce(): Promise<{ ok: boolean; status: number }> {
+    const response = await httpClient.post('/logout');
+    return {
+        ok: response.status >= 200 && response.status < 300,
+        status: response.status
+    };
+}
+
+async function refreshCsrfToken(): Promise<void> {
+    await httpClient.get('/api/bootstrap', {headers: {'Cache-Control': 'no-store'}});
 }
 
 export async function triggerRelogin(
-    fetchImpl: typeof fetch = fetch,
-    redirect: (url: string) => void = (url) => {
+    options: ReloginOptions = {}
+): Promise<void> {
+    const logoutExecutor = options.logoutExecutor ?? logoutOnce;
+    const redirect = options.redirect ?? ((url: string) => {
         if (typeof window !== 'undefined') {
             window.location.replace(url);
         }
-    },
-    csrfHeadersProvider: CsrfHeadersProvider = () => withEnsuredCsrfHeaders(),
-    refreshedCsrfHeadersProvider: CsrfHeadersProvider = () => withRefreshedCsrfHeaders()
-): Promise<void> {
+    });
+    const refreshCsrfExecutor = options.refreshCsrfExecutor ?? refreshCsrfToken;
+
     try {
-        const initialHeaders = await csrfHeadersProvider();
-        const initialResponse = await logoutOnce(fetchImpl, initialHeaders);
+        const initialResponse = await logoutExecutor();
 
         if (!initialResponse.ok && initialResponse.status === 403) {
-            const refreshedHeaders = await refreshedCsrfHeadersProvider();
-            await logoutOnce(fetchImpl, refreshedHeaders);
+            await refreshCsrfExecutor();
+            await logoutExecutor();
         }
     } catch {
         // Intentionally ignored: always continue to login.

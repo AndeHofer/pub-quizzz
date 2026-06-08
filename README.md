@@ -14,7 +14,8 @@ Lombok
 MapStruct  
 TypeScript  
 Tailwind CSS  
-Vite
+Vite  
+Axios
 
 ## How to run
 

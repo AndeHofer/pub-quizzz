@@ -13,57 +13,16 @@ import {
     promptForPayload,
     updateNews
 } from './admin_news';
+import {httpClient} from './http-client';
 
-type MockFetchResponse = {
-    ok: boolean;
-    status: number;
-    statusText: string;
-    text: () => Promise<string>;
-    clone: () => MockFetchResponse;
-};
-
-function createMockResponse(overrides: {
-    ok: boolean;
-    status: number;
-    statusText: string;
-    text: () => Promise<string>;
-}): MockFetchResponse {
+function mockAxiosResponse(overrides: { status: number; statusText?: string; data?: unknown }) {
     return {
-        ...overrides,
-        clone() {
-            return createMockResponse(overrides);
-        }
+        data: overrides.data ?? '',
+        status: overrides.status,
+        statusText: overrides.statusText ?? '',
+        headers: {},
+        config: {headers: {}}
     };
-}
-
-function mockFetchForMutationFailure(failingUrl: string, errorText: string): ReturnType<typeof vi.fn> {
-    return vi.fn(async (input: RequestInfo | URL) => {
-        const url = String(input);
-        if (url === '/api/bootstrap') {
-            return createMockResponse({
-                ok: true,
-                status: 200,
-                statusText: 'OK',
-                text: async () => ''
-            });
-        }
-
-        if (url === failingUrl) {
-            return createMockResponse({
-                ok: false,
-                status: 400,
-                statusText: 'Bad Request',
-                text: async () => errorText
-            });
-        }
-
-        return createMockResponse({
-            ok: true,
-            status: 200,
-            statusText: 'OK',
-            text: async () => ''
-        });
-    });
 }
 
 afterEach(() => {
@@ -150,22 +109,47 @@ describe('admin_news helpers', () => {
     });
 
     it('throws backend message when create fails', async () => {
-        const fetchMock = mockFetchForMutationFailure('/admin/news', 'Titel fehlt');
-        vi.stubGlobal('fetch', fetchMock);
+        vi.spyOn(httpClient, 'post').mockResolvedValue(mockAxiosResponse({
+            status: 400,
+            statusText: 'Bad Request',
+            data: 'Titel fehlt'
+        }));
 
         await expect(createNews({title: 'T', text: 'X'})).rejects.toThrow('Titel fehlt');
     });
 
+    it('does not bootstrap csrf endpoint when creating news', async () => {
+        const postSpy = vi.spyOn(httpClient, 'post').mockResolvedValue(mockAxiosResponse({
+            status: 201,
+            statusText: 'Created',
+            data: ''
+        }));
+        const fetchSpy = vi.spyOn(globalThis, 'fetch');
+
+        await createNews({title: 'Titel', text: 'Text'});
+
+        expect(postSpy).toHaveBeenCalledWith('/admin/news', {title: 'Titel', text: 'Text'}, {
+            headers: {'Content-Type': 'application/json'}
+        });
+        expect(fetchSpy).not.toHaveBeenCalledWith('/api/bootstrap', expect.anything());
+    });
+
     it('throws backend message when update fails', async () => {
-        const fetchMock = mockFetchForMutationFailure('/admin/news/4', 'Neuigkeit nicht gefunden');
-        vi.stubGlobal('fetch', fetchMock);
+        vi.spyOn(httpClient, 'put').mockResolvedValue(mockAxiosResponse({
+            status: 404,
+            statusText: 'Not Found',
+            data: 'Neuigkeit nicht gefunden'
+        }));
 
         await expect(updateNews(4, {title: 'Neu', text: 'Text'})).rejects.toThrow('Neuigkeit nicht gefunden');
     });
 
     it('throws backend message when delete fails', async () => {
-        const fetchMock = mockFetchForMutationFailure('/admin/news/9', 'Löschen fehlgeschlagen');
-        vi.stubGlobal('fetch', fetchMock);
+        vi.spyOn(httpClient, 'delete').mockResolvedValue(mockAxiosResponse({
+            status: 400,
+            statusText: 'Bad Request',
+            data: 'Löschen fehlgeschlagen'
+        }));
 
         await expect(deleteNews(9)).rejects.toThrow('Löschen fehlgeschlagen');
     });

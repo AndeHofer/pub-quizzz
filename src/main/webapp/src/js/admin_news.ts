@@ -1,9 +1,9 @@
 import type {NewsDTO} from './types';
-import {withEnsuredCsrfHeaders} from './csrf';
 import {escapeHtml} from './html-utils';
 import {renderTable, showError, showLoading, showModal, trustedHtml} from './admin_ui';
 import {readHttpErrorMessage} from './http-utils';
 import {handleAuthExpiredIfNeeded} from './auth-session';
+import {httpClient, readResponseText, toResponse} from './http-client';
 
 const API_BASE = '/admin/news';
 
@@ -95,52 +95,51 @@ export function buildAdminNewsTableMarkup(items: NewsDTO[]): string {
 }
 
 async function loadAllNews(): Promise<NewsDTO[]> {
-    const response = await fetch(API_BASE);
+    const axiosResponse = await httpClient.get<NewsDTO[]>(API_BASE);
+    const response = toResponse(axiosResponse);
     if (await handleAuthExpiredIfNeeded(response.clone())) {
         throw new Error('AUTH_EXPIRED_REDIRECT');
     }
     if (!response.ok) {
         throw new Error(await readHttpErrorMessage(response, 'Laden fehlgeschlagen'));
     }
-    return response.json() as Promise<NewsDTO[]>;
+    return axiosResponse.data;
 }
 
 export async function createNews(payload: { title: string; text: string }): Promise<void> {
-    const requestInit = buildNewsCreateRequestInit(payload);
-    requestInit.headers = await withEnsuredCsrfHeaders(requestInit.headers);
-    const response = await fetch(API_BASE, requestInit);
-    if (await handleAuthExpiredIfNeeded(response.clone())) {
+    const response = await httpClient.post(API_BASE, payload, {
+        headers: {'Content-Type': 'application/json'}
+    });
+    const authResponse = toResponse(response);
+    if (await handleAuthExpiredIfNeeded(authResponse.clone())) {
         throw new Error('AUTH_EXPIRED_REDIRECT');
     }
-    if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `HTTP ${response.status}`);
+    if (response.status < 200 || response.status >= 300) {
+        throw new Error(readResponseText(response.data) || `HTTP ${response.status}`);
     }
 }
 
 export async function updateNews(id: number, payload: { title: string; text: string }): Promise<void> {
-    const requestInit = buildNewsUpdateRequestInit(payload);
-    requestInit.headers = await withEnsuredCsrfHeaders(requestInit.headers);
-    const response = await fetch(buildNewsUrl(id), requestInit);
-    if (await handleAuthExpiredIfNeeded(response.clone())) {
+    const response = await httpClient.put(buildNewsUrl(id), payload, {
+        headers: {'Content-Type': 'application/json'}
+    });
+    const authResponse = toResponse(response);
+    if (await handleAuthExpiredIfNeeded(authResponse.clone())) {
         throw new Error('AUTH_EXPIRED_REDIRECT');
     }
-    if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `HTTP ${response.status}`);
+    if (response.status < 200 || response.status >= 300) {
+        throw new Error(readResponseText(response.data) || `HTTP ${response.status}`);
     }
 }
 
 export async function deleteNews(id: number): Promise<void> {
-    const requestInit = buildNewsDeleteRequestInit();
-    requestInit.headers = await withEnsuredCsrfHeaders(requestInit.headers);
-    const response = await fetch(buildNewsUrl(id), requestInit);
-    if (await handleAuthExpiredIfNeeded(response.clone())) {
+    const response = await httpClient.delete(buildNewsUrl(id));
+    const authResponse = toResponse(response);
+    if (await handleAuthExpiredIfNeeded(authResponse.clone())) {
         throw new Error('AUTH_EXPIRED_REDIRECT');
     }
-    if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `HTTP ${response.status}`);
+    if (response.status < 200 || response.status >= 300) {
+        throw new Error(readResponseText(response.data) || `HTTP ${response.status}`);
     }
 }
 
