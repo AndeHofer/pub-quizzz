@@ -1,8 +1,13 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {wireLogoutButton} from './index';
 
-const triggerReloginMock = vi.fn(async () => {
-});
+vi.mock('./logout-action', () => ({
+    triggerRelogin: vi.fn(async () => {
+    })
+}));
+
+import {triggerRelogin} from './logout-action';
+
+import {wireLogoutButton} from './index';
 
 describe('index logout button', () => {
     beforeEach(() => {
@@ -28,13 +33,13 @@ describe('index logout button', () => {
             getElementById
         } as unknown as Document;
 
-        wireLogoutButton(fakeDocument, triggerReloginMock);
+        wireLogoutButton(fakeDocument);
 
         const preventDefault = vi.fn();
         await listeners.click({preventDefault} as unknown as Event);
 
         expect(addEventListener).toHaveBeenCalledTimes(1);
-        expect(triggerReloginMock).toHaveBeenCalledTimes(1);
+        expect(triggerRelogin).toHaveBeenCalledTimes(1);
         expect(preventDefault).toHaveBeenCalledTimes(1);
     });
 
@@ -44,9 +49,9 @@ describe('index logout button', () => {
             getElementById
         } as unknown as Document;
 
-        wireLogoutButton(fakeDocument, triggerReloginMock);
+        wireLogoutButton(fakeDocument);
 
         expect(getElementById).toHaveBeenCalledWith('logoutBtn');
-        expect(triggerReloginMock).not.toHaveBeenCalled();
+        expect(triggerRelogin).not.toHaveBeenCalled();
     });
 });

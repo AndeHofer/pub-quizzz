@@ -1,5 +1,3 @@
-export {};
-
 import {goBack, showMessage} from './utils';
 import type {QuizDTO, ResultDTO, TeamDTO} from './types';
 import {quizDisplayTitle, sortQuizzesNewestFirst} from './quiz-utils';

@@ -16,7 +16,3 @@ function resolveApiFetch(loader: ApiFetchLoader): Promise<ApiFetchFunction> {
 export async function getApiFetch(): Promise<ApiFetchFunction> {
     return resolveApiFetch(() => import('./admin-api'));
 }
-
-export async function getApiFetchForTesting(loader: ApiFetchLoader): Promise<ApiFetchFunction> {
-    return resolveApiFetch(loader);
-}

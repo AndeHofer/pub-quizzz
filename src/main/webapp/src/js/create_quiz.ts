@@ -1,5 +1,3 @@
-export {};
-
 import { showMessage, goBack } from './utils';
 import type {QuizDTO, QuizDocumentDTO} from './types';
 import {buildDocumentListMarkup} from './create_quiz_documents';

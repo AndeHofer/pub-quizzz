@@ -4,8 +4,6 @@ export type AuthExpiredOptions = {
     redirectUrl?: string;
     delayMs?: number;
     message?: string;
-    redirect?: (url: string) => void;
-    scheduler?: (callback: () => void, delayMs: number) => void;
 };
 
 const DEFAULT_REDIRECT_URL = '/login';
@@ -34,16 +32,13 @@ export async function handleAuthExpiredIfNeeded(
     }
 
     showMessage(options.message ?? DEFAULT_MESSAGE, 'error');
-    const redirect = options.redirect ?? ((url: string) => {
+    const redirect = (url: string) => {
         if (typeof window !== 'undefined') {
             window.location.assign(url);
         }
-    });
-    const scheduler = options.scheduler ?? ((callback: () => void, delayMs: number) => {
-        setTimeout(callback, delayMs);
-    });
+    };
 
-    scheduler(
+    setTimeout(
         () => redirect(options.redirectUrl ?? DEFAULT_REDIRECT_URL),
         options.delayMs ?? DEFAULT_DELAY_MS
     );

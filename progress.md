@@ -118,6 +118,55 @@
   - `npm --prefix src/main/webapp run build` (PASS)
   - `./mvnw.cmd clean verify` (BUILD SUCCESS)
 
+### Phase 109A: Frontend Test-Seam Cleanup (Low Risk) ✅ COMPLETE
+
+- Step 1 done: Removed explicit test-only API from admin API loader.
+  - Target files:
+    - `src/main/webapp/src/js/admin-api-loader.ts`
+    - `src/main/webapp/src/js/admin-api-loader.test.ts`
+- Step 2 done: Removed logout trigger injection seam from index wiring while keeping behavior unchanged.
+  - Target files:
+    - `src/main/webapp/src/js/index.ts`
+    - `src/main/webapp/src/js/index-logout.test.ts`
+- Step 3 done: Run full verification commands:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
+### Phase 109B: Frontend Test-Seam Cleanup (Optional/Moderate) ✅ COMPLETE
+
+- Step 1 done: Removed redirect/scheduler injection seam from auth-expiry helper and adapted tests.
+  - Target files:
+    - `src/main/webapp/src/js/auth-session.ts`
+    - `src/main/webapp/src/js/auth-session.test.ts`
+- Step 2 done: Removed redundant leading `export {}` where safe.
+  - Candidate files:
+    - `src/main/webapp/src/js/admin_logs.ts`
+    - `src/main/webapp/src/js/admin_login_stats.ts`
+    - `src/main/webapp/src/js/create_quiz.ts`
+    - `src/main/webapp/src/js/create_result.ts`
+- Step 3 done: Run full verification commands:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
+### Phase 110: Remove Redundant relogin Query Flag ✅ COMPLETE
+
+- Step 1 done (TDD RED): Updated relogin/logout tests to expect redirect to `/login` (without query marker) and verified
+  failing state.
+  - Target file:
+    - `src/main/webapp/src/js/logout-action.test.ts`
+- Step 2 done (TDD GREEN): Updated runtime redirect target from `/login?relogin=1` to `/login`.
+  - Target file:
+    - `src/main/webapp/src/js/logout-action.ts`
+- Step 3 done: Run full verification commands:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
 ## Finished Phases
 
 ### Phase 104: Low-Risk Axios CSRF Migration ✅ COMPLETE

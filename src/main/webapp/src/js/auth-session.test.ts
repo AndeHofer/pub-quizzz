@@ -26,18 +26,38 @@ describe('auth-session', () => {
             text: async () => '{"error":"Nicht authentifiziert"}'
         } as Response;
 
-        const redirect = vi.fn();
-        const scheduler = vi.fn((callback: () => void) => callback());
-
-        const handled = await handleAuthExpiredIfNeeded(response, {
-            redirect,
-            scheduler,
-            redirectUrl: '/login'
+        const assignMock = vi.fn();
+        vi.useFakeTimers();
+        const originalWindow = globalThis.window;
+        const fakeWindow = {
+            location: {
+                assign: assignMock
+            }
+        } as unknown as Window & typeof globalThis;
+        Object.defineProperty(globalThis, 'window', {
+            configurable: true,
+            writable: true,
+            value: fakeWindow
         });
 
+        let handled = false;
+        try {
+            handled = await handleAuthExpiredIfNeeded(response, {
+                redirectUrl: '/login'
+            });
+            expect(assignMock).not.toHaveBeenCalled();
+            vi.runAllTimers();
+        } finally {
+            vi.useRealTimers();
+            Object.defineProperty(globalThis, 'window', {
+                configurable: true,
+                writable: true,
+                value: originalWindow
+            });
+        }
+
         expect(handled).toBe(true);
-        expect(scheduler).toHaveBeenCalledOnce();
-        expect(redirect).toHaveBeenCalledWith('/login');
+        expect(assignMock).toHaveBeenCalledWith('/login');
     });
 
     it('returns false when response is not auth-expired', async () => {
@@ -46,16 +66,31 @@ describe('auth-session', () => {
             text: async () => '{"error":"Bad Request"}'
         } as Response;
 
-        const redirect = vi.fn();
-        const scheduler = vi.fn();
-
-        const handled = await handleAuthExpiredIfNeeded(response, {
-            redirect,
-            scheduler
+        const assignMock = vi.fn();
+        const originalWindow = globalThis.window;
+        const fakeWindow = {
+            location: {
+                assign: assignMock
+            }
+        } as unknown as Window & typeof globalThis;
+        Object.defineProperty(globalThis, 'window', {
+            configurable: true,
+            writable: true,
+            value: fakeWindow
         });
 
+        let handled = false;
+        try {
+            handled = await handleAuthExpiredIfNeeded(response);
+        } finally {
+            Object.defineProperty(globalThis, 'window', {
+                configurable: true,
+                writable: true,
+                value: originalWindow
+            });
+        }
+
         expect(handled).toBe(false);
-        expect(redirect).not.toHaveBeenCalled();
-        expect(scheduler).not.toHaveBeenCalled();
+        expect(assignMock).not.toHaveBeenCalled();
     });
 });

@@ -1,5 +1,3 @@
-export {};
-
 import type {AdminMonthlyLoginStatDTO} from './types';
 import {goBack} from './utils';
 import {getApiFetch} from './admin-api-loader';

@@ -45,7 +45,7 @@ describe('logout action', () => {
 
         expect(postMock).toHaveBeenCalledTimes(1);
         expect(getMock).not.toHaveBeenCalled();
-        expect(replaceMock).toHaveBeenCalledWith('/login?relogin=1');
+        expect(replaceMock).toHaveBeenCalledWith('/login');
     });
 
     it('still redirects to /login when logout request fails', async () => {
@@ -78,7 +78,7 @@ describe('logout action', () => {
 
         expect(postMock).toHaveBeenCalledTimes(1);
         expect(getMock).not.toHaveBeenCalled();
-        expect(replaceMock).toHaveBeenCalledWith('/login?relogin=1');
+        expect(replaceMock).toHaveBeenCalledWith('/login');
     });
 
     it('retries logout after csrf refresh when first logout returns 403', async () => {
@@ -114,6 +114,6 @@ describe('logout action', () => {
 
         expect(postMock).toHaveBeenCalledTimes(2);
         expect(getMock).toHaveBeenCalledTimes(1);
-        expect(replaceMock).toHaveBeenCalledWith('/login?relogin=1');
+        expect(replaceMock).toHaveBeenCalledWith('/login');
     });
 });

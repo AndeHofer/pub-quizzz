@@ -3,8 +3,6 @@ import type {NewsDTO} from './types';
 import {renderNewsError, renderNewsSection} from './news';
 import {triggerRelogin} from './logout-action';
 
-type ReloginTrigger = () => Promise<void>;
-
 function setAdminCardVisible(isVisible: boolean, doc: Document = document): void {
     const adminCard = doc.getElementById('adminCard') as HTMLAnchorElement | null;
     if (!adminCard) {
@@ -45,10 +43,7 @@ async function loadNews(doc: Document = document): Promise<void> {
     }
 }
 
-export function wireLogoutButton(
-    doc: Document = document,
-    reloginTrigger: ReloginTrigger = triggerRelogin
-): void {
+export function wireLogoutButton(doc: Document = document): void {
     const logoutButton = doc.getElementById('logoutBtn');
     if (!logoutButton) {
         return;
@@ -56,7 +51,7 @@ export function wireLogoutButton(
 
     logoutButton.addEventListener('click', async (event) => {
         event.preventDefault();
-        await reloginTrigger();
+        await triggerRelogin();
     });
 }
 

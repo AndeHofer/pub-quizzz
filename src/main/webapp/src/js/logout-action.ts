@@ -24,7 +24,7 @@ export async function triggerRelogin(): Promise<void> {
         // Intentionally ignored: always continue to login.
     } finally {
         if (typeof window !== 'undefined') {
-            window.location.replace('/login?relogin=1');
+            window.location.replace('/login');
         }
     }
 }

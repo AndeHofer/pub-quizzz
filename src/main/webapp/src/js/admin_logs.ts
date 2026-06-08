@@ -1,5 +1,3 @@
-export {};
-
 import type {AdminLogEntryDTO, AdminLogResponseDTO} from './types';
 import {goBack, showMessage} from './utils';
 import {escapeHtml} from './html-utils';
