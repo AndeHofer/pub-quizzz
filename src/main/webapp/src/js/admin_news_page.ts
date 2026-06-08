@@ -18,12 +18,12 @@ export function buildNewsAuthoringHintMarkup(): string {
     return '<details class="mt-2 text-sm text-gray-600">' +
         '<summary class="cursor-pointer select-none">Kalender-Event-Hinweis</summary>' +
         '<div class="mt-2 space-y-2">' +
-        '<p>Im Neuigkeiten-Text koennen Sie klickbare Kalender-Termine setzen.</p>' +
+        '<p>Im Neuigkeiten-Text können klickbare Kalender-Termine gesetzt werden.</p>' +
         '<p><strong>Marker im sichtbaren Text:</strong> <code>[event-date:sept]2. September 2026[/event-date]</code></p>' +
         '<p><strong>Versteckte Event-Metadaten:</strong></p>' +
         '<pre class="whitespace-pre-wrap rounded bg-gray-100 p-2 text-xs"><code>&lt;!--event {&quot;events&quot;:{&quot;sept&quot;:{&quot;title&quot;:&quot;Pub Quiz September&quot;,&quot;start&quot;:&quot;2026-09-02T19:00&quot;,&quot;end&quot;:&quot;2026-09-02T22:00&quot;,&quot;location&quot;:&quot;Pub XY, Wien&quot;,&quot;text&quot;:&quot;Optionaler Kalendertext&quot;}}}--&gt;</code></pre>' +
         '<p>Pflichtfelder pro Event: <code>title</code>, <code>start</code>, <code>end</code>, <code>location</code>.</p>' +
-        '<p><code>text</code> ist optional und wird nur fuer den Kalendertext verwendet. Ohne <code>text</code> wird kein Kalendertext gesetzt.</p>' +
+        '<p><code>text</code> ist optional und wird nur für den Kalendertext verwendet. Ohne <code>text</code> wird kein Kalendertext gesetzt.</p>' +
         '</div>' +
         '</details>';
 }
@@ -102,7 +102,7 @@ async function saveNews(editingId: number | null, payload: NewsPayload): Promise
 async function removeNews(id: number): Promise<void> {
     const response = await apiFetch(`/admin/news/${id}`, {method: 'DELETE'});
     if (!response.ok) {
-        throw new Error(await readHttpErrorMessage(response, 'Loeschen fehlgeschlagen.'));
+        throw new Error(await readHttpErrorMessage(response, 'Löschen fehlgeschlagen.'));
     }
 }
 
@@ -211,7 +211,7 @@ function wireRowButtons(state: NewsPageState): void {
                 return;
             }
 
-            if (!confirm(`Neuigkeit ${id} wirklich loeschen?`)) {
+            if (!confirm(`Neuigkeit ${id} wirklich löschen?`)) {
                 return;
             }
 
@@ -221,7 +221,7 @@ function wireRowButtons(state: NewsPageState): void {
                 if (state.editingId === id) {
                     resetForm(state);
                 }
-                setMessage('Neuigkeit wurde geloescht.', 'success');
+                setMessage('Neuigkeit wurde gelöscht.', 'success');
             } catch (error) {
                 const text = error instanceof Error ? error.message : String(error);
                 setMessage(text, 'error');
