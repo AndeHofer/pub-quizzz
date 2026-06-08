@@ -42,7 +42,13 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(defaultCsrfTokenRequestHandler()))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/favicon.ico", "/robots.txt").permitAll()
+                        .requestMatchers(
+                                "/favicon.ico",
+                                "/robots.txt",
+                                "/.well-known/** ",
+                                "/apple-touch-icon-precomposed.png",
+                                "/apple-touch-icon.png"
+                        ).permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults())
