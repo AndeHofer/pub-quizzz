@@ -51,8 +51,7 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
                     forwardedProto,
                     forwardedHost,
                     authException.getClass().getSimpleName(),
-                    authException.getMessage(),
-                    authException);
+                    authException.getMessage());
             return;
         }
 
@@ -68,8 +67,7 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
                 forwardedProto,
                 forwardedHost,
                 authException.getClass().getSimpleName(),
-                authException.getMessage(),
-                authException);
+                authException.getMessage());
         try {
             loginRedirectEntryPoint.commence(request, response, authException);
         } catch (jakarta.servlet.ServletException ex) {

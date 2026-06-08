@@ -35,20 +35,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-
         http.csrf(csrf -> csrf
                         .ignoringRequestMatchers("/h2-console/**")
                         .csrfTokenRepository(csrfTokenRepository)
                         .csrfTokenRequestHandler(defaultCsrfTokenRequestHandler()))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/favicon.ico",
-                                "/robots.txt",
-                                "/.well-known/** ",
-                                "/apple-touch-icon-precomposed.png",
-                                "/apple-touch-icon.png"
-                        ).permitAll()
+                        .requestMatchers("/favicon.ico", "/robots.txt").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults())
