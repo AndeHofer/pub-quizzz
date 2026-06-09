@@ -1,7 +1,18 @@
 import {buildVersionBadgeMarkup} from './version-badge';
 import type {NewsDTO} from './types';
 import {renderNewsError, renderNewsSection} from './news';
-import {triggerRelogin} from './logout-action';
+
+function readCookieValue(doc: Document, name: string): string | null {
+    const cookies = (doc.cookie ?? '').split(';');
+    for (const rawCookie of cookies) {
+        const cookie = rawCookie.trim();
+        if (!cookie.startsWith(`${name}=`)) {
+            continue;
+        }
+        return decodeURIComponent(cookie.substring(name.length + 1));
+    }
+    return null;
+}
 
 function setAdminCardVisible(isVisible: boolean, doc: Document = document): void {
     const adminCard = doc.getElementById('adminCard') as HTMLAnchorElement | null;
@@ -44,15 +55,12 @@ async function loadNews(doc: Document = document): Promise<void> {
 }
 
 export function wireLogoutButton(doc: Document = document): void {
-    const logoutButton = doc.getElementById('logoutBtn');
-    if (!logoutButton) {
+    const csrfTokenInput = doc.getElementById('logoutCsrfToken') as HTMLInputElement | null;
+    if (!csrfTokenInput) {
         return;
     }
 
-    logoutButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-        await triggerRelogin();
-    });
+    csrfTokenInput.value = readCookieValue(doc, 'XSRF-TOKEN') ?? '';
 }
 
 export function initIndex(doc: Document = document): void {

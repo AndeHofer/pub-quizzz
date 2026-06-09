@@ -167,6 +167,64 @@
   - `npm --prefix src/main/webapp run build`
   - `./mvnw.cmd clean verify` (BUILD SUCCESS)
 
+### Phase 111: Spring-Only Logout Navigation ✅ COMPLETE
+
+- Step 1 done (TDD RED/GREEN): Added backend security tests for default Spring logout redirect and CSRF-required logout.
+  - Target file:
+    - `src/test/java/com/ande/pubquizzz/security/SecurityAccessTest.java`
+- Step 2 done (TDD GREEN): Kept default Spring logout target (`/login?logout`) and satisfied new backend tests without
+  custom logout success URL.
+- Step 3 done (TDD RED/GREEN): Replaced frontend JS-triggered logout with native Spring form POST logout and updated
+  frontend tests.
+  - Target files:
+    - `src/main/webapp/src/index.html`
+    - `src/main/webapp/src/js/index.ts`
+    - `src/main/webapp/src/js/index-logout.test.ts`
+    - `src/main/webapp/src/403.html`
+    - `src/main/webapp/src/js/403.test.ts`
+- Step 4 done: Removed obsolete logout action module/usages once no longer referenced.
+  - Candidate files:
+    - `src/main/webapp/src/js/logout-action.ts`
+    - `src/main/webapp/src/js/logout-action.test.ts`
+- Step 5 done: Run full verification commands:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
+### Phase 112: Remove Default Signed-Out Banner ✅ COMPLETE
+
+- Step 1 done (TDD RED/GREEN): Updated security integration expectation so logout success redirects to `/login` (without
+  `?logout`) and verified failing then passing state.
+  - Target file:
+    - `src/test/java/com/ande/pubquizzz/security/SecurityAccessTest.java`
+- Step 2 done (TDD GREEN): Configured explicit Spring logout success URL to `/login`.
+  - Target file:
+    - `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java`
+- Step 3 done: Run full verification commands:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
+### Phase 113: 403 Relogin Must Force Logout ✅ COMPLETE
+
+- Step 1 done (TDD RED/GREEN): Added failing tests proving 403 "Neu Anmelden" path should log out authenticated user
+  before showing login, then implemented until green.
+  - Target tests:
+    - `src/test/java/com/ande/pubquizzz/security/SecurityAccessTest.java`
+    - `src/main/webapp/src/js/403.test.ts`
+- Step 2 done (TDD GREEN): Replaced 403 relogin link with logout POST form and populated CSRF hidden field from cookie.
+  - Target files:
+    - `src/main/webapp/src/403.html`
+    - `src/main/webapp/src/js/403.ts`
+    - `src/main/webapp/src/js/403.test.ts`
+- Step 3 done: Run full verification commands:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
 ## Finished Phases
 
 ### Phase 104: Low-Risk Axios CSRF Migration ✅ COMPLETE

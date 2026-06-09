@@ -78,10 +78,13 @@
             </div>
         </a>
         <div class="pt-2 sm:pt-3 flex justify-end">
-            <button id="logoutBtn" type="button"
-                    class="secondary-btn w-full sm:w-auto px-4 py-2 rounded-lg text-sm sm:text-base my-0">
-                Abmelden
-            </button>
+            <form method="post" action="/logout" class="w-full sm:w-auto">
+                <input type="hidden" id="logoutCsrfToken" name="_csrf" value="">
+                <button id="logoutBtn" type="submit"
+                        class="secondary-btn w-full sm:w-auto px-4 py-2 rounded-lg text-sm sm:text-base my-0">
+                    Abmelden
+                </button>
+            </form>
         </div>
     </div>
 </div>

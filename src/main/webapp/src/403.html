@@ -22,7 +22,10 @@
 
         <div class="button-group">
             <a href="/" class="admin-btn text-center">Zur Startseite</a>
-            <a href="/login" id="reloginBtn" class="admin-btn secondary-btn text-center">Neu Anmelden</a>
+            <form id="reloginForm" method="post" action="/logout" class="w-full sm:w-auto">
+                <input type="hidden" id="reloginCsrfToken" name="_csrf" value="">
+                <button type="submit" class="admin-btn secondary-btn text-center w-full">Neu Anmelden</button>
+            </form>
         </div>
     </section>
 </div>

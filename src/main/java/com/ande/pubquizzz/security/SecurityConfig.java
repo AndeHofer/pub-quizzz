@@ -45,6 +45,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults())
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login")
+                        .permitAll())
                 .exceptionHandling(exceptions -> exceptions
                         .defaultAuthenticationEntryPointFor(new LoggingAuthenticationEntryPoint(), apiRequestMatcher())
                         .accessDeniedHandler(new LoggingAccessDeniedHandler()))

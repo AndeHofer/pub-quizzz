@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.containsString;
 
 /**
  * Verifies tightened security policy for unauthenticated access:
@@ -116,6 +117,17 @@ class SecurityAccessTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
+    void forbiddenPage_containsReloginLogoutForm() throws Exception {
+        mockMvc.perform(get("/403.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"reloginForm\"")))
+                .andExpect(content().string(containsString("method=\"post\"")))
+                .andExpect(content().string(containsString("action=\"/logout\"")))
+                .andExpect(content().string(containsString("id=\"reloginCsrfToken\"")));
+    }
+
+    @Test
     @WithMockUser
     void loginPage_authenticated_redirectsToIndex() throws Exception {
         mockMvc.perform(get("/login"))
@@ -139,6 +151,21 @@ class SecurityAccessTest {
                         .param("password", "admin123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @WithMockUser
+    void logoutPost_withCsrf_redirectsToLogin() throws Exception {
+        mockMvc.perform(post("/logout").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @WithMockUser
+    void logoutPost_withoutCsrf_isForbidden() throws Exception {
+        mockMvc.perform(post("/logout"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
