@@ -89,8 +89,8 @@ class AdminLogServiceTest {
         );
 
         assertEquals(2, response.getReturnedCount());
-        assertEquals("2026-05-27T10:30:00", response.getEntries().get(0).getTimestamp());
-        assertEquals("2026-05-27T10:00:00", response.getEntries().get(1).getTimestamp());
+        assertEquals("2026-05-27 10:30:00", response.getEntries().get(0).getTimestamp());
+        assertEquals("2026-05-27 10:00:00", response.getEntries().get(1).getTimestamp());
     }
 
     @Test

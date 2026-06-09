@@ -17,13 +17,13 @@
         </triggeringPolicy>
 
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %X{user}%class{0}.%method:%line - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss,Europe/Vienna} %-5level %X{user}%class{0}.%method:%line - %msg%n</pattern>
         </encoder>
     </appender>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %X{user}%class{0}.%method:%line - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss,Europe/Vienna} %-5level %X{user}%class{0}.%method:%line - %msg%n</pattern>
         </encoder>
     </appender>
 

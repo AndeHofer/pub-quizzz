@@ -31,7 +31,6 @@ public class AdminLogService {
                     + "(?<source>.*?)\\s-\\s(?<message>.*)$"
     );
     private static final DateTimeFormatter LOG_TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final DateTimeFormatter RESPONSE_TIMESTAMP_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     private final Path logFilePath;
 
@@ -70,7 +69,7 @@ public class AdminLogService {
             }
 
             entries.add(new AdminLogEntryDTO(
-                    parsed.timestamp() == null ? null : parsed.timestamp().format(RESPONSE_TIMESTAMP_FORMAT),
+                    parsed.timestamp() == null ? null : parsed.timestamp().format(LOG_TIMESTAMP_FORMAT),
                     parsed.level(),
                     parsed.source(),
                     parsed.message(),
