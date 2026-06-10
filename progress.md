@@ -2,6 +2,33 @@
 
 ## Open Tasks
 
+### Phase 115: Security Package Javadocs ✅ COMPLETE
+
+- Step 1 done: Enumerated all classes under `src/main/java/com/ande/pubquizzz/security` and reviewed class-level Javadoc
+  coverage:
+    - `LoggingAuthenticationEntryPoint` (already documented in Phase 114),
+    - `LoggingAccessDeniedHandler` (needed class-level Javadoc),
+    - `SecurityConfig` (needed class-level Javadoc),
+    - `CustomUserDetailsService` (needed class-level Javadoc).
+- Step 2 done: Added/refined class-level Javadocs to explain purpose and runtime usage for:
+    - `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java`
+    - `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java`
+    - `src/main/java/com/ande/pubquizzz/security/CustomUserDetailsService.java`
+    - plus internal class docs in `SecurityConfig` for nested security filters.
+- Step 3 done: Verified annotation/Javadoc ordering and removed unnecessary inline implementation comments in
+  `CustomUserDetailsService` to keep code clean.
+
+### Phase 114: Javadoc for LoggingAuthenticationEntryPoint ✅ COMPLETE
+
+- Step 1 done: Inspected `LoggingAuthenticationEntryPoint` and drafted class-level Javadoc scope (purpose +
+  mode-specific behavior).
+- Step 2 done: Added Javadoc to explain usage in Spring Security flow:
+    - invoked as `AuthenticationEntryPoint` for unauthenticated protected requests,
+    - API-style requests return `401` + JSON,
+    - browser-style requests delegate redirect to `/login`.
+- Step 3 done: Verified Javadoc formatting and link targets (`AuthenticationEntryPoint`,
+  `LoginUrlAuthenticationEntryPoint`).
+
 ### Phase 105: News Section Rebuild (In Progress)
 
 - Step 1 done: Finalized design decisions with user.

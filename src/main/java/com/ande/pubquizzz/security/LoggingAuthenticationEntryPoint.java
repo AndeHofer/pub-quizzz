@@ -11,6 +11,24 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 
 import java.io.IOException;
 
+/**
+ * Authentication entry point that logs all unauthorized access attempts with request context and then starts the
+ * appropriate unauthenticated response flow.
+ *
+ * <p>Usage in security flow:
+ *
+ * <ul>
+ *   <li>Configured in Spring Security as the {@link AuthenticationEntryPoint} for protected endpoints.
+ *   <li>Called by Spring Security when a request is unauthenticated and authentication is required.
+ *   <li>For API-style requests (for example {@code /api/**}, JSON {@code Accept}, or AJAX), returns HTTP 401 with a
+ *       JSON body.
+ *   <li>For browser-style requests, delegates to {@link LoginUrlAuthenticationEntryPoint} and redirects to
+ *       {@code /login}.
+ * </ul>
+ *
+ * <p>In both modes, the class writes structured warning logs with method, path, user, session, client/proxy headers,
+ * and exception details to support security monitoring and incident analysis.
+ */
 @Slf4j
 public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -39,7 +57,7 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
             response.setContentType(JSON_CONTENT_TYPE);
             response.getWriter().write(UNAUTHENTICATED_ERROR_BODY);
 
-            log.warn("401 Unauthorized - mode=json, method={}, path={}, user={}, sessionId={}, sessionValid={}, remoteAddr={}, userAgent={}, forwardedFor={}, forwardedProto={}, forwardedHost={}, exceptionType={}, message={}",
+            log.warn("401 Unauthorized - mode=json, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nexceptionType={}\nmessage={}",
                     request.getMethod(),
                     request.getRequestURI(),
                     username,
@@ -55,7 +73,7 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
             return;
         }
 
-        log.warn("401 Unauthorized - mode=redirect, method={}, path={}, user={}, sessionId={}, sessionValid={}, remoteAddr={}, userAgent={}, forwardedFor={}, forwardedProto={}, forwardedHost={}, target=/login, exceptionType={}, message={}",
+        log.warn("401 Unauthorized - mode=redirect, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\ntarget=/login\nexceptionType={}\nmessage={}",
                 request.getMethod(),
                 request.getRequestURI(),
                 username,

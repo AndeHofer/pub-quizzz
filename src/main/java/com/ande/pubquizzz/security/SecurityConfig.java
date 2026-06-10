@@ -28,6 +28,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Central Spring Security configuration for the application.
+ *
+ * <p>Usage in runtime:
+ *
+ * <ul>
+ *   <li>Loaded as a Spring {@code @Configuration} class during application startup.</li>
+ *   <li>Publishes the main {@link SecurityFilterChain} bean that defines authentication, authorization, CSRF,
+ *       exception handling, and custom filter behavior.
+ *   <li>Registers {@link PasswordEncoder} bean ({@link BCryptPasswordEncoder}) for password hashing/verification.
+ *   <li>Enables method-level authorization checks via {@code @EnableMethodSecurity}.</li>
+ * </ul>
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -85,6 +98,10 @@ public class SecurityConfig {
         };
     }
 
+    /**
+     * Internal filter that materializes the CSRF token attribute so {@link CookieCsrfTokenRepository} can write the
+     * client-readable `XSRF-TOKEN` cookie.
+     */
     private static final class CsrfCookieFilter extends OncePerRequestFilter {
         @Override
         protected void doFilterInternal(HttpServletRequest request,
@@ -98,6 +115,9 @@ public class SecurityConfig {
         }
     }
 
+    /**
+     * Internal filter that applies no-store cache headers to `/login` responses.
+     */
     private static final class LoginNoStoreFilter extends OncePerRequestFilter {
         @Override
         protected void doFilterInternal(HttpServletRequest request,
@@ -114,6 +134,9 @@ public class SecurityConfig {
         }
     }
 
+    /**
+     * Internal filter that redirects authenticated users from `GET /login` to `/`.
+     */
     private static final class AuthenticatedLoginRedirectFilter extends OncePerRequestFilter {
         @Override
         protected void doFilterInternal(HttpServletRequest request,

@@ -44,7 +44,6 @@ public class NoiseFilter implements Filter {
             log.info("Blocking suspicious request for '{}'", httpRequest.getRequestURI());
             return;
         }
-
         chain.doFilter(request, response);
     }
 }

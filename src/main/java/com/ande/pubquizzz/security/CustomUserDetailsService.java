@@ -9,6 +9,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * {@link UserDetailsService} implementation that loads application users from {@link UserRepository} for Spring
+ * Security authentication.
+ *
+ * <p>Usage in security flow:
+ *
+ * <ul>
+ *   <li>Detected as a Spring {@code @Service} and injected into the authentication infrastructure.</li>
+ *   <li>Invoked during form-login authentication to resolve a username to {@link UserDetails}.</li>
+ *   <li>Maps persisted {@link AppUser} data to Spring Security's {@link User} (username, hashed password, role).</li>
+ * </ul>
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -20,15 +32,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
-        // Look for the user in the database
         AppUser appUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Convert our User entity into a Spring Security UserDetails object
         return User
                 .withUsername(appUser.getUsername())
-                .password(appUser.getPassword()) // This is the hashed password from DB
-                .roles(appUser.getRole().name()) // Use the actual role from the database
+                .password(appUser.getPassword())
+                .roles(appUser.getRole().name())
                 .build();
     }
 }

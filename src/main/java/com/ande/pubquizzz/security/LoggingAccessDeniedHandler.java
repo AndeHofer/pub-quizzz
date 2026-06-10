@@ -15,6 +15,23 @@ import org.springframework.web.util.WebUtils;
 import java.io.IOException;
 import java.security.Principal;
 
+/**
+ * Access-denied handler that logs rich request/security context for authorization failures and then returns the
+ * appropriate 403 response behavior.
+ *
+ * <p>Usage in security flow:
+ *
+ * <ul>
+ *   <li>Configured in Spring Security via exception handling as the active {@link AccessDeniedHandler}.
+ *   <li>Called when an authenticated request is not authorized for the requested resource, or when CSRF validation
+ *       fails.
+ *   <li>For invalid CSRF on {@code POST /login}, redirects to {@code /login} to recover cleanly.
+ *   <li>For other denied requests, returns HTTP 403 and forwards GET/HEAD to {@code /403.html}.</li>
+ * </ul>
+ *
+ * <p>The log entry includes principal/authentication data, session metadata, client/proxy headers, and masked CSRF
+ * token previews for diagnostics and incident correlation.
+ */
 @Slf4j
 public class LoggingAccessDeniedHandler implements AccessDeniedHandler {
 
@@ -37,7 +54,7 @@ public class LoggingAccessDeniedHandler implements AccessDeniedHandler {
         String forwardedHost = safeLogValue(request.getHeader("X-Forwarded-Host"));
 
         log.warn(
-                "403 Forbidden - method={}, path={}, user={}, sessionId={}, sessionValid={}, remoteAddr={}, userAgent={}, forwardedFor={}, forwardedProto={}, forwardedHost={}, csrfHeaderPresent={}, csrfCookiePresent={}, csrfHeaderPreview={}, csrfCookiePreview={}, exceptionType={}, message={}",
+                "403 Forbidden - method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\ncsrfHeaderPresent={}\ncsrfCookiePresent={}\ncsrfHeaderPreview={}\ncsrfCookiePreview={}\nexceptionType={}\nmessage={}",
                 request.getMethod(),
                 request.getRequestURI(),
                 username,
