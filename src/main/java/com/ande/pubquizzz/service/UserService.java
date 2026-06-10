@@ -27,7 +27,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserDTO> getAllUsers() {
-        log.info("Fetching all users");
+        log.debug("Fetching all users");
         return userRepository.findAll().stream()
                 .map(userMapper::toDTO)
                 .toList();

@@ -2,6 +2,41 @@
 
 ## Open Tasks
 
+### Phase 117: Shared Safe Query Logging for Security Handlers ✅ COMPLETE
+
+- Step 1 done (TDD RED): Added failing tests in
+  `src/test/java/com/ande/pubquizzz/security/LoggingAuthenticationEntryPointTest.java` to require:
+  - sanitized full query-string logging (`\r`, `\n`, `\t`, `\uXXXX`),
+  - query string length logging,
+  - truncation marker for oversized query strings.
+- Step 2 done (TDD GREEN): Implemented shared helper and removed duplication:
+  - added `src/main/java/com/ande/pubquizzz/security/SecurityLogHelper.java`,
+  - refactored `LoggingAuthenticationEntryPoint` to log `queryString` + `queryStringLength` using helper,
+  - refactored `LoggingAccessDeniedHandler` to use the same helper for session/header/query sanitization.
+- Step 3 done: Verification passed:
+  - `./mvnw.cmd "-Dtest=LoggingAuthenticationEntryPointTest,LoggingAccessDeniedHandlerTest" test` (PASS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+  - `npm --prefix src/main/webapp run build` (PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
+### Phase 116: Safe Full Query String Logging in 403 Handler ✅ COMPLETE
+
+- Step 1 done (TDD RED): Added failing tests in
+  `src/test/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandlerTest.java` for:
+  - full query string logging with CR/LF/tab/control-char escaping,
+  - logged original query length,
+  - truncation marker for oversized query strings.
+- Step 2 done (TDD GREEN): Implemented sanitized full query-string logging in
+  `src/main/java/com/ande/pubquizzz/security/LoggingAccessDeniedHandler.java`:
+  - added `queryString` + `queryStringLength` log fields,
+  - added control-character escaping (`\r`, `\n`, `\t`, `\uXXXX`),
+  - added bounded output with truncation suffix (`...[truncated]`) at max 4096 chars.
+- Step 3 done: Verification passed:
+  - `./mvnw.cmd -Dtest=LoggingAccessDeniedHandlerTest test` (PASS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+  - `npm --prefix src/main/webapp run build` (PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
 ### Phase 115: Security Package Javadocs ✅ COMPLETE
 
 - Step 1 done: Enumerated all classes under `src/main/java/com/ande/pubquizzz/security` and reviewed class-level Javadoc

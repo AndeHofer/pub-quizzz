@@ -2,7 +2,6 @@ package com.ande.pubquizzz.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,13 +42,16 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
                          org.springframework.security.core.AuthenticationException authException) throws IOException {
         boolean apiStyleRequest = isApiStyleRequest(request);
         String username = resolveUsername();
-        String sessionId = resolveSessionId(request);
-        String sessionValid = resolveSessionValid(request);
-        String remoteAddr = safeLogValue(request.getRemoteAddr());
-        String userAgent = safeLogValue(request.getHeader("User-Agent"));
-        String forwardedFor = safeLogValue(request.getHeader("X-Forwarded-For"));
-        String forwardedProto = safeLogValue(request.getHeader("X-Forwarded-Proto"));
-        String forwardedHost = safeLogValue(request.getHeader("X-Forwarded-Host"));
+        String sessionId = SecurityLogHelper.resolveSessionId(request);
+        String sessionValid = SecurityLogHelper.resolveSessionValid(request);
+        String remoteAddr = SecurityLogHelper.safeLogValue(request.getRemoteAddr());
+        String userAgent = SecurityLogHelper.safeLogValue(request.getHeader("User-Agent"));
+        String forwardedFor = SecurityLogHelper.safeLogValue(request.getHeader("X-Forwarded-For"));
+        String forwardedProto = SecurityLogHelper.safeLogValue(request.getHeader("X-Forwarded-Proto"));
+        String forwardedHost = SecurityLogHelper.safeLogValue(request.getHeader("X-Forwarded-Host"));
+        String rawQueryString = request.getQueryString();
+        String queryString = SecurityLogHelper.sanitizeQueryStringForLog(rawQueryString);
+        int queryStringLength = SecurityLogHelper.queryStringLength(rawQueryString);
 
         if (apiStyleRequest) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -57,7 +59,7 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
             response.setContentType(JSON_CONTENT_TYPE);
             response.getWriter().write(UNAUTHENTICATED_ERROR_BODY);
 
-            log.warn("401 Unauthorized - mode=json, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nexceptionType={}\nmessage={}",
+            log.warn("401 Unauthorized - mode=json, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nqueryString={}\nqueryStringLength={}\nexceptionType={}\nmessage={}",
                     request.getMethod(),
                     request.getRequestURI(),
                     username,
@@ -68,12 +70,14 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
                     forwardedFor,
                     forwardedProto,
                     forwardedHost,
+                    queryString,
+                    queryStringLength,
                     authException.getClass().getSimpleName(),
                     authException.getMessage());
             return;
         }
 
-        log.warn("401 Unauthorized - mode=redirect, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\ntarget=/login\nexceptionType={}\nmessage={}",
+        log.warn("401 Unauthorized - mode=redirect, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nqueryString={}\nqueryStringLength={}\ntarget=/login\nexceptionType={}\nmessage={}",
                 request.getMethod(),
                 request.getRequestURI(),
                 username,
@@ -84,6 +88,8 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
                 forwardedFor,
                 forwardedProto,
                 forwardedHost,
+                queryString,
+                queryStringLength,
                 authException.getClass().getSimpleName(),
                 authException.getMessage());
         try {
@@ -116,25 +122,4 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
         return "anonymous";
     }
 
-    private String resolveSessionId(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            return safeLogValue(session.getId());
-        }
-        return safeLogValue(request.getRequestedSessionId());
-    }
-
-    private String resolveSessionValid(HttpServletRequest request) {
-        if (request.getRequestedSessionId() == null || request.getRequestedSessionId().isBlank()) {
-            return "-";
-        }
-        return String.valueOf(request.isRequestedSessionIdValid());
-    }
-
-    private String safeLogValue(String value) {
-        if (value == null || value.isBlank()) {
-            return "-";
-        }
-        return value;
-    }
 }

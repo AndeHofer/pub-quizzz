@@ -49,7 +49,7 @@ public class NewsService {
         news.setText(request.getText().trim());
         news.setShowOnHomePage(request.getShowOnHomePage());
         news.setCreatedAt(Instant.now());
-
+        log.info("Creating news: {}", news);
         return toDto(newsRepository.save(news));
     }
 
@@ -60,6 +60,7 @@ public class NewsService {
         news.setTitle(request.getTitle().trim());
         news.setText(request.getText().trim());
         news.setShowOnHomePage(request.getShowOnHomePage());
+        log.info("Updating news: {}", news);
         return toDto(newsRepository.save(news));
     }
 
@@ -67,6 +68,7 @@ public class NewsService {
     public void deleteNews(Long id) {
         News news = newsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Neuigkeit nicht gefunden: " + id));
+        log.info("Deleting news: {}", news);
         newsRepository.delete(news);
     }
 

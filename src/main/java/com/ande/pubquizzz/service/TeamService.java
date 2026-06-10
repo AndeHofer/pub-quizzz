@@ -26,7 +26,7 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public List<TeamDTO> getAllTeams() {
-        log.info("Fetching all teams");
+        log.debug("Fetching all teams");
         return teamRepository.findAll().stream()
                 .map(teamMapper::toDTO)
                 .toList();
@@ -34,7 +34,7 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public Optional<TeamDTO> getTeamById(Long id) {
-        log.info("Fetching team with ID: {}", id);
+        log.debug("Fetching team with ID: {}", id);
         return teamRepository.findById(id).map(teamMapper::toDTO);
     }
 

@@ -32,6 +32,7 @@ class LoggingAuthenticationEntryPointTest {
     void commence_jsonAccept_returnsJson401() throws Exception {
         LoggingAuthenticationEntryPoint entryPoint = new LoggingAuthenticationEntryPoint();
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/quizzes");
+        request.setQueryString("q=abc\r\nheader:bad\tvalue\u0001");
         request.addHeader("Accept", "application/json");
         request.setRemoteAddr("10.10.10.10");
         request.addHeader("User-Agent", "JUnit-Agent");
@@ -63,6 +64,8 @@ class LoggingAuthenticationEntryPointTest {
         assertTrue(message.contains("forwardedFor=203.0.113.10"));
         assertTrue(message.contains("forwardedProto=https"));
         assertTrue(message.contains("forwardedHost=quiz.example.com"));
+        assertTrue(message.contains("queryString=q=abc\\r\\nheader:bad\\tvalue\\u0001"));
+        assertTrue(message.contains("queryStringLength=24"));
     }
 
     @Test
@@ -109,5 +112,27 @@ class LoggingAuthenticationEntryPointTest {
         assertTrue(message.contains("forwardedFor=198.51.100.23"));
         assertTrue(message.contains("forwardedProto=https"));
         assertTrue(message.contains("forwardedHost=pubquizzz.example.com"));
+    }
+
+    @Test
+    void commence_truncatesVeryLongQueryStringInLogs() throws Exception {
+        LoggingAuthenticationEntryPoint entryPoint = new LoggingAuthenticationEntryPoint();
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/quizzes");
+        request.setQueryString("a".repeat(5000));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        appender.start();
+        logger.addAppender(appender);
+
+        entryPoint.commence(request, response, new InsufficientAuthenticationException("Auth required"));
+
+        assertEquals(401, response.getStatus());
+        assertFalse(appender.list.isEmpty());
+
+        ILoggingEvent event = appender.list.get(0);
+        String message = event.getFormattedMessage();
+        assertNotNull(message);
+        assertTrue(message.contains("queryStringLength=5000"));
+        assertTrue(message.contains("...[truncated]"));
     }
 }

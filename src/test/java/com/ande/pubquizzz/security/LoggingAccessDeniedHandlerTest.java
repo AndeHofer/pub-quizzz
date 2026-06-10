@@ -122,4 +122,45 @@ class LoggingAccessDeniedHandlerTest {
         assertEquals(null, response.getForwardedUrl());
         assertEquals("Forbidden", response.getErrorMessage());
     }
+
+    @Test
+    void handle_logsSanitizedFullQueryString() throws Exception {
+        LoggingAccessDeniedHandler handler = new LoggingAccessDeniedHandler();
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/results");
+        request.setQueryString("q=abc\r\nheader:bad\tvalue\u0001");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        appender.start();
+        logger.addAppender(appender);
+
+        handler.handle(request, response, new AccessDeniedException("Forbidden"));
+
+        assertFalse(appender.list.isEmpty());
+        ILoggingEvent event = appender.list.get(0);
+        String message = event.getFormattedMessage();
+        assertNotNull(message);
+        assertTrue(message.contains("queryString=q=abc\\r\\nheader:bad\\tvalue\\u0001"));
+        assertTrue(message.contains("queryStringLength=24"));
+    }
+
+    @Test
+    void handle_truncatesVeryLongQueryStringInLogs() throws Exception {
+        LoggingAccessDeniedHandler handler = new LoggingAccessDeniedHandler();
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/results");
+        String longQuery = "a".repeat(5000);
+        request.setQueryString(longQuery);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        appender.start();
+        logger.addAppender(appender);
+
+        handler.handle(request, response, new AccessDeniedException("Forbidden"));
+
+        assertFalse(appender.list.isEmpty());
+        ILoggingEvent event = appender.list.get(0);
+        String message = event.getFormattedMessage();
+        assertNotNull(message);
+        assertTrue(message.contains("queryStringLength=5000"));
+        assertTrue(message.contains("...[truncated]"));
+    }
 }
