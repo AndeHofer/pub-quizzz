@@ -6,6 +6,7 @@ import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.PointsLeaderboardEntry;
 import com.ande.pubquizzz.dto.AverageLeaderboardEntry;
 import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
+import com.ande.pubquizzz.dto.TopResultLeaderboardEntry;
 import com.ande.pubquizzz.mapper.ResultMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -182,5 +184,54 @@ class ResultServiceLeaderboardTest {
         assertThat(byTeam.get("Gamma Team").getGoldCount()).isEqualTo(1);
         assertThat(byTeam.get("Gamma Team").getSilverCount()).isEqualTo(0);
         assertThat(byTeam.get("Gamma Team").getBronzeCount()).isEqualTo(1);
+    }
+
+    @Test
+    void getTopResultsLeaderboard_returnsTopTenWithPointsOnlyGlobalRanksAndQuizRanksUsingTieBreaker() {
+        when(resultRepository.findTopResultsScoreBreakdownRaw()).thenReturn(List.of(
+                new Object[]{206L, LocalDate.of(2026, 1, 1), 10L, "Kappa Team", 43L, 2L, 0L},
+                new Object[]{205L, LocalDate.of(2026, 1, 15), 11L, "Lambda Team", 44L, 2L, 0L},
+                new Object[]{204L, LocalDate.of(2026, 2, 1), 8L, "Theta Team", 45L, 1L, 2L},
+                new Object[]{203L, LocalDate.of(2026, 2, 15), 7L, "Eta Team", 46L, 2L, 1L},
+                new Object[]{202L, LocalDate.of(2026, 3, 1), 5L, "Epsilon Team", 47L, 1L, 1L},
+                new Object[]{201L, LocalDate.of(2026, 4, 1), 4L, "Delta Team", 48L, 3L, 0L},
+                new Object[]{200L, LocalDate.of(2026, 5, 1), 2L, "Beta Team", 50L, 2L, 2L},
+                new Object[]{201L, LocalDate.of(2026, 4, 1), 3L, "Gamma Team", 48L, 3L, 0L},
+                new Object[]{200L, LocalDate.of(2026, 5, 1), 1L, "Alpha Team", 50L, 3L, 1L},
+                new Object[]{204L, LocalDate.of(2026, 2, 1), 9L, "Iota Team", 45L, 1L, 1L},
+                new Object[]{207L, LocalDate.of(2025, 12, 1), 12L, "Mu Team", 39L, 0L, 0L}
+        ));
+
+        List<TopResultLeaderboardEntry> result = resultService.getTopResultsLeaderboard();
+
+        assertThat(result).hasSize(10);
+        assertThat(result).extracting(TopResultLeaderboardEntry::getTeamName)
+                .containsExactly(
+                        "Alpha Team",
+                        "Beta Team",
+                        "Delta Team",
+                        "Gamma Team",
+                        "Epsilon Team",
+                        "Eta Team",
+                        "Iota Team",
+                        "Theta Team",
+                        "Lambda Team",
+                        "Kappa Team"
+                );
+
+        assertThat(result).extracting(TopResultLeaderboardEntry::getRank)
+                .containsExactly(1, 1, 3, 3, 5, 6, 7, 7, 9, 10);
+
+        Map<String, TopResultLeaderboardEntry> byTeam = result.stream()
+                .collect(java.util.stream.Collectors.toMap(TopResultLeaderboardEntry::getTeamName, e -> e));
+
+        assertThat(byTeam.get("Alpha Team").getQuizRank()).isEqualTo(1);
+        assertThat(byTeam.get("Beta Team").getQuizRank()).isEqualTo(2);
+        assertThat(byTeam.get("Delta Team").getQuizRank()).isEqualTo(1);
+        assertThat(byTeam.get("Gamma Team").getQuizRank()).isEqualTo(1);
+
+        assertThat(byTeam.get("Alpha Team").getQuizId()).isEqualTo(200L);
+        assertThat(byTeam.get("Alpha Team").getQuizDate()).isEqualTo("2026-05-01");
+        assertThat(byTeam.get("Alpha Team").getQuizTitle()).isEqualTo("2026 Mai");
     }
 }

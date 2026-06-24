@@ -2,6 +2,67 @@
 
 ## Open Tasks
 
+### Phase 127: Top-10 Einzelergebnisse Rangliste (In Progress)
+
+- Step 6 in progress: UI-Feinschliff nach Nutzerfeedback.
+  - Anforderung: Datum in neuer Top-Results-Rangliste entfernen, da im Quiztitel redundant.
+  - Nächster Schritt: RED-Test + minimale Frontend-Anpassung.
+
+- Step 1 in progress: Planung und Scope bestätigt.
+  - Endpoint/Page-Naming fixiert: `/api/leaderboard/top-results`, `top-results-leaderboard.html`.
+  - Globales Ranking: nur `totalPoints` (gleiche Punkte = gleicher Rang).
+  - `quizRank` bleibt olympisch mit Tiebreaker (`total`, `5er`, `3er`) gemäß bestehender Logik.
+- Step 2 done (TDD RED): Failing Tests für neue Top-Results-Rangliste hinzugefügt in:
+  - `src/test/java/com/ande/pubquizzz/service/ResultServiceLeaderboardTest.java`
+  - `src/test/java/com/ande/pubquizzz/controller/UserLeaderboardControllerTest.java`
+  - abgedeckt: cap=10, gleiche Punkte = gleicher globaler Rang, mehrfaches Quiz erlaubt, `quizRank`-Berechnung,
+    Endpoint `/api/leaderboard/top-results`.
+- Step 3 done (TDD GREEN): Backend für Top-Results implementiert:
+  - DTO: `src/main/java/com/ande/pubquizzz/dto/TopResultLeaderboardEntry.java`
+  - Repository-Query: `src/main/java/com/ande/pubquizzz/database/repositories/ResultRepository.java`
+    (`findTopResultsScoreBreakdownRaw` mit Shape `[quizId, quizDate, teamId, teamName, total, fives, threes]`)
+  - Service-Logik + Cache: `src/main/java/com/ande/pubquizzz/service/ResultService.java`
+    (`getTopResultsLeaderboard`, globales Ranking nur nach Punkten, `quizRank` mit bestehender olympischer
+    Tiebreak-Logik)
+  - Controller-Endpoint: `src/main/java/com/ande/pubquizzz/controller/UserLeaderboardController.java`
+    (`GET /api/leaderboard/top-results`)
+  - Cache-Namen erweitert: `src/main/java/com/ande/pubquizzz/config/CacheConfig.java`
+  - Cache-Annotation-Test erweitert: `src/test/java/com/ande/pubquizzz/service/CacheAnnotationsTest.java`
+- Step 4 done: Frontend für neue Rangliste ergänzt:
+  - Typ: `src/main/webapp/src/js/types.ts` (`TopResultLeaderboardEntry`)
+  - Seite: `src/main/webapp/src/top-results-leaderboard.html`
+  - Script: `src/main/webapp/src/js/top-results-leaderboard.ts`
+  - Navigation aktualisiert in:
+    - `src/main/webapp/src/index.html`
+    - `src/main/webapp/src/points-leaderboard.html`
+    - `src/main/webapp/src/medal-leaderboard.html`
+    - `src/main/webapp/src/average-leaderboard.html`
+    - `src/main/webapp/src/js/team.ts` (Backlink `source=top-results`)
+  - Vite-Entry ergänzt: `src/main/webapp/vite.config.ts`
+- Step 5 done: Verifikation erfolgreich:
+  - `./mvnw.cmd "-Dtest=ResultServiceLeaderboardTest,UserLeaderboardControllerTest,CacheAnnotationsTest" test` (PASS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+- Step 6 done (TDD RED/GREEN): Datum aus Top-Results-UI entfernt.
+  - RED: neuer Frontend-Test `src/main/webapp/src/js/top-results-leaderboard.test.ts` prüft, dass `quizDate` nicht
+    gerendert wird.
+  - GREEN: `src/main/webapp/src/js/top-results-leaderboard.ts` angepasst (nur Quiztitel-Link, kein Datums-Subtext);
+    Row-Markup in `buildTopResultsRowMarkup(...)` extrahiert.
+  - Verifikation:
+    - `npm --prefix src/main/webapp run test -- src/js/top-results-leaderboard.test.ts` (PASS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+- Step 7 in progress: Follow-up zur Typbereinigung.
+  - Anforderung: `quizDate` aus Frontend-Typ der Top-Results entfernen (nicht mehr benötigt im UI).
+  - Nächster Schritt: RED über Test-Anpassung, dann Type-Cleanup.
+- Step 7 done (TDD RED/GREEN): Frontend-Typ bereinigt (`quizDate` entfernt).
+  - RED: `src/main/webapp/src/js/top-results-leaderboard.test.ts` Testdaten ohne `quizDate` gesetzt;
+    `npm --prefix src/main/webapp run type-check` schlug erwartungsgemäß fehl (fehlendes Pflichtfeld).
+  - GREEN: `quizDate` aus `TopResultLeaderboardEntry` entfernt in `src/main/webapp/src/js/types.ts`.
+  - Verifikation:
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+
 ### Phase 126: Fix Team Results Score-Row Index Crash ✅ COMPLETE
 
 - Step 1 done (TDD RED): Added failing regression test in

@@ -102,6 +102,16 @@ export interface AverageLeaderboardEntry {
     quizCount: number;
 }
 
+export interface TopResultLeaderboardEntry {
+    rank: number;
+    teamId: number;
+    teamName: string;
+    quizId: number;
+    quizTitle: string;
+    totalPoints: number;
+    quizRank: number;
+}
+
 export interface TeamResultEntry {
     quizRank: number;
     participantCount: number;

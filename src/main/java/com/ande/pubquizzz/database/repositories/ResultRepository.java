@@ -80,4 +80,18 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
                 GROUP BY r.quiz.quizId, r.resultsId, r.team.teamsId, r.team.teamName
             """)
     List<Object[]> findScoresByQuizIds(@Param("quizIds") List<Long> quizIds);
+
+    @Query("""
+                SELECT r.quiz.quizId,
+                       r.quiz.pubDate,
+                       r.team.teamsId,
+                       r.team.teamName,
+                       COALESCE(SUM(a.points), 0),
+                       SUM(CASE WHEN a.points = 5 THEN 1 ELSE 0 END),
+                       SUM(CASE WHEN a.points = 3 THEN 1 ELSE 0 END)
+                FROM Result r
+                JOIN r.answers a
+                GROUP BY r.quiz.quizId, r.quiz.pubDate, r.resultsId, r.team.teamsId, r.team.teamName
+            """)
+    List<Object[]> findTopResultsScoreBreakdownRaw();
 }

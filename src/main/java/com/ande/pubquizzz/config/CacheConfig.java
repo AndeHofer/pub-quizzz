@@ -22,6 +22,7 @@ public class CacheConfig {
     public static final String POINTS_LEADERBOARD = "leaderboard.points";
     public static final String AVERAGE_LEADERBOARD = "leaderboard.average";
     public static final String MEDAL_LEADERBOARD = "leaderboard.medal";
+    public static final String TOP_RESULTS_LEADERBOARD = "leaderboard.topResults";
     public static final String RESULTS_FOR_TEAM = "results.byTeam";
     public static final String NEWS_LATEST = "news.latest";
     public static final String NEWS_ADMIN_ALL = "news.adminAll";
@@ -47,6 +48,7 @@ public class CacheConfig {
                 POINTS_LEADERBOARD,
                 AVERAGE_LEADERBOARD,
                 MEDAL_LEADERBOARD,
+                TOP_RESULTS_LEADERBOARD,
                 RESULTS_FOR_TEAM,
                 NEWS_LATEST,
                 NEWS_ADMIN_ALL

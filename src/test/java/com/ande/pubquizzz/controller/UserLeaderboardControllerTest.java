@@ -3,6 +3,7 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.PointsLeaderboardEntry;
 import com.ande.pubquizzz.dto.AverageLeaderboardEntry;
 import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
+import com.ande.pubquizzz.dto.TopResultLeaderboardEntry;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
 import com.ande.pubquizzz.service.ResultService;
@@ -115,5 +116,38 @@ class UserLeaderboardControllerTest {
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].averagePoints").value(42.5))
                 .andExpect(jsonPath("$[0].quizCount").value(4));
+    }
+
+    @Test
+    @WithMockUser
+    void getTopResultsLeaderboard_authenticated_returnsLeaderboard() throws Exception {
+        TopResultLeaderboardEntry entry = new TopResultLeaderboardEntry();
+        entry.setRank(1);
+        entry.setTeamId(1L);
+        entry.setTeamName("Alpha Team");
+        entry.setQuizId(7L);
+        entry.setQuizTitle("2026 Mai");
+        entry.setQuizDate("2026-05-01");
+        entry.setTotalPoints(50);
+        entry.setQuizRank(2);
+
+        when(resultService.getTopResultsLeaderboard()).thenReturn(List.of(entry));
+
+        mockMvc.perform(get("/api/leaderboard/top-results"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].rank").value(1))
+                .andExpect(jsonPath("$[0].teamId").value(1))
+                .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
+                .andExpect(jsonPath("$[0].quizId").value(7))
+                .andExpect(jsonPath("$[0].quizTitle").value("2026 Mai"))
+                .andExpect(jsonPath("$[0].quizDate").value("2026-05-01"))
+                .andExpect(jsonPath("$[0].totalPoints").value(50))
+                .andExpect(jsonPath("$[0].quizRank").value(2));
+    }
+
+    @Test
+    void getTopResultsLeaderboard_unauthenticated_returnsJson401() throws Exception {
+        mockMvc.perform(get("/api/leaderboard/top-results"))
+                .andExpect(status().isUnauthorized());
     }
 }

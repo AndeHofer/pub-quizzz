@@ -78,6 +78,9 @@ async function loadTeamResults(): Promise<void> {
         } else if (source === 'average') {
             backLinkEl.href = './average-leaderboard.html';
             backLinkEl.textContent = '← Durchschnittsrangliste';
+        } else if (source === 'top-results') {
+            backLinkEl.href = './top-results-leaderboard.html';
+            backLinkEl.textContent = '← Top 10 Ergebnisse';
         } else {
             backLinkEl.href = './points-leaderboard.html';
             backLinkEl.textContent = '← Punkterangliste';

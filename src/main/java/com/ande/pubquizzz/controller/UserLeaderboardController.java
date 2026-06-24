@@ -3,6 +3,7 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.PointsLeaderboardEntry;
 import com.ande.pubquizzz.dto.AverageLeaderboardEntry;
 import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
+import com.ande.pubquizzz.dto.TopResultLeaderboardEntry;
 import com.ande.pubquizzz.service.ResultService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,5 +37,11 @@ public class UserLeaderboardController {
     public List<AverageLeaderboardEntry> getAverageLeaderboard() {
         log.debug("GET /api/leaderboard/average");
         return resultService.getAverageLeaderboard();
+    }
+
+    @GetMapping("/leaderboard/top-results")
+    public List<TopResultLeaderboardEntry> getTopResultsLeaderboard() {
+        log.debug("GET /api/leaderboard/top-results");
+        return resultService.getTopResultsLeaderboard();
     }
 }

@@ -17,6 +17,7 @@ import com.ande.pubquizzz.dto.QuizResultsResponse;
 import com.ande.pubquizzz.dto.QuizSummaryDTO;
 import com.ande.pubquizzz.dto.ResultDTO;
 import com.ande.pubquizzz.dto.TeamResultEntry;
+import com.ande.pubquizzz.dto.TopResultLeaderboardEntry;
 import com.ande.pubquizzz.dto.UpdateResultRequest;
 import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.exception.ResourceNotFoundException;
@@ -28,6 +29,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +46,7 @@ import static com.ande.pubquizzz.config.CacheConfig.QUIZ_SUMMARIES;
 import static com.ande.pubquizzz.config.CacheConfig.RESULTS_FOR_QUIZ;
 import static com.ande.pubquizzz.config.CacheConfig.RESULTS_FOR_TEAM;
 import static com.ande.pubquizzz.config.CacheConfig.RESULTS_LIST;
+import static com.ande.pubquizzz.config.CacheConfig.TOP_RESULTS_LEADERBOARD;
 
 @Slf4j
 @Service
@@ -319,6 +322,73 @@ public class ResultService {
         return leaderboard;
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(TOP_RESULTS_LEADERBOARD)
+    public List<TopResultLeaderboardEntry> getTopResultsLeaderboard() {
+        log.debug("Fetching top results leaderboard");
+        List<Object[]> rows = new ArrayList<>(resultRepository.findTopResultsScoreBreakdownRaw());
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, List<Object[]>> rowsByQuizId = rows.stream()
+                .collect(Collectors.groupingBy(row -> ((Number) row[0]).longValue()));
+
+        Map<Long, Map<Long, Integer>> quizRanksByQuizAndTeam = new HashMap<>();
+        for (Map.Entry<Long, List<Object[]>> entry : rowsByQuizId.entrySet()) {
+            List<Object[]> quizRows = new ArrayList<>(entry.getValue());
+            quizRows.sort(ResultService::compareTopResultRowsByQuizTieBreakDesc);
+
+            Map<Long, Integer> rankByTeamId = new HashMap<>();
+            int quizRank = 1;
+            for (int i = 0; i < quizRows.size(); i++) {
+                if (i > 0 && !hasSameTopResultQuizScore(quizRows.get(i - 1), quizRows.get(i))) {
+                    quizRank = i + 1;
+                }
+                Long teamId = ((Number) quizRows.get(i)[2]).longValue();
+                rankByTeamId.putIfAbsent(teamId, quizRank);
+            }
+            quizRanksByQuizAndTeam.put(entry.getKey(), rankByTeamId);
+        }
+
+        rows.sort(ResultService::compareTopResultRowsForGlobalList);
+
+        List<Object[]> topRows = rows.stream().limit(10).toList();
+
+        List<TopResultLeaderboardEntry> leaderboard = new ArrayList<>();
+        int rank = 1;
+        Integer previousTotalPoints = null;
+        for (int i = 0; i < topRows.size(); i++) {
+            Object[] row = topRows.get(i);
+            int totalPoints = ((Number) row[4]).intValue();
+            if (i == 0) {
+                previousTotalPoints = totalPoints;
+            } else if (previousTotalPoints != null && totalPoints != previousTotalPoints) {
+                rank = i + 1;
+                previousTotalPoints = totalPoints;
+            }
+
+            Long quizId = ((Number) row[0]).longValue();
+            Long teamId = ((Number) row[2]).longValue();
+            LocalDate quizDate = (LocalDate) row[1];
+
+            TopResultLeaderboardEntry dto = new TopResultLeaderboardEntry();
+            dto.setRank(rank);
+            dto.setTeamId(teamId);
+            dto.setTeamName((String) row[3]);
+            dto.setQuizId(quizId);
+            dto.setQuizDate(quizDate.toString());
+            dto.setQuizTitle(deriveQuizTitle(quizDate));
+            dto.setTotalPoints(totalPoints);
+            dto.setQuizRank(quizRanksByQuizAndTeam
+                    .getOrDefault(quizId, Map.of())
+                    .getOrDefault(teamId, 1));
+            leaderboard.add(dto);
+        }
+
+        return leaderboard;
+    }
+
     @Transactional
     @InvalidateAllAppCaches
     public ResultDTO createResult(CreateResultRequest req) {
@@ -582,6 +652,48 @@ public class ResultService {
                 scoreValue(right, 4),
                 scoreValue(right, 5)
         );
+    }
+
+    private static int compareTopResultRowsByQuizTieBreakDesc(Object[] left, Object[] right) {
+        return compareScoresDesc(
+                scoreValue(left, 4),
+                scoreValue(left, 5),
+                scoreValue(left, 6),
+                scoreValue(right, 4),
+                scoreValue(right, 5),
+                scoreValue(right, 6)
+        );
+    }
+
+    private static boolean hasSameTopResultQuizScore(Object[] left, Object[] right) {
+        return scoreValue(left, 4) == scoreValue(right, 4)
+                && scoreValue(left, 5) == scoreValue(right, 5)
+                && scoreValue(left, 6) == scoreValue(right, 6);
+    }
+
+    private static int compareTopResultRowsForGlobalList(Object[] left, Object[] right) {
+        int pointsCmp = Long.compare(scoreValue(right, 4), scoreValue(left, 4));
+        if (pointsCmp != 0) {
+            return pointsCmp;
+        }
+
+        LocalDate leftDate = (LocalDate) left[1];
+        LocalDate rightDate = (LocalDate) right[1];
+        int dateCmp = rightDate.compareTo(leftDate);
+        if (dateCmp != 0) {
+            return dateCmp;
+        }
+
+        String leftTeamName = (String) left[3];
+        String rightTeamName = (String) right[3];
+        int teamNameCmp = leftTeamName.compareTo(rightTeamName);
+        if (teamNameCmp != 0) {
+            return teamNameCmp;
+        }
+
+        long leftTeamId = scoreValue(left, 2);
+        long rightTeamId = scoreValue(right, 2);
+        return Long.compare(leftTeamId, rightTeamId);
     }
 
     private static class MedalAccumulator {
