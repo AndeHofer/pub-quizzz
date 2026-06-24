@@ -57,9 +57,9 @@ class ResultServiceLeaderboardTest {
     }
 
     private static Stream<List<Object[]>> pointsLeaderboardInputVariants() {
-        Object[] alpha = {"Alpha Team", 150L, 3L};
-        Object[] gamma = {"Gamma Team", 150L, 2L};
-        Object[] beta = {"Beta Team", 90L, 2L};
+        Object[] alpha = {1L, "Alpha Team", 150L, 3L};
+        Object[] gamma = {3L, "Gamma Team", 150L, 2L};
+        Object[] beta = {2L, "Beta Team", 90L, 2L};
         return Stream.of(
                 List.of(beta, alpha, gamma),
                 List.of(alpha, gamma, beta)
@@ -77,9 +77,9 @@ class ResultServiceLeaderboardTest {
 
     @Test
     void getAverageLeaderboard_returnsEntriesRankedByAverage() {
-        Object[] row1 = {"Beta Team", 100L, 2L};
-        Object[] row2 = {"Alpha Team", 120L, 3L};
-        Object[] row3 = {"Gamma Team", 50L, 1L};
+        Object[] row1 = {2L, "Beta Team", 100L, 2L};
+        Object[] row2 = {1L, "Alpha Team", 120L, 3L};
+        Object[] row3 = {3L, "Gamma Team", 50L, 1L};
         when(resultRepository.findLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
 
         List<AverageLeaderboardEntry> result = resultService.getAverageLeaderboard();
@@ -104,12 +104,12 @@ class ResultServiceLeaderboardTest {
     @Test
     void getMedalLeaderboard_appliesCompetitionRankingAndMedalCounts() {
         when(resultRepository.findPerQuizTeamScoreBreakdownRaw()).thenReturn(List.of(
-                new Object[]{1L, "Alpha Team", 40L, 3L, 1L},
-                new Object[]{1L, "Beta Team", 40L, 2L, 2L},
-                new Object[]{1L, "Gamma Team", 30L, 1L, 3L},
-                new Object[]{2L, "Gamma Team", 50L, 4L, 1L},
-                new Object[]{2L, "Alpha Team", 45L, 4L, 0L},
-                new Object[]{2L, "Beta Team", 44L, 4L, 0L}
+                new Object[]{1L, 1L, "Alpha Team", 40L, 3L, 1L},
+                new Object[]{1L, 2L, "Beta Team", 40L, 2L, 2L},
+                new Object[]{1L, 3L, "Gamma Team", 30L, 1L, 3L},
+                new Object[]{2L, 3L, "Gamma Team", 50L, 4L, 1L},
+                new Object[]{2L, 1L, "Alpha Team", 45L, 4L, 0L},
+                new Object[]{2L, 2L, "Beta Team", 44L, 4L, 0L}
         ));
 
         List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard();
@@ -140,10 +140,10 @@ class ResultServiceLeaderboardTest {
     @Test
     void getMedalLeaderboard_excludesTeamsWithoutAnyMedal() {
         when(resultRepository.findPerQuizTeamScoreBreakdownRaw()).thenReturn(List.of(
-                new Object[]{1L, "Alpha Team", 60L, 4L, 1L},
-                new Object[]{1L, "Beta Team", 50L, 3L, 1L},
-                new Object[]{1L, "Gamma Team", 40L, 2L, 2L},
-                new Object[]{1L, "Delta Team", 30L, 1L, 2L}
+                new Object[]{1L, 1L, "Alpha Team", 60L, 4L, 1L},
+                new Object[]{1L, 2L, "Beta Team", 50L, 3L, 1L},
+                new Object[]{1L, 3L, "Gamma Team", 40L, 2L, 2L},
+                new Object[]{1L, 4L, "Delta Team", 30L, 1L, 2L}
         ));
 
         List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard();
@@ -156,12 +156,12 @@ class ResultServiceLeaderboardTest {
     @Test
     void getMedalLeaderboard_usesSameTieRulesAsQuizRanking() {
         when(resultRepository.findPerQuizTeamScoreBreakdownRaw()).thenReturn(List.of(
-                new Object[]{1L, "Alpha Team", 40L, 3L, 1L},
-                new Object[]{1L, "Beta Team", 40L, 2L, 2L},
-                new Object[]{1L, "Gamma Team", 35L, 3L, 0L},
-                new Object[]{2L, "Beta Team", 30L, 2L, 1L},
-                new Object[]{2L, "Gamma Team", 30L, 2L, 1L},
-                new Object[]{2L, "Alpha Team", 29L, 3L, 0L}
+                new Object[]{1L, 1L, "Alpha Team", 40L, 3L, 1L},
+                new Object[]{1L, 2L, "Beta Team", 40L, 2L, 2L},
+                new Object[]{1L, 3L, "Gamma Team", 35L, 3L, 0L},
+                new Object[]{2L, 2L, "Beta Team", 30L, 2L, 1L},
+                new Object[]{2L, 3L, "Gamma Team", 30L, 2L, 1L},
+                new Object[]{2L, 1L, "Alpha Team", 29L, 3L, 0L}
         ));
 
         List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard();

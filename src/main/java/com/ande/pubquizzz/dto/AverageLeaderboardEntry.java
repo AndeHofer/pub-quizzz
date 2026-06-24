@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AverageLeaderboardEntry {
     private int rank;
+    private Long teamId;
     private String teamName;
     private double averagePoints;
     private int quizCount;

@@ -2,6 +2,62 @@
 
 ## Open Tasks
 
+### Phase 126: Fix Team Results Score-Row Index Crash ✅ COMPLETE
+
+- Step 1 done (TDD RED): Added failing regression test in
+  `src/test/java/com/ande/pubquizzz/service/ResultServiceTeamResultsTest.java` for non-empty
+  `findScoresByQuizIds(...)` rows with shape `[quizId, teamId, teamName, totalPoints, fives, threes]`.
+  - test reproduced manual `ClassCastException` in team-rank sorting path.
+- Step 2 done (TDD GREEN): Fixed score-row index usage in
+  `src/main/java/com/ande/pubquizzz/service/ResultService.java`:
+  - `hasSameScore(...)` now reads score tuple from indexes `3/4/5` (total/fives/threes),
+  - `compareScoreRowsDesc(...)` now compares indexes `3/4/5` instead of stale `2/3/4`.
+- Step 3 done: Scanned `ResultService` raw-row consumers for similar index mismatches after teamId migration.
+  - verified `findScoresByQuizIds` ranking in quiz summaries already uses `3/4/5`,
+  - verified leaderboard and medal row mappings align with their updated query shapes,
+  - no additional mismatches found.
+- Step 4 done: Verification passed:
+  - `./mvnw.cmd "-Dtest=ResultServiceTeamResultsTest" test` (PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+
+### Phase 125: Team Detail URL Hard Cutover to teamId ✅ COMPLETE
+
+- Step 1 done (TDD RED): Updated backend tests for id-based team detail route and DTO/query shapes in:
+  - `src/test/java/com/ande/pubquizzz/controller/UserTeamControllerTest.java`
+  - `src/test/java/com/ande/pubquizzz/service/ResultServiceTeamResultsTest.java`
+  - `src/test/java/com/ande/pubquizzz/service/ResultServiceLeaderboardTest.java`
+  - `src/test/java/com/ande/pubquizzz/service/ResultServiceQuizTest.java`
+  - `src/test/java/com/ande/pubquizzz/controller/UserLeaderboardControllerTest.java`
+  - `src/test/java/com/ande/pubquizzz/controller/UserQuizControllerTest.java`
+- Step 2 done (TDD GREEN): Implemented backend hard cutover to id-based team detail lookup and teamId propagation in
+  leaderboard/quiz DTOs:
+  - `src/main/java/com/ande/pubquizzz/controller/UserTeamController.java`
+  - `src/main/java/com/ande/pubquizzz/service/ResultService.java`
+  - `src/main/java/com/ande/pubquizzz/database/repositories/ResultRepository.java`
+  - `src/main/java/com/ande/pubquizzz/dto/PointsLeaderboardEntry.java`
+  - `src/main/java/com/ande/pubquizzz/dto/AverageLeaderboardEntry.java`
+  - `src/main/java/com/ande/pubquizzz/dto/MedalLeaderboardEntry.java`
+  - `src/main/java/com/ande/pubquizzz/dto/QuizResultEntry.java`
+  - `src/main/java/com/ande/pubquizzz/dto/QuizSummaryDTO.java`
+- Step 3 done: Updated frontend types and links to `?teamId=` and id-based API calls:
+  - `src/main/webapp/src/js/types.ts`
+  - `src/main/webapp/src/js/team.ts`
+  - `src/main/webapp/src/js/points-leaderboard.ts`
+  - `src/main/webapp/src/js/average-leaderboard.ts`
+  - `src/main/webapp/src/js/medal-leaderboard.ts`
+  - `src/main/webapp/src/js/quiz.ts`
+  - `src/main/webapp/src/js/quizzes.ts`
+- Step 4 done: Verification passed:
+  -
+  `./mvnw.cmd "-Dtest=UserTeamControllerTest,ResultServiceTeamResultsTest,ResultServiceLeaderboardTest,ResultServiceQuizTest,UserLeaderboardControllerTest,UserQuizControllerTest" test` (
+  PASS)
+  - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+  - `npm --prefix src/main/webapp run type-check` (PASS)
+- Step 5 done (follow-up from full verify): Updated cache annotation contract test for changed ResultService method
+  signature:
+  - `src/test/java/com/ande/pubquizzz/service/CacheAnnotationsTest.java`
+
 ### Phase 124: Remove Evictions From Cache Metrics ✅ COMPLETE
 
 - Step 1 done (TDD RED): Updated failing formatter/snapshot expectations in

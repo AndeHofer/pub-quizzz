@@ -57,9 +57,11 @@ class ResultServiceQuizTest {
         quiz2.setTitle("Jahresstart 2026");
 
         teamA = new Team();
+        teamA.setTeamsId(1L);
         teamA.setTeamName("Alpha");
 
         teamB = new Team();
+        teamB.setTeamsId(2L);
         teamB.setTeamName("Beta");
     }
 
@@ -165,10 +167,10 @@ class ResultServiceQuizTest {
         quiz1.setQuizId(10L);
         List<Object[]> rows = List.<Object[]>of(new Object[]{quiz1, 2L});
         when(quizRepository.findAllWithResultCount()).thenReturn(rows);
-        // [quizId, teamName, totalPoints, fivesCount, threesCount]
+        // [quizId, teamId, teamName, totalPoints, fivesCount, threesCount]
         List<Object[]> scoreRows = List.<Object[]>of(
-                new Object[]{10L, "Alpha", 30L, 5L, 1L},
-                new Object[]{10L, "Beta", 25L, 4L, 1L}
+                new Object[]{10L, 1L, "Alpha", 30L, 5L, 1L},
+                new Object[]{10L, 2L, "Beta", 25L, 4L, 1L}
         );
         when(resultRepository.findScoresByQuizIds(List.of(10L))).thenReturn(scoreRows);
 
@@ -197,8 +199,8 @@ class ResultServiceQuizTest {
         when(quizRepository.findAllWithResultCount()).thenReturn(rows);
         // Both teams 25 pts; Beta has more 5-point answers
         List<Object[]> scoreRows = List.<Object[]>of(
-                new Object[]{12L, "Alpha", 25L, 3L, 5L},
-                new Object[]{12L, "Beta", 25L, 5L, 0L}
+                new Object[]{12L, 1L, "Alpha", 25L, 3L, 5L},
+                new Object[]{12L, 2L, "Beta", 25L, 5L, 0L}
         );
         when(resultRepository.findScoresByQuizIds(List.of(12L))).thenReturn(scoreRows);
 
@@ -214,8 +216,8 @@ class ResultServiceQuizTest {
         when(quizRepository.findAllWithResultCount()).thenReturn(rows);
         // Both teams 25 pts, both 3 fives; Alpha has more 3-point answers
         List<Object[]> scoreRows = List.<Object[]>of(
-                new Object[]{13L, "Alpha", 25L, 3L, 4L},
-                new Object[]{13L, "Beta", 25L, 3L, 2L}
+                new Object[]{13L, 1L, "Alpha", 25L, 3L, 4L},
+                new Object[]{13L, 2L, "Beta", 25L, 3L, 2L}
         );
         when(resultRepository.findScoresByQuizIds(List.of(13L))).thenReturn(scoreRows);
 

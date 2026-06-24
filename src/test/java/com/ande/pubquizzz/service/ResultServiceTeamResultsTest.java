@@ -14,9 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,13 +46,16 @@ class ResultServiceTeamResultsTest {
     @BeforeEach
     void setUp() {
         team = new Team();
+        team.setTeamsId(7L);
         team.setTeamName("TestTeam");
 
         quizOld = new Quiz();
+        quizOld.setQuizId(1L);
         quizOld.setPubDate(LocalDate.of(2026, 1, 1));
         quizOld.setSubmitDate(LocalDate.of(2026, 1, 2));
 
         quizNew = new Quiz();
+        quizNew.setQuizId(2L);
         quizNew.setPubDate(LocalDate.of(2026, 3, 15));
         quizNew.setSubmitDate(LocalDate.of(2026, 3, 16));
     }
@@ -76,10 +81,10 @@ class ResultServiceTeamResultsTest {
         Result oldResult = makeResult(quizOld, List.of(makeAnswer(1, 3)));
         Result newResult = makeResult(quizNew, List.of(makeAnswer(1, 5)));
         // Repository returns them already sorted (newest first per query)
-        when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
+        when(resultRepository.findByTeamIdOrderByPubDateDesc(7L))
             .thenReturn(List.of(newResult, oldResult));
 
-        List<TeamResultEntry> results = resultService.getResultsForTeam("TestTeam");
+        List<TeamResultEntry> results = resultService.getResultsForTeam(7L);
 
         assertThat(results).hasSize(2);
         assertThat(results.get(0).getQuizDate()).isEqualTo("2026-03-15");
@@ -92,20 +97,20 @@ class ResultServiceTeamResultsTest {
     void getResultsForTeam_ignoresStoredTitleAndUsesPubDateMonthYear() {
         quizNew.setTitle("Frühjahr 2026");
         Result result = makeResult(quizNew, List.of(makeAnswer(1, 5)));
-        when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
+        when(resultRepository.findByTeamIdOrderByPubDateDesc(7L))
             .thenReturn(List.of(result));
 
-        List<TeamResultEntry> results = resultService.getResultsForTeam("TestTeam");
+        List<TeamResultEntry> results = resultService.getResultsForTeam(7L);
 
         assertThat(results.get(0).getQuizTitle()).isEqualTo("2026 März");
     }
 
     @Test
     void getResultsForTeam_unknownTeam_returnsEmpty() {
-        when(resultRepository.findByTeamNameOrderByPubDateDesc("Unknown"))
+        when(resultRepository.findByTeamIdOrderByPubDateDesc(999L))
             .thenReturn(List.of());
 
-        List<TeamResultEntry> results = resultService.getResultsForTeam("Unknown");
+        List<TeamResultEntry> results = resultService.getResultsForTeam(999L);
 
         assertThat(results).isEmpty();
     }
@@ -115,10 +120,10 @@ class ResultServiceTeamResultsTest {
         ResultAnswer a1 = makeAnswer(1, 4);
         ResultAnswer a2 = makeAnswer(2, 2);
         Result result = makeResult(quizNew, List.of(a1, a2));
-        when(resultRepository.findByTeamNameOrderByPubDateDesc("TestTeam"))
+        when(resultRepository.findByTeamIdOrderByPubDateDesc(7L))
             .thenReturn(List.of(result));
 
-        List<TeamResultEntry> results = resultService.getResultsForTeam("TestTeam");
+        List<TeamResultEntry> results = resultService.getResultsForTeam(7L);
 
         assertThat(results).hasSize(1);
         TeamResultEntry entry = results.get(0);
@@ -128,5 +133,28 @@ class ResultServiceTeamResultsTest {
         assertThat(entry.getParticipantCount()).isEqualTo(1);
         assertThat(entry.getAnswers().get(0).getQuestionNumber()).isEqualTo(1);
         assertThat(entry.getAnswers().get(0).getPoints()).isEqualTo(4);
+    }
+
+    @Test
+    void getResultsForTeam_withScoreRowsIncludingTeamId_calculatesRankWithoutClassCast() {
+        Team otherTeam = new Team();
+        otherTeam.setTeamsId(9L);
+        otherTeam.setTeamName("Other Team");
+
+        Result tracked = makeResult(quizNew, List.of(makeAnswer(1, 5), makeAnswer(2, 3)));
+
+        when(resultRepository.findByTeamIdOrderByPubDateDesc(7L)).thenReturn(List.of(tracked));
+        when(resultRepository.findScoresByQuizIds(List.of(2L))).thenReturn(new ArrayList<>(List.of(
+                new Object[]{2L, 7L, "TestTeam", 8L, 1L, 1L},
+                new Object[]{2L, 9L, "Other Team", 9L, 1L, 2L}
+        )));
+
+        assertThatCode(() -> resultService.getResultsForTeam(7L))
+                .doesNotThrowAnyException();
+
+        List<TeamResultEntry> results = resultService.getResultsForTeam(7L);
+        assertThat(results).hasSize(1);
+        assertThat(results.getFirst().getQuizRank()).isEqualTo(2);
+        assertThat(results.getFirst().getParticipantCount()).isEqualTo(2);
     }
 }

@@ -33,7 +33,7 @@ class CacheAnnotationsTest {
         assertHasCacheable(ResultService.class.getMethod("getPointsLeaderboard"));
         assertHasCacheable(ResultService.class.getMethod("getAverageLeaderboard"));
         assertHasCacheable(ResultService.class.getMethod("getMedalLeaderboard"));
-        assertHasCacheable(ResultService.class.getMethod("getResultsForTeam", String.class));
+        assertHasCacheable(ResultService.class.getMethod("getResultsForTeam", Long.class));
     }
 
     @Test

@@ -68,7 +68,7 @@ async function loadTeamResults(): Promise<void> {
     const backLinkEl = document.getElementById('backToLeaderboardLink') as HTMLAnchorElement | null;
 
     const params = new URLSearchParams(window.location.search);
-    const teamName = params.get('team');
+    const teamIdRaw = params.get('teamId');
     const source = params.get('source');
 
     if (backLinkEl) {
@@ -84,7 +84,8 @@ async function loadTeamResults(): Promise<void> {
         }
     }
 
-    if (!teamName) {
+    const teamId = teamIdRaw ? Number(teamIdRaw) : NaN;
+    if (!teamIdRaw || !Number.isInteger(teamId) || teamId <= 0) {
         if (loadingEl) loadingEl.style.display = 'none';
         if (errorEl) {
             errorEl.style.display = 'block';
@@ -95,17 +96,18 @@ async function loadTeamResults(): Promise<void> {
 
     // Set heading immediately so it shows during load
     const heading = document.getElementById('teamHeading');
-    if (heading) heading.textContent = `\uD83C\uDFF5\uFE0F Team: ${teamName}`;
+    if (heading) heading.textContent = '\uD83C\uDFF5\uFE0F Team';
 
     try {
-        const response = await fetch(`/api/teams/${encodeURIComponent(teamName)}/results`);
+        const response = await fetch(`/api/teams/${encodeURIComponent(String(teamId))}/results`);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
         const entries: TeamResultEntry[] = await response.json();
         if (loadingEl) loadingEl.style.display = 'none';
         if (tableEl) tableEl.style.display = 'table';
-        renderResults(teamName, entries);
+        const resolvedTeamName = entries[0]?.teamName ?? `#${teamId}`;
+        renderResults(resolvedTeamName, entries);
     } catch {
         if (loadingEl) loadingEl.style.display = 'none';
         if (errorEl) {

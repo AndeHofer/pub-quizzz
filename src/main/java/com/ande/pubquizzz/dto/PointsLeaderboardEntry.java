@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PointsLeaderboardEntry {
     private int rank;
+    private Long teamId;
     private String teamName;
     private int totalPoints;
     private int quizCount;

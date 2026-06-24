@@ -11,8 +11,8 @@ function renderQuizzes(quizzes: QuizSummaryDTO[]): void {
     }
 
     tbody.innerHTML = quizzes.map(q => {
-        const winnerCell = q.winnerTeamName
-            ? `<a href="/team.html?team=${encodeURIComponent(q.winnerTeamName)}" class="text-blue-700 hover:underline">${escapeHtml(q.winnerTeamName)}</a>`
+        const winnerCell = q.winnerTeamName && q.winnerTeamId != null
+            ? `<a href="/team.html?teamId=${encodeURIComponent(String(q.winnerTeamId))}" class="text-blue-700 hover:underline">${escapeHtml(q.winnerTeamName)}</a>`
             : `<span class="text-gray-400">&mdash;</span>`;
         return `
         <tr class="border-b border-gray-200 hover:bg-gray-50">

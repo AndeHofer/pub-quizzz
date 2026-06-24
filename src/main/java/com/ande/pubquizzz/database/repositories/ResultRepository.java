@@ -24,7 +24,8 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     void deleteByQuizQuizId(Long quizId);
 
     @Query("""
-            SELECT t.teamName,
+            SELECT t.teamsId,
+                   t.teamName,
                    COALESCE(SUM(ra.points), 0) AS totalPoints,
                    COUNT(DISTINCT r.quiz.quizId) AS quizCount
             FROM Result r
@@ -37,6 +38,7 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
 
     @Query("""
             SELECT r.quiz.quizId,
+                   t.teamsId,
                    t.teamName,
                    COALESCE(SUM(ra.points), 0),
                    SUM(CASE WHEN ra.points = 5 THEN 1 ELSE 0 END),
@@ -53,10 +55,10 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
         JOIN FETCH r.team t
         JOIN FETCH r.quiz q
         JOIN FETCH r.answers
-        WHERE t.teamName = :teamName
+                WHERE t.teamsId = :teamId
         ORDER BY q.pubDate DESC
     """)
-    List<Result> findByTeamNameOrderByPubDateDesc(@Param("teamName") String teamName);
+    List<Result> findByTeamIdOrderByPubDateDesc(@Param("teamId") Long teamId);
 
     @Query("""
         SELECT DISTINCT r FROM Result r
@@ -68,14 +70,14 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     List<Result> findByQuizIdWithTeamAndAnswers(@Param("quizId") Long quizId);
 
     @Query("""
-                SELECT r.quiz.quizId, r.team.teamName,
+                SELECT r.quiz.quizId, r.team.teamsId, r.team.teamName,
                        COALESCE(SUM(a.points), 0),
                        SUM(CASE WHEN a.points = 5 THEN 1 ELSE 0 END),
                        SUM(CASE WHEN a.points = 3 THEN 1 ELSE 0 END)
                 FROM Result r
                 JOIN r.answers a
                 WHERE r.quiz.quizId IN :quizIds
-                GROUP BY r.quiz.quizId, r.resultsId, r.team.teamName
+                GROUP BY r.quiz.quizId, r.resultsId, r.team.teamsId, r.team.teamName
             """)
     List<Object[]> findScoresByQuizIds(@Param("quizIds") List<Long> quizIds);
 }

@@ -8,6 +8,8 @@ import java.util.List;
 public class TeamResultEntry {
     private int quizRank;
     private int participantCount;
+    private Long teamId;
+    private String teamName;
     private Long quizId;
     private String quizDate;
     private String quizTitle;

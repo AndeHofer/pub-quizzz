@@ -75,26 +75,26 @@ public class ResultService {
                 .map(row -> ((Quiz) row[0]).getQuizId())
                 .toList();
 
-        java.util.Map<Long, String> winnerMap = new java.util.HashMap<>();
+        java.util.Map<Long, Object[]> winnerMap = new java.util.HashMap<>();
         if (!quizIdsWithResults.isEmpty()) {
             List<Object[]> scoreRows = resultRepository.findScoresByQuizIds(quizIdsWithResults);
-            // scoreRows: [quizId, teamName, totalPoints, fivesCount, threesCount]
+            // scoreRows: [quizId, teamId, teamName, totalPoints, fivesCount, threesCount]
             // Group by quizId, pick the row with best tiebreaker order
             java.util.Map<Long, Object[]> bestRow = new java.util.HashMap<>();
             for (Object[] sr : scoreRows) {
                 Long qId = ((Number) sr[0]).longValue();
                 bestRow.merge(qId, sr, (existing, candidate) -> {
                     return compareScoresDesc(
-                            scoreValue(candidate, 2),
                             scoreValue(candidate, 3),
                             scoreValue(candidate, 4),
-                            scoreValue(existing, 2),
+                            scoreValue(candidate, 5),
                             scoreValue(existing, 3),
-                            scoreValue(existing, 4)
+                            scoreValue(existing, 4),
+                            scoreValue(existing, 5)
                     ) < 0 ? candidate : existing;
                 });
             }
-            bestRow.forEach((qId, sr) -> winnerMap.put(qId, (String) sr[1]));
+            winnerMap.putAll(bestRow);
         }
 
         return rows.stream().map(row -> {
@@ -106,7 +106,11 @@ public class ResultService {
             dto.setPubDate(quiz.getPubDate().toString());
             dto.setFinished(QuizFinishedChecker.isFinished(quiz));
             dto.setTeamCount((int) count);
-            dto.setWinnerTeamName(winnerMap.get(quiz.getQuizId()));
+            Object[] winnerRow = winnerMap.get(quiz.getQuizId());
+            if (winnerRow != null) {
+                dto.setWinnerTeamId(((Number) winnerRow[1]).longValue());
+                dto.setWinnerTeamName((String) winnerRow[2]);
+            }
             return dto;
         }).toList();
     }
@@ -143,6 +147,7 @@ public class ResultService {
             Result r = sorted.get(i);
             QuizResultEntry entry = new QuizResultEntry();
             entry.setRank(rank);
+            entry.setTeamId(r.getTeam().getTeamsId());
             entry.setTeamName(r.getTeam().getTeamName());
             entry.setTotalPoints(r.calculateTotalPoints());
             entry.setAnswers(mapAnswerScores(r));
@@ -171,15 +176,15 @@ public class ResultService {
         log.debug("Fetching points leaderboard");
         List<Object[]> rows = new ArrayList<>(resultRepository.findLeaderboardRaw());
         // Sort rows defensively by totalPoints (DESC) and teamName (ASC)
-        rows.sort(Comparator.comparingInt((Object[] row) -> ((Number) row[1]).intValue()).reversed()
-                .thenComparing(row -> (String) row[0]));
+        rows.sort(Comparator.comparingInt((Object[] row) -> ((Number) row[2]).intValue()).reversed()
+                .thenComparing(row -> (String) row[1]));
 
         List<PointsLeaderboardEntry> leaderboard = new ArrayList<>();
         int rank = 1;
         for (int i = 0; i < rows.size(); i++) {
             if (i > 0) {
-                int previousPoints = ((Number) rows.get(i - 1)[1]).intValue();
-                int currentPoints = ((Number) rows.get(i)[1]).intValue();
+                int previousPoints = ((Number) rows.get(i - 1)[2]).intValue();
+                int currentPoints = ((Number) rows.get(i)[2]).intValue();
                 if (currentPoints != previousPoints) {
                     rank = i + 1;
                 }
@@ -187,9 +192,10 @@ public class ResultService {
             Object[] row = rows.get(i);
             PointsLeaderboardEntry entry = new PointsLeaderboardEntry();
             entry.setRank(rank);
-            entry.setTeamName((String) row[0]);
-            entry.setTotalPoints(((Number) row[1]).intValue());
-            entry.setQuizCount(((Number) row[2]).intValue());
+            entry.setTeamId(((Number) row[0]).longValue());
+            entry.setTeamName((String) row[1]);
+            entry.setTotalPoints(((Number) row[2]).intValue());
+            entry.setQuizCount(((Number) row[3]).intValue());
             leaderboard.add(entry);
         }
         return leaderboard;
@@ -203,10 +209,11 @@ public class ResultService {
 
         List<AverageTeamStats> stats = rows.stream()
                 .map(row -> {
-                    String teamName = (String) row[0];
-                    int quizCount = ((Number) row[2]).intValue();
-                    double averagePoints = quizCount == 0 ? 0.0 : ((Number) row[1]).doubleValue() / quizCount;
-                    return new AverageTeamStats(teamName, quizCount, averagePoints);
+                    Long teamId = ((Number) row[0]).longValue();
+                    String teamName = (String) row[1];
+                    int quizCount = ((Number) row[3]).intValue();
+                    double averagePoints = quizCount == 0 ? 0.0 : ((Number) row[2]).doubleValue() / quizCount;
+                    return new AverageTeamStats(teamId, teamName, quizCount, averagePoints);
                 })
                 .sorted(Comparator.comparingDouble(AverageTeamStats::averagePoints).reversed())
                 .toList();
@@ -220,6 +227,7 @@ public class ResultService {
             AverageTeamStats stat = stats.get(i);
             AverageLeaderboardEntry entry = new AverageLeaderboardEntry();
             entry.setRank(rank);
+            entry.setTeamId(stat.teamId());
             entry.setTeamName(stat.teamName());
             entry.setAveragePoints(stat.averagePoints());
             entry.setQuizCount(stat.quizCount());
@@ -237,15 +245,17 @@ public class ResultService {
         Map<Long, List<QuizTeamScore>> totalsByQuiz = new HashMap<>();
         for (Object[] row : rows) {
             Long quizId = ((Number) row[0]).longValue();
-            String teamName = (String) row[1];
-            int totalPoints = ((Number) row[2]).intValue();
-            int fiveCount = ((Number) row[3]).intValue();
-            int threeCount = ((Number) row[4]).intValue();
+            Long teamId = ((Number) row[1]).longValue();
+            String teamName = (String) row[2];
+            int totalPoints = ((Number) row[3]).intValue();
+            int fiveCount = ((Number) row[4]).intValue();
+            int threeCount = ((Number) row[5]).intValue();
             totalsByQuiz.computeIfAbsent(quizId, ignored -> new ArrayList<>())
-                    .add(new QuizTeamScore(teamName, totalPoints, fiveCount, threeCount));
+                    .add(new QuizTeamScore(teamId, teamName, totalPoints, fiveCount, threeCount));
         }
 
-        Map<String, MedalAccumulator> medalsByTeam = new HashMap<>();
+        Map<Long, MedalAccumulator> medalsByTeam = new HashMap<>();
+        Map<Long, String> teamNamesById = new HashMap<>();
         totalsByQuiz.values().forEach(quizTotals -> {
             List<QuizTeamScore> sorted = quizTotals.stream()
                     .sorted(Comparator.comparingInt(QuizTeamScore::totalPoints).reversed()
@@ -261,9 +271,10 @@ public class ResultService {
                 }
 
                 MedalAccumulator accumulator = medalsByTeam.computeIfAbsent(
-                        current.teamName(),
+                        current.teamId(),
                         ignored -> new MedalAccumulator()
                 );
+                teamNamesById.putIfAbsent(current.teamId(), current.teamName());
 
                 if (rank == 1) {
                     accumulator.goldCount++;
@@ -275,11 +286,11 @@ public class ResultService {
             }
         });
 
-        List<Map.Entry<String, MedalAccumulator>> sortedTeams = medalsByTeam.entrySet().stream()
+        List<Map.Entry<Long, MedalAccumulator>> sortedTeams = medalsByTeam.entrySet().stream()
                 .filter(e -> e.getValue().goldCount > 0 || e.getValue().silverCount > 0 || e.getValue().bronzeCount > 0)
-                .sorted(Comparator.<Map.Entry<String, MedalAccumulator>>comparingInt(e -> e.getValue().goldCount).reversed()
-                        .thenComparing(Comparator.comparingInt((Map.Entry<String, MedalAccumulator> e) -> e.getValue().silverCount).reversed())
-                        .thenComparing(Comparator.comparingInt((Map.Entry<String, MedalAccumulator> e) -> e.getValue().bronzeCount).reversed()))
+                .sorted(Comparator.<Map.Entry<Long, MedalAccumulator>>comparingInt(e -> e.getValue().goldCount).reversed()
+                        .thenComparing(Comparator.comparingInt((Map.Entry<Long, MedalAccumulator> e) -> e.getValue().silverCount).reversed())
+                        .thenComparing(Comparator.comparingInt((Map.Entry<Long, MedalAccumulator> e) -> e.getValue().bronzeCount).reversed()))
                 .toList();
 
         List<MedalLeaderboardEntry> leaderboard = new ArrayList<>();
@@ -294,11 +305,12 @@ public class ResultService {
                     rank = i + 1;
                 }
             }
-            Map.Entry<String, MedalAccumulator> row = sortedTeams.get(i);
+            Map.Entry<Long, MedalAccumulator> row = sortedTeams.get(i);
             MedalAccumulator acc = row.getValue();
             MedalLeaderboardEntry entry = new MedalLeaderboardEntry();
             entry.setRank(rank);
-            entry.setTeamName(row.getKey());
+            entry.setTeamId(row.getKey());
+            entry.setTeamName(teamNamesById.get(row.getKey()));
             entry.setGoldCount(acc.goldCount);
             entry.setSilverCount(acc.silverCount);
             entry.setBronzeCount(acc.bronzeCount);
@@ -379,9 +391,9 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = RESULTS_FOR_TEAM, key = "#teamName")
-    public List<TeamResultEntry> getResultsForTeam(String teamName) {
-        List<Result> results = resultRepository.findByTeamNameOrderByPubDateDesc(teamName);
+    @Cacheable(value = RESULTS_FOR_TEAM, key = "#teamId")
+    public List<TeamResultEntry> getResultsForTeam(Long teamId) {
+        List<Result> results = resultRepository.findByTeamIdOrderByPubDateDesc(teamId);
         if (results.isEmpty()) {
             return List.of();
         }
@@ -400,6 +412,8 @@ public class ResultService {
 
         return results.stream().map(r -> {
             TeamResultEntry entry = new TeamResultEntry();
+            entry.setTeamId(r.getTeam().getTeamsId());
+            entry.setTeamName(r.getTeam().getTeamName());
             entry.setQuizId(r.getQuiz().getQuizId());
             entry.setQuizDate(r.getQuiz().getPubDate().toString());
             entry.setQuizTitle(deriveQuizTitle(r.getQuiz().getPubDate()));
@@ -426,8 +440,8 @@ public class ResultService {
                         rank = i + 1;
                     }
                 }
-                String currentTeamName = (String) scores.get(i)[1];
-                if (currentTeamName.equals(r.getTeam().getTeamName())) {
+                Long currentTeamId = ((Number) scores.get(i)[1]).longValue();
+                if (currentTeamId.equals(r.getTeam().getTeamsId())) {
                     entry.setQuizRank(rank);
                     break;
                 }
@@ -516,10 +530,10 @@ public class ResultService {
 
     private static final int QUESTION_COUNT = 8;
 
-    private record AverageTeamStats(String teamName, int quizCount, double averagePoints) {
+    private record AverageTeamStats(Long teamId, String teamName, int quizCount, double averagePoints) {
     }
 
-    private record QuizTeamScore(String teamName, int totalPoints, int fiveCount, int threeCount) {
+    private record QuizTeamScore(Long teamId, String teamName, int totalPoints, int fiveCount, int threeCount) {
     }
 
     private boolean sameQuizRankMetrics(QuizTeamScore left, QuizTeamScore right) {
@@ -554,19 +568,19 @@ public class ResultService {
     }
 
     private static boolean hasSameScore(Object[] left, Object[] right) {
-        return scoreValue(left, 2) == scoreValue(right, 2)
-                && scoreValue(left, 3) == scoreValue(right, 3)
-                && scoreValue(left, 4) == scoreValue(right, 4);
+        return scoreValue(left, 3) == scoreValue(right, 3)
+                && scoreValue(left, 4) == scoreValue(right, 4)
+                && scoreValue(left, 5) == scoreValue(right, 5);
     }
 
     private static int compareScoreRowsDesc(Object[] left, Object[] right) {
         return compareScoresDesc(
-                scoreValue(left, 2),
                 scoreValue(left, 3),
                 scoreValue(left, 4),
-                scoreValue(right, 2),
+                scoreValue(left, 5),
                 scoreValue(right, 3),
-                scoreValue(right, 4)
+                scoreValue(right, 4),
+                scoreValue(right, 5)
         );
     }
 

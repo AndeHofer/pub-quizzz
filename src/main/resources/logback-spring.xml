@@ -27,7 +27,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.ande.pubquizzz" level="INFO"/>
+    <logger name="com.ande.pubquizzz" level="DEBUG"/>
     <logger name="org.springframework" level="ERROR"/>
     <logger name="org.hibernate" level="ERROR"/>
 

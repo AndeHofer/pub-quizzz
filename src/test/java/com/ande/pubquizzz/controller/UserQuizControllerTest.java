@@ -50,6 +50,7 @@ class UserQuizControllerTest {
         dto.setPubDate("2026-03-15");
         dto.setFinished(true);
         dto.setTeamCount(3);
+        dto.setWinnerTeamId(1L);
         dto.setWinnerTeamName("Alpha");
 
         when(resultService.getQuizSummaries()).thenReturn(List.of(dto));
@@ -61,6 +62,7 @@ class UserQuizControllerTest {
                 .andExpect(jsonPath("$[0].pubDate").value("2026-03-15"))
                 .andExpect(jsonPath("$[0].finished").value(true))
                 .andExpect(jsonPath("$[0].teamCount").value(3))
+                .andExpect(jsonPath("$[0].winnerTeamId").value(1))
                 .andExpect(jsonPath("$[0].winnerTeamName").value("Alpha"));
     }
 
@@ -79,6 +81,7 @@ class UserQuizControllerTest {
 
         QuizResultEntry entry = new QuizResultEntry();
         entry.setRank(1);
+        entry.setTeamId(1L);
         entry.setTeamName("Alpha");
         entry.setTotalPoints(10);
         entry.setAnswers(List.of(a));
@@ -93,6 +96,7 @@ class UserQuizControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quizTitle").value("2026 März"))
                 .andExpect(jsonPath("$.entries[0].rank").value(1))
+                .andExpect(jsonPath("$.entries[0].teamId").value(1))
                 .andExpect(jsonPath("$.entries[0].teamName").value("Alpha"))
                 .andExpect(jsonPath("$.entries[0].totalPoints").value(10))
                 .andExpect(jsonPath("$.entries[0].answers[0].questionNumber").value(1));

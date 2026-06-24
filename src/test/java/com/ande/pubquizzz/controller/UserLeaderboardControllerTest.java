@@ -40,6 +40,7 @@ class UserLeaderboardControllerTest {
     void getPointsLeaderboard_authenticated_returnsLeaderboard() throws Exception {
         PointsLeaderboardEntry entry = new PointsLeaderboardEntry();
         entry.setRank(1);
+        entry.setTeamId(1L);
         entry.setTeamName("Alpha Team");
         entry.setTotalPoints(150);
         entry.setQuizCount(3);
@@ -49,6 +50,7 @@ class UserLeaderboardControllerTest {
         mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].rank").value(1))
+                .andExpect(jsonPath("$[0].teamId").value(1))
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].totalPoints").value(150))
                 .andExpect(jsonPath("$[0].quizCount").value(3));
@@ -76,6 +78,7 @@ class UserLeaderboardControllerTest {
     void getMedalLeaderboard_authenticated_returnsLeaderboard() throws Exception {
         MedalLeaderboardEntry entry = new MedalLeaderboardEntry();
         entry.setRank(1);
+        entry.setTeamId(1L);
         entry.setTeamName("Alpha Team");
         entry.setGoldCount(2);
         entry.setSilverCount(1);
@@ -86,6 +89,7 @@ class UserLeaderboardControllerTest {
         mockMvc.perform(get("/api/leaderboard/medals"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].rank").value(1))
+                .andExpect(jsonPath("$[0].teamId").value(1))
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].goldCount").value(2))
                 .andExpect(jsonPath("$[0].silverCount").value(1))
@@ -97,6 +101,7 @@ class UserLeaderboardControllerTest {
     void getAverageLeaderboard_authenticated_returnsLeaderboard() throws Exception {
         AverageLeaderboardEntry entry = new AverageLeaderboardEntry();
         entry.setRank(1);
+        entry.setTeamId(1L);
         entry.setTeamName("Alpha Team");
         entry.setAveragePoints(42.5);
         entry.setQuizCount(4);
@@ -106,6 +111,7 @@ class UserLeaderboardControllerTest {
         mockMvc.perform(get("/api/leaderboard/average"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].rank").value(1))
+                .andExpect(jsonPath("$[0].teamId").value(1))
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].averagePoints").value(42.5))
                 .andExpect(jsonPath("$[0].quizCount").value(4));

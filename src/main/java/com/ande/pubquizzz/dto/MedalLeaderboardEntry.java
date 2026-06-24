@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MedalLeaderboardEntry {
     private int rank;
+    private Long teamId;
     private String teamName;
     private int goldCount;
     private int silverCount;

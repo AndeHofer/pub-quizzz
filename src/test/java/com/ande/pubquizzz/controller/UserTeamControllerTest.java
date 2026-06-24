@@ -50,9 +50,9 @@ class UserTeamControllerTest {
         entry.setParticipantCount(1);
         entry.setAnswers(List.of(a));
 
-        when(resultService.getResultsForTeam("TestTeam")).thenReturn(List.of(entry));
+        when(resultService.getResultsForTeam(7L)).thenReturn(List.of(entry));
 
-        mockMvc.perform(get("/api/teams/TestTeam/results"))
+        mockMvc.perform(get("/api/teams/7/results"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].quizDate").value("2026-03-15"))
@@ -65,16 +65,16 @@ class UserTeamControllerTest {
     @Test
     @WithMockUser
     void getTeamResults_unknownTeam_returns200WithEmptyArray() throws Exception {
-        when(resultService.getResultsForTeam("Unknown")).thenReturn(List.of());
+        when(resultService.getResultsForTeam(999L)).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/teams/Unknown/results"))
+        mockMvc.perform(get("/api/teams/999/results"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
     void getTeamResults_unauthenticated_returnsJson401() throws Exception {
-        mockMvc.perform(get("/api/teams/TestTeam/results"))
+        mockMvc.perform(get("/api/teams/7/results"))
                 .andExpect(status().isUnauthorized());
     }
 }

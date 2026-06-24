@@ -79,6 +79,7 @@ export interface AdminLogResponseDTO {
 
 export interface AllTimeLeaderboardEntry {
     rank: number;
+    teamId: number;
     teamName: string;
     totalPoints: number;
     quizCount: number;
@@ -86,6 +87,7 @@ export interface AllTimeLeaderboardEntry {
 
 export interface MedalLeaderboardEntry {
     rank: number;
+    teamId: number;
     teamName: string;
     goldCount: number;
     silverCount: number;
@@ -94,6 +96,7 @@ export interface MedalLeaderboardEntry {
 
 export interface AverageLeaderboardEntry {
     rank: number;
+    teamId: number;
     teamName: string;
     averagePoints: number;
     quizCount: number;
@@ -102,6 +105,8 @@ export interface AverageLeaderboardEntry {
 export interface TeamResultEntry {
     quizRank: number;
     participantCount: number;
+    teamId: number;
+    teamName: string;
     quizId: number;
     quizDate: string;
     quizTitle: string;
@@ -115,11 +120,13 @@ export interface QuizSummaryDTO {
     pubDate: string;
     finished?: boolean;
     teamCount: number;
+    winnerTeamId?: number | null;
     winnerTeamName?: string | null;
 }
 
 export interface QuizResultEntry {
     rank: number;
+    teamId: number;
     teamName: string;
     totalPoints: number;
     answers: AnswerScoreDTO[];

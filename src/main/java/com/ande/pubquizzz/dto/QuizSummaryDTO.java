@@ -9,5 +9,6 @@ public class QuizSummaryDTO {
     private String pubDate;
     private boolean finished;
     private int teamCount;
+    private Long winnerTeamId;
     private String winnerTeamName;
 }
