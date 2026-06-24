@@ -62,6 +62,19 @@
   - Verifikation:
     - `npm --prefix src/main/webapp run type-check` (PASS)
     - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+- Step 8 in progress: Navigation auf Leaderboard-Seiten vereinfachen.
+  - Anforderung: Oben nur `← Startseite`, keine Querverlinkung zwischen Leaderboards.
+  - Nächster Schritt: HTML-Navigationen bereinigen und verifizieren.
+- Step 8 done: Top-Navigationen auf Leaderboard-Seiten bereinigt.
+  - Angepasst in:
+    - `src/main/webapp/src/points-leaderboard.html`
+    - `src/main/webapp/src/medal-leaderboard.html`
+    - `src/main/webapp/src/average-leaderboard.html`
+    - `src/main/webapp/src/top-results-leaderboard.html`
+  - Ergebnis: jeweils oben nur noch Link `← Startseite`.
+  - Verifikation:
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
 
 ### Phase 126: Fix Team Results Score-Row Index Crash ✅ COMPLETE
 
