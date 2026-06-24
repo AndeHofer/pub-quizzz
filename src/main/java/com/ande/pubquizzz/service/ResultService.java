@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.service;
 
+import com.ande.pubquizzz.cache.InvalidateAllAppCaches;
 import com.ande.pubquizzz.database.entities.Result;
 import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.entities.ResultAnswer;
@@ -23,6 +24,7 @@ import com.ande.pubquizzz.mapper.ResultMapper;
 import com.ande.pubquizzz.mapper.QuizFinishedChecker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,14 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+
+import static com.ande.pubquizzz.config.CacheConfig.AVERAGE_LEADERBOARD;
+import static com.ande.pubquizzz.config.CacheConfig.MEDAL_LEADERBOARD;
+import static com.ande.pubquizzz.config.CacheConfig.POINTS_LEADERBOARD;
+import static com.ande.pubquizzz.config.CacheConfig.QUIZ_SUMMARIES;
+import static com.ande.pubquizzz.config.CacheConfig.RESULTS_FOR_QUIZ;
+import static com.ande.pubquizzz.config.CacheConfig.RESULTS_FOR_TEAM;
+import static com.ande.pubquizzz.config.CacheConfig.RESULTS_LIST;
 
 @Slf4j
 @Service
@@ -54,6 +64,7 @@ public class ResultService {
                     .thenComparing(Comparator.<Result, Long>comparing(r -> r.countAnswersWithPoints(3)).reversed());
 
     @Transactional(readOnly = true)
+    @Cacheable(QUIZ_SUMMARIES)
     public List<QuizSummaryDTO> getQuizSummaries() {
         log.debug("Fetching quiz summaries");
         List<Object[]> rows = quizRepository.findAllWithResultCount();
@@ -101,6 +112,7 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = RESULTS_FOR_QUIZ, key = "#quizId")
     public QuizResultsResponse getResultsForQuiz(Long quizId) {
         log.debug("Fetching results for quiz {}", quizId);
         List<Result> results = resultRepository.findByQuizIdWithTeamAndAnswers(quizId);
@@ -144,6 +156,7 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = RESULTS_LIST, key = "#quizId == null ? 'all' : #quizId")
     public List<ResultDTO> getResults(Long quizId) {
         log.debug("Fetching results{}", quizId != null ? " for quiz " + quizId : "");
         List<Result> results = quizId != null
@@ -153,6 +166,7 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(POINTS_LEADERBOARD)
     public List<PointsLeaderboardEntry> getPointsLeaderboard() {
         log.debug("Fetching points leaderboard");
         List<Object[]> rows = new ArrayList<>(resultRepository.findLeaderboardRaw());
@@ -182,6 +196,7 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(AVERAGE_LEADERBOARD)
     public List<AverageLeaderboardEntry> getAverageLeaderboard() {
         log.debug("Fetching average leaderboard");
         List<Object[]> rows = resultRepository.findLeaderboardRaw();
@@ -214,6 +229,7 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(MEDAL_LEADERBOARD)
     public List<MedalLeaderboardEntry> getMedalLeaderboard() {
         log.debug("Fetching medal leaderboard");
         List<Object[]> rows = resultRepository.findPerQuizTeamScoreBreakdownRaw();
@@ -292,6 +308,7 @@ public class ResultService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public ResultDTO createResult(CreateResultRequest req) {
         log.info("Creating result for quizId={} teamId={}", req.getQuizId(), req.getTeamId());
 
@@ -327,6 +344,7 @@ public class ResultService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public void deleteResult(Long id) {
         log.info("Deleting result id={}", id);
         if (!resultRepository.existsById(id)) {
@@ -336,6 +354,7 @@ public class ResultService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public ResultDTO updateResult(Long id, UpdateResultRequest req) {
         log.info("Updating result id={}", id);
         Result result = resultRepository.findByIdWithAnswers(id)
@@ -360,6 +379,7 @@ public class ResultService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = RESULTS_FOR_TEAM, key = "#teamName")
     public List<TeamResultEntry> getResultsForTeam(String teamName) {
         List<Result> results = resultRepository.findByTeamNameOrderByPubDateDesc(teamName);
         if (results.isEmpty()) {

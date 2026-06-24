@@ -9,6 +9,34 @@ import {apiFetch} from './admin-api';
 
 export {renderTable, showError, trustedHtml};
 
+export async function invalidateCache(
+    apiFetchFn: typeof apiFetch,
+    confirmFn: (message: string) => boolean,
+    msgDiv: HTMLElement | null
+) {
+    if (!confirmFn('Cache wirklich leeren?')) {
+        return;
+    }
+
+    setStatusMessage(msgDiv, 'Cache wird geleert...', 'neutral');
+    try {
+        const response = await apiFetchFn('/admin/cache/invalidate', {method: 'POST'});
+        if (response.ok) {
+            const payload = await response.json() as { clearedCount?: number };
+            const clearedCount = typeof payload.clearedCount === 'number' ? payload.clearedCount : 0;
+            setStatusMessage(msgDiv, `Cache geleert (${clearedCount} Cache(s)).`, 'green');
+            return;
+        }
+        const err = await response.json().catch(() => ({error: 'Unbekannter Fehler'}));
+        setStatusMessage(msgDiv, `Fehler: ${String(err.error ?? 'Unbekannter Fehler')}`, 'red');
+    } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
+        setStatusMessage(msgDiv, `Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, 'red');
+    }
+}
+
 function isAuthExpiredRedirectError(error: unknown): boolean {
     return error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT';
 }
@@ -87,6 +115,10 @@ window.addEventListener('load', () => {
     }
 
     document.getElementById('cleanupImagesBtn')?.addEventListener('click', cleanupImages);
+    document.getElementById('invalidateCacheBtn')?.addEventListener('click', async () => {
+        const msgDiv = document.getElementById('cacheInvalidateMessage') as HTMLElement | null;
+        await invalidateCache(apiFetch, confirm, msgDiv);
+    });
     document.getElementById('viewLogsBtn')?.addEventListener('click', () => {
         location.href = 'logs.html';
     });

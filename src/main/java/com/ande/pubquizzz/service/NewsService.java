@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.service;
 
+import com.ande.pubquizzz.cache.InvalidateAllAppCaches;
 import com.ande.pubquizzz.database.entities.News;
 import com.ande.pubquizzz.database.repositories.NewsRepository;
 import com.ande.pubquizzz.dto.CreateNewsRequest;
@@ -8,12 +9,16 @@ import com.ande.pubquizzz.dto.UpdateNewsRequest;
 import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+
+import static com.ande.pubquizzz.config.CacheConfig.NEWS_LATEST;
+import static com.ande.pubquizzz.config.CacheConfig.NEWS_ADMIN_ALL;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +31,7 @@ public class NewsService {
     private final NewsRepository newsRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = NEWS_LATEST, key = "#requestedLimit")
     public List<NewsDTO> getLatestNews(int requestedLimit) {
         int effectiveLimit = requestedLimit > 0 ? Math.min(requestedLimit, MAX_LIMIT) : DEFAULT_LIMIT;
         return newsRepository.findAllByShowOnHomePageTrueOrderByCreatedAtDescNewsIdDesc(PageRequest.of(0, effectiveLimit))
@@ -35,6 +41,7 @@ public class NewsService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(NEWS_ADMIN_ALL)
     public List<NewsDTO> getAllNewsForAdmin() {
         return newsRepository.findAllByOrderByCreatedAtDescNewsIdDesc()
                 .stream()
@@ -43,6 +50,7 @@ public class NewsService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public NewsDTO createNews(CreateNewsRequest request) {
         News news = new News();
         news.setTitle(request.getTitle().trim());
@@ -54,6 +62,7 @@ public class NewsService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public NewsDTO updateNews(Long id, UpdateNewsRequest request) {
         News news = newsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Neuigkeit nicht gefunden: " + id));
@@ -65,6 +74,7 @@ public class NewsService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public void deleteNews(Long id) {
         News news = newsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Neuigkeit nicht gefunden: " + id));

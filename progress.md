@@ -2,6 +2,139 @@
 
 ## Open Tasks
 
+### Phase 124: Remove Evictions From Cache Metrics ✅ COMPLETE
+
+- Step 1 done (TDD RED): Updated failing formatter/snapshot expectations in
+  `src/test/java/com/ande/pubquizzz/service/CacheMetricsLoggingServiceTest.java`:
+    - removed `evictions` / `deltaEvictions` constructor arguments and assertions,
+    - asserted `EVICTIONS` header no longer appears,
+    - kept aligned `|`-column checks and totals assertions for remaining columns.
+- Step 2 done (TDD GREEN): Refactored
+  `src/main/java/com/ande/pubquizzz/service/CacheMetricsLoggingService.java` to remove eviction metrics end-to-end:
+    - dropped eviction fields from `CacheMetricsSnapshot`,
+    - removed eviction totals and delta tracking from collection/aggregation,
+    - removed eviction column from pretty table row/separator/header/TOTAL rendering,
+    - retained adaptive-width alignment for remaining columns.
+- Step 3 done: Verification passed:
+    - `./mvnw.cmd "-Dtest=CacheMetricsLoggingServiceTest" test` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+
+### Phase 123: Short Cache Invalidation Logs ✅ COMPLETE
+
+- Step 1 done (TDD RED): Added failing tests for short invalidation log entries in:
+    - `src/test/java/com/ande/pubquizzz/cache/CacheInvalidationLoggingAspectTest.java`
+    - `src/test/java/com/ande/pubquizzz/controller/AdminCacheControllerTest.java`
+- Step 2 done (TDD GREEN): Implemented centralized automatic invalidation logging via aspect and aligned manual log
+  wording:
+    - added `src/main/java/com/ande/pubquizzz/cache/CacheInvalidationLoggingAspect.java`
+    - updated `src/main/java/com/ande/pubquizzz/controller/AdminCacheController.java`
+    - automatic log format: `Cache invalidated: all caches (trigger=<Class>.<method>)`
+    - manual log format: `Cache invalidated: all caches (trigger=admin, cleared=<n>)`
+- Step 3 done: Verification passed:
+    - `./mvnw.cmd "-Dtest=CacheInvalidationLoggingAspectTest,AdminCacheControllerTest" test` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+
+### Phase 122: Align Cache Metrics Table Columns ✅ COMPLETE
+
+- Step 1 done (TDD RED): Added failing formatter test expectations for aligned `|` columns and long cache-name coverage
+  in:
+    - `src/test/java/com/ande/pubquizzz/service/CacheMetricsLoggingServiceTest.java`
+- Step 2 done (TDD GREEN): Reworked pretty metrics logging into adaptive-width table rendering with aligned separators:
+    - `src/main/java/com/ande/pubquizzz/service/CacheMetricsLoggingService.java`
+    - added shared table helpers for row and separator rendering
+    - no cache-name truncation; column width adapts to longest cache name/value content
+    - totals emitted as aligned table row (`TOTAL`) instead of free-form text
+- Step 3 done: Verification passed:
+    - `./mvnw.cmd "-Dtest=CacheMetricsLoggingServiceTest" test` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+
+### Phase 121: Pretty Aggregated Cache Metrics Log ✅ COMPLETE
+
+- Step 1 done (TDD RED): Added failing tests for pretty aggregated cache metrics formatting in:
+    - `src/test/java/com/ande/pubquizzz/service/CacheMetricsLoggingServiceTest.java`
+- Step 2 done (TDD GREEN): Replaced per-cache log lines with one readable aggregated pretty log entry per interval in:
+    - `src/main/java/com/ande/pubquizzz/service/CacheMetricsLoggingService.java`
+    - added formatter path (`buildPrettyMetricsLog(...)`) and single-entry emission from `logCacheMetrics()`
+- Step 3 done: Full verification passed:
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+
+### Phase 120: Cache Hit/Miss Logging ✅ COMPLETE
+
+- Step 1 done (TDD RED): Added failing tests for cache metrics snapshot collection and delta behavior:
+    - `src/test/java/com/ande/pubquizzz/service/CacheMetricsLoggingServiceTest.java`
+- Step 2 done (TDD GREEN): Implemented periodic cache metrics logger service:
+    - `src/main/java/com/ande/pubquizzz/service/CacheMetricsLoggingService.java`
+    - logs per-cache metrics: hits, misses, hitRate, evictions, deltaHits, deltaMisses, deltaEvictions
+    - skips non-Caffeine caches and respects enable flag
+- Step 3 done: Enabled scheduler and cache stats support:
+    - `src/main/java/com/ande/pubquizzz/PubQuizzzApplication.java` (`@EnableScheduling`)
+    - `src/main/java/com/ande/pubquizzz/config/CacheConfig.java` (`recordStats()`)
+- Step 4 done: Added configurable properties:
+    - `src/main/resources/application.properties`
+        - `app.cache.metrics.enabled=true`
+        - `app.cache.metrics.log-interval-ms=60000`
+- Step 5 done: Verification passed:
+    - `./mvnw.cmd "-Dtest=CacheMetricsLoggingServiceTest" test` (PASS)
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+
+### Phase 119: Global Cache Invalidation on Successful Writes ✅ COMPLETE
+
+- Step 1 done (TDD RED): Updated cache annotation contract tests to require shared global invalidation annotation on
+  all write methods:
+    - `src/test/java/com/ande/pubquizzz/service/CacheAnnotationsTest.java`
+    - (and aligned service-specific cache annotation expectation in
+      `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java`)
+- Step 2 done (TDD GREEN): Introduced shared annotation for clean-all eviction with default
+  `beforeInvocation=false` behavior (only after successful write):
+    - `src/main/java/com/ande/pubquizzz/cache/InvalidateAllAppCaches.java`
+- Step 3 done: Refactored write services to use shared clean-all annotation, removed per-method fine-grained eviction
+  blocks:
+    - `src/main/java/com/ande/pubquizzz/service/QuizService.java`
+    - `src/main/java/com/ande/pubquizzz/service/ResultService.java`
+    - `src/main/java/com/ande/pubquizzz/service/TeamService.java`
+    - `src/main/java/com/ande/pubquizzz/service/NewsService.java`
+- Step 4 done: Verified cache admin endpoint/service behavior and cache contracts still pass:
+    - `./mvnw.cmd "-Dtest=CacheAnnotationsTest,NewsServiceTest,CacheAdminServiceTest,AdminCacheControllerTest" test` (
+      PASS)
+- Step 5 done: Full verification passed:
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+
+### Phase 118: Backend Caching + Admin Cache Invalidate ✅ COMPLETE
+
+- Step 1 done (TDD RED/GREEN): Added cache admin tests first, then implemented backend cache admin feature:
+    - tests added:
+        - `src/test/java/com/ande/pubquizzz/service/CacheAdminServiceTest.java`
+        - `src/test/java/com/ande/pubquizzz/controller/AdminCacheControllerTest.java`
+    - implementation added:
+        - `src/main/java/com/ande/pubquizzz/service/CacheAdminService.java`
+        - `src/main/java/com/ande/pubquizzz/controller/AdminCacheController.java`
+        - `src/main/java/com/ande/pubquizzz/config/CacheConfig.java`
+    - app wiring updated:
+        - `src/main/java/com/ande/pubquizzz/PubQuizzzApplication.java` (`@EnableCaching`)
+        - `pom.xml` (cache + caffeine dependencies)
+- Step 2 done: Added service-level caching and write-triggered cache invalidation:
+    - `src/main/java/com/ande/pubquizzz/service/QuizService.java`
+    - `src/main/java/com/ande/pubquizzz/service/ResultService.java`
+    - `src/main/java/com/ande/pubquizzz/service/TeamService.java`
+    - `src/main/java/com/ande/pubquizzz/service/NewsService.java`
+- Step 3 done (TDD RED/GREEN): Added/updated backend tests for caching contract and compatibility:
+    - added `src/test/java/com/ande/pubquizzz/service/CacheAnnotationsTest.java`
+    - updated `src/test/java/com/ande/pubquizzz/service/NewsServiceTest.java`
+    - updated `src/test/java/com/ande/pubquizzz/controller/SecurityTestConfig.java` with test cache manager bean.
+- Step 4 done (TDD RED/GREEN): Added admin UI button + frontend behavior/tests for manual cache clear-all:
+    - updated `src/main/webapp/src/admin/admin_main.html` (button + status message container)
+    - updated `src/main/webapp/src/js/admin_functions.ts` (invalidate handler)
+    - updated `src/main/webapp/src/js/admin_functions.test.ts` (new test coverage)
+- Step 5 done: Full verification passed:
+    - `./mvnw.cmd clean verify` (BUILD SUCCESS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+
 ### Phase 117: Shared Safe Query Logging for Security Handlers ✅ COMPLETE
 
 - Step 1 done (TDD RED): Added failing tests in

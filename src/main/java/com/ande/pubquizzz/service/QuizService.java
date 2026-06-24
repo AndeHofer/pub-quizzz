@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.service;
 
+import com.ande.pubquizzz.cache.InvalidateAllAppCaches;
 import com.ande.pubquizzz.database.entities.Hint;
 import com.ande.pubquizzz.database.entities.Quiz;
 import com.ande.pubquizzz.database.repositories.QuizRepository;
@@ -12,12 +13,17 @@ import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.mapper.QuizMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.ande.pubquizzz.config.CacheConfig.QUIZ_BY_ID;
+import static com.ande.pubquizzz.config.CacheConfig.QUIZ_DETAIL_BY_ID;
+import static com.ande.pubquizzz.config.CacheConfig.QUIZZES_ALL;
 
 @Slf4j
 @Service
@@ -31,6 +37,7 @@ public class QuizService {
     private final DocumentStorageService documentStorageService;
 
     @Transactional(readOnly = true)
+    @Cacheable(QUIZZES_ALL)
     public List<QuizDTO> getAllQuizzes() {
         log.debug("Fetching all quizzes");
         return quizRepository.findAll().stream()
@@ -39,18 +46,21 @@ public class QuizService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = QUIZ_BY_ID, key = "#id")
     public Optional<QuizDTO> getQuizById(Long id) {
         log.debug("Fetching quiz with ID: {}", id);
         return quizRepository.findById(id).map(quizMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = QUIZ_DETAIL_BY_ID, key = "#id")
     public Optional<QuizDetailDTO> getQuizDetailById(Long id) {
         log.debug("Fetching quiz detail with ID: {}", id);
         return quizRepository.findById(id).map(quizMapper::toDetailDTO);
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public QuizDTO createQuiz(CreateQuizRequest request) {
         Quiz quiz = new Quiz();
         quiz.setPubDate(request.getPubDate() != null ? request.getPubDate() : LocalDate.now());
@@ -65,6 +75,7 @@ public class QuizService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public QuizDTO updateQuiz(Long id, LocalDate pubDate, LocalDate submitDate) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz nicht gefunden: " + id));
@@ -76,6 +87,7 @@ public class QuizService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public QuizDTO updateQuizFull(Long id, CreateQuizRequest request) {
         log.info("Fully updating quiz with ID: {}", id);
         Quiz quiz = quizRepository.findById(id)
@@ -120,6 +132,7 @@ public class QuizService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public boolean deleteQuiz(Long id) {
         Quiz quiz = quizRepository.findById(id).orElse(null);
         if (quiz == null) {

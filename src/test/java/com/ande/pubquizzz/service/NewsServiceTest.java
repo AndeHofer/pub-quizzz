@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.service;
 
+import com.ande.pubquizzz.cache.InvalidateAllAppCaches;
 import com.ande.pubquizzz.database.entities.News;
 import com.ande.pubquizzz.database.repositories.NewsRepository;
 import com.ande.pubquizzz.dto.CreateNewsRequest;
@@ -11,7 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+
+import java.lang.reflect.Method;
 
 import java.time.Instant;
 import java.util.List;
@@ -47,6 +51,15 @@ class NewsServiceTest {
         assertEquals(2, result.size());
         assertEquals("Neu", result.getFirst().getTitle());
         assertEquals("Alt", result.get(1).getTitle());
+    }
+
+    @Test
+    void getLatestNews_hasCacheableAnnotation() throws NoSuchMethodException {
+        Method method = NewsService.class.getMethod("getLatestNews", int.class);
+        Cacheable cacheable = method.getAnnotation(Cacheable.class);
+
+        assertNotNull(cacheable);
+        assertEquals("news.latest", cacheable.value()[0]);
     }
 
     @Test
@@ -92,6 +105,14 @@ class NewsServiceTest {
         assertEquals(true, result.getFirst().isShowOnHomePage());
         assertEquals(false, result.get(1).isShowOnHomePage());
         verify(newsRepository).findAllByOrderByCreatedAtDescNewsIdDesc();
+    }
+
+    @Test
+    void createNews_hasGlobalInvalidateAnnotation() throws NoSuchMethodException {
+        Method method = NewsService.class.getMethod("createNews", CreateNewsRequest.class);
+        InvalidateAllAppCaches invalidateAllAppCaches = method.getAnnotation(InvalidateAllAppCaches.class);
+
+        assertNotNull(invalidateAllAppCaches);
     }
 
     @Test

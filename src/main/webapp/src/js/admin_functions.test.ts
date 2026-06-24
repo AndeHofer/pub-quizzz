@@ -1,5 +1,5 @@
-import {describe, expect, it} from 'vitest';
-import {renderTable, showError, trustedHtml} from './admin_functions';
+import {describe, expect, it, vi} from 'vitest';
+import {invalidateCache, renderTable, showError, trustedHtml} from './admin_functions';
 
 describe('admin_functions rendering helpers', () => {
     it('escapes untrusted table headers and cell content', () => {
@@ -29,5 +29,19 @@ describe('admin_functions rendering helpers', () => {
         const markup = showError('<script>alert(1)</script>');
         expect(markup).not.toContain('<script>alert(1)</script>');
         expect(markup).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    });
+
+    it('invalidateCache calls admin endpoint and sets success message', async () => {
+        const apiFetchFn = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({clearedCount: 4})
+        });
+        const confirmFn = vi.fn(() => true);
+        const msgDiv = {style: {color: ''}, textContent: ''} as unknown as HTMLElement;
+
+        await invalidateCache(apiFetchFn, confirmFn, msgDiv);
+
+        expect(apiFetchFn).toHaveBeenCalledWith('/admin/cache/invalidate', {method: 'POST'});
+        expect(msgDiv.textContent).toContain('Cache geleert (4 Cache(s)).');
     });
 });

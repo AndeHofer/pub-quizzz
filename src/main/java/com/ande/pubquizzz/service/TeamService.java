@@ -1,5 +1,6 @@
 package com.ande.pubquizzz.service;
 
+import com.ande.pubquizzz.cache.InvalidateAllAppCaches;
 import com.ande.pubquizzz.database.entities.Team;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
@@ -9,11 +10,15 @@ import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.mapper.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.ande.pubquizzz.config.CacheConfig.TEAMS_ALL;
+import static com.ande.pubquizzz.config.CacheConfig.TEAM_BY_ID;
 
 @Slf4j
 @Service
@@ -25,6 +30,7 @@ public class TeamService {
     private final TeamMapper teamMapper;
 
     @Transactional(readOnly = true)
+    @Cacheable(TEAMS_ALL)
     public List<TeamDTO> getAllTeams() {
         log.debug("Fetching all teams");
         return teamRepository.findAll().stream()
@@ -33,12 +39,14 @@ public class TeamService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = TEAM_BY_ID, key = "#id")
     public Optional<TeamDTO> getTeamById(Long id) {
         log.debug("Fetching team with ID: {}", id);
         return teamRepository.findById(id).map(teamMapper::toDTO);
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public TeamDTO createTeam(String teamName) {
         log.info("Creating new team: {}", teamName);
         if (teamRepository.existsByTeamName(teamName)) {
@@ -52,6 +60,7 @@ public class TeamService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public TeamDTO renameTeam(Long id, String newName) {
         log.info("Renaming team with ID: {} to '{}'", id, newName);
         Team team = teamRepository.findById(id)
@@ -66,6 +75,7 @@ public class TeamService {
     }
 
     @Transactional
+    @InvalidateAllAppCaches
     public boolean deleteTeam(Long id) {
         log.info("Deleting team with ID: {}", id);
         if (!teamRepository.existsById(id)) {
