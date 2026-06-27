@@ -31,10 +31,9 @@ SPRING_DATASOURCE_URL
 
 ## TODOS
 
-1) create Top 10 overall results
-2) caching mechanism for results -> cache refresh when database change
-3) add text for hints before hint revealed like already possible with pics
-4) merging teams should be possible
-5) usage statistics for admin
+1) Leaderboards presentation overhaul
+2) add text for hints before hint revealed like already possible with pics
+3) merging teams should be possible
+4) usage statistics for admin
 
 
