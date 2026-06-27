@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(defaultCsrfTokenRequestHandler()))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/favicon.ico", "/robots.txt").permitAll()
+                        .requestMatchers("/favicon.ico", "/robots.txt", "/login").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults())
