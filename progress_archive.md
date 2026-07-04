@@ -4,6 +4,165 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 129: DRY Refactor for Security Matcher + Leaderboard Init ✅ COMPLETE
+
+- Backend: extracted shared API-style request matcher and removed duplicated detection logic in security config and
+  entrypoint handling.
+- Frontend: introduced shared leaderboard page initialization helper and reused it across all leaderboard pages.
+- Added RED/GREEN coverage in:
+  - `src/test/java/com/ande/pubquizzz/security/SecurityRequestMatchersTest.java`
+  - `src/main/webapp/src/js/leaderboard-page.test.ts`
+- Verification passed: `npm --prefix src/main/webapp run test`, `npm --prefix src/main/webapp run type-check`,
+  `npm --prefix src/main/webapp run build`, `./mvnw.cmd verify`.
+
+### Phase 128: Allow Internal Error Dispatch Without Public /error ✅ COMPLETE
+
+- Updated security rules to permit only `DispatcherType.ERROR` for internal error dispatches while keeping normal
+  `/error` requests protected.
+- Extended unauthorized diagnostics with `dispatcherType`, `errorRequestUri`, and `errorStatusCode` logging fields.
+- Verification passed: `./mvnw.cmd "-Dtest=SecurityAccessTest,LoggingAuthenticationEntryPointTest" test`,
+  `npm --prefix src/main/webapp run type-check`, `./mvnw.cmd verify`.
+
+### Phase 127: Top-10 Single Results Leaderboard ✅ COMPLETE
+
+- Added backend endpoint `GET /api/leaderboard/top-results` with ranking logic and cache integration.
+- Added frontend page and navigation for top single results.
+- Completed follow-ups: removed redundant date from UI, removed unused frontend `quizDate` field, simplified leaderboard
+  top navigation.
+- Verification passed: targeted backend tests, frontend type-check/tests, and full `./mvnw.cmd clean verify`.
+
+### Phase 126: Fix Team Results Score-Row Index Crash ✅ COMPLETE
+
+- Added regression coverage for score tuple shape changes in team-results ranking.
+- Fixed score-row index usage in `ResultService` comparisons/tie checks.
+- Verification passed: `./mvnw.cmd "-Dtest=ResultServiceTeamResultsTest" test`, `./mvnw.cmd clean verify`,
+  `npm --prefix src/main/webapp run type-check`.
+
+### Phase 125: Team Detail URL Hard Cutover to teamId ✅ COMPLETE
+
+- Migrated backend and frontend routing/contracts from team-name lookup to `teamId`.
+- Updated DTO/query mappings and all affected leaderboard/quiz/team links.
+- Verification passed: targeted controller/service suite, full `./mvnw.cmd clean verify`, frontend type-check.
+
+### Phase 124: Remove Evictions From Cache Metrics ✅ COMPLETE
+
+- Removed eviction metrics from cache snapshot model and pretty-log output.
+- Updated formatter tests and totals alignment expectations.
+- Verification passed: cache metrics tests, `./mvnw.cmd clean verify`, frontend type-check.
+
+### Phase 123: Short Cache Invalidation Logs ✅ COMPLETE
+
+- Added centralized invalidation logging aspect with concise trigger format.
+- Aligned manual admin invalidation log wording.
+- Verification passed: `CacheInvalidationLoggingAspectTest`, `AdminCacheControllerTest`, full verify, frontend
+  type-check.
+
+### Phase 122: Align Cache Metrics Table Columns ✅ COMPLETE
+
+- Reworked cache metrics pretty-table formatting for adaptive-width aligned columns.
+- Added long-name and separator alignment test coverage.
+- Verification passed: cache metrics tests, full verify, frontend type-check.
+
+### Phase 121: Pretty Aggregated Cache Metrics Log ✅ COMPLETE
+
+- Replaced per-cache log spam with one aggregated formatted metrics log entry per interval.
+- Verification passed: full verify and frontend type-check.
+
+### Phase 120: Cache Hit/Miss Logging ✅ COMPLETE
+
+- Implemented periodic cache metrics logging service and scheduler wiring.
+- Enabled cache stats collection and added configurable properties.
+- Verification passed: `CacheMetricsLoggingServiceTest`, full verify, frontend type-check.
+
+### Phase 119: Global Cache Invalidation on Successful Writes ✅ COMPLETE
+
+- Introduced shared `InvalidateAllAppCaches` annotation and applied it to write paths.
+- Ensured invalidation runs after successful writes only.
+- Verification passed: targeted cache tests and full verify.
+
+### Phase 118: Backend Caching + Admin Cache Invalidate ✅ COMPLETE
+
+- Added admin cache clear-all endpoint/service and Caffeine cache configuration.
+- Added service-level caching plus frontend admin invalidate action and tests.
+- Verification passed: full backend+frontend verification (`./mvnw.cmd clean verify`, frontend test/type-check/build).
+
+### Phase 117: Shared Safe Query Logging for Security Handlers ✅ COMPLETE
+
+- Added shared helper for sanitized query-string/session/header log values.
+- Refactored both 401 and 403 handlers to use shared logic.
+- Verification passed: targeted security tests, frontend build/type-check, full verify.
+
+### Phase 116: Safe Full Query String Logging in 403 Handler ✅ COMPLETE
+
+- Added sanitized full query logging, original length logging, and truncation marker handling in 403 logs.
+- Verification passed: `LoggingAccessDeniedHandlerTest`, frontend checks, full verify.
+
+### Phase 115: Security Package Javadocs ✅ COMPLETE
+
+- Added/updated class-level Javadocs for core security classes and internal filters.
+- Cleaned annotation/Javadoc ordering and removed unnecessary inline comments.
+
+### Phase 114: Javadoc for LoggingAuthenticationEntryPoint ✅ COMPLETE
+
+- Added class-level Javadoc documenting runtime behavior for JSON 401 vs browser redirect flow.
+
+### Phase 113: 403 Relogin Must Force Logout ✅ COMPLETE
+
+- Replaced relogin link with logout POST form and CSRF field population.
+- Added backend/frontend tests proving forced logout behavior.
+- Verification passed: frontend test/type-check/build and `./mvnw.cmd clean verify`.
+
+### Phase 112: Remove Default Signed-Out Banner ✅ COMPLETE
+
+- Changed logout success target to `/login` (no query marker).
+- Verification passed: frontend checks and full verify.
+
+### Phase 111: Spring-Only Logout Navigation ✅ COMPLETE
+
+- Switched logout flow to native Spring form POST and removed JS logout trigger module.
+- Added/updated backend and frontend tests for CSRF + redirect behavior.
+- Verification passed: frontend checks and full verify.
+
+### Phase 110: Remove Redundant relogin Query Flag ✅ COMPLETE
+
+- Removed `?relogin=1` redirect parameter and aligned tests to `/login`.
+- Verification passed: frontend checks and full verify.
+
+### Phase 109B: Frontend Test-Seam Cleanup (Optional/Moderate) ✅ COMPLETE
+
+- Removed redirect/scheduler injection seam from auth-expiry helper.
+- Removed redundant `export {}` stubs where safe.
+- Verification passed: frontend checks and full verify.
+
+### Phase 109A: Frontend Test-Seam Cleanup (Low Risk) ✅ COMPLETE
+
+- Removed explicit test-only API from admin API loader.
+- Removed index logout trigger injection seam while preserving behavior.
+- Verification passed: frontend checks and full verify.
+
+### Phase 108: 403 Module Export Simplification ✅ COMPLETE
+
+- Removed redundant re-export from `403.ts` and kept behavior-only wiring.
+- Verification passed: frontend checks and full verify.
+
+### Phase 107: Logout Action Option Injection Removal ✅ COMPLETE
+
+- Removed runtime option-injection seam from logout-action flow and adapted tests.
+- Verification passed: frontend checks and full verify.
+
+### Phase 106: Security Log Correlation Fields ✅ COMPLETE
+
+- Added correlation fields to 401/403 logs (`sessionId`, `sessionValid`, client/proxy headers).
+- Extended logging tests for both handlers.
+- Verification passed: frontend checks and full verify.
+
+### Phase 105: News Section Rebuild ✅ COMPLETE
+
+- Rebuilt news management to dedicated admin page (no modal CRUD), added `showOnHomePage`, and homepage top-3 behavior.
+- Added backend/frontend tests and backup/restore compatibility updates.
+- Included follow-up hotfixes for schema compatibility and missing authoring hint block.
+- Verification passed repeatedly with frontend tests/type-check/build and `./mvnw.cmd clean verify`.
+
 ### Phase 93: Login Security Hardening ✅ COMPLETE
 
 - Added security integration tests for `/login` cache headers and login CSRF enforcement.

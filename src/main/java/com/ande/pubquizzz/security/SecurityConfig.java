@@ -16,7 +16,6 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -64,7 +63,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login")
                         .permitAll())
                 .exceptionHandling(exceptions -> exceptions
-                        .defaultAuthenticationEntryPointFor(new LoggingAuthenticationEntryPoint(), apiRequestMatcher())
+                        .defaultAuthenticationEntryPointFor(new LoggingAuthenticationEntryPoint(), SecurityRequestMatchers.apiStyleRequestMatcher())
                         .accessDeniedHandler(new LoggingAccessDeniedHandler()))
                 .addFilterBefore(new AuthenticatedLoginRedirectFilter(), DefaultLoginPageGeneratingFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
@@ -81,23 +80,6 @@ public class SecurityConfig {
 
     private CsrfTokenRequestHandler defaultCsrfTokenRequestHandler() {
         return new CsrfTokenRequestAttributeHandler();
-    }
-
-    private RequestMatcher apiRequestMatcher() {
-        return request -> {
-            String uri = request.getRequestURI();
-            if (uri != null && uri.startsWith("/api/")) {
-                return true;
-            }
-
-            String accept = request.getHeader("Accept");
-            if (accept != null && accept.toLowerCase().contains("application/json")) {
-                return true;
-            }
-
-            String requestedWith = request.getHeader("X-Requested-With");
-            return "XMLHttpRequest".equalsIgnoreCase(requestedWith);
-        };
     }
 
     /**

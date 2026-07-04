@@ -41,7 +41,7 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          org.springframework.security.core.AuthenticationException authException) throws IOException {
-        boolean apiStyleRequest = isApiStyleRequest(request);
+        boolean apiStyleRequest = SecurityRequestMatchers.isApiStyleRequest(request);
         String username = resolveUsername();
         String sessionId = SecurityLogHelper.resolveSessionId(request);
         String sessionValid = SecurityLogHelper.resolveSessionValid(request);
@@ -113,21 +113,6 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
         } catch (jakarta.servlet.ServletException ex) {
             throw new IOException("Login redirect failed", ex);
         }
-    }
-
-    private boolean isApiStyleRequest(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        if (uri != null && uri.startsWith("/api/")) {
-            return true;
-        }
-
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.toLowerCase().contains(JSON_CONTENT_TYPE)) {
-            return true;
-        }
-
-        String requestedWith = request.getHeader("X-Requested-With");
-        return "XMLHttpRequest".equalsIgnoreCase(requestedWith);
     }
 
     private String resolveUsername() {

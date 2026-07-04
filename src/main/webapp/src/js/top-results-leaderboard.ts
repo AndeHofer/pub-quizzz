@@ -1,5 +1,6 @@
 import {TopResultLeaderboardEntry} from './types';
-import {getMedal, renderLeaderboard, loadLeaderboard} from './leaderboard-common';
+import {getMedal} from './leaderboard-common';
+import {initLeaderboardPage} from './leaderboard-page';
 import {escapeHtml} from './html-utils';
 
 export function buildTopResultsRowMarkup(e: TopResultLeaderboardEntry): string {
@@ -14,19 +15,8 @@ export function buildTopResultsRowMarkup(e: TopResultLeaderboardEntry): string {
     `;
 }
 
-window.addEventListener('load', () => {
-    loadLeaderboard<TopResultLeaderboardEntry>(
-        '/api/leaderboard/top-results',
-        (entries: TopResultLeaderboardEntry[]) => {
-            renderLeaderboard<TopResultLeaderboardEntry>(
-                entries,
-                'leaderboardBody',
-                buildTopResultsRowMarkup,
-                'Noch keine Ergebnisse vorhanden.'
-            );
-        },
-        'loading',
-        'leaderboardTable',
-        'errorMessage'
-    );
+initLeaderboardPage<TopResultLeaderboardEntry>({
+    apiUrl: '/api/leaderboard/top-results',
+    rowRenderer: buildTopResultsRowMarkup,
+    fallbackMessage: 'Noch keine Ergebnisse vorhanden.'
 });

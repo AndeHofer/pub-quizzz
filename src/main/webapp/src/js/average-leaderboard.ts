@@ -1,15 +1,11 @@
 import {AverageLeaderboardEntry} from './types';
-import {getMedal, renderLeaderboard, loadLeaderboard} from './leaderboard-common';
+import {getMedal} from './leaderboard-common';
+import {initLeaderboardPage} from './leaderboard-page';
 import {escapeHtml} from './html-utils';
 
-window.addEventListener('load', () => {
-    loadLeaderboard<AverageLeaderboardEntry>(
-        '/api/leaderboard/average',
-        (entries: AverageLeaderboardEntry[]) => {
-            renderLeaderboard<AverageLeaderboardEntry>(
-                entries,
-                'leaderboardBody',
-                (e) => `
+initLeaderboardPage<AverageLeaderboardEntry>({
+    apiUrl: '/api/leaderboard/average',
+    rowRenderer: (e) => `
                     <tr class="border-b border-gray-200 hover:bg-gray-50">
                         <td class="py-3 px-4 font-semibold text-center">${getMedal(e.rank)}</td>
                         <td class="py-3 px-4 font-medium"><a href="/team.html?teamId=${encodeURIComponent(String(e.teamId))}&source=average" class="text-blue-600 hover:underline">${escapeHtml(e.teamName)}</a></td>
@@ -17,11 +13,5 @@ window.addEventListener('load', () => {
                         <td class="py-3 px-4 text-center text-gray-600">${e.quizCount}</td>
                     </tr>
                 `,
-                'Noch keine Ergebnisse vorhanden.'
-            );
-        },
-        'loading',
-        'leaderboardTable',
-        'errorMessage'
-    );
+    fallbackMessage: 'Noch keine Ergebnisse vorhanden.'
 });
