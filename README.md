@@ -29,8 +29,9 @@ SPRING_DATASOURCE_URL
 
 ## TODOS
 
-1) add text for hints before a hint revealed like already possible with pics
-2) merging teams should be possible
-3) usage statistics for admin
+1) Move project to Codeberg
+2) add text for hints before a hint revealed like already possible with pics
+3) merging teams should be possible
+4) usage statistics for admin
 
 
