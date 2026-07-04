@@ -3,6 +3,8 @@ package com.ande.pubquizzz.security;
 import com.ande.pubquizzz.controller.AdminBackupController;
 import com.ande.pubquizzz.controller.SecurityTestConfig;
 import com.ande.pubquizzz.service.BackupService;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
@@ -79,6 +81,19 @@ class SecurityAccessTest {
         mockMvc.perform(get("/admin/quizzes"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void errorDispatcherRequest_unauthenticated_isNotRedirectedToLogin() throws Exception {
+        mockMvc.perform(get("/error")
+                        .with(request -> {
+                            request.setDispatcherType(DispatcherType.ERROR);
+                            request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/missing-page");
+                            request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 404);
+                            return request;
+                        }))
+                .andExpect(status().is4xxClientError())
+                .andExpect(header().doesNotExist("Location"));
     }
 
     @Test

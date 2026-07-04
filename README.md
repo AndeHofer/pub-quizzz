@@ -7,9 +7,7 @@ A simple webpage to archive results, quiz and answers.
 :seedling:Spring Boot 4.x  
 Java 25  
 JUnit  
-Mockito  
-Spring Test  
-Spring Security  
+Mockito
 Lombok  
 MapStruct  
 TypeScript  
@@ -31,8 +29,8 @@ SPRING_DATASOURCE_URL
 
 ## TODOS
 
-1) Leaderboards presentation overhaul
-2) add text for hints before hint revealed like already possible with pics
+1) Leaderboard presentation overhaul
+2) add text for hints before a hint revealed like already possible with pics
 3) merging teams should be possible
 4) usage statistics for admin
 

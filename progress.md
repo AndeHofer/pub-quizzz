@@ -2,6 +2,30 @@
 
 ## Open Tasks
 
+### Phase 128: Allow Internal Error Dispatch Without Public /error (In Progress)
+
+- Step 1 in progress: TDD scope and constraints confirmed.
+    - Public endpoints remain only `/login`, `/favicon.ico`, `/robots.txt`.
+    - `/error` must NOT be public for normal requests.
+    - Approach: permit `DispatcherType.ERROR` only.
+- Step 2 pending (TDD RED): Add failing tests for error-dispatch behavior and richer `/error` diagnostics in auth logs.
+- Step 2 done (TDD RED): Added failing tests for internal error dispatch + auth log diagnostics:
+    - `src/test/java/com/ande/pubquizzz/security/SecurityAccessTest.java`
+        - `errorDispatcherRequest_unauthenticated_isNotRedirectedToLogin`
+    - `src/test/java/com/ande/pubquizzz/security/LoggingAuthenticationEntryPointTest.java`
+        - `commence_errorDispatch_includesDispatcherDiagnosticsInLogs`
+- Step 3 pending (TDD GREEN): Implement security config + logging changes.
+- Step 3 done (TDD GREEN): Implemented minimal fix for internal error dispatch and richer diagnostics:
+    - `src/main/java/com/ande/pubquizzz/security/SecurityConfig.java`
+        - permit only `DispatcherType.ERROR`
+    - `src/main/java/com/ande/pubquizzz/security/LoggingAuthenticationEntryPoint.java`
+        - added `dispatcherType`, `errorRequestUri`, `errorStatusCode` fields in 401 logs
+- Step 4 pending: Full verification (`./mvnw.cmd test`, `./mvnw.cmd verify`, frontend type-check).
+- Step 4 done: Full verification passed.
+    - `./mvnw.cmd "-Dtest=SecurityAccessTest,LoggingAuthenticationEntryPointTest" test` (PASS)
+    - `npm --prefix src/main/webapp run type-check` (PASS)
+    - `./mvnw.cmd verify` (BUILD SUCCESS)
+
 ### Phase 127: Top-10 Einzelergebnisse Rangliste (In Progress)
 
 - Step 6 in progress: UI-Feinschliff nach Nutzerfeedback.

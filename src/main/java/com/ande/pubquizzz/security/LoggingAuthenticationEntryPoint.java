@@ -9,6 +9,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Authentication entry point that logs all unauthorized access attempts with request context and then starts the
@@ -52,6 +53,15 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
         String rawQueryString = request.getQueryString();
         String queryString = SecurityLogHelper.sanitizeQueryStringForLog(rawQueryString);
         int queryStringLength = SecurityLogHelper.queryStringLength(rawQueryString);
+        String dispatcherType = request.getDispatcherType() != null
+                ? request.getDispatcherType().name()
+                : "-";
+        String errorRequestUri = SecurityLogHelper.safeLogValue(
+                (String) request.getAttribute("jakarta.servlet.error.request_uri")
+        );
+        String errorStatusCode = Optional.ofNullable(request.getAttribute("jakarta.servlet.error.status_code"))
+                .map(String::valueOf)
+                .orElse("-");
 
         if (apiStyleRequest) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -59,9 +69,12 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
             response.setContentType(JSON_CONTENT_TYPE);
             response.getWriter().write(UNAUTHENTICATED_ERROR_BODY);
 
-            log.warn("401 Unauthorized - mode=json, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nqueryString={}\nqueryStringLength={}\nexceptionType={}\nmessage={}",
+            log.warn("401 Unauthorized - mode=json, method={}\npath={}\ndispatcherType={}\nerrorRequestUri={}\nerrorStatusCode={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nqueryString={}\nqueryStringLength={}\nexceptionType={}\nmessage={}",
                     request.getMethod(),
                     request.getRequestURI(),
+                    dispatcherType,
+                    errorRequestUri,
+                    errorStatusCode,
                     username,
                     sessionId,
                     sessionValid,
@@ -77,9 +90,12 @@ public class LoggingAuthenticationEntryPoint implements AuthenticationEntryPoint
             return;
         }
 
-        log.warn("Redirect for 401 Unauthorized, method={}\npath={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nqueryString={}\nqueryStringLength={}\ntarget=/login\nexceptionType={}\nmessage={}",
+        log.warn("Redirect for 401 Unauthorized, method={}\npath={}\ndispatcherType={}\nerrorRequestUri={}\nerrorStatusCode={}\nuser={}\nsessionId={}\nsessionValid={}\nremoteAddr={}\nuserAgent={}\nforwardedFor={}\nforwardedProto={}\nforwardedHost={}\nqueryString={}\nqueryStringLength={}\ntarget=/login\nexceptionType={}\nmessage={}",
                 request.getMethod(),
                 request.getRequestURI(),
+                dispatcherType,
+                errorRequestUri,
+                errorStatusCode,
                 username,
                 sessionId,
                 sessionValid,

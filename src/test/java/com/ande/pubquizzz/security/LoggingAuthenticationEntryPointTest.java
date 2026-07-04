@@ -3,6 +3,8 @@ package com.ande.pubquizzz.security;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -130,5 +132,32 @@ class LoggingAuthenticationEntryPointTest {
 //        assertNotNull(message);
 //        assertTrue(message.contains("queryStringLength=5000"));
 //        assertTrue(message.contains("...[truncated]"));
+    }
+
+    @Test
+    void commence_errorDispatch_includesDispatcherDiagnosticsInLogs() throws Exception {
+        LoggingAuthenticationEntryPoint entryPoint = new LoggingAuthenticationEntryPoint();
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/error");
+        request.setDispatcherType(DispatcherType.ERROR);
+        request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/missing-page");
+        request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 404);
+        request.addHeader("Accept", "text/html");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        appender.start();
+        logger.addAppender(appender);
+
+        entryPoint.commence(request, response, new InsufficientAuthenticationException("Auth required"));
+
+        assertEquals(302, response.getStatus());
+        assertFalse(appender.list.isEmpty());
+
+        ILoggingEvent event = appender.list.get(0);
+        String message = event.getFormattedMessage();
+        assertNotNull(message);
+        assertTrue(message.contains("path=/error"));
+        assertTrue(message.contains("dispatcherType=ERROR"));
+        assertTrue(message.contains("errorRequestUri=/missing-page"));
+        assertTrue(message.contains("errorStatusCode=404"));
     }
 }

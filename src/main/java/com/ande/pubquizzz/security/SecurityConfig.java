@@ -1,6 +1,7 @@
 package com.ande.pubquizzz.security;
 
 import com.ande.pubquizzz.database.entities.Role;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,6 +55,7 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(defaultCsrfTokenRequestHandler()))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/favicon.ico", "/robots.txt", "/login").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
