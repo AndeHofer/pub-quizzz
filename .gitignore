@@ -14,6 +14,7 @@ src/main/resources/static/
 node_modules/
 docs/superpowers
 nul
+server-info
 # Maven release plugin
 release.properties
 pom.xml.releaseBackup
