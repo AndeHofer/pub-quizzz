@@ -29,10 +29,11 @@ SPRING_DATASOURCE_URL
 
 ## TODOS
 
-1) Rankings for actual year, past years and overall
-2) Move project to Codeberg
-3) add text for hints before a hint revealed like already possible with pics
-4) merging teams should be possible
-5) usage statistics for admin
+- Rankings for actual year, past years and overall
+- Move project to Codeberg
+- add text for hints before a hint revealed like already possible with pics
+- merging teams should be possible
+- usage statistics for admin
+- top 10 does not update automaticly --> check the cache mechanism
 
 
