@@ -20,3 +20,4 @@ release.properties
 pom.xml.releaseBackup
 pom.xml.next
 pom.xml.tag
+*.log
