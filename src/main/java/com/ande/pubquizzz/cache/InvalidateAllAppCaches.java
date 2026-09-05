@@ -21,6 +21,7 @@ import static com.ande.pubquizzz.config.CacheConfig.RESULTS_FOR_TEAM;
 import static com.ande.pubquizzz.config.CacheConfig.RESULTS_LIST;
 import static com.ande.pubquizzz.config.CacheConfig.TEAMS_ALL;
 import static com.ande.pubquizzz.config.CacheConfig.TEAM_BY_ID;
+import static com.ande.pubquizzz.config.CacheConfig.TOP_RESULTS_LEADERBOARD;
 
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -36,6 +37,7 @@ import static com.ande.pubquizzz.config.CacheConfig.TEAM_BY_ID;
         POINTS_LEADERBOARD,
         AVERAGE_LEADERBOARD,
         MEDAL_LEADERBOARD,
+        TOP_RESULTS_LEADERBOARD,
         RESULTS_FOR_TEAM,
         NEWS_LATEST,
         NEWS_ADMIN_ALL

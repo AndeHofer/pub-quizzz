@@ -2,6 +2,22 @@
 
 ## Open Tasks
 
+### Phase 131: Top-Results Cache Invalidation Bugfix ✅ COMPLETE
+
+- Step 1 done: Investigated why the Top 10 page did not reflect an additional result.
+  - Frontend confirmed: leaderboard pages fetch once on window `load`; there is no live refresh.
+  - Backend confirmed: `leaderboard.topResults` is cacheable but was not included in global cache invalidation.
+- Step 2 done: Added integration regression test `TopResultsLeaderboardCacheInvalidationIntegrationTest`.
+  - Verified RED first: after `POST /admin/results`, `/api/leaderboard/top-results` still returned the old cached
+    leader.
+- Step 3 done: Added `TOP_RESULTS_LEADERBOARD` to `@InvalidateAllAppCaches` so result create/update/delete clears the
+  top-results cache too.
+- Step 4 done: Full verification passed.
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd verify`
+
 ### Phase 130: Progress File Cleanup (In Progress)
 
 - Step 1 done: Reviewed `AGENTS.md` constraints and current progress files.

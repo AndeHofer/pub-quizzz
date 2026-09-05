@@ -34,6 +34,5 @@ SPRING_DATASOURCE_URL
 - add text for hints before a hint revealed like already possible with pics
 - merging teams should be possible
 - usage statistics for admin
-- top 10 does not update automatically --> check the cache mechanism
 
 
