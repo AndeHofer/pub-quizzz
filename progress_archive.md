@@ -4,6 +4,16 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 132: Leaderboard Year Tabs ✅ COMPLETE
+
+- Added backend controller/service tests first for optional `year` leaderboard queries and `/api/leaderboard/years`.
+- Implemented year-aware repository queries, service caching keys, and controller endpoints.
+- Added integration tests for all four leaderboard endpoints with year-specific recalculation.
+- Added frontend tests for dynamic year tabs shared by the four leaderboard pages, then implemented the shared
+  year tabs UI and year-aware refetch logic.
+- Verification passed: `npm --prefix src/main/webapp run test`, `npm --prefix src/main/webapp run type-check`,
+  `npm --prefix src/main/webapp run build`, `./mvnw.cmd verify`.
+
 ### Phase 131: Top-Results Cache Invalidation Bugfix ✅ COMPLETE
 
 - Investigated why the Top 10 page did not reflect an additional result: frontend fetches leaderboards once on

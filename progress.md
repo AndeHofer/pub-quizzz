@@ -6,6 +6,21 @@ None currently open.
 
 ## Finished Phases
 
+### Phase 135: Leaderboard Table 20px Gap Fix ✅ COMPLETE
+
+- Root cause: global `table { mt-5 }` rule in `src/main/webapp/src/css/styles.css:122-124` adds a
+  20px top margin to every `<table>` site-wide, creating an oversized/inconsistent gap above the
+  leaderboard tables once loaded (they already sit below the year-tabs wrapper's own spacing).
+- Added a markup regression test asserting all four leaderboard tables carry an `mt-0` override
+  (`leaderboard-pages-markup.test.ts`), verified RED first.
+- Added `mt-0` to `<table id="leaderboardTable">` on all four leaderboard pages (points/average/medal/
+  top-results), scoped fix — other pages using the global `table` style keep their existing spacing.
+- Verification passed:
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd verify`
+
 ### Phase 134: ResultService Leaderboard Split ✅ COMPLETE
 
 - Step 1 done: Confirmed clean baseline (`./mvnw.cmd verify` green) before refactor.
@@ -35,20 +50,6 @@ None currently open.
 - Step 3 done: Added the missing tab container to the four leaderboard pages and suppressed rendering for 0-1 years.
 - Step 4 done: Focused frontend tests and full project verification passed.
   - `npm --prefix src/main/webapp run test -- leaderboard-page.test.ts leaderboard-pages-markup.test.ts`
-  - `npm --prefix src/main/webapp run test`
-  - `npm --prefix src/main/webapp run type-check`
-  - `npm --prefix src/main/webapp run build`
-  - `./mvnw.cmd verify`
-
-### Phase 132: Leaderboard Year Tabs ✅ COMPLETE
-
-- Step 1 done: Added backend controller/service tests first for optional `year` leaderboard queries and
-  `/api/leaderboard/years`.
-- Step 2 done: Implemented year-aware repository queries, service caching keys, and controller endpoints.
-- Step 3 done: Added integration tests for all four leaderboard endpoints with year-specific recalculation.
-- Step 4 done: Added frontend tests for dynamic year tabs shared by the four leaderboard pages.
-- Step 5 done: Implemented shared year tabs UI and year-aware refetch logic for the four leaderboard pages only.
-- Step 6 done: Full verification passed.
   - `npm --prefix src/main/webapp run test`
   - `npm --prefix src/main/webapp run type-check`
   - `npm --prefix src/main/webapp run build`

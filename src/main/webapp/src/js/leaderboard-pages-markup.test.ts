@@ -15,6 +15,21 @@ describe('leaderboard page markup', () => {
             expect(page).toContain('id="leaderboardYearTabs"');
         });
     });
+
+    it('overrides the global table top margin so no extra 20px gap appears above the leaderboard table', async () => {
+        const pages = await Promise.all([
+            readPage('/points-leaderboard.html'),
+            readPage('/average-leaderboard.html'),
+            readPage('/medal-leaderboard.html'),
+            readPage('/top-results-leaderboard.html'),
+        ]);
+
+        pages.forEach(page => {
+            const tableTagMatch = page.match(/<table id="leaderboardTable"[^>]*>/);
+            expect(tableTagMatch).not.toBeNull();
+            expect(tableTagMatch![0]).toMatch(/class="[^"]*\bmt-0\b[^"]*"/);
+        });
+    });
 });
 
 async function readPage(path: string): Promise<string> {
