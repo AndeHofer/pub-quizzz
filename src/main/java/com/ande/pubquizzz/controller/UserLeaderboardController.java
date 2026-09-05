@@ -8,6 +8,7 @@ import com.ande.pubquizzz.service.ResultService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,26 +23,32 @@ public class UserLeaderboardController {
     private final ResultService resultService;
 
     @GetMapping("/leaderboard/points")
-    public List<PointsLeaderboardEntry> getPointsLeaderboard() {
-        log.debug("GET /api/leaderboard/points");
-        return resultService.getPointsLeaderboard();
+    public List<PointsLeaderboardEntry> getPointsLeaderboard(@RequestParam(required = false) Integer year) {
+        log.debug("GET /api/leaderboard/points - year={}", year);
+        return resultService.getPointsLeaderboard(year);
     }
 
     @GetMapping("/leaderboard/medals")
-    public List<MedalLeaderboardEntry> getMedalLeaderboard() {
-        log.debug("GET /api/leaderboard/medals");
-        return resultService.getMedalLeaderboard();
+    public List<MedalLeaderboardEntry> getMedalLeaderboard(@RequestParam(required = false) Integer year) {
+        log.debug("GET /api/leaderboard/medals - year={}", year);
+        return resultService.getMedalLeaderboard(year);
     }
 
     @GetMapping("/leaderboard/average")
-    public List<AverageLeaderboardEntry> getAverageLeaderboard() {
-        log.debug("GET /api/leaderboard/average");
-        return resultService.getAverageLeaderboard();
+    public List<AverageLeaderboardEntry> getAverageLeaderboard(@RequestParam(required = false) Integer year) {
+        log.debug("GET /api/leaderboard/average - year={}", year);
+        return resultService.getAverageLeaderboard(year);
     }
 
     @GetMapping("/leaderboard/top-results")
-    public List<TopResultLeaderboardEntry> getTopResultsLeaderboard() {
-        log.debug("GET /api/leaderboard/top-results");
-        return resultService.getTopResultsLeaderboard();
+    public List<TopResultLeaderboardEntry> getTopResultsLeaderboard(@RequestParam(required = false) Integer year) {
+        log.debug("GET /api/leaderboard/top-results - year={}", year);
+        return resultService.getTopResultsLeaderboard(year);
+    }
+
+    @GetMapping("/leaderboard/years")
+    public List<Integer> getLeaderboardYears() {
+        log.debug("GET /api/leaderboard/years");
+        return resultService.getLeaderboardYears();
     }
 }

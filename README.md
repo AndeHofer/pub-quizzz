@@ -29,7 +29,6 @@ SPRING_DATASOURCE_URL
 
 ## TODOS
 
-- Rankings for actual year, past years and overall
 - Move project to Codeberg
 - add text for hints before a hint revealed like already possible with pics
 - merging teams should be possible

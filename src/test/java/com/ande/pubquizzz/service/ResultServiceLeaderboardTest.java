@@ -37,7 +37,7 @@ class ResultServiceLeaderboardTest {
     @ParameterizedTest
     @MethodSource("pointsLeaderboardInputVariants")
     void getPointsLeaderboard_ranksEntriesByPointsForAnyInputOrder(List<Object[]> rows) {
-        when(resultRepository.findLeaderboardRaw()).thenReturn(rows);
+        when(resultRepository.findLeaderboardRaw(null)).thenReturn(rows);
 
         List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
 
@@ -70,7 +70,7 @@ class ResultServiceLeaderboardTest {
 
     @Test
     void getPointsLeaderboard_whenEmpty_returnsEmptyList() {
-        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of());
+        when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.of());
 
         List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
 
@@ -78,11 +78,26 @@ class ResultServiceLeaderboardTest {
     }
 
     @Test
+    void getPointsLeaderboard_withYear_usesYearFilteredRows() {
+        when(resultRepository.findLeaderboardRaw(2025)).thenReturn(List.of(
+                new Object[]{1L, "Alpha Team", 80L, 2L},
+                new Object[]{2L, "Beta Team", 50L, 2L}
+        ));
+
+        List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard(2025);
+
+        assertThat(result).extracting(PointsLeaderboardEntry::getTeamName)
+                .containsExactly("Alpha Team", "Beta Team");
+        assertThat(result).extracting(PointsLeaderboardEntry::getRank)
+                .containsExactly(1, 2);
+    }
+
+    @Test
     void getAverageLeaderboard_returnsEntriesRankedByAverage() {
         Object[] row1 = {2L, "Beta Team", 100L, 2L};
         Object[] row2 = {1L, "Alpha Team", 120L, 3L};
         Object[] row3 = {3L, "Gamma Team", 50L, 1L};
-        when(resultRepository.findLeaderboardRaw()).thenReturn(List.of(row1, row2, row3));
+        when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.of(row1, row2, row3));
 
         List<AverageLeaderboardEntry> result = resultService.getAverageLeaderboard();
 
@@ -104,8 +119,23 @@ class ResultServiceLeaderboardTest {
     }
 
     @Test
+    void getAverageLeaderboard_withYear_usesYearFilteredRows() {
+        when(resultRepository.findLeaderboardRaw(2025)).thenReturn(List.of(
+                new Object[]{2L, "Beta Team", 80L, 2L},
+                new Object[]{1L, "Alpha Team", 30L, 1L}
+        ));
+
+        List<AverageLeaderboardEntry> result = resultService.getAverageLeaderboard(2025);
+
+        assertThat(result).extracting(AverageLeaderboardEntry::getTeamName)
+                .containsExactly("Beta Team", "Alpha Team");
+        assertThat(result.get(0).getAveragePoints()).isEqualTo(40.0);
+        assertThat(result.get(1).getAveragePoints()).isEqualTo(30.0);
+    }
+
+    @Test
     void getMedalLeaderboard_appliesCompetitionRankingAndMedalCounts() {
-        when(resultRepository.findPerQuizTeamScoreBreakdownRaw()).thenReturn(List.of(
+        when(resultRepository.findPerQuizTeamScoreBreakdownRaw(null)).thenReturn(List.of(
                 new Object[]{1L, 1L, "Alpha Team", 40L, 3L, 1L},
                 new Object[]{1L, 2L, "Beta Team", 40L, 2L, 2L},
                 new Object[]{1L, 3L, "Gamma Team", 30L, 1L, 3L},
@@ -141,7 +171,7 @@ class ResultServiceLeaderboardTest {
 
     @Test
     void getMedalLeaderboard_excludesTeamsWithoutAnyMedal() {
-        when(resultRepository.findPerQuizTeamScoreBreakdownRaw()).thenReturn(List.of(
+        when(resultRepository.findPerQuizTeamScoreBreakdownRaw(null)).thenReturn(List.of(
                 new Object[]{1L, 1L, "Alpha Team", 60L, 4L, 1L},
                 new Object[]{1L, 2L, "Beta Team", 50L, 3L, 1L},
                 new Object[]{1L, 3L, "Gamma Team", 40L, 2L, 2L},
@@ -157,7 +187,7 @@ class ResultServiceLeaderboardTest {
 
     @Test
     void getMedalLeaderboard_usesSameTieRulesAsQuizRanking() {
-        when(resultRepository.findPerQuizTeamScoreBreakdownRaw()).thenReturn(List.of(
+        when(resultRepository.findPerQuizTeamScoreBreakdownRaw(null)).thenReturn(List.of(
                 new Object[]{1L, 1L, "Alpha Team", 40L, 3L, 1L},
                 new Object[]{1L, 2L, "Beta Team", 40L, 2L, 2L},
                 new Object[]{1L, 3L, "Gamma Team", 35L, 3L, 0L},
@@ -187,8 +217,27 @@ class ResultServiceLeaderboardTest {
     }
 
     @Test
+    void getMedalLeaderboard_withYear_usesYearFilteredRows() {
+        when(resultRepository.findPerQuizTeamScoreBreakdownRaw(2025)).thenReturn(List.of(
+                new Object[]{1L, 1L, "Alpha Team", 40L, 3L, 1L},
+                new Object[]{1L, 2L, "Beta Team", 35L, 2L, 1L},
+                new Object[]{2L, 2L, "Beta Team", 50L, 4L, 1L},
+                new Object[]{2L, 1L, "Alpha Team", 45L, 4L, 0L}
+        ));
+
+        List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard(2025);
+        Map<String, MedalLeaderboardEntry> byTeam = result.stream()
+                .collect(java.util.stream.Collectors.toMap(MedalLeaderboardEntry::getTeamName, e -> e));
+
+        assertThat(byTeam.get("Alpha Team").getGoldCount()).isEqualTo(1);
+        assertThat(byTeam.get("Alpha Team").getSilverCount()).isEqualTo(1);
+        assertThat(byTeam.get("Beta Team").getGoldCount()).isEqualTo(1);
+        assertThat(byTeam.get("Beta Team").getSilverCount()).isEqualTo(1);
+    }
+
+    @Test
     void getTopResultsLeaderboard_returnsTopTenWithPointsOnlyGlobalRanksAndQuizRanksUsingTieBreaker() {
-        when(resultRepository.findTopResultsScoreBreakdownRaw()).thenReturn(List.of(
+        when(resultRepository.findTopResultsScoreBreakdownRaw(null)).thenReturn(List.of(
                 new Object[]{206L, LocalDate.of(2026, 1, 1), 10L, "Kappa Team", 43L, 2L, 0L},
                 new Object[]{205L, LocalDate.of(2026, 1, 15), 11L, "Lambda Team", 44L, 2L, 0L},
                 new Object[]{204L, LocalDate.of(2026, 2, 1), 8L, "Theta Team", 45L, 1L, 2L},
@@ -233,5 +282,27 @@ class ResultServiceLeaderboardTest {
         assertThat(byTeam.get("Alpha Team").getQuizId()).isEqualTo(200L);
         assertThat(byTeam.get("Alpha Team").getQuizDate()).isEqualTo("2026-05-01");
         assertThat(byTeam.get("Alpha Team").getQuizTitle()).isEqualTo("2026 Mai");
+    }
+
+    @Test
+    void getTopResultsLeaderboard_withYear_limitsAndRanksWithinSelectedYear() {
+        when(resultRepository.findTopResultsScoreBreakdownRaw(2025)).thenReturn(List.of(
+                new Object[]{1L, LocalDate.of(2025, 5, 1), 1L, "Alpha Team", 50L, 2L, 1L},
+                new Object[]{1L, LocalDate.of(2025, 5, 1), 2L, "Beta Team", 48L, 1L, 1L}
+        ));
+
+        List<TopResultLeaderboardEntry> result = resultService.getTopResultsLeaderboard(2025);
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getTeamName()).isEqualTo("Alpha Team");
+        assertThat(result.get(0).getQuizDate()).isEqualTo("2025-05-01");
+        assertThat(result.get(0).getQuizRank()).isEqualTo(1);
+    }
+
+    @Test
+    void getLeaderboardYears_returnsRepositoryYears() {
+        when(resultRepository.findAvailableLeaderboardYears()).thenReturn(List.of(2026, 2025));
+
+        assertThat(resultService.getLeaderboardYears()).containsExactly(2026, 2025);
     }
 }

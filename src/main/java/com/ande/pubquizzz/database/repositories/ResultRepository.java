@@ -31,10 +31,11 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
             FROM Result r
             JOIN r.team t
             JOIN r.answers ra
+            WHERE (:year IS NULL OR FUNCTION('YEAR', r.quiz.pubDate) = :year)
             GROUP BY t.teamsId, t.teamName
             ORDER BY COALESCE(SUM(ra.points), 0) DESC, t.teamName ASC
             """)
-    List<Object[]> findLeaderboardRaw();
+    List<Object[]> findLeaderboardRaw(@Param("year") Integer year);
 
     @Query("""
             SELECT r.quiz.quizId,
@@ -46,9 +47,10 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
             FROM Result r
             JOIN r.team t
             JOIN r.answers ra
+            WHERE (:year IS NULL OR FUNCTION('YEAR', r.quiz.pubDate) = :year)
             GROUP BY r.quiz.quizId, t.teamsId, t.teamName
             """)
-    List<Object[]> findPerQuizTeamScoreBreakdownRaw();
+    List<Object[]> findPerQuizTeamScoreBreakdownRaw(@Param("year") Integer year);
 
     @Query("""
         SELECT DISTINCT r FROM Result r
@@ -91,7 +93,16 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
                        SUM(CASE WHEN a.points = 3 THEN 1 ELSE 0 END)
                 FROM Result r
                 JOIN r.answers a
+                WHERE (:year IS NULL OR FUNCTION('YEAR', r.quiz.pubDate) = :year)
                 GROUP BY r.quiz.quizId, r.quiz.pubDate, r.resultsId, r.team.teamsId, r.team.teamName
             """)
-    List<Object[]> findTopResultsScoreBreakdownRaw();
+    List<Object[]> findTopResultsScoreBreakdownRaw(@Param("year") Integer year);
+
+    @Query("""
+            SELECT DISTINCT FUNCTION('YEAR', r.quiz.pubDate)
+            FROM Result r
+            WHERE r.quiz.pubDate IS NOT NULL
+            ORDER BY FUNCTION('YEAR', r.quiz.pubDate) DESC
+            """)
+    List<Integer> findAvailableLeaderboardYears();
 }

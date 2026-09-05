@@ -40,6 +40,7 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 import static com.ande.pubquizzz.config.CacheConfig.AVERAGE_LEADERBOARD;
+import static com.ande.pubquizzz.config.CacheConfig.LEADERBOARD_YEARS;
 import static com.ande.pubquizzz.config.CacheConfig.MEDAL_LEADERBOARD;
 import static com.ande.pubquizzz.config.CacheConfig.POINTS_LEADERBOARD;
 import static com.ande.pubquizzz.config.CacheConfig.QUIZ_SUMMARIES;
@@ -176,8 +177,14 @@ public class ResultService {
     @Transactional(readOnly = true)
     @Cacheable(POINTS_LEADERBOARD)
     public List<PointsLeaderboardEntry> getPointsLeaderboard() {
+        return getPointsLeaderboard(null);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = POINTS_LEADERBOARD, key = "#year == null ? 'all' : #year")
+    public List<PointsLeaderboardEntry> getPointsLeaderboard(Integer year) {
         log.debug("Fetching points leaderboard");
-        List<Object[]> rows = new ArrayList<>(resultRepository.findLeaderboardRaw());
+        List<Object[]> rows = new ArrayList<>(resultRepository.findLeaderboardRaw(year));
         // Sort rows defensively by totalPoints (DESC) and teamName (ASC)
         rows.sort(Comparator.comparingInt((Object[] row) -> ((Number) row[2]).intValue()).reversed()
                 .thenComparing(row -> (String) row[1]));
@@ -207,8 +214,14 @@ public class ResultService {
     @Transactional(readOnly = true)
     @Cacheable(AVERAGE_LEADERBOARD)
     public List<AverageLeaderboardEntry> getAverageLeaderboard() {
+        return getAverageLeaderboard(null);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = AVERAGE_LEADERBOARD, key = "#year == null ? 'all' : #year")
+    public List<AverageLeaderboardEntry> getAverageLeaderboard(Integer year) {
         log.debug("Fetching average leaderboard");
-        List<Object[]> rows = resultRepository.findLeaderboardRaw();
+        List<Object[]> rows = resultRepository.findLeaderboardRaw(year);
 
         List<AverageTeamStats> stats = rows.stream()
                 .map(row -> {
@@ -242,8 +255,14 @@ public class ResultService {
     @Transactional(readOnly = true)
     @Cacheable(MEDAL_LEADERBOARD)
     public List<MedalLeaderboardEntry> getMedalLeaderboard() {
+        return getMedalLeaderboard(null);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = MEDAL_LEADERBOARD, key = "#year == null ? 'all' : #year")
+    public List<MedalLeaderboardEntry> getMedalLeaderboard(Integer year) {
         log.debug("Fetching medal leaderboard");
-        List<Object[]> rows = resultRepository.findPerQuizTeamScoreBreakdownRaw();
+        List<Object[]> rows = resultRepository.findPerQuizTeamScoreBreakdownRaw(year);
 
         Map<Long, List<QuizTeamScore>> totalsByQuiz = new HashMap<>();
         for (Object[] row : rows) {
@@ -325,8 +344,14 @@ public class ResultService {
     @Transactional(readOnly = true)
     @Cacheable(TOP_RESULTS_LEADERBOARD)
     public List<TopResultLeaderboardEntry> getTopResultsLeaderboard() {
+        return getTopResultsLeaderboard(null);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = TOP_RESULTS_LEADERBOARD, key = "#year == null ? 'all' : #year")
+    public List<TopResultLeaderboardEntry> getTopResultsLeaderboard(Integer year) {
         log.debug("Fetching top results leaderboard");
-        List<Object[]> rows = new ArrayList<>(resultRepository.findTopResultsScoreBreakdownRaw());
+        List<Object[]> rows = new ArrayList<>(resultRepository.findTopResultsScoreBreakdownRaw(year));
         if (rows.isEmpty()) {
             return List.of();
         }
@@ -387,6 +412,13 @@ public class ResultService {
         }
 
         return leaderboard;
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(LEADERBOARD_YEARS)
+    public List<Integer> getLeaderboardYears() {
+        log.debug("Fetching available leaderboard years");
+        return resultRepository.findAvailableLeaderboardYears();
     }
 
     @Transactional

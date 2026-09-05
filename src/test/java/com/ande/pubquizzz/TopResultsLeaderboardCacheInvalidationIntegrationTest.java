@@ -11,6 +11,7 @@ import com.ande.pubquizzz.database.repositories.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -46,8 +47,12 @@ class TopResultsLeaderboardCacheInvalidationIntegrationTest {
     @Autowired
     private ResultRepository resultRepository;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     @BeforeEach
     void setUp() {
+        clearCaches();
         resultRepository.deleteAll();
         quizRepository.deleteAll();
         teamRepository.deleteAll();
@@ -149,6 +154,15 @@ class TopResultsLeaderboardCacheInvalidationIntegrationTest {
             hint.setHintText(text);
             return hint;
         }).toList();
+    }
+
+    private void clearCaches() {
+        cacheManager.getCacheNames().forEach(cacheName -> {
+            var cache = cacheManager.getCache(cacheName);
+            if (cache != null) {
+                cache.clear();
+            }
+        });
     }
 
 }
