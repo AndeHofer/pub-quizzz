@@ -2,6 +2,29 @@
 
 ## Open Tasks
 
+None currently open.
+
+## Finished Phases
+
+### Phase 134: ResultService Leaderboard Split ✅ COMPLETE
+
+- Step 1 done: Confirmed clean baseline (`./mvnw.cmd verify` green) before refactor.
+- Step 2 done: Added `RankingUtils` (shared tie-break comparator: total points DESC, fives DESC, threes DESC)
+  with dedicated unit tests.
+- Step 3 done: Added `QuizTitleFormatter` (shared "YYYY Month" title formatting) with dedicated unit tests.
+- Step 4 done: Rewired `ResultService` to use `RankingUtils`/`QuizTitleFormatter`, removed the 4 leaderboard
+  methods + `getLeaderboardYears()` (moved to new `LeaderboardService`).
+- Step 5 done: Created `LeaderboardService` (points/average/medal/top-results leaderboards + years), moved
+  `ResultServiceLeaderboardTest` content into `LeaderboardServiceTest`.
+- Step 6 done: Rewired `UserLeaderboardController` to `LeaderboardService`; updated its test's `@MockitoBean`.
+- Step 7 done: Split `CacheAnnotationsTest` so leaderboard `@Cacheable` methods are asserted on
+  `LeaderboardService`, CRUD/quiz/team methods remain asserted on `ResultService`.
+- Step 8 done: Full verification passed.
+  - `npm --prefix src/main/webapp run test`
+  - `npm --prefix src/main/webapp run type-check`
+  - `npm --prefix src/main/webapp run build`
+  - `./mvnw.cmd verify`
+
 ### Phase 133: Leaderboard Tab Visibility Bugfix ✅ COMPLETE
 
 - Step 1 done: Investigated why no tabs were visible on leaderboard pages.
@@ -31,60 +54,4 @@
   - `npm --prefix src/main/webapp run build`
   - `./mvnw.cmd verify`
 
-### Phase 131: Top-Results Cache Invalidation Bugfix ✅ COMPLETE
-
-- Step 1 done: Investigated why the Top 10 page did not reflect an additional result.
-  - Frontend confirmed: leaderboard pages fetch once on window `load`; there is no live refresh.
-  - Backend confirmed: `leaderboard.topResults` is cacheable but was not included in global cache invalidation.
-- Step 2 done: Added integration regression test `TopResultsLeaderboardCacheInvalidationIntegrationTest`.
-  - Verified RED first: after `POST /admin/results`, `/api/leaderboard/top-results` still returned the old cached
-    leader.
-- Step 3 done: Added `TOP_RESULTS_LEADERBOARD` to `@InvalidateAllAppCaches` so result create/update/delete clears the
-  top-results cache too.
-- Step 4 done: Full verification passed.
-  - `npm --prefix src/main/webapp run test`
-  - `npm --prefix src/main/webapp run type-check`
-  - `npm --prefix src/main/webapp run build`
-  - `./mvnw.cmd verify`
-
-### Phase 130: Progress File Cleanup (In Progress)
-
-- Step 1 done: Reviewed `AGENTS.md` constraints and current progress files.
-  - Requirement confirmed: keep `progress.md` short (max 100 lines).
-  - Requirement confirmed: keep at most 3 finished features in `progress.md`.
-- Step 2 done: Reduced `progress.md` to active focus + latest finished phases only.
-- Step 3 done: Kept historical details in `progress_archive.md` and removed oversized in-file history.
-- Step 4 done: Verified `progress.md` is now concise and policy-compliant.
-
-## Finished Phases
-
-### Phase 129: DRY Refactor for Security Matcher + Leaderboard Init ✅ COMPLETE
-
-- Backend: extracted shared API-style matcher and removed duplicate logic in security entrypoints/config.
-- Frontend: added shared leaderboard page initializer and reused it across all leaderboard pages.
-- Added tests first (RED), then implementation (GREEN):
-  - `src/test/java/com/ande/pubquizzz/security/SecurityRequestMatchersTest.java`
-  - `src/main/webapp/src/js/leaderboard-page.test.ts`
-- Verification passed:
-  - `npm --prefix src/main/webapp run test`
-  - `npm --prefix src/main/webapp run type-check`
-  - `npm --prefix src/main/webapp run build`
-  - `./mvnw.cmd verify`
-
-### Phase 128: Allow Internal Error Dispatch Without Public /error ✅ COMPLETE
-
-- Security allows only `DispatcherType.ERROR` for internal error dispatches.
-- `/error` is not public for normal requests; public routes remain restricted.
-- Added dispatcher diagnostics in auth logs (`dispatcherType`, `errorRequestUri`, `errorStatusCode`).
-- Verification passed:
-  - `./mvnw.cmd "-Dtest=SecurityAccessTest,LoggingAuthenticationEntryPointTest" test`
-  - `npm --prefix src/main/webapp run type-check`
-  - `./mvnw.cmd verify`
-
-### Phase 127: Top-10 Einzelergebnisse Rangliste ✅ COMPLETE
-
-- Added backend endpoint and frontend page for top 10 single results.
-- Follow-ups completed: removed date from UI, removed unused frontend `quizDate` type field, simplified leaderboard nav.
-- Verification passed:
-  - `./mvnw.cmd clean verify`
-  - `npm --prefix src/main/webapp run type-check`
+Older finished phases have been moved to `progress_archive.md` to keep this file short.

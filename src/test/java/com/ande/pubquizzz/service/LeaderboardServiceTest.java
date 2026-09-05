@@ -1,13 +1,10 @@
 package com.ande.pubquizzz.service;
 
-import com.ande.pubquizzz.database.repositories.QuizRepository;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
-import com.ande.pubquizzz.database.repositories.TeamRepository;
 import com.ande.pubquizzz.dto.PointsLeaderboardEntry;
 import com.ande.pubquizzz.dto.AverageLeaderboardEntry;
 import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
 import com.ande.pubquizzz.dto.TopResultLeaderboardEntry;
-import com.ande.pubquizzz.mapper.ResultMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,21 +22,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ResultServiceLeaderboardTest {
+class LeaderboardServiceTest {
 
-    @Mock ResultRepository resultRepository;
-    @Mock QuizRepository quizRepository;
-    @Mock TeamRepository teamRepository;
-    @Mock ResultMapper resultMapper;
+    @Mock
+    ResultRepository resultRepository;
 
-    @InjectMocks ResultService resultService;
+    @InjectMocks
+    LeaderboardService leaderboardService;
 
     @ParameterizedTest
     @MethodSource("pointsLeaderboardInputVariants")
     void getPointsLeaderboard_ranksEntriesByPointsForAnyInputOrder(List<Object[]> rows) {
         when(resultRepository.findLeaderboardRaw(null)).thenReturn(rows);
 
-        List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
+        List<PointsLeaderboardEntry> result = leaderboardService.getPointsLeaderboard();
 
         assertThat(result).hasSize(3);
         assertThat(result.get(0).getRank()).isEqualTo(1);
@@ -72,7 +68,7 @@ class ResultServiceLeaderboardTest {
     void getPointsLeaderboard_whenEmpty_returnsEmptyList() {
         when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.of());
 
-        List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard();
+        List<PointsLeaderboardEntry> result = leaderboardService.getPointsLeaderboard();
 
         assertThat(result).isEmpty();
     }
@@ -84,7 +80,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{2L, "Beta Team", 50L, 2L}
         ));
 
-        List<PointsLeaderboardEntry> result = resultService.getPointsLeaderboard(2025);
+        List<PointsLeaderboardEntry> result = leaderboardService.getPointsLeaderboard(2025);
 
         assertThat(result).extracting(PointsLeaderboardEntry::getTeamName)
                 .containsExactly("Alpha Team", "Beta Team");
@@ -99,7 +95,7 @@ class ResultServiceLeaderboardTest {
         Object[] row3 = {3L, "Gamma Team", 50L, 1L};
         when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.of(row1, row2, row3));
 
-        List<AverageLeaderboardEntry> result = resultService.getAverageLeaderboard();
+        List<AverageLeaderboardEntry> result = leaderboardService.getAverageLeaderboard();
 
         assertThat(result).hasSize(3);
         assertThat(result.get(0).getRank()).isEqualTo(1);
@@ -125,7 +121,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{1L, "Alpha Team", 30L, 1L}
         ));
 
-        List<AverageLeaderboardEntry> result = resultService.getAverageLeaderboard(2025);
+        List<AverageLeaderboardEntry> result = leaderboardService.getAverageLeaderboard(2025);
 
         assertThat(result).extracting(AverageLeaderboardEntry::getTeamName)
                 .containsExactly("Beta Team", "Alpha Team");
@@ -144,7 +140,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{2L, 2L, "Beta Team", 44L, 4L, 0L}
         ));
 
-        List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard();
+        List<MedalLeaderboardEntry> result = leaderboardService.getMedalLeaderboard();
 
         assertThat(result).hasSize(3);
         assertThat(result.get(0).getTeamName()).isEqualTo("Alpha Team");
@@ -178,7 +174,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{1L, 4L, "Delta Team", 30L, 1L, 2L}
         ));
 
-        List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard();
+        List<MedalLeaderboardEntry> result = leaderboardService.getMedalLeaderboard();
 
         assertThat(result).hasSize(3);
         assertThat(result).extracting(MedalLeaderboardEntry::getTeamName)
@@ -196,7 +192,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{2L, 1L, "Alpha Team", 29L, 3L, 0L}
         ));
 
-        List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard();
+        List<MedalLeaderboardEntry> result = leaderboardService.getMedalLeaderboard();
         Map<String, MedalLeaderboardEntry> byTeam = result.stream()
                 .collect(java.util.stream.Collectors.toMap(MedalLeaderboardEntry::getTeamName, e -> e));
 
@@ -225,7 +221,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{2L, 1L, "Alpha Team", 45L, 4L, 0L}
         ));
 
-        List<MedalLeaderboardEntry> result = resultService.getMedalLeaderboard(2025);
+        List<MedalLeaderboardEntry> result = leaderboardService.getMedalLeaderboard(2025);
         Map<String, MedalLeaderboardEntry> byTeam = result.stream()
                 .collect(java.util.stream.Collectors.toMap(MedalLeaderboardEntry::getTeamName, e -> e));
 
@@ -251,7 +247,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{207L, LocalDate.of(2025, 12, 1), 12L, "Mu Team", 39L, 0L, 0L}
         ));
 
-        List<TopResultLeaderboardEntry> result = resultService.getTopResultsLeaderboard();
+        List<TopResultLeaderboardEntry> result = leaderboardService.getTopResultsLeaderboard();
 
         assertThat(result).hasSize(10);
         assertThat(result).extracting(TopResultLeaderboardEntry::getTeamName)
@@ -291,7 +287,7 @@ class ResultServiceLeaderboardTest {
                 new Object[]{1L, LocalDate.of(2025, 5, 1), 2L, "Beta Team", 48L, 1L, 1L}
         ));
 
-        List<TopResultLeaderboardEntry> result = resultService.getTopResultsLeaderboard(2025);
+        List<TopResultLeaderboardEntry> result = leaderboardService.getTopResultsLeaderboard(2025);
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getTeamName()).isEqualTo("Alpha Team");
@@ -303,6 +299,6 @@ class ResultServiceLeaderboardTest {
     void getLeaderboardYears_returnsRepositoryYears() {
         when(resultRepository.findAvailableLeaderboardYears()).thenReturn(List.of(2026, 2025));
 
-        assertThat(resultService.getLeaderboardYears()).containsExactly(2026, 2025);
+        assertThat(leaderboardService.getLeaderboardYears()).containsExactly(2026, 2025);
     }
 }

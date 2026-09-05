@@ -4,6 +4,21 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 131: Top-Results Cache Invalidation Bugfix ✅ COMPLETE
+
+- Investigated why the Top 10 page did not reflect an additional result: frontend fetches leaderboards once on
+  window `load` with no live refresh, and `leaderboard.topResults` was cacheable but missing from global cache
+  invalidation.
+- Added integration regression test `TopResultsLeaderboardCacheInvalidationIntegrationTest` (verified RED first).
+- Added `TOP_RESULTS_LEADERBOARD` to `@InvalidateAllAppCaches` so result create/update/delete clears it too.
+- Verification passed: `npm --prefix src/main/webapp run test`, `npm --prefix src/main/webapp run type-check`,
+  `npm --prefix src/main/webapp run build`, `./mvnw.cmd verify`.
+
+### Phase 130: Progress File Cleanup ✅ COMPLETE
+
+- Reviewed `AGENTS.md` constraints on `progress.md` size (max 100 lines) and finished-phase count (max 3).
+- Reduced `progress.md` to active focus + latest finished phases only, moving historical details into this archive.
+
 ### Phase 129: DRY Refactor for Security Matcher + Leaderboard Init ✅ COMPLETE
 
 - Backend: extracted shared API-style request matcher and removed duplicated detection logic in security config and

@@ -6,7 +6,7 @@ import com.ande.pubquizzz.dto.MedalLeaderboardEntry;
 import com.ande.pubquizzz.dto.TopResultLeaderboardEntry;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
-import com.ande.pubquizzz.service.ResultService;
+import com.ande.pubquizzz.service.LeaderboardService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
@@ -35,7 +35,7 @@ class UserLeaderboardControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ResultService resultService;
+    private LeaderboardService leaderboardService;
 
     @Test
     @WithMockUser
@@ -47,7 +47,7 @@ class UserLeaderboardControllerTest {
         entry.setTotalPoints(150);
         entry.setQuizCount(3);
 
-        when(resultService.getPointsLeaderboard(null)).thenReturn(List.of(entry));
+        when(leaderboardService.getPointsLeaderboard(null)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().isOk())
@@ -61,7 +61,7 @@ class UserLeaderboardControllerTest {
     @Test
     @WithMockUser
     void getPointsLeaderboard_whenEmpty_returnsEmptyArray() throws Exception {
-        when(resultService.getPointsLeaderboard(null)).thenReturn(List.of());
+        when(leaderboardService.getPointsLeaderboard(null)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/leaderboard/points"))
                 .andExpect(status().isOk())
@@ -79,14 +79,14 @@ class UserLeaderboardControllerTest {
         entry.setTotalPoints(80);
         entry.setQuizCount(2);
 
-        when(resultService.getPointsLeaderboard(2025)).thenReturn(List.of(entry));
+        when(leaderboardService.getPointsLeaderboard(2025)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/points").param("year", "2025"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].totalPoints").value(80));
 
-        verify(resultService).getPointsLeaderboard(2025);
+        verify(leaderboardService).getPointsLeaderboard(2025);
     }
 
     @Test
@@ -106,7 +106,7 @@ class UserLeaderboardControllerTest {
         entry.setSilverCount(1);
         entry.setBronzeCount(0);
 
-        when(resultService.getMedalLeaderboard(null)).thenReturn(List.of(entry));
+        when(leaderboardService.getMedalLeaderboard(null)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/medals"))
                 .andExpect(status().isOk())
@@ -129,14 +129,14 @@ class UserLeaderboardControllerTest {
         entry.setSilverCount(0);
         entry.setBronzeCount(0);
 
-        when(resultService.getMedalLeaderboard(2025)).thenReturn(List.of(entry));
+        when(leaderboardService.getMedalLeaderboard(2025)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/medals").param("year", "2025"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].goldCount").value(1));
 
-        verify(resultService).getMedalLeaderboard(2025);
+        verify(leaderboardService).getMedalLeaderboard(2025);
     }
 
     @Test
@@ -149,7 +149,7 @@ class UserLeaderboardControllerTest {
         entry.setAveragePoints(42.5);
         entry.setQuizCount(4);
 
-        when(resultService.getAverageLeaderboard(null)).thenReturn(List.of(entry));
+        when(leaderboardService.getAverageLeaderboard(null)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/average"))
                 .andExpect(status().isOk())
@@ -170,14 +170,14 @@ class UserLeaderboardControllerTest {
         entry.setAveragePoints(40.0);
         entry.setQuizCount(2);
 
-        when(resultService.getAverageLeaderboard(2025)).thenReturn(List.of(entry));
+        when(leaderboardService.getAverageLeaderboard(2025)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/average").param("year", "2025"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].averagePoints").value(40.0));
 
-        verify(resultService).getAverageLeaderboard(2025);
+        verify(leaderboardService).getAverageLeaderboard(2025);
     }
 
     @Test
@@ -193,7 +193,7 @@ class UserLeaderboardControllerTest {
         entry.setTotalPoints(50);
         entry.setQuizRank(2);
 
-        when(resultService.getTopResultsLeaderboard(null)).thenReturn(List.of(entry));
+        when(leaderboardService.getTopResultsLeaderboard(null)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/top-results"))
                 .andExpect(status().isOk())
@@ -220,27 +220,27 @@ class UserLeaderboardControllerTest {
         entry.setTotalPoints(50);
         entry.setQuizRank(1);
 
-        when(resultService.getTopResultsLeaderboard(2025)).thenReturn(List.of(entry));
+        when(leaderboardService.getTopResultsLeaderboard(2025)).thenReturn(List.of(entry));
 
         mockMvc.perform(get("/api/leaderboard/top-results").param("year", "2025"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
                 .andExpect(jsonPath("$[0].quizDate").value("2025-05-01"));
 
-        verify(resultService).getTopResultsLeaderboard(2025);
+        verify(leaderboardService).getTopResultsLeaderboard(2025);
     }
 
     @Test
     @WithMockUser
     void getLeaderboardYears_returnsDescendingYears() throws Exception {
-        when(resultService.getLeaderboardYears()).thenReturn(List.of(2026, 2025));
+        when(leaderboardService.getLeaderboardYears()).thenReturn(List.of(2026, 2025));
 
         mockMvc.perform(get("/api/leaderboard/years"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]").value(2026))
                 .andExpect(jsonPath("$[1]").value(2025));
 
-        verify(resultService).getLeaderboardYears();
+        verify(leaderboardService).getLeaderboardYears();
     }
 
     @Test

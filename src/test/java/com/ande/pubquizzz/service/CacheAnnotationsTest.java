@@ -30,10 +30,6 @@ class CacheAnnotationsTest {
         assertHasCacheable(ResultService.class.getMethod("getQuizSummaries"));
         assertHasCacheable(ResultService.class.getMethod("getResultsForQuiz", Long.class));
         assertHasCacheable(ResultService.class.getMethod("getResults", Long.class));
-        assertHasCacheable(ResultService.class.getMethod("getPointsLeaderboard"));
-        assertHasCacheable(ResultService.class.getMethod("getAverageLeaderboard"));
-        assertHasCacheable(ResultService.class.getMethod("getMedalLeaderboard"));
-        assertHasCacheable(ResultService.class.getMethod("getTopResultsLeaderboard"));
         assertHasCacheable(ResultService.class.getMethod("getResultsForTeam", Long.class));
     }
 
@@ -42,6 +38,19 @@ class CacheAnnotationsTest {
         assertHasGlobalInvalidate(ResultService.class.getMethod("createResult", com.ande.pubquizzz.dto.CreateResultRequest.class));
         assertHasGlobalInvalidate(ResultService.class.getMethod("deleteResult", Long.class));
         assertHasGlobalInvalidate(ResultService.class.getMethod("updateResult", Long.class, com.ande.pubquizzz.dto.UpdateResultRequest.class));
+    }
+
+    @Test
+    void leaderboardReadMethodsAreCacheable() throws NoSuchMethodException {
+        assertHasCacheable(LeaderboardService.class.getMethod("getPointsLeaderboard"));
+        assertHasCacheable(LeaderboardService.class.getMethod("getPointsLeaderboard", Integer.class));
+        assertHasCacheable(LeaderboardService.class.getMethod("getAverageLeaderboard"));
+        assertHasCacheable(LeaderboardService.class.getMethod("getAverageLeaderboard", Integer.class));
+        assertHasCacheable(LeaderboardService.class.getMethod("getMedalLeaderboard"));
+        assertHasCacheable(LeaderboardService.class.getMethod("getMedalLeaderboard", Integer.class));
+        assertHasCacheable(LeaderboardService.class.getMethod("getTopResultsLeaderboard"));
+        assertHasCacheable(LeaderboardService.class.getMethod("getTopResultsLeaderboard", Integer.class));
+        assertHasCacheable(LeaderboardService.class.getMethod("getLeaderboardYears"));
     }
 
     @Test
