@@ -33,5 +33,6 @@ SPRING_DATASOURCE_URL
 - add text for hints before a hint revealed like already possible with pics
 - merging teams should be possible
 - usage statistics for admin
+- enrich the news section with html and pics
 
 
