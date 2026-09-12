@@ -2,7 +2,84 @@
 
 ## Open Tasks
 
-None currently open.
+### Frontend Unused Dependency Cleanup
+
+- [x] Removed only the confirmed redundant direct dependencies: `autoprefixer`, `playwright`, and `postcss`.
+  `@playwright/test` remains available for future browser-test/CLI use.
+- [x] npm regenerated the lockfile and reduced resolved dependencies from 167 to 157; `npm audit --json` reports 0
+  vulnerabilities.
+- [x] Frontend checks passed: Vitest 5 ran 16 files / 56 tests, `npm run type-check` had no diagnostics, and Vite 8.3.0
+  built 112 modules in 482 ms.
+- [x] `./mvnw.cmd verify` passed in 37.851 s: 339 Java tests, Maven-managed Vitest 5 suite (16 files / 56 tests), and
+  application JAR packaging.
+- Blockers: none.
+
+### Frontend Package Metadata Cleanup
+
+- [x] Removed unused frontend package metadata: `version`, `description`, `main`, `keywords`, `author`, and `license`.
+  Maven remains the sole maintained application-version source.
+- [x] Regenerated the lockfile root package metadata with no package `version` or `license`; npm retains its independent
+  top-level lockfile format version `1.0.0`.
+- [x] `npm audit --json` reports 0 vulnerabilities. Frontend checks passed: Vitest 5 ran 16 files / 56 tests,
+  `npm run type-check` had no diagnostics, and Vite 8.3.0 built 112 modules in 387 ms.
+- [x] `./mvnw.cmd verify` passed in 32.880 s: 339 Java tests, Maven-managed Vitest 5 suite (16 files / 56 tests), and
+  application JAR packaging.
+- Blockers: none.
+
+### Maven And Node Patch Migration
+
+- [x] Updated only the Maven Wrapper distribution from 3.9.12 to 3.9.16 and Maven-managed Node from 24.20.0 to 24.21.0.
+- [x] Confirmed `./mvnw.cmd --version` uses Apache Maven 3.9.16 and `target/node/node.exe --version` uses Node 24.21.0.
+- [x] Frontend checks passed: Vitest 5 ran 16 files / 56 tests; `npm run type-check` had no diagnostics; Vite 8.3.0
+  built 112 modules in 507 ms.
+- [x] `./mvnw.cmd verify` passed in 56.963 s: 339 Java tests, Maven-managed Vitest 5 suite (16 files / 56 tests), and
+  application JAR packaging.
+- Blockers: none.
+
+### Vitest 5 Migration
+
+- [x] Updated only the frontend Vitest dependency from 4.1.11 to 5.0.0 and its npm lockfile resolution.
+- [x] Vitest 5 suite passed without test changes: 16 test files / 56 tests. The configuration-free setup remains
+  unchanged.
+- [x] Frontend `npm run type-check` passed with no diagnostics; `npm run build` passed with Vite 8.3.0 (112 modules, 292
+  ms).
+- [x] `./mvnw.cmd verify` passed in 32.572 s: 339 Java tests plus Maven-managed Vitest 5 suite (16 files / 56 tests);
+  the application JAR was built.
+- Blockers: none.
+
+### Vite ESM Configuration Cleanup
+
+- [x] Set the frontend package to ESM so Vite's future native config loader can load `vite.config.ts` without warning.
+- [x] Frontend tests passed: 16 files / 56 tests; type-check and production build passed without the Vite warning.
+- [x] Maven verification passed: 339 backend tests, 16 frontend test files / 56 tests, and the application JAR build.
+
+### TypeScript 7 Migration Planning
+
+- [x] Inspected the clean TypeScript 6.0.3 baseline, compiler configuration, and TypeScript 7 migration requirements.
+- [x] Agreed scope: TypeScript 7 only; remove obsolete `ignoreDeprecations` and `baseUrl`, make only confirmed
+  type-error fixes.
+- [x] Wrote and reviewed the implementation plan before migration work begins.
+- [x] Task 1: Updated only the TypeScript manifest and lockfile entry to 7.0.2 with
+  `npm install --save-dev typescript@7.0.2 --package-lock-only`.
+- [x] Task 1: Removed only `ignoreDeprecations` and `baseUrl` from the TypeScript configuration; retained the relative
+  `@/*` path alias.
+- [x] Task 1: Installed the locked TypeScript 7.0.2 compiler with `npm install --ignore-scripts`. Root cause:
+  `--package-lock-only` deliberately leaves `node_modules` at 6.0.3, so the first type-check did not validate TypeScript
+  7.
+- [x] Task 1: Ran `npm run type-check` with installed TypeScript 7.0.2; exact result: `> pub-quizzz@1.0.0 type-check` /
+  `> tsc --noEmit`, exit code 0 with no diagnostics. No tests or production build run by scope.
+- [x] Task 1 self-review: `npm ls typescript --depth=0` reports `typescript@7.0.2`; scope is limited to the frontend
+  package/lockfile, the two requested tsconfig entries, and progress tracking.
+- [x] Task 3: Frontend `npm run test` passed: 16 test files / 56 tests, exit code 0. `npm run type-check` passed with
+  exit code 0 and no TypeScript diagnostics. `npm run build` passed: Vite 8.3.0 transformed 112 modules and completed in
+  278 ms, with no warnings.
+- [x] Task 3: Root `.\mvnw.cmd verify` passed with `BUILD SUCCESS` in 42.965 s: 339 backend tests (0 failures, 0 errors,
+  0 skipped) and its embedded frontend test run (16 test files / 56 tests) passed; the application JAR was built.
+- [x] Task 3 warnings: Maven emitted the JDK warning that Byte Buddy dynamically loaded a Java agent and this will be
+  disallowed by default in a future release. The Maven log also contains expected WARN/ERROR application logging from
+  security, validation, and backup/restore negative-path tests; these test scenarios passed and produced no test
+  failures.
+- Blockers: none.
 
 ## Finished Phases
 
