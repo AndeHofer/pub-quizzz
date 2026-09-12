@@ -13,7 +13,6 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: './index.html',
-                403: './403.html',
                 admin_main: './admin/admin_main.html',
                 admin_news: './admin/news.html',
                 create_quiz: './admin/create_quiz.html',

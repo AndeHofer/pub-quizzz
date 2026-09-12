@@ -22,10 +22,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.containsString;
 
 /**
  * Verifies tightened security policy for unauthenticated access:
@@ -97,29 +95,26 @@ class SecurityAccessTest {
     }
 
     @Test
-    void apiPath_unauthenticated_returnsJson401() throws Exception {
+    void apiPath_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/leaderboard/points"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.containsString("application/json")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Nicht authentifiziert")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
-    void apiPath_unauthenticated_withJsonAccept_returnsJson401() throws Exception {
+    void apiPath_unauthenticated_withJsonAccept_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/leaderboard/points")
                         .header("Accept", "application/json"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.containsString("application/json")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Nicht authentifiziert")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
-    void adminPath_unauthenticated_withJsonAccept_returnsJson401() throws Exception {
+    void adminPath_unauthenticated_withJsonAccept_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/admin/quizzes")
                         .header("Accept", "application/json"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.containsString("application/json")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Nicht authentifiziert")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -129,17 +124,6 @@ class SecurityAccessTest {
                 .andExpect(header().string("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate"))
                 .andExpect(header().string("Pragma", "no-cache"))
                 .andExpect(header().dateValue("Expires", 0));
-    }
-
-    @Test
-    @WithMockUser(roles = "USER")
-    void forbiddenPage_containsReloginLogoutForm() throws Exception {
-        mockMvc.perform(get("/403.html"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("id=\"reloginForm\"")))
-                .andExpect(content().string(containsString("method=\"post\"")))
-                .andExpect(content().string(containsString("action=\"/logout\"")))
-                .andExpect(content().string(containsString("id=\"reloginCsrfToken\"")));
     }
 
     @Test
@@ -159,13 +143,12 @@ class SecurityAccessTest {
     }
 
     @Test
-    void loginPost_withInvalidCsrf_redirectsToLogin() throws Exception {
+    void loginPost_withInvalidCsrf_isForbidden() throws Exception {
         mockMvc.perform(post("/login")
                         .with(csrf().useInvalidToken())
                         .param("username", "admin")
                         .param("password", "admin123"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(status().isForbidden());
     }
 
     @Test

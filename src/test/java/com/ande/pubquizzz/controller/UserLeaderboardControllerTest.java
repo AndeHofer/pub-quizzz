@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserLeaderboardController.class)
@@ -90,9 +91,10 @@ class UserLeaderboardControllerTest {
     }
 
     @Test
-    void getPointsLeaderboard_unauthenticated_returnsJson401() throws Exception {
+    void getPointsLeaderboard_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/leaderboard/points"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -244,8 +246,9 @@ class UserLeaderboardControllerTest {
     }
 
     @Test
-    void getTopResultsLeaderboard_unauthenticated_returnsJson401() throws Exception {
+    void getTopResultsLeaderboard_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/leaderboard/top-results"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

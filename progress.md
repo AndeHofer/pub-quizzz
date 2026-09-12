@@ -2,6 +2,22 @@
 
 ## Open Tasks
 
+### Default Security Error Handling
+
+- [x] Removed the custom exception-handling block, disconnected 401/403 handlers, their logging helper/request matcher,
+  and their unit tests.
+- [x] Updated security integration coverage for Spring Security default login redirects and invalid-CSRF 403 responses;
+  removed the deleted 403 page markup assertion.
+- [x] Removed the custom 403 page, its relogin script/test, Vite build input, and the custom-forwarding integration
+  test.
+- [x] Updated eight remaining user-controller integration tests from the removed JSON 401 contract to the default
+  `/login` redirect contract.
+- [x] No removed source references remain. Frontend checks passed: Vitest 5 ran 15 files / 54 tests,
+  `npm run type-check` had no diagnostics, and Vite 8.3.0 built 110 modules in 355 ms.
+- [x] Final `./mvnw.cmd verify` passed in 40.073 s after unused-import cleanup: 321 Java tests, Maven-managed Vitest 5
+  suite (15 files / 54 tests), and application JAR packaging.
+- Blockers: none.
+
 ### Frontend Unused Dependency Cleanup
 
 - [x] Removed only the confirmed redundant direct dependencies: `autoprefixer`, `playwright`, and `postcss`.

@@ -62,9 +62,6 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login")
                         .permitAll())
-                .exceptionHandling(exceptions -> exceptions
-                        .defaultAuthenticationEntryPointFor(new LoggingAuthenticationEntryPoint(), SecurityRequestMatchers.apiStyleRequestMatcher())
-                        .accessDeniedHandler(new LoggingAccessDeniedHandler()))
                 .addFilterBefore(new AuthenticatedLoginRedirectFilter(), DefaultLoginPageGeneratingFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
                 .addFilterAfter(new LoginNoStoreFilter(), CsrfFilter.class);

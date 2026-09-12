@@ -73,8 +73,9 @@ class UserTeamControllerTest {
     }
 
     @Test
-    void getTeamResults_unauthenticated_returnsJson401() throws Exception {
+    void getTeamResults_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/teams/7/results"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

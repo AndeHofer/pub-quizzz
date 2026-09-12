@@ -25,6 +25,7 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserQuizController.class)
@@ -67,9 +68,10 @@ class UserQuizControllerTest {
     }
 
     @Test
-    void getQuizSummaries_unauthenticated_returnsJson401() throws Exception {
+    void getQuizSummaries_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/quizzes"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -103,9 +105,10 @@ class UserQuizControllerTest {
     }
 
     @Test
-    void getQuizResults_unauthenticated_returnsJson401() throws Exception {
+    void getQuizResults_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/quizzes/42/results"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -146,8 +149,9 @@ class UserQuizControllerTest {
     }
 
     @Test
-    void getQuizDetail_unauthenticated_returnsJson401() throws Exception {
+    void getQuizDetail_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/quizzes/42/detail"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
@@ -56,11 +56,10 @@ class UserControllerTest {
     }
 
     @Test
-    void getBootstrap_unauthenticated_returnsJson401() throws Exception {
+    void getBootstrap_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/api/bootstrap"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.containsString("application/json")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Nicht authentifiziert")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
