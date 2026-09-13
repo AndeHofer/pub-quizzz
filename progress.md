@@ -2,6 +2,19 @@
 
 ## Open Tasks
 
+### Two-Week Session Timeout
+
+- [x] Confirmed scope: set the global servlet session idle timeout to two weeks for every user; application restarts
+  continue to invalidate all in-memory sessions.
+- [x] Changed `server.servlet.session.timeout` from `4h` to `14d` in the main application configuration. Spring Boot
+  does not support the `w` duration unit, so `14d` is the valid two-week equivalent.
+- [x] Initial `./mvnw.cmd verify` correctly exposed the invalid `2w` unit during application-context startup; replaced
+  it with the supported `14d` unit before rerunning verification.
+- [x] `./mvnw.cmd verify` passed in 35.409 s: 321 Java tests plus the Maven-managed Vitest suite (15 files / 54 tests),
+  and application JAR packaging. The Maven build includes the frontend production build; standalone frontend type
+  checking is not configured as a Maven phase.
+- Blockers: none.
+
 ### Default Security Error Handling
 
 - [x] Removed the custom exception-handling block, disconnected 401/403 handlers, their logging helper/request matcher,
