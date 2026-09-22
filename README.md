@@ -34,5 +34,6 @@ SPRING_DATASOURCE_URL
 - merging teams should be possible
 - usage statistics for admin
 - enrich the news section with html and pics
+- different designs for different months
 
 
