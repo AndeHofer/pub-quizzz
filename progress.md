@@ -2,6 +2,20 @@
 
 ## Open Tasks
 
+### Theme Preview Design
+
+- [x] Explored the shared frontend style system, multi-page Vite entries, public pages, and neutral admin layout.
+- [x] Approved scope: an isolated preview system for public pages only; existing and new admin pages remain neutral.
+- [x] Approved selection model: all administrators select `Standard`, `November`, `Dezember`, `Jänner`, or `Halloween`
+  from a dedicated admin page; the choice remains in that browser tab's `sessionStorage` only.
+- [x] Approved behavior: selection does not navigate; the administrator manually opens public pages in the same tab.
+- [x] Deferred calendar activation. The future resolver will use Halloween from 24–31 October and preserve the manual
+  session preview as the highest-priority override.
+- [x] Wrote and self-reviewed `docs/superpowers/specs/2026-09-23-public-theme-preview-design.md`: no placeholders,
+  conflicting behavior, or out-of-scope calendar implementation remains.
+- [ ] Await user review of the design specification before writing the implementation plan.
+- Blockers: none.
+
 ### Two-Week Session Timeout
 
 - [x] Confirmed scope: set the global servlet session idle timeout to two weeks for every user; application restarts
