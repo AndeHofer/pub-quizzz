@@ -1,0 +1,24 @@
+html[data-theme="april"] {
+    --pq-page-bg: #e4ebf0;
+    --pq-surface-bg: #f6fafc;
+    --pq-soft-surface-bg: #d7e3eb;
+    --pq-text-main: #213745;
+    --pq-text-muted: #526c7c;
+    --pq-border: #b5cad7;
+    --pq-button-bg: #477c96;
+    --pq-button-bg-hover: #326077;
+    --pq-highlight-bg: #cee2ed;
+    --pq-decoration-primary-motifs: '☔  💧  ☁\A  ·  ☔';
+    --pq-decoration-secondary-motifs: '🌷  ✦  ≈\A  💧  ·';
+    --pq-decoration-color: #719bb6;
+    --pq-decoration-size: 62px;
+    --pq-decoration-mobile-size: 49px;
+    --pq-decoration-spacing: 14px;
+    --pq-decoration-mobile-spacing: 9px;
+    --pq-decoration-line-height: 1.55;
+    --pq-decoration-opacity: 0.23;
+    --pq-decoration-mobile-opacity: 0.18;
+    --pq-decoration-rotation: -9deg;
+    --pq-decoration-filter: saturate(0.75);
+    --pq-decoration-atmosphere: linear-gradient(160deg, rgb(176 207 225 / 31%), transparent 38%), radial-gradient(circle at 85% 20%, rgb(110 160 193 / 26%), transparent 29%);
+}

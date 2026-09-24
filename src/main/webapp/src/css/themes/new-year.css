@@ -1,0 +1,24 @@
+html[data-theme="new-year"] {
+    --pq-page-bg: #11142b;
+    --pq-surface-bg: #1d2344;
+    --pq-soft-surface-bg: #2b3562;
+    --pq-text-main: #f8fbff;
+    --pq-text-muted: #d6def4;
+    --pq-border: #8496c2;
+    --pq-button-bg: #708dc5;
+    --pq-button-bg-hover: #506dac;
+    --pq-highlight-bg: #394873;
+    --pq-decoration-primary-motifs: '🎆  🥂  ✦\A  ⌁  🎆';
+    --pq-decoration-secondary-motifs: '🎉  ⭐  ✧\A  🥂  ·';
+    --pq-decoration-color: #dbe7ff;
+    --pq-decoration-size: 65px;
+    --pq-decoration-mobile-size: 51px;
+    --pq-decoration-spacing: 17px;
+    --pq-decoration-mobile-spacing: 10px;
+    --pq-decoration-line-height: 1.58;
+    --pq-decoration-opacity: 0.27;
+    --pq-decoration-mobile-opacity: 0.2;
+    --pq-decoration-rotation: -9deg;
+    --pq-decoration-filter: saturate(0.85);
+    --pq-decoration-atmosphere: radial-gradient(circle at 13% 8%, rgb(186 213 255 / 27%), transparent 28%), radial-gradient(circle at 89% 79%, rgb(104 127 211 / 29%), transparent 37%);
+}

@@ -1,0 +1,24 @@
+html[data-theme="september"] {
+    --pq-page-bg: #e9e6d3;
+    --pq-surface-bg: #faf8ee;
+    --pq-soft-surface-bg: #dedcbf;
+    --pq-text-main: #35402b;
+    --pq-text-muted: #5f6b4e;
+    --pq-border: #b9bd92;
+    --pq-button-bg: #6d7b48;
+    --pq-button-bg-hover: #536038;
+    --pq-highlight-bg: #d2d5ad;
+    --pq-decoration-primary-motifs: '🍃  ✦  ·\A  ⌁  🍃';
+    --pq-decoration-secondary-motifs: '🌻  🍂  ✧\A  ·  🌻';
+    --pq-decoration-color: #819353;
+    --pq-decoration-size: 64px;
+    --pq-decoration-mobile-size: 50px;
+    --pq-decoration-spacing: 16px;
+    --pq-decoration-mobile-spacing: 10px;
+    --pq-decoration-line-height: 1.55;
+    --pq-decoration-opacity: 0.24;
+    --pq-decoration-mobile-opacity: 0.18;
+    --pq-decoration-rotation: -8deg;
+    --pq-decoration-filter: saturate(0.65);
+    --pq-decoration-atmosphere: radial-gradient(circle at 12% 8%, rgb(196 190 111 / 27%), transparent 28%), radial-gradient(circle at 88% 80%, rgb(115 135 73 / 25%), transparent 38%);
+}

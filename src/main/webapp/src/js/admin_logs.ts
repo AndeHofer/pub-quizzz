@@ -27,7 +27,7 @@ export function levelBadgeClass(level: string): string {
 
 export function buildLogStream(entries: AdminLogEntryDTO[]): string {
     if (entries.length === 0) {
-        return '<div class="bg-white rounded-lg border border-gray-200 px-4 py-6 text-gray-500 text-center">Keine Log-Eintraege gefunden.</div>';
+        return '<div class="bg-white rounded-lg border border-gray-200 px-4 py-6 text-gray-500 text-center">Keine Log-Einträge gefunden.</div>';
     }
 
     return entries.map(entry => {
@@ -147,19 +147,19 @@ async function loadLogs(): Promise<void> {
         const response = await fetchLogs(params);
         streamEl.innerHTML = buildLogStream(response.entries);
         if (logMetaEl) {
-            logMetaEl.textContent = `${response.returnedCount} Eintraege angezeigt (Limit: ${response.appliedLimit})`;
+            logMetaEl.textContent = `${response.returnedCount} Einträge angezeigt (Limit: ${response.appliedLimit})`;
         }
     } catch (error) {
         if (error instanceof Error && error.message === 'AUTH_EXPIRED_REDIRECT') {
             return;
         }
         const message = error instanceof Error ? error.message : 'Unbekannter Fehler';
-        setError(`Fehler beim Laden der Log-Eintraege: ${message}`);
+        setError(`Fehler beim Laden der Log-Einträge: ${message}`);
         streamEl.innerHTML = '';
         if (logMetaEl) {
             logMetaEl.textContent = '';
         }
-        showMessage('Log-Eintraege konnten nicht geladen werden.', 'error');
+        showMessage('Log-Einträge konnten nicht geladen werden.', 'error');
         console.error(error);
     } finally {
         setLoading(false);

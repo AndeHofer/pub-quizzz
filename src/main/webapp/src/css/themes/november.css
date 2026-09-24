@@ -1,0 +1,24 @@
+html[data-theme="november"] {
+    --pq-page-bg: #f4efe7;
+    --pq-surface-bg: #fbf7f1;
+    --pq-soft-surface-bg: #efe5d8;
+    --pq-text-main: #2f241d;
+    --pq-text-muted: #67574a;
+    --pq-border: #d8c7b3;
+    --pq-button-bg: #4a3a31;
+    --pq-button-bg-hover: #352920;
+    --pq-highlight-bg: #ede3d6;
+    --pq-decoration-primary-motifs: '🍁  🍂  ·\A  ☕  🍁';
+    --pq-decoration-secondary-motifs: '⌇  ✧  ☁\A  ·  🍂';
+    --pq-decoration-color: #d7884e;
+    --pq-decoration-size: 64px;
+    --pq-decoration-mobile-size: 52px;
+    --pq-decoration-spacing: 16px;
+    --pq-decoration-mobile-spacing: 12px;
+    --pq-decoration-line-height: 1.55;
+    --pq-decoration-opacity: 0.26;
+    --pq-decoration-mobile-opacity: 0.2;
+    --pq-decoration-rotation: -8deg;
+    --pq-decoration-filter: saturate(0.72) sepia(0.3);
+    --pq-decoration-atmosphere: radial-gradient(circle at 10% 4%, rgb(192 117 59 / 22%), transparent 29%), radial-gradient(circle at 89% 82%, rgb(99 76 49 / 20%), transparent 38%);
+}

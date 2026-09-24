@@ -1,0 +1,24 @@
+html[data-theme="august"] {
+    --pq-page-bg: #eee2b9;
+    --pq-surface-bg: #fff9e8;
+    --pq-soft-surface-bg: #e9d59b;
+    --pq-text-main: #3f3820;
+    --pq-text-muted: #6f633e;
+    --pq-border: #d2b76d;
+    --pq-button-bg: #85742e;
+    --pq-button-bg-hover: #665a21;
+    --pq-highlight-bg: #e2c67d;
+    --pq-decoration-primary-motifs: '🌾  ☀  ❋\A  ·  🌾';
+    --pq-decoration-secondary-motifs: '🍑  ✦  ⌇\A  🌾  ·';
+    --pq-decoration-color: #b79431;
+    --pq-decoration-size: 65px;
+    --pq-decoration-mobile-size: 51px;
+    --pq-decoration-spacing: 17px;
+    --pq-decoration-mobile-spacing: 10px;
+    --pq-decoration-line-height: 1.58;
+    --pq-decoration-opacity: 0.24;
+    --pq-decoration-mobile-opacity: 0.18;
+    --pq-decoration-rotation: -8deg;
+    --pq-decoration-filter: saturate(0.75);
+    --pq-decoration-atmosphere: radial-gradient(circle at 13% 8%, rgb(255 222 115 / 36%), transparent 28%), radial-gradient(circle at 88% 79%, rgb(126 116 47 / 23%), transparent 38%);
+}
