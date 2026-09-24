@@ -2,6 +2,48 @@
 
 ## Open Tasks
 
+### Table Hover Contrast Correction
+
+- [x] Added a static CSS assertion requiring the global row-hover selector to be restricted to hover-capable devices.
+- [x] Scoped the existing global `tr:hover` rule to `@media (hover: hover)` without changing theme tokens, result
+  markup,
+  toggle behavior, or intentional detail-row backgrounds.
+- [x] Focused regression verification passed: `npm run test -- src/css/theme-imports.test.ts` (1 file / 16 tests).
+- [x] Full verification passed:
+  - `npm run test` (23 files / 115 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `.\mvnw.cmd verify` (`BUILD SUCCESS` in 32.303 s, 321 backend tests, embedded frontend 23 files / 115 tests)
+- [x] Added a static CSS assertion requiring desktop table hover feedback to use the theme interaction background.
+- [x] Changed global desktop table hover feedback from `bg-gray-50` to `--pq-highlight-bg`.
+- [x] Focused regression verification passed: `npm run test -- src/css/theme-imports.test.ts` (1 file / 17 tests).
+- [x] Full verification passed:
+  - `npm run test` (23 files / 116 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `.\mvnw.cmd verify` (`BUILD SUCCESS` in 32.530 s, 321 backend tests, embedded frontend 23 files / 116 tests)
+- [x] Audited all public hover states after the Christmas homepage report: only `hover:bg-gray-50`, `hover:bg-gray-100`,
+  and `hover:bg-gray-200` bypass the theme background mapping; text-only, shadow-only, dark-button, and admin-only
+  hover states are not equivalent foreground/background defects.
+- [x] Added focused static coverage for themed neutral hover utility mapping.
+- [x] Mapped those three public neutral hover utilities to `--pq-highlight-bg` through the shared theme token layer.
+- [x] Focused regression verification passed: `npm run test -- src/css/theme-imports.test.ts` (1 file / 18 tests).
+- [x] Full verification passed:
+  - `npm run test` (23 files / 117 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `.\mvnw.cmd verify` (`BUILD SUCCESS` in 36.237 s, 321 backend tests, embedded frontend 23 files / 117 tests)
+- [x] Added a failing markup test for contrast-safe hover feedback on the four remaining homepage navigation cards.
+- [x] Added the shared neutral hover utility to the `Quiz Ergebnisse`, `Quiz ansehen`, `Spielregeln`, and
+  `Admin-Bereich` cards.
+- [x] Focused regression verification passed: `npm run test -- src/js/homepage-card-hover.test.ts` (1 file / 1 test).
+- [x] Full verification passed:
+  - `npm run test` (24 files / 118 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `.\mvnw.cmd verify` (`BUILD SUCCESS` in 37.796 s, 321 backend tests, embedded frontend 24 files / 118 tests)
+- Blockers: none.
+
 ### Public Theme Contrast Audit
 
 - [x] Traced the Christmas rules-page defect to unmapped `bg-yellow-50` and `bg-green-50` callout backgrounds
@@ -38,6 +80,36 @@
   - `npm run type-check` (no diagnostics)
   - `npm run build` (Vite 8.3.0, 115 modules)
   - `./mvnw.cmd verify` (`BUILD SUCCESS` in 37.540 s, 321 backend tests, embedded frontend 22 files / 112 tests)
+- Blockers: none.
+
+### Random Public Motif Layouts
+
+- [x] Approved scope: select one of four safe cluster layouts on each public page load, without storage, API, backend,
+  motif-string randomization, or changes to admin pages.
+- [x] Added a focused initializer test for the generated `data-motif-layout` attribute; it failed as expected before
+  layout selection existed.
+- [x] Set the random layout attribute in the public initializer and added four fixed CSS-only layout variants.
+- [x] Focused regression verification passed: `npm run test -- src/js/public_theme_init.test.ts` (1 file / 4 tests).
+- [x] Full verification passed:
+  - `npm run test` (22 files / 113 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `./mvnw.cmd verify` (`BUILD SUCCESS` in 32.638 s, 321 backend tests, embedded frontend 22 files / 113 tests)
+- Blockers: none.
+
+### Team Result Detail Simplification
+
+- [x] Confirmed the expanded team-result table renders a dedicated header row solely for the blue question-number
+  badges; the point cells already convey the requested data without it.
+- [x] Added focused dependency-free rendering coverage for a detail row containing only point values; a DOM-based test
+  was intentionally not introduced because this frontend test setup has no `jsdom` dependency.
+- [x] Removed the team-only question-number header and unused badge import.
+- [x] Focused regression verification passed: `npm run test -- src/js/team-result-rendering.test.ts` (1 file / 1 test).
+- [x] Full verification passed:
+  - `npm run test` (23 files / 114 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `./mvnw.cmd verify` (`BUILD SUCCESS` in 35.464 s, 321 backend tests, embedded frontend 23 files / 114 tests)
 - Blockers: none.
 
 ### German Umlaut Display Cleanup

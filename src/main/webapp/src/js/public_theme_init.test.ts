@@ -31,4 +31,14 @@ describe('initPublicTheme', () => {
 
         expect(setAttribute).toHaveBeenCalledWith('data-theme', 'august');
     });
+
+    it('assigns one safe motif layout for the current public page load', () => {
+        const setAttribute = vi.fn();
+        const doc = {documentElement: {setAttribute}} as unknown as Document;
+        const storage = {getItem: () => null} as unknown as Storage;
+
+        initPublicTheme(doc, storage, new Date('2026-08-15T12:00:00.000Z'), () => 0.75);
+
+        expect(setAttribute).toHaveBeenCalledWith('data-motif-layout', '4');
+    });
 });

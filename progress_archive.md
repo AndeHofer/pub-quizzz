@@ -4,6 +4,41 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Team Result Detail Simplification ✅ COMPLETE
+
+- Removed the team-only question-number header and unused badge import from expanded team-result details; point values
+  remain unchanged. Added dependency-free static rendering coverage and completed full verification.
+
+### German Umlaut Display Cleanup ✅ COMPLETE
+
+- Replaced active German UI-text transliterations with literal umlauts while retaining identifiers, URLs, API values,
+  entities, and historical records. Added regression coverage and completed full verification.
+
+### Legacy December Identifier Cleanup ✅ COMPLETE
+
+- Confirmed the active source already uses `december` internally and `Dezember` in UI text, with no obsolete
+  `dezember` compatibility branch remaining. No production change was needed; verification passed.
+
+### Theme Preview Table Simplification ✅ COMPLETE
+
+- Removed the visible description column from the admin theme preview table while preserving registry metadata, with
+  regression coverage and full verification.
+
+### Theme Motif Cluster Variation ✅ COMPLETE
+
+- Replaced repeated decoration fields with isolated primary/secondary theme motif clusters and preserved mobile
+  primary-only rendering, supported by CSS structure tests and full verification.
+
+### Calendar Theme Activation ✅ COMPLETE
+
+- Implemented Europe/Vienna calendar theme resolution with ordered event rules, tab-local preview priority, and public
+  page integration; admin pages remain neutral. Added resolver and initializer coverage, then completed verification.
+
+### Theme Preview Design ✅ COMPLETE
+
+- Added public-only theme preview selection, tokenized per-theme styles, responsive decorations, and the full seasonal
+  catalogue; admin pages remain neutral. Completed frontend and Maven verification.
+
 ### Phase 136: Public Theme Preview (Admin Session-Local) ✅ COMPLETE
 
 - Added frontend theme domain module and tests: `src/main/webapp/src/js/theme-preview.ts`,

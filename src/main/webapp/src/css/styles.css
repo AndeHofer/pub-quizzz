@@ -166,8 +166,10 @@ html {
         color: var(--pq-text-main);
     }
 
-    tr:hover {
-        @apply bg-gray-50;
+    @media (hover: hover) {
+        tr:hover {
+            background-color: var(--pq-highlight-bg);
+        }
     }
 
     .loading {

@@ -65,6 +65,27 @@ describe('theme CSS structure', () => {
         expect(tokens).toContain('color: var(--pq-control-placeholder);');
     });
 
+    it('limits global table-row hover feedback to hover-capable devices', async () => {
+        const styles = await readFile(path.join(cssDirectory, 'styles.css'), 'utf-8');
+
+        expect(styles).toMatch(/@media \(hover: hover\) \{\r?\n\s+tr:hover \{/);
+    });
+
+    it('uses the theme interaction background for global table-row hover feedback', async () => {
+        const styles = await readFile(path.join(cssDirectory, 'styles.css'), 'utf-8');
+
+        expect(styles).toMatch(/tr:hover \{\r?\n\s+background-color: var\(--pq-highlight-bg\);/);
+    });
+
+    it('maps neutral hover utilities to the active theme interaction background', async () => {
+        const tokens = await readFile(path.join(cssDirectory, 'themes', 'tokens.css'), 'utf-8');
+
+        expect(tokens).toContain('html[data-theme] .hover\\:bg-gray-50:hover,');
+        expect(tokens).toContain('html[data-theme] .hover\\:bg-gray-100:hover,');
+        expect(tokens).toContain('html[data-theme] .hover\\:bg-gray-200:hover {');
+        expect(tokens).toContain('background-color: var(--pq-highlight-bg) !important;');
+    });
+
     it('defines shared contrast tokens for every dark public theme', async () => {
         for (const themeId of ['february', 'halloween', 'christmas', 'new-year']) {
             const themeCss = await readFile(path.join(cssDirectory, 'themes', `${themeId}.css`), 'utf-8');
