@@ -40,18 +40,39 @@ describe('theme CSS structure', () => {
         await expectThemeFile('halloween.css', '🎃');
     });
 
-    it('uses explicit high-contrast halloween text and field colors', async () => {
+    it('defines explicit high-contrast halloween text and field tokens', async () => {
         const halloween = await readFile(path.join(cssDirectory, 'themes', 'halloween.css'), 'utf-8');
 
         expect(halloween).toContain('--pq-text-main: #fffaff;');
-        expect(halloween).toContain('input[type="text"]');
-        expect(halloween).toContain('background-color: #1d1726;');
+        expect(halloween).toContain('--pq-control-bg: #1d1726;');
+        expect(halloween).toContain('--pq-control-text: #fffaff;');
     });
 
     it('maps gray-900 dynamic score text to the active theme primary color', async () => {
         const tokens = await readFile(path.join(cssDirectory, 'themes', 'tokens.css'), 'utf-8');
 
         expect(tokens).toContain('html[data-theme] .text-gray-900,');
+    });
+
+    it('maps public links, callouts, modals, and form controls through theme tokens', async () => {
+        const tokens = await readFile(path.join(cssDirectory, 'themes', 'tokens.css'), 'utf-8');
+
+        expect(tokens).toContain('--pq-link:');
+        expect(tokens).toContain('html[data-theme] .text-blue-600,');
+        expect(tokens).toContain('html[data-theme] .bg-yellow-50,');
+        expect(tokens).toContain('html[data-theme] .modal-content');
+        expect(tokens).toContain('html[data-theme] input[type="text"]');
+        expect(tokens).toContain('color: var(--pq-control-placeholder);');
+    });
+
+    it('defines shared contrast tokens for every dark public theme', async () => {
+        for (const themeId of ['february', 'halloween', 'christmas', 'new-year']) {
+            const themeCss = await readFile(path.join(cssDirectory, 'themes', `${themeId}.css`), 'utf-8');
+
+            expect(themeCss).toContain('--pq-link:');
+            expect(themeCss).toContain('--pq-callout-bg:');
+            expect(themeCss).toContain('--pq-control-bg:');
+        }
     });
 
     it('adds an equally configured desktop body decoration below the public container', async () => {
@@ -73,7 +94,7 @@ describe('theme CSS structure', () => {
         expect(tokens).toContain('inset: var(--pq-decoration-secondary-position);');
         expect(tokens).toContain('content: var(--pq-decoration-body-primary-motifs);');
         expect(tokens).toContain('content: var(--pq-decoration-body-secondary-motifs);');
-        expect(tokens).toContain('body > .container::after {\n        display: none;');
+        expect(tokens).toMatch(/body > \.container::after \{\r?\n\s+display: none;/);
         expect(tokens).toContain('font-size: var(--pq-decoration-primary-mobile-size);');
         expect(tokens).toContain('opacity: var(--pq-decoration-primary-mobile-opacity);');
     });
@@ -95,6 +116,34 @@ describe('theme CSS structure', () => {
         }
     });
 
+    it('keeps motif repetitions out of individual corner clusters', async () => {
+        const themeIds = [
+            'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october',
+            'november', 'december', 'easter', 'halloween', 'christmas', 'new-year'
+        ];
+
+        for (const themeId of themeIds) {
+            const themeCss = await readFile(path.join(cssDirectory, 'themes', `${themeId}.css`), 'utf-8');
+            expect(motifClusterHasUniqueSymbols(themeCss, 'primary')).toBe(true);
+            expect(motifClusterHasUniqueSymbols(themeCss, 'secondary')).toBe(true);
+        }
+    });
+
+    it('places the desktop body secondary cluster away from the container secondary cluster', async () => {
+        const tokens = await readFile(path.join(cssDirectory, 'themes', 'tokens.css'), 'utf-8');
+
+        expect(tokens).toContain('--pq-decoration-body-secondary-position: auto auto 10% 3%;');
+        expect(tokens).toContain('--pq-decoration-secondary-position: auto -3% 3% auto;');
+    });
+
+    it('uses a stronger January decoration palette on pale surfaces', async () => {
+        const january = await readFile(path.join(cssDirectory, 'themes', 'january.css'), 'utf-8');
+
+        expect(january).toContain('--pq-decoration-color: #76b4dc;');
+        expect(january).toContain('--pq-decoration-opacity: 0.36;');
+        expect(january).toContain('--pq-decoration-mobile-opacity: 0.28;');
+    });
+
     it('imports and configures every remaining month and event theme', async () => {
         const styles = await readFile(path.join(cssDirectory, 'styles.css'), 'utf-8');
         const themes = [
@@ -114,4 +163,10 @@ describe('theme CSS structure', () => {
 async function expectThemeFile(fileName: string, selector: string): Promise<void> {
     const themeCss = await readFile(path.join(cssDirectory, 'themes', fileName), 'utf-8');
     expect(themeCss).toContain(selector);
+}
+
+function motifClusterHasUniqueSymbols(themeCss: string, cluster: 'primary' | 'secondary'): boolean {
+    const match = themeCss.match(new RegExp(`--pq-decoration-${cluster}-motifs: '([^']+)';`));
+    const symbols = match?.[1].split(/\s+|\\A/).filter(Boolean) ?? [];
+    return symbols.length > 0 && new Set(symbols).size === symbols.length;
 }

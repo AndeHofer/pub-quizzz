@@ -2,6 +2,44 @@
 
 ## Open Tasks
 
+### Public Theme Contrast Audit
+
+- [x] Traced the Christmas rules-page defect to unmapped `bg-yellow-50` and `bg-green-50` callout backgrounds
+  combined with tokenized light foreground text.
+- [x] Audited the public UI and confirmed the same token-boundary defect in quiz-detail answer/note callouts,
+  dark-surface `text-black` controls, blue links, modal surfaces, and dark-theme form controls.
+- [x] Added focused CSS regression coverage for generic link, callout, modal, and form-control token mappings; the
+  new assertions failed as expected before the missing contrast tokens existed.
+- [x] Added minimal shared mappings for links, callouts, modals, controls, and `text-black`; supplied dark-theme token
+  values and moved Halloween's duplicated field rule into the shared contract. Darkened Christmas, Halloween, and New
+  Year primary buttons to preserve white-label contrast.
+- [x] Focused regression verification passed: `npm run test -- src/css/theme-imports.test.ts` (1 file / 12 tests).
+- [x] Full verification passed:
+  - `npm run test` (22 files / 109 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `./mvnw.cmd verify` (`BUILD SUCCESS` in 32.428 s, 321 backend tests, embedded frontend 22 files / 109 tests)
+- Blockers: none.
+- Blockers: none.
+
+### Theme Motif Visibility And Spacing
+
+- [x] Audited every non-standard theme: Jänner is the clearest low-contrast motif case; Dezember, März, April, and
+  Juni also need stronger decoration variables on pale surfaces.
+- [x] Confirmed every theme repeats at least one motif within a corner cluster; desktop body and container secondary
+  clusters also share the lower-right area.
+- [x] Added CSS structure tests for unique motifs per cluster, separated desktop secondary decoration, and the
+  strengthened Jänner variables; the assertions failed as expected before the changes existed.
+- [x] Revised all non-standard theme motif strings, repositioned the shared desktop body secondary cluster to the
+  lower left, and calibrated decoration colors/opacities for visibility on pale surfaces.
+- [x] Focused regression verification passed: `npm run test -- src/css/theme-imports.test.ts` (1 file / 15 tests).
+- [x] Full verification passed:
+  - `npm run test` (22 files / 112 tests)
+  - `npm run type-check` (no diagnostics)
+  - `npm run build` (Vite 8.3.0, 115 modules)
+  - `./mvnw.cmd verify` (`BUILD SUCCESS` in 37.540 s, 321 backend tests, embedded frontend 22 files / 112 tests)
+- Blockers: none.
+
 ### German Umlaut Display Cleanup
 
 - [x] Scope approved: replace German UI-text transliterations such as `ae`, `oe`, and `ue` with literal umlauts;

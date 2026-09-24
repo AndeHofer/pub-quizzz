@@ -5,10 +5,18 @@ html[data-theme="halloween"] {
     --pq-text-main: #fffaff;
     --pq-text-muted: #eadcf7;
     --pq-border: #5c4a74;
-    --pq-button-bg: #ce5f16;
-    --pq-button-bg-hover: #a74c11;
+    --pq-button-bg: #a74910;
+    --pq-button-bg-hover: #80370c;
     --pq-highlight-bg: #3f3252;
-    --pq-decoration-primary-motifs: '🎃  🦇  ✦\A  ☾  🎃';
+    --pq-link: #ffcf8f;
+    --pq-link-hover: #ffe4bd;
+    --pq-callout-bg: #3a3048;
+    --pq-callout-border: #9275aa;
+    --pq-control-bg: #1d1726;
+    --pq-control-text: #fffaff;
+    --pq-control-border: #b288ca;
+    --pq-control-placeholder: #eadcf7;
+    --pq-decoration-primary-motifs: '🎃  🦇  ✦\A  ☾  🕸';
     --pq-decoration-secondary-motifs: '🕸  👻  ✧\A  🦇  ·';
     --pq-decoration-color: #ff861f;
     --pq-decoration-size: 66px;
@@ -16,25 +24,10 @@ html[data-theme="halloween"] {
     --pq-decoration-spacing: 20px;
     --pq-decoration-mobile-spacing: 12px;
     --pq-decoration-line-height: 1.62;
-    --pq-decoration-opacity: 0.27;
+    --pq-decoration-opacity: 0.30;
     --pq-decoration-mobile-opacity: 0.2;
     --pq-decoration-rotation: -9deg;
     --pq-decoration-filter: saturate(0.9) sepia(0.18);
     --pq-decoration-atmosphere: radial-gradient(circle at 12% 8%, rgb(241 112 25 / 26%), transparent 28%), radial-gradient(circle at 89% 77%, rgb(128 64 173 / 30%), transparent 34%);
 }
 
-html[data-theme="halloween"] input[type="text"],
-html[data-theme="halloween"] input[type="password"],
-html[data-theme="halloween"] input[type="date"],
-html[data-theme="halloween"] textarea,
-html[data-theme="halloween"] select {
-    background-color: #1d1726;
-    color: #fffaff;
-    border-color: #b288ca;
-}
-
-html[data-theme="halloween"] input::placeholder,
-html[data-theme="halloween"] textarea::placeholder {
-    color: #eadcf7;
-    opacity: 0.8;
-}

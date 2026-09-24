@@ -8,6 +8,14 @@
     --pq-button-bg: #374151;
     --pq-button-bg-hover: #1f2937;
     --pq-highlight-bg: #eff6ff;
+    --pq-link: #1d4ed8;
+    --pq-link-hover: #1e40af;
+    --pq-callout-bg: #f3f4f6;
+    --pq-callout-border: #d1d5db;
+    --pq-control-bg: #ffffff;
+    --pq-control-text: #1f2937;
+    --pq-control-border: #d1d5db;
+    --pq-control-placeholder: #6b7280;
 }
 
 html[data-theme] body {
@@ -25,6 +33,12 @@ html[data-theme] .bg-gray-100 {
     background-color: var(--pq-soft-surface-bg) !important;
 }
 
+html[data-theme] .bg-yellow-50,
+html[data-theme] .bg-green-50,
+html[data-theme] .bg-amber-50 {
+    background-color: var(--pq-callout-bg) !important;
+}
+
 html[data-theme] .text-gray-900,
 html[data-theme] .text-gray-800,
 html[data-theme] .text-gray-700 {
@@ -36,9 +50,48 @@ html[data-theme] .text-gray-500 {
     color: var(--pq-text-muted) !important;
 }
 
+html[data-theme] .text-blue-600,
+html[data-theme] .text-blue-700 {
+    color: var(--pq-link) !important;
+}
+
+html[data-theme] .hover\:text-blue-800:hover {
+    color: var(--pq-link-hover) !important;
+}
+
+html[data-theme] .text-black {
+    color: var(--pq-text-main) !important;
+}
+
 html[data-theme] .border-gray-200,
 html[data-theme] .border-gray-300 {
     border-color: var(--pq-border) !important;
+}
+
+html[data-theme] .border-green-200,
+html[data-theme] .border-amber-200 {
+    border-color: var(--pq-callout-border) !important;
+}
+
+html[data-theme] .modal-content {
+    background-color: var(--pq-surface-bg);
+    color: var(--pq-text-main);
+}
+
+html[data-theme] input[type="text"],
+html[data-theme] input[type="password"],
+html[data-theme] input[type="date"],
+html[data-theme] textarea,
+html[data-theme] select {
+    background-color: var(--pq-control-bg);
+    color: var(--pq-control-text);
+    border-color: var(--pq-control-border);
+}
+
+html[data-theme] input::placeholder,
+html[data-theme] textarea::placeholder {
+    color: var(--pq-control-placeholder);
+    opacity: 1;
 }
 
 html[data-theme]:not([data-theme="standard"]) body {
@@ -73,7 +126,7 @@ html[data-theme]:not([data-theme="standard"]) body {
     --pq-decoration-body-primary-rotation: var(--pq-decoration-primary-rotation);
     --pq-decoration-body-primary-filter: var(--pq-decoration-primary-filter);
     --pq-decoration-body-secondary-motifs: var(--pq-decoration-secondary-motifs);
-    --pq-decoration-body-secondary-position: auto 3% 10% auto;
+    --pq-decoration-body-secondary-position: auto auto 10% 3%;
     --pq-decoration-body-secondary-color: var(--pq-decoration-secondary-color);
     --pq-decoration-body-secondary-size: calc(var(--pq-decoration-secondary-size) * 0.8);
     --pq-decoration-body-secondary-spacing: var(--pq-decoration-secondary-spacing);

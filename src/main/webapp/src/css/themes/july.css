@@ -8,7 +8,7 @@ html[data-theme="july"] {
     --pq-button-bg: #167a93;
     --pq-button-bg-hover: #0e6075;
     --pq-highlight-bg: #bee1e5;
-    --pq-decoration-primary-motifs: '☀  ≈  ✦\A  ·  ☀';
+    --pq-decoration-primary-motifs: '☀  ≈  ✦\A  ·  ⛱';
     --pq-decoration-secondary-motifs: '⛱  ⌁  ✧\A  ≈  ·';
     --pq-decoration-color: #2699ad;
     --pq-decoration-size: 67px;
@@ -16,8 +16,8 @@ html[data-theme="july"] {
     --pq-decoration-spacing: 19px;
     --pq-decoration-mobile-spacing: 11px;
     --pq-decoration-line-height: 1.57;
-    --pq-decoration-opacity: 0.23;
-    --pq-decoration-mobile-opacity: 0.18;
+    --pq-decoration-opacity: 0.26;
+    --pq-decoration-mobile-opacity: 0.21;
     --pq-decoration-rotation: -9deg;
     --pq-decoration-filter: saturate(0.85);
     --pq-decoration-atmosphere: radial-gradient(circle at 10% 9%, rgb(255 213 91 / 33%), transparent 27%), radial-gradient(circle at 91% 81%, rgb(54 170 193 / 28%), transparent 37%);

@@ -8,7 +8,7 @@ html[data-theme="may"] {
     --pq-button-bg: #a85372;
     --pq-button-bg-hover: #863b59;
     --pq-highlight-bg: #f0d7df;
-    --pq-decoration-primary-motifs: '✿  ❀  ❁\A  ·  ✿';
+    --pq-decoration-primary-motifs: '✿  ❀  ❁\A  ·  ☘';
     --pq-decoration-secondary-motifs: '☘  ✦  ❋\A  ❀  ·';
     --pq-decoration-color: #d57c9d;
     --pq-decoration-size: 67px;
@@ -16,8 +16,8 @@ html[data-theme="may"] {
     --pq-decoration-spacing: 18px;
     --pq-decoration-mobile-spacing: 11px;
     --pq-decoration-line-height: 1.55;
-    --pq-decoration-opacity: 0.24;
-    --pq-decoration-mobile-opacity: 0.18;
+    --pq-decoration-opacity: 0.27;
+    --pq-decoration-mobile-opacity: 0.21;
     --pq-decoration-rotation: -8deg;
     --pq-decoration-filter: none;
     --pq-decoration-atmosphere: radial-gradient(circle at 10% 10%, rgb(255 205 219 / 47%), transparent 29%), radial-gradient(circle at 90% 82%, rgb(199 222 163 / 30%), transparent 38%);

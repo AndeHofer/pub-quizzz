@@ -8,17 +8,17 @@ html[data-theme="december"] {
     --pq-button-bg: #18476b;
     --pq-button-bg-hover: #123654;
     --pq-highlight-bg: #e4eef6;
-    --pq-decoration-primary-motifs: '🌲  ❄  ✦\A  ✧  🌲';
+    --pq-decoration-primary-motifs: '🌲  ❄  ✦\A  ✧  ☾';
     --pq-decoration-secondary-motifs: '☾  ⌁  ·\A  ❄  ✧';
-    --pq-decoration-color: #b6d6d5;
+    --pq-decoration-color: #6faaa7;
     --pq-decoration-size: 66px;
     --pq-decoration-mobile-size: 52px;
     --pq-decoration-spacing: 18px;
     --pq-decoration-mobile-spacing: 12px;
     --pq-decoration-line-height: 1.6;
-    --pq-decoration-opacity: 0.25;
-    --pq-decoration-mobile-opacity: 0.19;
+    --pq-decoration-opacity: 0.30;
+    --pq-decoration-mobile-opacity: 0.24;
     --pq-decoration-rotation: -7deg;
-    --pq-decoration-filter: saturate(0.56);
+    --pq-decoration-filter: saturate(0.75);
     --pq-decoration-atmosphere: radial-gradient(circle at 16% 10%, rgb(190 229 224 / 16%), transparent 26%), radial-gradient(circle at 88% 75%, rgb(49 111 106 / 30%), transparent 37%);
 }

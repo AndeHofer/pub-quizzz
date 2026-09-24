@@ -8,7 +8,7 @@ html[data-theme="october"] {
     --pq-button-bg: #925d43;
     --pq-button-bg-hover: #70432f;
     --pq-highlight-bg: #cdb6a8;
-    --pq-decoration-primary-motifs: '🍂  ☁  ≋\A  ·  🍂';
+    --pq-decoration-primary-motifs: '🍂  ☁  ≋\A  ·  🌫';
     --pq-decoration-secondary-motifs: '🌫  🍁  ✦\A  ≋  ·';
     --pq-decoration-color: #a26749;
     --pq-decoration-size: 65px;
@@ -16,8 +16,8 @@ html[data-theme="october"] {
     --pq-decoration-spacing: 17px;
     --pq-decoration-mobile-spacing: 10px;
     --pq-decoration-line-height: 1.58;
-    --pq-decoration-opacity: 0.24;
-    --pq-decoration-mobile-opacity: 0.18;
+    --pq-decoration-opacity: 0.27;
+    --pq-decoration-mobile-opacity: 0.21;
     --pq-decoration-rotation: -9deg;
     --pq-decoration-filter: saturate(0.6);
     --pq-decoration-atmosphere: radial-gradient(circle at 12% 11%, rgb(178 110 76 / 23%), transparent 28%), radial-gradient(circle at 89% 78%, rgb(91 87 92 / 25%), transparent 37%);
