@@ -16,7 +16,6 @@
         <connection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</connection>
         <developerConnection>scm:git:https://github.com/AndeHofer/pub-quizzz.git</developerConnection>
         <url>https://github.com/AndeHofer/pub-quizzz</url>
-        <tag>v26.9.3</tag>
     </scm>
     <properties>
         <java.version>25</java.version>

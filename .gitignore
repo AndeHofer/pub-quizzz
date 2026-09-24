@@ -5,6 +5,7 @@ logs/
 .classpath
 .factorypath
 .project
+.superpowers
 .settings/
 src/main/resources/static/
 .idea

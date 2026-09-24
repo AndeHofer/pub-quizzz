@@ -1,0 +1,24 @@
+html[data-theme="easter"] {
+    --pq-page-bg: #f6edf6;
+    --pq-surface-bg: #fffaff;
+    --pq-soft-surface-bg: #f0dff1;
+    --pq-text-main: #463142;
+    --pq-text-muted: #785d73;
+    --pq-border: #dfbfe0;
+    --pq-button-bg: #a05c96;
+    --pq-button-bg-hover: #814576;
+    --pq-highlight-bg: #ead0e8;
+    --pq-decoration-primary-motifs: '🐣  🥚  ❀\A  🌷  🐣';
+    --pq-decoration-secondary-motifs: '🐇  ✦  ☘\A  🥚  ❀';
+    --pq-decoration-color: #d888bf;
+    --pq-decoration-size: 62px;
+    --pq-decoration-mobile-size: 48px;
+    --pq-decoration-spacing: 14px;
+    --pq-decoration-mobile-spacing: 8px;
+    --pq-decoration-line-height: 1.57;
+    --pq-decoration-opacity: 0.25;
+    --pq-decoration-mobile-opacity: 0.19;
+    --pq-decoration-rotation: -8deg;
+    --pq-decoration-filter: saturate(0.75);
+    --pq-decoration-atmosphere: radial-gradient(circle at 12% 8%, rgb(255 223 137 / 35%), transparent 27%), radial-gradient(circle at 89% 80%, rgb(206 145 194 / 29%), transparent 38%);
+}

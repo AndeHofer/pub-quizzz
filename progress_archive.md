@@ -4,6 +4,43 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 136: Public Theme Preview (Admin Session-Local) ✅ COMPLETE
+
+- Added frontend theme domain module and tests: `src/main/webapp/src/js/theme-preview.ts`,
+  `src/main/webapp/src/js/theme-preview.test.ts`.
+- Added dedicated admin preview page and logic:
+  `src/main/webapp/src/admin/theme_preview.html`,
+  `src/main/webapp/src/js/admin_theme_preview_page.ts`,
+  `src/main/webapp/src/js/admin_theme_preview_page.test.ts`.
+- Wired navigation from admin main and Vite input:
+  `src/main/webapp/src/admin/admin_main.html`,
+  `src/main/webapp/src/js/admin_functions.ts`,
+  `src/main/webapp/vite.config.ts`.
+- Added public-page initializer and markup coverage:
+  `src/main/webapp/src/js/public_theme_init.ts`,
+  `src/main/webapp/src/js/public-theme-loader-markup.test.ts`,
+  plus public HTML entries now loading the initializer.
+- Added isolated tokenized theme styling with overrides for November, Dezember, Jänner, and Halloween in
+  `src/main/webapp/src/css/themes/`, imported from `src/main/webapp/src/css/styles.css`; added
+  `src/main/webapp/src/css/theme-imports.test.ts` to prevent the modular CSS structure from regressing.
+- Renamed the internal Jänner theme identifier and stylesheet to English `january` / `january.css`; user-facing labels
+  remain `Jänner`.
+- Added shared, responsive Unicode-plus-CSS decoration behind non-standard public themes: November has leaves,
+  Dezember has a winter forest, Jänner has geometric frost, and Halloween has pumpkins. No image/SVG assets or
+  backend changes were introduced; admin pages remain decoration-free. Follow-up: moved the decoration from `body`
+  into the public `.container` stacking context so full-width mobile containers no longer cover it. Removed the mobile
+  themed body top strip, renamed internal `december` naming from legacy `dezember`, and increased Halloween contrast
+  for text, fields, and placeholders. Added the missing themed `text-gray-900` mapping so dynamically rendered
+  point totals remain readable on dark Halloween surfaces. Added an equally strong desktop-only body decoration using
+  the same shared theme variables while preserving container-only decoration on mobile. Expanded the preview-only
+  catalogue to all months plus Easter, Christmas, and New Year with English internal IDs/CSS files and German labels;
+  calendar activation remains intentionally disabled.
+- Verification passed:
+    - `npm run test` (20 files / 77 tests)
+    - `npm run type-check`
+    - `npm run build`
+    - `./mvnw.cmd verify` (`BUILD SUCCESS`, 321 backend tests, embedded frontend suite 20 files / 77 tests).
+
 ### Phase 132: Leaderboard Year Tabs ✅ COMPLETE
 
 - Added backend controller/service tests first for optional `year` leaderboard queries and `/api/leaderboard/years`.

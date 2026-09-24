@@ -90,6 +90,9 @@ window.addEventListener('load', () => {
     document.getElementById('manageNewsBtn')?.addEventListener('click', () => {
         location.href = 'news.html';
     });
+    document.getElementById('viewThemePreviewBtn')?.addEventListener('click', () => {
+        location.href = 'theme_preview.html';
+    });
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeModal);
 
     const modal = document.getElementById('dataModal');

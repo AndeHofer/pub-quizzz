@@ -1,4 +1,21 @@
 @import "tailwindcss";
+@import "./themes/tokens.css";
+@import "./themes/january.css";
+@import "./themes/february.css";
+@import "./themes/march.css";
+@import "./themes/april.css";
+@import "./themes/may.css";
+@import "./themes/june.css";
+@import "./themes/july.css";
+@import "./themes/august.css";
+@import "./themes/september.css";
+@import "./themes/october.css";
+@import "./themes/november.css";
+@import "./themes/december.css";
+@import "./themes/easter.css";
+@import "./themes/halloween.css";
+@import "./themes/christmas.css";
+@import "./themes/new-year.css";
 
 html {
     scrollbar-gutter: stable;
@@ -7,6 +24,8 @@ html {
 @layer components {
     body {
         @apply font-sans m-0 pt-4 sm:pt-[50px] bg-gray-50 opacity-100;
+        background-color: var(--pq-page-bg);
+        color: var(--pq-text-main);
         transition: opacity 160ms ease;
     }
 
@@ -24,6 +43,7 @@ html {
 
     .container {
         @apply bg-white px-4 py-5 sm:p-[30px] rounded-lg shadow max-w-[900px] mx-auto;
+        background-color: var(--pq-surface-bg);
     }
 
     .container.small {
@@ -32,10 +52,13 @@ html {
 
     h1 {
         @apply text-gray-800;
+        color: var(--pq-text-main);
     }
 
     h2 {
         @apply text-gray-600 mt-[30px] border-b-2 border-gray-200 pb-[10px];
+        color: var(--pq-text-muted);
+        border-color: var(--pq-border);
     }
 
     .section {
@@ -50,19 +73,23 @@ html {
     button,
     .admin-btn {
         @apply bg-gray-700 text-white px-5 py-3 border-0 rounded cursor-pointer text-base my-[10px];
+        background-color: var(--pq-button-bg);
     }
 
     button:hover,
     .admin-btn:hover {
         @apply bg-gray-800;
+        background-color: var(--pq-button-bg-hover);
     }
 
     .secondary-btn {
         @apply bg-gray-500;
+        background-color: color-mix(in srgb, var(--pq-button-bg) 85%, white 15%);
     }
 
     .secondary-btn:hover {
         @apply bg-gray-600;
+        background-color: color-mix(in srgb, var(--pq-button-bg-hover) 85%, white 15%);
     }
 
     .danger-btn {
@@ -96,6 +123,8 @@ html {
 
     .suggestions {
         @apply list-none m-0 p-0 border border-gray-300 max-h-[200px] overflow-y-auto bg-white absolute z-[1100] w-full shadow-md mt-1;
+        border-color: var(--pq-border);
+        background-color: var(--pq-surface-bg);
     }
 
     .suggestions li {
@@ -105,10 +134,12 @@ html {
     .suggestions li:hover,
     .suggestions li.highlight {
         @apply bg-gray-100;
+        background-color: var(--pq-highlight-bg);
     }
 
     .suggestions li:focus {
         @apply outline-none bg-blue-50;
+        background-color: var(--pq-highlight-bg);
     }
 
     .close {
@@ -126,10 +157,13 @@ html {
     th,
     td {
         @apply border border-gray-300 p-1.5 sm:p-3 text-left text-sm sm:text-base;
+        border-color: var(--pq-border);
     }
 
     th {
         @apply bg-gray-100 text-gray-700;
+        background-color: var(--pq-soft-surface-bg);
+        color: var(--pq-text-main);
     }
 
     tr:hover {

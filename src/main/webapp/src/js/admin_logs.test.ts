@@ -4,7 +4,7 @@ import {buildLogStream, levelBadgeClass, queryParamsFromFilters} from './admin_l
 describe('admin_logs helpers', () => {
     it('renders empty-state in stream mode', () => {
         const markup = buildLogStream([]);
-        expect(markup).toContain('Keine Log-Eintraege gefunden.');
+        expect(markup).toContain('Keine Log-Einträge gefunden.');
     });
 
     it('maps level badges to deterministic classes', () => {

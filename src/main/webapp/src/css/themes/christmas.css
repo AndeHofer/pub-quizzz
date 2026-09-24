@@ -1,0 +1,24 @@
+html[data-theme="christmas"] {
+    --pq-page-bg: #10251d;
+    --pq-surface-bg: #18372a;
+    --pq-soft-surface-bg: #24503c;
+    --pq-text-main: #fff8e8;
+    --pq-text-muted: #ebdfbf;
+    --pq-border: #9b8050;
+    --pq-button-bg: #a97824;
+    --pq-button-bg-hover: #815a19;
+    --pq-highlight-bg: #3c684e;
+    --pq-decoration-primary-motifs: '🎄  🕯  ✦\A  ❄  🎄';
+    --pq-decoration-secondary-motifs: '🔔  🎁  ✧\A  🕯  ·';
+    --pq-decoration-color: #e9c66e;
+    --pq-decoration-size: 65px;
+    --pq-decoration-mobile-size: 51px;
+    --pq-decoration-spacing: 16px;
+    --pq-decoration-mobile-spacing: 10px;
+    --pq-decoration-line-height: 1.6;
+    --pq-decoration-opacity: 0.27;
+    --pq-decoration-mobile-opacity: 0.2;
+    --pq-decoration-rotation: -8deg;
+    --pq-decoration-filter: saturate(0.8);
+    --pq-decoration-atmosphere: radial-gradient(circle at 12% 8%, rgb(239 195 79 / 28%), transparent 28%), radial-gradient(circle at 89% 79%, rgb(37 113 76 / 31%), transparent 38%);
+}

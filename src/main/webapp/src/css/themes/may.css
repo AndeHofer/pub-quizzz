@@ -1,0 +1,24 @@
+html[data-theme="may"] {
+    --pq-page-bg: #f4eee8;
+    --pq-surface-bg: #fffafa;
+    --pq-soft-surface-bg: #f5e3e8;
+    --pq-text-main: #3d2c35;
+    --pq-text-muted: #765664;
+    --pq-border: #e4bdcb;
+    --pq-button-bg: #a85372;
+    --pq-button-bg-hover: #863b59;
+    --pq-highlight-bg: #f0d7df;
+    --pq-decoration-primary-motifs: '✿  ❀  ❁\A  ·  ✿';
+    --pq-decoration-secondary-motifs: '☘  ✦  ❋\A  ❀  ·';
+    --pq-decoration-color: #d57c9d;
+    --pq-decoration-size: 67px;
+    --pq-decoration-mobile-size: 52px;
+    --pq-decoration-spacing: 18px;
+    --pq-decoration-mobile-spacing: 11px;
+    --pq-decoration-line-height: 1.55;
+    --pq-decoration-opacity: 0.24;
+    --pq-decoration-mobile-opacity: 0.18;
+    --pq-decoration-rotation: -8deg;
+    --pq-decoration-filter: none;
+    --pq-decoration-atmosphere: radial-gradient(circle at 10% 10%, rgb(255 205 219 / 47%), transparent 29%), radial-gradient(circle at 90% 82%, rgb(199 222 163 / 30%), transparent 38%);
+}
