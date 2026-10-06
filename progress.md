@@ -2,6 +2,18 @@
 
 ## Open Tasks
 
+### Team Results Mobile Columns
+
+- [x] Confirmed the requested mobile rebalance: reduce points while widening the rank column for medal and text.
+- [x] Swapped 8px from the mobile points column to the rank column; no tests or build runs requested.
+- Blockers: none.
+
+### Team Results Desktop Columns
+
+- [x] Confirmed the mobile table dimensions must remain unchanged.
+- [x] Widened only the desktop points, rank, and detail-toggle columns; no tests or build runs requested.
+- Blockers: none.
+
 ### Frontend Dependency Maintenance
 
 - [x] Identified the sole audit finding as transitive `source-map-js@1.2.1` and confirmed `1.2.2` is the minimal fix.
