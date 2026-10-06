@@ -2,6 +2,18 @@
 
 ## Open Tasks
 
+### Quizzes Overview Desktop Columns
+
+- [x] Confirmed the desktop Quiz and Teams columns should be narrowed so Gewinner receives the released space.
+- [x] Set the desktop Quiz width to 30% and Teams width to 80px; no tests or build runs requested.
+- Blockers: none.
+
+### Quiz Results Desktop Columns
+
+- [x] Confirmed the desktop points and detail-toggle columns should use the Team table values.
+- [x] Widened only the desktop Quiz points and detail-toggle columns; no tests or build runs requested.
+- Blockers: none.
+
 ### Team Results Mobile Columns
 
 - [x] Confirmed the requested mobile rebalance: reduce points while widening the rank column for medal and text.
