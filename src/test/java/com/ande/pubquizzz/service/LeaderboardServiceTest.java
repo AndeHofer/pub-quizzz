@@ -232,7 +232,7 @@ class LeaderboardServiceTest {
     }
 
     @Test
-    void getTopResultsLeaderboard_returnsTopTenWithPointsOnlyGlobalRanksAndQuizRanksUsingTieBreaker() {
+    void getTopResultsLeaderboard_returnsTopTenWithPointsOnlyGlobalRanksUsingTieBreaker() {
         when(resultRepository.findTopResultsScoreBreakdownRaw(null)).thenReturn(List.of(
                 new Object[]{206L, LocalDate.of(2026, 1, 1), 10L, "Kappa Team", 43L, 2L, 0L},
                 new Object[]{205L, LocalDate.of(2026, 1, 15), 11L, "Lambda Team", 44L, 2L, 0L},
@@ -267,21 +267,13 @@ class LeaderboardServiceTest {
         assertThat(result).extracting(TopResultLeaderboardEntry::getRank)
                 .containsExactly(1, 1, 3, 3, 5, 6, 7, 7, 9, 10);
 
-        Map<String, TopResultLeaderboardEntry> byTeam = result.stream()
-                .collect(java.util.stream.Collectors.toMap(TopResultLeaderboardEntry::getTeamName, e -> e));
-
-        assertThat(byTeam.get("Alpha Team").getQuizRank()).isEqualTo(1);
-        assertThat(byTeam.get("Beta Team").getQuizRank()).isEqualTo(2);
-        assertThat(byTeam.get("Delta Team").getQuizRank()).isEqualTo(1);
-        assertThat(byTeam.get("Gamma Team").getQuizRank()).isEqualTo(1);
-
-        assertThat(byTeam.get("Alpha Team").getQuizId()).isEqualTo(200L);
-        assertThat(byTeam.get("Alpha Team").getQuizDate()).isEqualTo("2026-05-01");
-        assertThat(byTeam.get("Alpha Team").getQuizTitle()).isEqualTo("2026 Mai");
+        assertThat(result.getFirst().getQuizId()).isEqualTo(200L);
+        assertThat(result.getFirst().getQuizDate()).isEqualTo("2026-05-01");
+        assertThat(result.getFirst().getQuizTitle()).isEqualTo("2026 Mai");
     }
 
     @Test
-    void getTopResultsLeaderboard_withYear_limitsAndRanksWithinSelectedYear() {
+    void getTopResultsLeaderboard_withYear_limitsWithinSelectedYear() {
         when(resultRepository.findTopResultsScoreBreakdownRaw(2025)).thenReturn(List.of(
                 new Object[]{1L, LocalDate.of(2025, 5, 1), 1L, "Alpha Team", 50L, 2L, 1L},
                 new Object[]{1L, LocalDate.of(2025, 5, 1), 2L, "Beta Team", 48L, 1L, 1L}
@@ -292,7 +284,6 @@ class LeaderboardServiceTest {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getTeamName()).isEqualTo("Alpha Team");
         assertThat(result.get(0).getQuizDate()).isEqualTo("2025-05-01");
-        assertThat(result.get(0).getQuizRank()).isEqualTo(1);
     }
 
     @Test

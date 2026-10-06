@@ -25,7 +25,6 @@ describe('top-results leaderboard row markup', () => {
             quizId: 42,
             quizTitle: '2026 Mai',
             totalPoints: 50,
-            quizRank: 2,
         };
 
         expect(buildTopResultsRowMarkup).toBeTypeOf('function');
@@ -33,5 +32,6 @@ describe('top-results leaderboard row markup', () => {
 
         expect(markup).toContain('2026 Mai');
         expect(markup).not.toContain('2026-05-01');
+        expect(markup).toContain('class="text-blue-600 hover:underline font-medium">2026 Mai</a>');
     });
 });

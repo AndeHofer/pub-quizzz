@@ -22,14 +22,20 @@
 
     <div id="errorMessage" class="bg-red-100 text-red-700 rounded-lg px-4 py-3 mb-4" style="display:none;"></div>
 
-    <div class="overflow-x-auto">
-        <table id="quizzesTable" class="w-full bg-white rounded-lg shadow-sm min-w-[320px] sm:min-w-0"
+    <div>
+        <table id="quizzesTable" class="w-full table-fixed bg-white rounded-lg shadow-sm"
                style="display:none;">
             <thead>
             <tr class="border-b-2 border-gray-200 bg-gray-100">
-                <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-700 text-xs sm:text-base">Quiz</th>
-                <th class="py-2 px-2 sm:py-3 sm:px-4 text-center text-gray-700 text-xs sm:text-base">Gewinner</th>
-                <th class="py-2 px-2 sm:py-3 sm:px-4 text-center text-gray-700 text-xs sm:text-base">Teams</th>
+                <th class="w-[38%] py-2 px-1.5 sm:w-auto sm:py-3 sm:px-4 text-left text-gray-700 text-xs sm:text-base">
+                    Quiz
+                </th>
+                <th class="py-2 px-1.5 sm:w-auto sm:py-3 sm:px-4 text-center text-gray-700 text-xs sm:text-base">
+                    Gewinner
+                </th>
+                <th class="w-12 py-2 px-1.5 sm:w-auto sm:py-3 sm:px-4 text-center text-gray-700 text-xs sm:text-base">
+                    Teams
+                </th>
             </tr>
             </thead>
             <tbody id="quizzesBody"></tbody>

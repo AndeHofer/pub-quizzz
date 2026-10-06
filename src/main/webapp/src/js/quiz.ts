@@ -18,12 +18,12 @@ function renderResults(entries: QuizResultEntry[]): void {
         // Summary row
         rows.push(`
             <tr class="border-b border-gray-200 hover:bg-gray-50">
-                <td class="py-2 px-2 sm:py-3 sm:px-4 font-semibold text-center text-xs sm:text-base">${getMedal(entry.rank)}</td>
-                <td class="py-2 px-2 sm:py-3 sm:px-4 font-medium text-xs sm:text-base">
+                <td class="py-2 px-1.5 sm:py-3 sm:px-4 font-semibold text-center text-xs sm:text-base">${getMedal(entry.rank)}</td>
+                <td class="py-2 px-1.5 sm:py-3 sm:px-4 font-medium break-words">
                     <a href="/team.html?teamId=${encodeURIComponent(String(entry.teamId))}" class="text-blue-600 hover:underline">${escapeHtml(entry.teamName)}</a>
                 </td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-gray-900 text-xs sm:text-base">${entry.totalPoints}</td>
-                <td class="py-2 px-2 sm:py-3 sm:px-4 text-center">
+                <td class="py-2 px-1.5 sm:py-3 sm:px-4 text-center">
                     ${buildToggleButtonHtml(detailRowId)}
                 </td>
             </tr>

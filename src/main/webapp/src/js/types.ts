@@ -109,7 +109,6 @@ export interface TopResultLeaderboardEntry {
     quizId: number;
     quizTitle: string;
     totalPoints: number;
-    quizRank: number;
 }
 
 export interface TeamResultEntry {

@@ -34,7 +34,7 @@ SPRING_DATASOURCE_URL
 - merging teams should be possible
 - usage statistics for admin
 - enrich the news section with html and pics
-- different designs for different months
+- ~~different designs for different months~~
 - user for every team with a different appearance and more focus on the team results
 - Top 10 mobile width refactoring
 

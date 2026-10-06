@@ -1,7 +1,3 @@
-# AGENTS.md — pub-quizzz
-
-Guidance for AI coding agents working in this repository.
-
 # Instructions:
 
 - Communicate in the CLI always in English.

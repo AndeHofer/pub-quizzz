@@ -4,6 +4,21 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Table Hover Contrast Correction ✅ COMPLETE
+
+- Scoped table hover feedback to hover-capable devices and mapped desktop rows plus public neutral hover utilities to
+  the shared theme interaction background. Added CSS and homepage-card regression coverage; full verification passed.
+
+### Public Theme Contrast Audit ✅ COMPLETE
+
+- Tokenized public links, callouts, modal surfaces, controls, and dark-surface foregrounds; calibrated event-theme
+  primary buttons for white-label contrast. Added focused CSS coverage; full verification passed.
+
+### Theme Motif Visibility And Spacing ✅ COMPLETE
+
+- Reworked non-standard theme motifs to use distinct, visible corner clusters and moved desktop secondary decoration
+  to the lower left. Added CSS structure coverage; full verification passed.
+
 ### Team Result Detail Simplification ✅ COMPLETE
 
 - Removed the team-only question-number header and unused badge import from expanded team-result details; point values

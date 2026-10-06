@@ -286,11 +286,11 @@ html {
     }
 
     .icon-btn {
-        @apply bg-transparent border-0 p-0 cursor-pointer text-[1.2rem] m-0;
+        @apply inline-flex items-center justify-center bg-transparent border-0 p-0 cursor-pointer text-[1.2rem] leading-none m-0;
     }
 
     .icon-btn:hover {
-        @apply opacity-70;
+        @apply bg-transparent opacity-70;
     }
 
     .question-toggle {

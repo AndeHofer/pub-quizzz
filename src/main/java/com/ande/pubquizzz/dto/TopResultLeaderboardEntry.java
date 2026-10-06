@@ -15,5 +15,4 @@ public class TopResultLeaderboardEntry {
     private String quizTitle;
     private String quizDate;
     private int totalPoints;
-    private int quizRank;
 }

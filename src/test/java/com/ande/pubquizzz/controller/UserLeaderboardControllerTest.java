@@ -193,7 +193,6 @@ class UserLeaderboardControllerTest {
         entry.setQuizTitle("2026 Mai");
         entry.setQuizDate("2026-05-01");
         entry.setTotalPoints(50);
-        entry.setQuizRank(2);
 
         when(leaderboardService.getTopResultsLeaderboard(null)).thenReturn(List.of(entry));
 
@@ -205,8 +204,7 @@ class UserLeaderboardControllerTest {
                 .andExpect(jsonPath("$[0].quizId").value(7))
                 .andExpect(jsonPath("$[0].quizTitle").value("2026 Mai"))
                 .andExpect(jsonPath("$[0].quizDate").value("2026-05-01"))
-                .andExpect(jsonPath("$[0].totalPoints").value(50))
-                .andExpect(jsonPath("$[0].quizRank").value(2));
+                .andExpect(jsonPath("$[0].totalPoints").value(50));
     }
 
     @Test
@@ -220,7 +218,6 @@ class UserLeaderboardControllerTest {
         entry.setQuizTitle("2025 Mai");
         entry.setQuizDate("2025-05-01");
         entry.setTotalPoints(50);
-        entry.setQuizRank(1);
 
         when(leaderboardService.getTopResultsLeaderboard(2025)).thenReturn(List.of(entry));
 

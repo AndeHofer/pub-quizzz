@@ -214,26 +214,6 @@ public class LeaderboardService {
             return List.of();
         }
 
-        Map<Long, List<Object[]>> rowsByQuizId = rows.stream()
-                .collect(Collectors.groupingBy(row -> ((Number) row[0]).longValue()));
-
-        Map<Long, Map<Long, Integer>> quizRanksByQuizAndTeam = new HashMap<>();
-        for (Map.Entry<Long, List<Object[]>> entry : rowsByQuizId.entrySet()) {
-            List<Object[]> quizRows = new ArrayList<>(entry.getValue());
-            quizRows.sort((left, right) -> RankingUtils.compareScoreRowsDesc(left, right, 4, 5, 6));
-
-            Map<Long, Integer> rankByTeamId = new HashMap<>();
-            int quizRank = 1;
-            for (int i = 0; i < quizRows.size(); i++) {
-                if (i > 0 && !RankingUtils.hasSameScore(quizRows.get(i - 1), quizRows.get(i), 4, 5, 6)) {
-                    quizRank = i + 1;
-                }
-                Long teamId = ((Number) quizRows.get(i)[2]).longValue();
-                rankByTeamId.putIfAbsent(teamId, quizRank);
-            }
-            quizRanksByQuizAndTeam.put(entry.getKey(), rankByTeamId);
-        }
-
         rows.sort(LeaderboardService::compareTopResultRowsForGlobalList);
 
         List<Object[]> topRows = rows.stream().limit(10).toList();
@@ -263,9 +243,6 @@ public class LeaderboardService {
             dto.setQuizDate(quizDate.toString());
             dto.setQuizTitle(QuizTitleFormatter.deriveQuizTitle(quizDate));
             dto.setTotalPoints(totalPoints);
-            dto.setQuizRank(quizRanksByQuizAndTeam
-                    .getOrDefault(quizId, Map.of())
-                    .getOrDefault(teamId, 1));
             leaderboard.add(dto);
         }
 

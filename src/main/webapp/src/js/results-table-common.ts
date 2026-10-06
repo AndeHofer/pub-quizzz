@@ -3,7 +3,7 @@ export function numberBadge(n: number): string {
 }
 
 export function buildToggleButtonHtml(detailRowId: string): string {
-    return `<button type="button" data-action="toggle-detail" data-target-row="${detailRowId}" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 whitespace-nowrap">&#9658; anzeigen</button>`;
+    return `<button type="button" data-action="toggle-detail" data-target-row="${detailRowId}" class="icon-btn w-6 h-6 text-gray-500 hover:bg-transparent hover:text-gray-700">+</button>`;
 }
 
 export function toggleDetailRow(button: HTMLButtonElement, container: ParentNode = document): void {
@@ -15,7 +15,7 @@ export function toggleDetailRow(button: HTMLButtonElement, container: ParentNode
 
     const isHidden = row.style.display === 'none';
     row.style.display = isHidden ? 'table-row' : 'none';
-    button.innerHTML = isHidden ? '&#9660; schlie&szlig;en' : '&#9658; anzeigen';
+    button.innerHTML = isHidden ? '&minus;' : '+';
 }
 
 export function wireDetailToggleButtons(container: HTMLElement): void {
