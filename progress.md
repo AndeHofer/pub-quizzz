@@ -2,6 +2,14 @@
 
 ## Open Tasks
 
+### Presentation Test Cleanup
+
+- [x] Identified tests that coupled frontend behavior checks to Tailwind classes or layout markup.
+- [x] Removed presentation-only tests and retained behavioral assertions in mixed tests.
+- [x] Full verification passed: frontend tests (22 files, 97 tests), type check, production build, and Maven verify (321
+  backend tests).
+- Blockers: none.
+
 ### Team Results Mobile Table
 
 - [x] Traced the mobile overflow to Team results using a 320px minimum-width table inside an overflow container.

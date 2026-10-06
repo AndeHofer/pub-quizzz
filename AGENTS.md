@@ -38,6 +38,7 @@
 - Use TypeScript for the frontend.
 - Use Tailwind CSS for styling the frontend.
 - Use Vite for the frontend build tool.
+- Do not create tests for styling
 
 ## Business Rules (Critical)
 

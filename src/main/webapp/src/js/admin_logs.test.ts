@@ -1,18 +1,10 @@
 import {describe, expect, it} from 'vitest';
-import {buildLogStream, levelBadgeClass, queryParamsFromFilters} from './admin_logs';
+import {buildLogStream, queryParamsFromFilters} from './admin_logs';
 
 describe('admin_logs helpers', () => {
     it('renders empty-state in stream mode', () => {
         const markup = buildLogStream([]);
         expect(markup).toContain('Keine Log-Einträge gefunden.');
-    });
-
-    it('maps level badges to deterministic classes', () => {
-        expect(levelBadgeClass('ERROR')).toContain('text-red-700');
-        expect(levelBadgeClass('WARN')).toContain('text-amber-700');
-        expect(levelBadgeClass('INFO')).toContain('text-blue-700');
-        expect(levelBadgeClass('DEBUG')).toContain('text-gray-700');
-        expect(levelBadgeClass('ANYTHING')).toContain('text-slate-700');
     });
 
     it('escapes markup in message and source', () => {

@@ -42,7 +42,7 @@ describe('news helpers', () => {
             }
         ]);
 
-        expect(markup).toContain('<span class="text-xs text-gray-500">-</span>');
+        expect(markup).toContain('>-</span>');
     });
 
     it('renders createdAt as date only without time', () => {
