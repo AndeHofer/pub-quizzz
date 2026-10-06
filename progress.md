@@ -2,6 +2,15 @@
 
 ## Open Tasks
 
+### Frontend Dependency Maintenance
+
+- [x] Identified the sole audit finding as transitive `source-map-js@1.2.1` and confirmed `1.2.2` is the minimal fix.
+- [x] Updated the approved Vite, Vitest, Node type, and transitive security dependencies.
+- [x] `npm audit` reports zero vulnerabilities; full verification passed: frontend tests (22 files, 97 tests), type
+  check,
+  production build, and Maven verify (321 backend tests).
+- Blockers: none.
+
 ### Presentation Test Cleanup
 
 - [x] Identified tests that coupled frontend behavior checks to Tailwind classes or layout markup.
