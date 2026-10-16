@@ -244,12 +244,13 @@ class LeaderboardServiceTest {
                 new Object[]{201L, LocalDate.of(2026, 4, 1), 3L, "Gamma Team", 48L, 3L, 0L},
                 new Object[]{200L, LocalDate.of(2026, 5, 1), 1L, "Alpha Team", 50L, 3L, 1L},
                 new Object[]{204L, LocalDate.of(2026, 2, 1), 9L, "Iota Team", 45L, 1L, 1L},
+                new Object[]{205L, LocalDate.of(2026, 3, 1), 11L, "Lambda Team", 43L, 4L, 0L},
                 new Object[]{207L, LocalDate.of(2025, 12, 1), 12L, "Mu Team", 39L, 0L, 0L}
         ));
 
         List<TopResultLeaderboardEntry> result = leaderboardService.getTopResultsLeaderboard();
 
-        assertThat(result).hasSize(10);
+        assertThat(result).hasSize(11);
         assertThat(result).extracting(TopResultLeaderboardEntry::getTeamName)
                 .containsExactly(
                         "Alpha Team",
@@ -261,11 +262,12 @@ class LeaderboardServiceTest {
                         "Iota Team",
                         "Theta Team",
                         "Lambda Team",
+                        "Lambda Team",
                         "Kappa Team"
                 );
 
         assertThat(result).extracting(TopResultLeaderboardEntry::getRank)
-                .containsExactly(1, 1, 3, 3, 5, 6, 7, 7, 9, 10);
+                .containsExactly(1, 1, 3, 3, 5, 6, 7, 7, 9, 10, 10);
 
         assertThat(result.getFirst().getQuizId()).isEqualTo(200L);
         assertThat(result.getFirst().getQuizDate()).isEqualTo("2026-05-01");
@@ -282,8 +284,8 @@ class LeaderboardServiceTest {
         List<TopResultLeaderboardEntry> result = leaderboardService.getTopResultsLeaderboard(2025);
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getTeamName()).isEqualTo("Alpha Team");
-        assertThat(result.get(0).getQuizDate()).isEqualTo("2025-05-01");
+        assertThat(result.getFirst().getTeamName()).isEqualTo("Alpha Team");
+        assertThat(result.getFirst().getQuizDate()).isEqualTo("2025-05-01");
     }
 
     @Test

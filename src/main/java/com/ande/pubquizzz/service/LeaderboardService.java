@@ -12,18 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
-import static com.ande.pubquizzz.config.CacheConfig.AVERAGE_LEADERBOARD;
-import static com.ande.pubquizzz.config.CacheConfig.LEADERBOARD_YEARS;
-import static com.ande.pubquizzz.config.CacheConfig.MEDAL_LEADERBOARD;
-import static com.ande.pubquizzz.config.CacheConfig.POINTS_LEADERBOARD;
-import static com.ande.pubquizzz.config.CacheConfig.TOP_RESULTS_LEADERBOARD;
+import static com.ande.pubquizzz.config.CacheConfig.*;
 
 @Slf4j
 @Service
@@ -216,7 +207,15 @@ public class LeaderboardService {
 
         rows.sort(LeaderboardService::compareTopResultRowsForGlobalList);
 
-        List<Object[]> topRows = rows.stream().limit(10).toList();
+        List<Object[]> topRows;
+        if (rows.size() <= 10) {
+            topRows = rows;
+        } else {
+            long tenthPlacePoints = RankingUtils.scoreValue(rows.get(9), 4);
+            topRows = rows.stream()
+                    .filter(row -> RankingUtils.scoreValue(row, 4) >= tenthPlacePoints)
+                    .toList();
+        }
 
         List<TopResultLeaderboardEntry> leaderboard = new ArrayList<>();
         int rank = 1;
