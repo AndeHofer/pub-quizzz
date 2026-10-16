@@ -2,6 +2,20 @@
 
 ## Open Tasks
 
+### Dependency Maintenance
+
+- [x] Audited direct Maven and npm dependencies, their resolved versions, and npm vulnerabilities.
+- [x] Updated the Maven-managed Node runtime from v24.21.0 to the current v24.22.0 LTS patch release.
+- [x] Updated @playwright/test to 1.64.1, @types/node to the LTS-aligned 24.19.2, Vite to 8.3.4, and Vitest to 5.0.5;
+  regenerated the npm lockfile with no audit vulnerabilities.
+- [x] Updated the explicit Jackson Databind dependency from 2.21.5 to 2.22.3; controller integration tests cover JSON
+  request and response handling.
+- [x] Frontend type check, 22-file/97-test Vitest suite, and production build passed.
+- [x] Maven verification passed: 321 backend unit and integration tests plus the configured 22-file/97-test frontend
+  suite.
+- [x] Post-update npm audit passed with zero reported vulnerabilities.
+- Blockers: none.
+
 ### Punkte-Rangliste Mobile Columns
 
 - [x] Confirmed the Team column receives all width released by smaller Punkte and Teiln. columns.
@@ -20,36 +34,6 @@
 - [x] Applied `font-medium` to both quiz title links and confirmed the focused frontend tests pass.
 - [x] Full verification passed: frontend tests (24 files, 119 tests), type check, production build, and Maven verify
   (321 backend tests).
-- Blockers: none.
-
-### Top 10 Desktop Width Alignment
-
-- [x] Changed the Top 10 results desktop container from `sm:max-w-4xl` to `sm:max-w-3xl`, matching the other
-  leaderboard pages.
-- [x] Changed the Top 10 results mobile table minimum width from 720px to 420px.
-- [x] Made all four leaderboard tables fixed-width within mobile viewports, removed horizontal-scroll/minimum-width
-  fallbacks, compacted mobile padding, and wrapped long team names. Simplified Top 10 to four columns and renders its
-  quiz rank beneath the quiz title.
-- [x] Widened the points and medal numeric columns on mobile so the team column does not dominate the table.
-- [x] Widened desktop numeric leaderboard columns so their German headers remain centered without changing mobile
-  widths.
-- [x] Rebalanced the desktop Top 10 columns: widened team and points while constraining quiz titles.
-- [x] Rebalanced mobile leaderboard columns to favor team names while retaining centered numeric headings.
-- [x] Made the Quiz Ergebnisse table fit mobile viewports while reserving more space for winner names.
-- [x] Renamed the quiz-result points heading and sized its column for centered mobile and desktop display.
-- [x] Replaced shared result-detail text toggles with accessible chevrons and fit the quiz summary table on mobile.
-- [x] Reduced the shared result-detail chevron to a subtle inline control.
-- [x] Removed tooltip and accessible-label attributes from the compact result-detail toggle.
-- [x] Applied the existing icon-button reset to the shared result-detail chevron.
-- [x] Removed the shared detail-toggle hover background and used equal-size state glyphs.
-- [x] Centered the shared detail-toggle glyph and suppressed the global hover background on touch devices.
-- [x] Replaced the shared detail-toggle triangles with stable plus/minus symbols.
-- [x] Aligned mobile team-name text sizing on quiz result pages with the leaderboards.
-- [x] Reduced the mobile quiz-list Quiz column and aligned its title text size with team names.
-- [x] Aligned the team-results quiz-title mobile text size with the other public pages.
-- [x] Widened the mobile quiz-list Quiz column so month titles remain on one line.
-- [x] Removed the unused quiz rank from the Top 10 UI, API, calculation, and tests.
-- [x] Ran the full frontend and Maven verification suite after removing the Top 10 quiz rank.
 - Blockers: none.
 
 ## Finished Phases

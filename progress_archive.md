@@ -965,3 +965,17 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 - Archived frontend migration to TypeScript, Tailwind CSS, and Vite.
 
 Note: Phase numbering reflects original historical labels where applicable.
+
+# Archived Progress
+
+### Top 10 Desktop Width Alignment
+
+- [x] Changed the Top 10 results desktop container from `sm:max-w-4xl` to `sm:max-w-3xl`, matching the other leaderboard
+  pages.
+- [x] Made all leaderboard and quiz-result tables fit mobile viewports through fixed-width layouts, compact columns,
+  wrapped team names, and responsive column rebalancing.
+- [x] Replaced shared result-detail text toggles with compact accessible glyph controls and aligned mobile typography
+  across result pages.
+- [x] Removed the unused quiz rank from the Top 10 UI, API, calculation, and tests.
+- [x] Ran the full frontend and Maven verification suite after the changes.
+- Blockers: none.
