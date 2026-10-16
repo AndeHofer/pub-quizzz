@@ -2,55 +2,13 @@
 
 ## Open Tasks
 
-### Quizzes Overview Desktop Columns
+### Punkte-Rangliste Mobile Columns
 
-- [x] Confirmed the desktop Quiz and Teams columns should be narrowed so Gewinner receives the released space.
-- [x] Set the desktop Quiz width to 30% and Teams width to 80px; no tests or build runs requested.
-- Blockers: none.
-
-### Quiz Results Desktop Columns
-
-- [x] Confirmed the desktop points and detail-toggle columns should use the Team table values.
-- [x] Widened only the desktop Quiz points and detail-toggle columns; no tests or build runs requested.
-- Blockers: none.
-
-### Team Results Mobile Columns
-
-- [x] Confirmed the requested mobile rebalance: reduce points while widening the rank column for medal and text.
-- [x] Swapped 8px from the mobile points column to the rank column; no tests or build runs requested.
-- Blockers: none.
-
-### Team Results Desktop Columns
-
-- [x] Confirmed the mobile table dimensions must remain unchanged.
-- [x] Widened only the desktop points, rank, and detail-toggle columns; no tests or build runs requested.
-- Blockers: none.
-
-### Frontend Dependency Maintenance
-
-- [x] Identified the sole audit finding as transitive `source-map-js@1.2.1` and confirmed `1.2.2` is the minimal fix.
-- [x] Updated the approved Vite, Vitest, Node type, and transitive security dependencies.
-- [x] `npm audit` reports zero vulnerabilities; full verification passed: frontend tests (22 files, 97 tests), type
-  check,
-  production build, and Maven verify (321 backend tests).
-- Blockers: none.
-
-### Presentation Test Cleanup
-
-- [x] Identified tests that coupled frontend behavior checks to Tailwind classes or layout markup.
-- [x] Removed presentation-only tests and retained behavioral assertions in mixed tests.
+- [x] Confirmed the Team column receives all width released by smaller Punkte and Teiln. columns.
+- [x] Reduced the mobile Punkte column from 64px to 56px and Teiln. from 64px to 48px; retained all `sm:` desktop
+  widths.
 - [x] Full verification passed: frontend tests (22 files, 97 tests), type check, production build, and Maven verify (321
   backend tests).
-- Blockers: none.
-
-### Team Results Mobile Table
-
-- [x] Traced the mobile overflow to Team results using a 320px minimum-width table inside an overflow container.
-- [x] Added regression coverage for the fixed mobile table and blank action header; it failed as expected before the
-  markup change.
-- [x] Removed the Team results overflow fallback and minimum width; uses fixed columns for points and rank only.
-- [x] Full verification passed: frontend tests (24 files, 120 tests), type check, production build, and Maven verify
-  (321 backend tests).
 - Blockers: none.
 
 ### Quiz Title Link Weight

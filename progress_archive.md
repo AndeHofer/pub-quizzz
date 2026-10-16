@@ -4,6 +4,34 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Quizzes Overview Desktop Columns ✅ COMPLETE
+
+- Narrowed the desktop Quiz and Teams columns so Gewinner receives the released space.
+
+### Quiz Results Desktop Columns ✅ COMPLETE
+
+- Widened only the desktop Quiz points and detail-toggle columns; mobile dimensions remain unchanged.
+
+### Team Results Mobile Columns ✅ COMPLETE
+
+- Swapped 8px from the mobile points column to the rank column for medal and text display.
+
+### Team Results Desktop Columns ✅ COMPLETE
+
+- Widened only the desktop points, rank, and detail-toggle columns.
+
+### Frontend Dependency Maintenance ✅ COMPLETE
+
+- Updated the approved Vite, Vitest, Node type, and transitive security dependencies; all checks passed.
+
+### Presentation Test Cleanup ✅ COMPLETE
+
+- Removed presentation-only tests while retaining behavioral assertions; all checks passed.
+
+### Team Results Mobile Table ✅ COMPLETE
+
+- Removed the mobile overflow fallback and minimum width in favor of fixed columns; all checks passed.
+
 ### Table Hover Contrast Correction ✅ COMPLETE
 
 - Scoped table hover feedback to hover-capable devices and mapped desktop rows plus public neutral hover utilities to
