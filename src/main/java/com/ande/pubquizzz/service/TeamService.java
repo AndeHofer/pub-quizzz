@@ -1,6 +1,7 @@
 package com.ande.pubquizzz.service;
 
 import com.ande.pubquizzz.cache.InvalidateAllAppCaches;
+import com.ande.pubquizzz.database.entities.Result;
 import com.ande.pubquizzz.database.entities.Team;
 import com.ande.pubquizzz.database.repositories.ResultRepository;
 import com.ande.pubquizzz.database.repositories.TeamRepository;
@@ -85,5 +86,43 @@ public class TeamService {
         teamRepository.deleteById(id);
         log.info("Team {} deleted successfully", id);
         return true;
+    }
+
+    /**
+     * Merges two teams by moving all results from the source team to the target team.
+     * Throws a BusinessValidationException if the source and target teams are the same.
+     * Throws a ResourceNotFoundException if either the source or target team is not found.
+     * Throws a BusinessValidationException if the teams have conflicting quiz IDs.
+     *
+     * @param sourceTeamId the ID of the source team
+     * @param targetTeamId the ID of the target team
+     * @return the DTO of the target team after the merge
+     * @author AndeHofer
+     * @since 26.10.3
+     */
+    @Transactional
+    @InvalidateAllAppCaches
+    public TeamDTO mergeTeams(Long sourceTeamId, Long targetTeamId) {
+        // check if possible
+        if (sourceTeamId.equals(targetTeamId)) {
+            throw new BusinessValidationException("Quellteam und Zielteam dürfen nicht identisch sein");
+        }
+        Team targetTeam = teamRepository.findById(targetTeamId)
+                .orElseThrow(() -> new ResourceNotFoundException("Zielteam nicht gefunden: " + targetTeamId));
+        Team sourceTeam = teamRepository.findById(sourceTeamId)
+                .orElseThrow(() -> new ResourceNotFoundException("Quellteam nicht gefunden: " + sourceTeamId));
+        List<Long> conflictingQuizIds = resultRepository.findConflictingQuizIdsForTeamMerge(sourceTeamId, targetTeamId);
+        if (!conflictingQuizIds.isEmpty()) {
+            throw new BusinessValidationException(
+                    "Teams können nicht zusammengelegt werden. Beide Teams haben Ergebnisse für Quiz-IDs: "
+                            + conflictingQuizIds);
+        }
+
+        // do the merge
+        List<Result> sourceResults = resultRepository.findByTeamIdOrderByPubDateDesc(sourceTeamId);
+        sourceResults.forEach(result -> result.setTeam(targetTeam));
+        resultRepository.saveAll(sourceResults);
+        teamRepository.delete(sourceTeam);
+        return teamMapper.toDTO(targetTeam);
     }
 }

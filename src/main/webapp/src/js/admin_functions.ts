@@ -66,66 +66,66 @@ function setStatusMessage(msgDiv: HTMLElement | null, text: string, color: 'red'
 
 // Wire up admin page handlers and modal click-outside behavior
 if (typeof window !== 'undefined') {
-window.addEventListener('load', () => {
-    // Wire up admin_main.html buttons by ID
-    document.getElementById('createQuizBtn')?.addEventListener('click', () => {
-        location.href = 'create_quiz.html';
-    });
-    document.getElementById('viewQuizzesBtn')?.addEventListener('click', viewQuizzes);
-    document.getElementById('createTeamBtn')?.addEventListener('click', createTeam);
-    document.getElementById('viewTeamsBtn')?.addEventListener('click', viewTeams);
-    document.getElementById('addResultBtn')?.addEventListener('click', () => {
-        location.href = 'create_result.html';
-    });
-    document.getElementById('viewResultsBtn')?.addEventListener('click', () => {
-        location.href = 'results.html';
-    });
-    document.getElementById('viewLoginStatsBtn')?.addEventListener('click', () => {
-        location.href = 'login_stats.html';
-    });
-    document.getElementById('createUserBtn')?.addEventListener('click', () => {
-        location.href = 'register_user.html';
-    });
-    document.getElementById('viewUsersBtn')?.addEventListener('click', viewUsers);
-    document.getElementById('manageNewsBtn')?.addEventListener('click', () => {
-        location.href = 'news.html';
-    });
-    document.getElementById('viewThemePreviewBtn')?.addEventListener('click', () => {
-        location.href = 'theme_preview.html';
-    });
-    document.getElementById('modalCloseBtn')?.addEventListener('click', closeModal);
-
-    const modal = document.getElementById('dataModal');
-    if (modal) {
-        window.addEventListener('click', (event: MouseEvent) => {
-            if (event.target === modal) closeModal();
+    window.addEventListener('load', () => {
+        // Wire up admin_main.html buttons by ID
+        document.getElementById('createQuizBtn')?.addEventListener('click', () => {
+            location.href = 'create_quiz.html';
         });
-    }
-
-    const exportBtn = document.getElementById('exportBackupBtn');
-    if (exportBtn) exportBtn.addEventListener('click', exportBackup);
-
-    const importBtn = document.getElementById('importBackupBtn');
-    const importForm = document.getElementById('importBackupForm') as HTMLFormElement | null;
-    if (importBtn && importForm) {
-        importBtn.addEventListener('click', () => {
-            importForm.style.display = importForm.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('viewQuizzesBtn')?.addEventListener('click', viewQuizzes);
+        document.getElementById('createTeamBtn')?.addEventListener('click', createTeam);
+        document.getElementById('viewTeamsBtn')?.addEventListener('click', viewTeams);
+        document.getElementById('addResultBtn')?.addEventListener('click', () => {
+            location.href = 'create_result.html';
         });
-        importForm.addEventListener('submit', async (e: Event) => {
-            e.preventDefault();
-            await importBackup();
+        document.getElementById('viewResultsBtn')?.addEventListener('click', () => {
+            location.href = 'results.html';
         });
-    }
+        document.getElementById('viewLoginStatsBtn')?.addEventListener('click', () => {
+            location.href = 'login_stats.html';
+        });
+        document.getElementById('createUserBtn')?.addEventListener('click', () => {
+            location.href = 'register_user.html';
+        });
+        document.getElementById('viewUsersBtn')?.addEventListener('click', viewUsers);
+        document.getElementById('manageNewsBtn')?.addEventListener('click', () => {
+            location.href = 'news.html';
+        });
+        document.getElementById('viewThemePreviewBtn')?.addEventListener('click', () => {
+            location.href = 'theme_preview.html';
+        });
+        document.getElementById('modalCloseBtn')?.addEventListener('click', closeModal);
 
-    document.getElementById('cleanupImagesBtn')?.addEventListener('click', cleanupImages);
-    document.getElementById('invalidateCacheBtn')?.addEventListener('click', async () => {
-        const msgDiv = document.getElementById('cacheInvalidateMessage') as HTMLElement | null;
-        await invalidateCache(apiFetch, confirm, msgDiv);
+        const modal = document.getElementById('dataModal');
+        if (modal) {
+            window.addEventListener('click', (event: MouseEvent) => {
+                if (event.target === modal) closeModal();
+            });
+        }
+
+        const exportBtn = document.getElementById('exportBackupBtn');
+        if (exportBtn) exportBtn.addEventListener('click', exportBackup);
+
+        const importBtn = document.getElementById('importBackupBtn');
+        const importForm = document.getElementById('importBackupForm') as HTMLFormElement | null;
+        if (importBtn && importForm) {
+            importBtn.addEventListener('click', () => {
+                importForm.style.display = importForm.style.display === 'none' ? 'block' : 'none';
+            });
+            importForm.addEventListener('submit', async (e: Event) => {
+                e.preventDefault();
+                await importBackup();
+            });
+        }
+
+        document.getElementById('cleanupImagesBtn')?.addEventListener('click', cleanupImages);
+        document.getElementById('invalidateCacheBtn')?.addEventListener('click', async () => {
+            const msgDiv = document.getElementById('cacheInvalidateMessage') as HTMLElement | null;
+            await invalidateCache(apiFetch, confirm, msgDiv);
+        });
+        document.getElementById('viewLogsBtn')?.addEventListener('click', () => {
+            location.href = 'logs.html';
+        });
     });
-    document.getElementById('viewLogsBtn')?.addEventListener('click', () => {
-        location.href = 'logs.html';
-    });
-});
 }
 
 // ==================== Quiz Management ====================
@@ -261,6 +261,7 @@ async function viewTeams() {
                 t.teamName,
                 trustedHtml(`
                 <button class="icon-btn rename-team-btn" data-id="${escapeHtml(String(t.teamsId))}" data-name="${escapeHtml(t.teamName)}" title="Team umbenennen">✏️</button>
+                <button class="icon-btn merge-team-btn" data-id="${escapeHtml(String(t.teamsId))}" data-name="${escapeHtml(t.teamName)}" title="Team zusammenlegen">🔀</button>
                 <button class="icon-btn delete-team-btn" data-id="${escapeHtml(String(t.teamsId))}" data-name="${escapeHtml(t.teamName)}" title="Team löschen">🗑️</button>
             `)
             ];
@@ -278,6 +279,12 @@ async function viewTeams() {
                 const id = Number((btn as HTMLElement).dataset.id);
                 const name = (btn as HTMLElement).dataset.name ?? '';
                 deleteTeam(id, name);
+            });
+        });
+        document.querySelectorAll('.merge-team-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sourceTeamId = Number((btn as HTMLElement).dataset.id);
+                showMergeTeamDialog(sourceTeamId, teams);
             });
         });
     } catch (error: unknown) {
@@ -325,6 +332,132 @@ async function renameTeam(teamId: number, currentName: string) {
             return;
         }
         showModal('Fehler', showError('Fehler: ' + (error instanceof Error ? error.message : error)));
+    }
+}
+
+function showMergeTeamDialog(
+    sourceTeamId: number,
+    teams: TeamDTO[]
+): void {
+    const sourceTeam = teams.find(team => team.teamsId === sourceTeamId);
+    const targetTeams = teams.filter(team => team.teamsId !== sourceTeamId);
+
+    if (!sourceTeam) {
+        showModal('Fehler', showError('Das Quellteam wurde nicht gefunden.'));
+        return;
+    }
+
+    if (targetTeams.length === 0) {
+        showModal(
+            'Zusammenlegen nicht möglich',
+            showError('Es muss mindestens ein weiteres Team als Zielteam vorhanden sein.')
+        );
+        return;
+    }
+
+    const targetOptions = targetTeams
+        .map(team => `
+            <option value="${escapeHtml(String(team.teamsId))}">
+                ${escapeHtml(team.teamName)} (ID ${escapeHtml(String(team.teamsId))})
+            </option>
+        `)
+        .join('');
+
+    showModal(
+        'Teams zusammenlegen',
+        `
+            <p>
+                Das Team <strong>${escapeHtml(sourceTeam.teamName)}</strong>
+                wird aufgelöst. Seine Ergebnisse werden auf das ausgewählte
+                Zielteam übertragen.
+            </p>
+            <div class="field-group">
+                <label for="mergeTargetTeam">Zielteam:</label>
+                <select id="mergeTargetTeam">
+                    ${targetOptions}
+                </select>
+            </div>
+            <div class="flex gap-2 mt-4">
+                <button id="confirmMergeTeamBtn" type="button">
+                    Teams zusammenlegen
+                </button>
+                <button id="cancelMergeTeamBtn" type="button">
+                    Abbrechen
+                </button>
+            </div>
+        `
+    );
+
+    document.getElementById('confirmMergeTeamBtn')?.addEventListener('click', () => {
+        const targetSelect = document.getElementById('mergeTargetTeam') as HTMLSelectElement | null;
+
+        const targetTeamId = Number(targetSelect?.value);
+        const targetTeam = targetTeams.find(team => team.teamsId === targetTeamId);
+
+        if (!targetTeam) {
+            showModal('Fehler', showError('Bitte ein gültiges Zielteam auswählen.'));
+            return;
+        }
+
+        void mergeTeams(sourceTeam, targetTeam);
+    });
+
+    document.getElementById('cancelMergeTeamBtn')?.addEventListener('click', () => {
+        void viewTeams();
+    });
+}
+
+async function mergeTeams(
+    sourceTeam: TeamDTO,
+    targetTeam: TeamDTO
+): Promise<void> {
+    const confirmed = confirm(
+        `Team "${sourceTeam.teamName}" wirklich mit `
+        + `"${targetTeam.teamName}" zusammenlegen?\n\n`
+        + `Alle Ergebnisse von "${sourceTeam.teamName}" werden `
+        + `"${targetTeam.teamName}" zugeordnet. `
+        + `Das Team "${sourceTeam.teamName}" wird anschließend gelöscht. `
+        + `Ziehe in Betracht zuvor die DB zu sichern.`
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await apiFetch(`${API_BASE}/teams/merge`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                sourceTeamId: sourceTeam.teamsId,
+                targetTeamId: targetTeam.teamsId
+            })
+        });
+
+        if (!response.ok) {
+            showModal(
+                'Zusammenlegen nicht möglich',
+                showError(await readHttpErrorMessage(
+                    response,
+                    'Die Teams konnten nicht zusammengelegt werden.'
+                ))
+            );
+            return;
+        }
+
+        await viewTeams();
+    } catch (error: unknown) {
+        if (isAuthExpiredRedirectError(error)) {
+            return;
+        }
+
+        showModal(
+            'Fehler',
+            showError(
+                'Fehler beim Zusammenlegen der Teams: '
+                + (error instanceof Error ? error.message : String(error))
+            )
+        );
     }
 }
 
@@ -402,12 +535,12 @@ async function importBackup() {
     setStatusMessage(msgDiv, 'Hochladen...', 'neutral');
 
     try {
-        const resp = await apiFetch('/admin/backup/import', { method: 'POST', body: formData });
+        const resp = await apiFetch('/admin/backup/import', {method: 'POST', body: formData});
         if (resp.ok) {
             const msg = await resp.text();
             setStatusMessage(msgDiv, msg, 'green');
         } else {
-            const err = await resp.json().catch(() => ({ error: 'Unbekannter Fehler' }));
+            const err = await resp.json().catch(() => ({error: 'Unbekannter Fehler'}));
             setStatusMessage(msgDiv, `Fehler: ${String(err.error ?? 'Unbekannter Fehler')}`, 'red');
         }
     } catch (error: unknown) {

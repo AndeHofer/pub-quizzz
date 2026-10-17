@@ -3,8 +3,8 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.dto.TeamDTO;
 import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
+import com.ande.pubquizzz.exception.ResourceNotFoundException;
 import com.ande.pubquizzz.security.SecurityConfig;
-
 import com.ande.pubquizzz.service.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
-import com.ande.pubquizzz.exception.ResourceNotFoundException;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -184,4 +177,122 @@ class AdminTeamControllerTest {
                         .content("{\"teamName\":\"X\"}"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void mergeTeams_withValidRequest_returnsTargetTeam() throws Exception {
+        TeamDTO targetTeam = new TeamDTO();
+        targetTeam.setTeamsId(2L);
+        targetTeam.setTeamName("Quizmeister");
+
+        when(teamService.mergeTeams(1L, 2L)).thenReturn(targetTeam);
+
+        mockMvc.perform(post("/admin/teams/merge")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sourceTeamId": 1,
+                                  "targetTeamId": 2
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.teamsId").value(2))
+                .andExpect(jsonPath("$.teamName").value("Quizmeister"));
+
+        verify(teamService).mergeTeams(1L, 2L);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void mergeTeams_withoutSourceTeamId_returnsBadRequest() throws Exception {
+        mockMvc.perform(post("/admin/teams/merge")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "targetTeamId": 2
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Die ID des Quellteams darf nicht fehlen"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void mergeTeams_withNonPositiveTargetTeamId_returnsBadRequest() throws Exception {
+        mockMvc.perform(post("/admin/teams/merge")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sourceTeamId": 1,
+                                  "targetTeamId": 0
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Die ID des Zielteams muss positiv sein"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void mergeTeams_withSameTeamIds_returnsBadRequest() throws Exception {
+        when(teamService.mergeTeams(1L, 1L))
+                .thenThrow(new BusinessValidationException(
+                        "Quellteam und Zielteam dürfen nicht identisch sein"));
+
+        mockMvc.perform(post("/admin/teams/merge")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sourceTeamId": 1,
+                                  "targetTeamId": 1
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Quellteam und Zielteam dürfen nicht identisch sein"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void mergeTeams_withConflictingQuizResults_returnsBadRequest() throws Exception {
+        when(teamService.mergeTeams(1L, 2L))
+                .thenThrow(new BusinessValidationException(
+                        "Teams können nicht zusammengelegt werden. "
+                                + "Beide Teams haben Ergebnisse für Quiz-IDs: [7, 3]"));
+
+        mockMvc.perform(post("/admin/teams/merge")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sourceTeamId": 1,
+                                  "targetTeamId": 2
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Teams können nicht zusammengelegt werden. "
+                                + "Beide Teams haben Ergebnisse für Quiz-IDs: [7, 3]"));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void mergeTeams_asNonAdmin_returnsForbidden() throws Exception {
+        mockMvc.perform(post("/admin/teams/merge")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sourceTeamId": 1,
+                                  "targetTeamId": 2
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+    }
 }
+

@@ -53,22 +53,22 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     List<Object[]> findPerQuizTeamScoreBreakdownRaw(@Param("year") Integer year);
 
     @Query("""
-        SELECT DISTINCT r FROM Result r
-        JOIN FETCH r.team t
-        JOIN FETCH r.quiz q
-        JOIN FETCH r.answers
-                WHERE t.teamsId = :teamId
-        ORDER BY q.pubDate DESC
-    """)
+                SELECT DISTINCT r FROM Result r
+                JOIN FETCH r.team t
+                JOIN FETCH r.quiz q
+                JOIN FETCH r.answers
+                        WHERE t.teamsId = :teamId
+                ORDER BY q.pubDate DESC
+            """)
     List<Result> findByTeamIdOrderByPubDateDesc(@Param("teamId") Long teamId);
 
     @Query("""
-        SELECT DISTINCT r FROM Result r
-        JOIN FETCH r.team
-        JOIN FETCH r.quiz
-        JOIN FETCH r.answers
-        WHERE r.quiz.quizId = :quizId
-    """)
+                SELECT DISTINCT r FROM Result r
+                JOIN FETCH r.team
+                JOIN FETCH r.quiz
+                JOIN FETCH r.answers
+                WHERE r.quiz.quizId = :quizId
+            """)
     List<Result> findByQuizIdWithTeamAndAnswers(@Param("quizId") Long quizId);
 
     @Query("""
@@ -105,4 +105,25 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
             ORDER BY FUNCTION('YEAR', r.quiz.pubDate) DESC
             """)
     List<Integer> findAvailableLeaderboardYears();
+
+    /**
+     * Returns a list of quiz IDs that are conflicting for a team merge operation.
+     *
+     * @author Ande
+     * @since 26.10.3
+     */
+    @Query("""
+            SELECT r.quiz.quizId
+            FROM Result r
+            WHERE r.team.teamsId = :sourceTeamId
+                        AND EXISTS (
+                            SELECT 1 FROM Result targetResult
+                            WHERE targetResult.team.teamsId = :targetTeamId
+                                        AND targetResult.quiz = r.quiz
+                        )
+            ORDER BY r.quiz.pubDate DESC
+            """)
+    List<Long> findConflictingQuizIdsForTeamMerge(
+            @Param("sourceTeamId") Long sourceTeamId,
+            @Param("targetTeamId") Long targetTeamId);
 }
