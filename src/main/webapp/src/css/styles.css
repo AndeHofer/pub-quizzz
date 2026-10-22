@@ -23,22 +23,9 @@ html {
 
 @layer components {
     body {
-        @apply font-sans m-0 pt-4 sm:pt-[50px] bg-gray-50 opacity-100;
+        @apply font-sans m-0 pt-4 sm:pt-[50px] bg-gray-50;
         background-color: var(--pq-page-bg);
         color: var(--pq-text-main);
-        transition: opacity 160ms ease;
-    }
-
-    body.page-enter {
-        opacity: 0;
-    }
-
-    body.page-enter.page-enter-active {
-        opacity: 1;
-    }
-
-    body.page-leave {
-        opacity: 0;
     }
 
     .container {

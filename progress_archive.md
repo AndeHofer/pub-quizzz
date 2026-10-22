@@ -979,3 +979,33 @@ Note: Phase numbering reflects original historical labels where applicable.
 - [x] Removed the unused quiz rank from the Top 10 UI, API, calculation, and tests.
 - [x] Ran the full frontend and Maven verification suite after the changes.
 - Blockers: none.
+
+# Archived Progress
+
+## Dependency Maintenance: Vite and Security Patch
+
+- Updated Vite from 8.3.4 to 8.3.5 and regenerated the npm lockfile.
+- Applied the audited `follow-redirects` 1.16.1 security patch; `npm audit` reported zero vulnerabilities.
+- Maven verification passed: production frontend build, TypeScript check, 22-file/97-test Vitest suite, and 333 backend
+  unit and integration tests.
+
+## Reproducible Frontend Build
+
+- Retained npm install for reliable local Maven builds after npm ci encountered a Windows file lock.
+- Added the existing frontend TypeScript check to Maven verification.
+- Full Maven verification passed with the TypeScript check, 333 backend tests, and 22 frontend files / 97 tests.
+
+## Dependency Maintenance
+
+- Audited direct Maven and npm dependencies and updated the managed Node, frontend, and Jackson dependencies.
+- Frontend type check, tests, production build, Maven verification, and npm audit passed.
+
+## Punkte-Rangliste Mobile Columns
+
+- Reduced mobile Punkte and Teiln. column widths while retaining desktop widths.
+- Full frontend and Maven verification passed.
+
+## Quiz Title Link Weight
+
+- Applied `font-medium` to Top 10 and team-detail quiz title links with regression coverage.
+- Full frontend and Maven verification passed.
