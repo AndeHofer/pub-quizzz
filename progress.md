@@ -2,6 +2,23 @@
 
 ## Open Tasks
 
+### Dependency Maintenance: Vite and Security Patch
+
+- [x] Updated Vite from 8.3.4 to 8.3.5 and regenerated the npm lockfile.
+- [x] Applied the audited `follow-redirects` 1.16.1 security patch; `npm audit` reports zero vulnerabilities.
+- [x] Maven verification passed: production frontend build, TypeScript check, 22-file/97-test Vitest suite, and 333
+  backend unit and integration tests.
+- Blockers: none.
+
+### Reproducible Frontend Build
+
+- [x] Kept npm install for reliable local Maven builds after npm ci encountered a Windows file lock.
+- [x] Added the existing frontend TypeScript check to Maven verification.
+- [x] Full Maven verification passed with the TypeScript check, 333 backend tests, and 22 frontend files / 97 tests.
+- [x] Restored the unintended QuizFinishedChecker expression exactly and reran verification successfully.
+- Resolved: npm ci was not adopted because it requires replacing locally locked files; no user process was terminated.
+- Blockers: none.
+
 ### Dependency Maintenance
 
 - [x] Audited direct Maven and npm dependencies, their resolved versions, and npm vulnerabilities.
