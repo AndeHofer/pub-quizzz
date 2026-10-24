@@ -38,3 +38,4 @@ SPRING_DATASOURCE_URL
 - user for every team with a different appearance and more focus on the team results
 - ~~Top 10 mobile width refactoring~~
 - svg pic for every team which want one
+- make news foldable
