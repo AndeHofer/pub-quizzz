@@ -4,6 +4,16 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Remove Full-Page Transitions ✅ COMPLETE
+
+- Removed the transition module, all 19 page references, and obsolete opacity rules.
+- Full frontend and Maven verification passed.
+
+### Phase 133: Leaderboard Tab Visibility Bugfix ✅ COMPLETE
+
+- Added missing leaderboard year-tab containers and hide behavior for zero or one year.
+- Added focused frontend tests and completed full verification.
+
 ### Quizzes Overview Desktop Columns ✅ COMPLETE
 
 - Narrowed the desktop Quiz and Teams columns so Gewinner receives the released space.
