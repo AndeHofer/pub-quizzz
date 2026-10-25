@@ -2,6 +2,8 @@ import {buildVersionBadgeMarkup} from './version-badge';
 import type {NewsDTO} from './types';
 import {renderNewsError, renderNewsSection} from './news';
 
+const NEWS_COLLAPSED_STORAGE_KEY = 'pub-quizzz.news-collapsed';
+
 function readCookieValue(doc: Document, name: string): string | null {
     const cookies = (doc.cookie ?? '').split(';');
     for (const rawCookie of cookies) {
@@ -66,6 +68,7 @@ export function wireLogoutButton(doc: Document = document): void {
 export function initIndex(doc: Document = document): void {
     setAdminCardVisible(false, doc);
     wireLogoutButton(doc);
+    wireNewsToggle(doc);
 
     fetch('/api/bootstrap')
         .then(response => response.ok ? response.json() : null)
@@ -82,6 +85,65 @@ export function initIndex(doc: Document = document): void {
         });
 
     void loadNews(doc);
+}
+
+function setNewsCollapsed(
+    collapsed: boolean,
+    button: HTMLButtonElement,
+    newsList: HTMLElement
+): void {
+    newsList.hidden = collapsed;
+
+    button.textContent = collapsed ? '+' : '−';
+    button.setAttribute('aria-expanded', String(!collapsed));
+
+    const description = collapsed
+        ? 'Neuigkeiten ausklappen'
+        : 'Neuigkeiten einklappen';
+
+    button.setAttribute('aria-label', description);
+    button.title = description;
+}
+
+export function wireNewsToggle(
+    doc: Document = document,
+    storage: Storage | null = getSessionStorage()
+): void {
+    const button = doc.getElementById('newsToggleButton') as HTMLButtonElement | null;
+    const newsList = doc.getElementById('newsList');
+
+    if (!button || !newsList) {
+        return;
+    }
+
+    let collapsed = false;
+
+    try {
+        collapsed = storage?.getItem(NEWS_COLLAPSED_STORAGE_KEY) === 'true';
+    } catch {
+        // Continue with the default expanded state if storage is unavailable.
+    }
+
+    setNewsCollapsed(collapsed, button, newsList);
+
+    button.addEventListener('click', () => {
+        collapsed = !collapsed;
+        setNewsCollapsed(collapsed, button, newsList);
+
+        try {
+            storage?.setItem(NEWS_COLLAPSED_STORAGE_KEY, String(collapsed));
+        } catch {
+            // The toggle still works even if storage is unavailable.
+        }
+    });
+}
+
+function getSessionStorage(): Storage | null {
+    try {
+        return typeof sessionStorage === 'undefined' ? null : sessionStorage;
+    } catch {
+        return null;
+    }
 }
 
 if (typeof document !== 'undefined') {
