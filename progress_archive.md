@@ -4,6 +4,12 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 134: ResultService Leaderboard Split ✅ COMPLETE
+
+- Extracted shared ranking and title formatting logic into `RankingUtils` and `QuizTitleFormatter`.
+- Moved leaderboard responsibilities to `LeaderboardService` and rewired controller/tests.
+- Full frontend and Maven verification passed.
+
 ### Remove Full-Page Transitions ✅ COMPLETE
 
 - Removed the transition module, all 19 page references, and obsolete opacity rules.
