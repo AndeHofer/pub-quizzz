@@ -18,6 +18,7 @@
 @import "./themes/new-year.css";
 
 html {
+    background-color: var(--pq-page-bg, #f9fafb);
     scrollbar-gutter: stable;
 }
 

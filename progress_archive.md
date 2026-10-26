@@ -4,6 +4,11 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Phase 135: Leaderboard Table 20px Gap Fix ✅ COMPLETE
+
+- Scoped `mt-0` for leaderboard tables to neutralize the global table top margin.
+- Added regression coverage and completed full verification.
+
 ### Phase 134: ResultService Leaderboard Split ✅ COMPLETE
 
 - Extracted shared ranking and title formatting logic into `RankingUtils` and `QuizTitleFormatter`.

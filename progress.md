@@ -6,6 +6,15 @@ None.
 
 ## Finished Phases
 
+### Public Navigation White-Flicker Fix ✅ COMPLETE
+
+- Added an immediate themed root background and synchronous pre-CSS bootstrap to all 10 public pages.
+- Consolidated the duplicated bootstrap into one shared classic script referenced before CSS.
+- Persisted the resolved theme and motif layout for stable same-tab navigation with restricted-storage fallbacks.
+- Confirmed generated output retains the shared bootstrap before CSS; full verification passed with 22 frontend files /
+  104
+  tests and 333 backend tests.
+
 ### Compact Top 10 Quiz Titles ✅ COMPLETE
 
 - Added compact `Mon. YY` mobile titles while retaining full titles from `sm` upward.
@@ -20,11 +29,5 @@ None.
 - Left admin-page spacing unchanged.
 - Full Maven verification passed: production build, TypeScript check, 22 frontend files / 97 tests, and 333 backend
   tests.
-
-### Phase 135: Leaderboard Table 20px Gap Fix ✅ COMPLETE
-
-- Scoped `mt-0` override for leaderboard tables to neutralize global table top margin.
-- Added regression coverage in `leaderboard-pages-markup.test.ts`.
-- Full verification passed (`npm run test`, `npm run type-check`, `npm run build`, `./mvnw.cmd verify`).
 
 Older finished phases are tracked in `progress_archive.md`.
