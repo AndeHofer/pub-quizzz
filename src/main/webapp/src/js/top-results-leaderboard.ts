@@ -2,31 +2,9 @@ import {TopResultLeaderboardEntry} from './types';
 import {getMedal} from './leaderboard-common';
 import {initLeaderboardPage} from './leaderboard-page';
 import {escapeHtml} from './html-utils';
+import {compactQuizTitle} from './quiz-utils';
 
-const COMPACT_MONTH_NAMES: Record<string, string> = {
-    Jänner: 'Jän.',
-    Februar: 'Feb.',
-    März: 'März',
-    April: 'Apr.',
-    Mai: 'Mai',
-    Juni: 'Juni',
-    Juli: 'Juli',
-    August: 'Aug.',
-    September: 'Sep.',
-    Oktober: 'Okt.',
-    November: 'Nov.',
-    Dezember: 'Dez.',
-};
-
-export function compactQuizTitle(quizTitle: string): string {
-    const match = /^(\d{4}) (.+)$/.exec(quizTitle);
-    if (!match) {
-        return quizTitle;
-    }
-
-    const compactMonth = COMPACT_MONTH_NAMES[match[2]];
-    return compactMonth ? `${compactMonth} ${match[1].slice(-2)}` : quizTitle;
-}
+export {compactQuizTitle};
 
 export function buildTopResultsRowMarkup(e: TopResultLeaderboardEntry): string {
     const fullQuizTitle = escapeHtml(e.quizTitle);

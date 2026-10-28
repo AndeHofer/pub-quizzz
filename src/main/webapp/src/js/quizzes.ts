@@ -1,5 +1,5 @@
 import {QuizSummaryDTO} from './types';
-import {sortFinishedQuizzesNewestFirst} from './quiz-utils';
+import {compactQuizTitle, sortFinishedQuizzesNewestFirst} from './quiz-utils';
 import {escapeHtml} from './html-utils';
 
 function renderQuizzes(quizzes: QuizSummaryDTO[]): void {
@@ -11,15 +11,17 @@ function renderQuizzes(quizzes: QuizSummaryDTO[]): void {
     }
 
     tbody.innerHTML = quizzes.map(q => {
+        const fullQuizTitle = escapeHtml(q.quizTitle);
+        const mobileQuizTitle = escapeHtml(compactQuizTitle(q.quizTitle));
         const winnerCell = q.winnerTeamName && q.winnerTeamId != null
             ? `<a href="/team.html?teamId=${encodeURIComponent(String(q.winnerTeamId))}" class="text-blue-700 hover:underline">${escapeHtml(q.winnerTeamName)}</a>`
             : `<span class="text-gray-400">&mdash;</span>`;
         return `
         <tr class="border-b border-gray-200 hover:bg-gray-50">
-            <td class="py-2 px-1.5 sm:py-3 sm:px-4 break-words font-medium">
-                <a href="/quiz.html?id=${q.quizId}" class="text-blue-600 hover:underline">${escapeHtml(q.quizTitle)}</a>
+            <td class="py-2 px-1.5 sm:py-3 sm:px-4 break-words font-medium text-sm sm:text-base">
+                <a href="/quiz.html?id=${q.quizId}" class="text-blue-600 hover:underline" aria-label="${fullQuizTitle}" title="${fullQuizTitle}"><span class="sm:hidden block truncate" aria-hidden="true">${mobileQuizTitle}</span><span class="hidden sm:inline" aria-hidden="true">${fullQuizTitle}</span></a>
             </td>
-            <td class="py-2 px-1.5 sm:py-3 sm:px-4 break-words text-center text-gray-600 font-medium">${winnerCell}</td>
+            <td class="py-2 px-1.5 sm:py-3 sm:px-4 break-words text-left text-gray-600 font-medium">${winnerCell}</td>
             <td class="py-2 px-1.5 sm:py-3 sm:px-4 text-center text-gray-600 text-xs sm:text-base">${q.teamCount}</td>
         </tr>
     `;

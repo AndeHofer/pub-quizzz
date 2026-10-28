@@ -9,10 +9,13 @@ type LeaderboardPageConfig<T> = {
 
 const YEAR_TABS_ID = 'leaderboardYearTabs';
 
-function readActiveYearFromUrl(targetWindow: Window): number | null {
+type RequestedYear = number | 'all' | null;
+
+function readActiveYearFromUrl(targetWindow: Window): RequestedYear {
     const params = new URLSearchParams(targetWindow.location.search);
     const yearValue = params.get('year');
-    if (!yearValue) return null;
+    if (yearValue === null) return null;
+    if (yearValue === 'all') return 'all';
 
     const parsed = Number(yearValue);
     return Number.isInteger(parsed) ? parsed : null;
@@ -30,7 +33,18 @@ async function fetchLeaderboardYears(): Promise<number[]> {
     }
 
     const years = await response.json() as number[];
-    return years.filter(Number.isInteger);
+    return years.filter(Number.isInteger).sort((left, right) => right - left);
+}
+
+function resolveActiveYear(requestedYear: RequestedYear, availableYears: number[]): number | null {
+    if (availableYears.length < 2 || requestedYear === 'all') {
+        return null;
+    }
+    if (typeof requestedYear === 'number' && availableYears.includes(requestedYear)) {
+        return requestedYear;
+    }
+
+    return Math.max(...availableYears);
 }
 
 function renderYearTabs(targetWindow: Window, years: number[], activeYear: number | null): void {
@@ -52,7 +66,7 @@ function renderYearTabs(targetWindow: Window, years: number[], activeYear: numbe
             ${year}
         </button>`).join('');
 
-    tabsEl.innerHTML = allTab + yearTabs;
+    tabsEl.innerHTML = yearTabs + allTab;
     tabsEl.setAttribute('aria-label', 'Jahresfilter');
     tabsEl.setAttribute('role', 'tablist');
 }
@@ -60,7 +74,7 @@ function renderYearTabs(targetWindow: Window, years: number[], activeYear: numbe
 function updateYearInUrl(targetWindow: Window, year: number | null): void {
     const url = new URL(targetWindow.location.href);
     if (year === null) {
-        url.searchParams.delete('year');
+        url.searchParams.set('year', 'all');
     } else {
         url.searchParams.set('year', String(year));
     }
@@ -78,13 +92,8 @@ export function initLeaderboardPage<T>(config: LeaderboardPageConfig<T>): void {
             console.error(`Error loading leaderboard years: ${error}`);
         }
 
-        let activeYear = readActiveYearFromUrl(targetWindow);
-        if (availableYears.length < 2) {
-            activeYear = null;
-        }
-        if (activeYear !== null && !availableYears.includes(activeYear)) {
-            activeYear = null;
-        }
+        const requestedYear = readActiveYearFromUrl(targetWindow);
+        const activeYear = resolveActiveYear(requestedYear, availableYears);
 
         const reloadLeaderboard = (year: number | null): void => {
             loadLeaderboard<T>(

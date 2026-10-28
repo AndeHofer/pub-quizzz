@@ -14,18 +14,20 @@ describe('leaderboard page init helper', () => {
         vi.clearAllMocks();
     });
 
-    it('loads available years, defaults to Alle, and delegates to shared leaderboard functions', async () => {
+    it('loads available years, defaults to the newest year, and delegates to shared leaderboard functions', async () => {
         const addEventListener = vi.fn();
         const replaceState = vi.fn();
         const tabListeners = new Map<string, EventListener>();
         const elements = createFakeElements(tabListeners);
+        const newestYear = new Date().getFullYear() - 1;
+        const previousYear = newestYear - 1;
 
         vi.stubGlobal('document', {
             getElementById: (id: string) => elements[id] ?? null,
         });
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: true,
-            json: async () => [2026, 2025],
+            json: async () => [newestYear, previousYear],
         }));
 
         const fakeWindow = {
@@ -50,11 +52,13 @@ describe('leaderboard page init helper', () => {
 
         expect(fetch).toHaveBeenCalledWith('/api/leaderboard/years');
         expect(elements.leaderboardYearTabs.innerHTML).toContain('Alle');
-        expect(elements.leaderboardYearTabs.innerHTML).toContain('2026');
-        expect(elements.leaderboardYearTabs.innerHTML).toContain('2025');
+        expect(elements.leaderboardYearTabs.innerHTML).toContain(String(newestYear));
+        expect(elements.leaderboardYearTabs.innerHTML).toContain(String(previousYear));
+        expect(elements.leaderboardYearTabs.innerHTML.indexOf(String(newestYear)))
+            .toBeLessThan(elements.leaderboardYearTabs.innerHTML.indexOf('Alle'));
 
         expect(loadLeaderboardMock).toHaveBeenCalledWith(
-            '/api/leaderboard/points',
+            `/api/leaderboard/points?year=${newestYear}`,
             expect.any(Function),
             'loading',
             'leaderboardTable',
@@ -118,7 +122,7 @@ describe('leaderboard page init helper', () => {
         expect(elements.leaderboardYearTabs.innerHTML).toContain('aria-pressed="true"');
     });
 
-    it('updates the URL and reloads when a year tab is clicked', async () => {
+    it('updates the URL and reloads when the Alle tab is clicked', async () => {
         const addEventListener = vi.fn();
         const replaceState = vi.fn();
         const tabListeners = new Map<string, EventListener>();
@@ -155,13 +159,13 @@ describe('leaderboard page init helper', () => {
 
         await clickListener!({
             target: {
-                closest: () => ({dataset: {year: '2026'}})
+                closest: () => ({dataset: {year: 'all'}})
             }
         } as unknown as Event);
 
-        expect(replaceState).toHaveBeenCalledWith({}, '', 'https://example.test/points-leaderboard.html?year=2026');
+        expect(replaceState).toHaveBeenCalledWith({}, '', 'https://example.test/points-leaderboard.html?year=all');
         expect(loadLeaderboardMock).toHaveBeenLastCalledWith(
-            '/api/leaderboard/points?year=2026',
+            '/api/leaderboard/points',
             expect.any(Function),
             'loading',
             'leaderboardTable',
