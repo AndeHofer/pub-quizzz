@@ -31,11 +31,11 @@ SPRING_DATASOURCE_URL
 
 - Move project to Codeberg
 - add text for hints before a hint revealed like already possible with pics
-- ~~merging teams should be possible~~
 - usage statistics for admin
 - enrich the news section with html and pics
-- ~~different designs for different months~~
 - user for every team with a different appearance and more focus on the team results
-- ~~Top 10 mobile width refactoring~~
 - svg pic for every team which want one
 - ~~make news foldable~~
+- ~~merging teams should be possible~~
+- ~~Top 10 mobile width refactoring~~
+- ~~different designs for different months~~
