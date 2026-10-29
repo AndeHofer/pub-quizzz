@@ -1,7 +1,8 @@
-import {QuizResultEntry, QuizResultsResponse} from './types';
+import {QuizResultEntry, QuizResultsResponse, QuizSummaryDTO} from './types';
 import {getMedal} from './leaderboard-common';
 import {escapeHtml} from './html-utils';
 import {buildToggleButtonHtml, numberBadge, wireDetailToggleButtons} from './results-table-common';
+import {findNextQuiz} from './quiz-navigation';
 
 function renderResults(entries: QuizResultEntry[]): void {
     const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement;
@@ -53,6 +54,29 @@ function renderResults(entries: QuizResultEntry[]): void {
     tbody.innerHTML = rows.join('');
 }
 
+async function loadNextQuizNavigation(currentQuizId: number): Promise<void> {
+    const nextQuizLink = document.getElementById('nextQuizLink') as HTMLAnchorElement | null;
+    if (!nextQuizLink) return;
+
+    try {
+        const response = await fetch('/api/quizzes');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const quizzes: QuizSummaryDTO[] = await response.json();
+        const nextQuiz = findNextQuiz(currentQuizId, quizzes);
+        if (!nextQuiz) return;
+
+        nextQuizLink.href = `/quiz.html?id=${encodeURIComponent(String(nextQuiz.quizId))}`;
+        nextQuizLink.textContent = `${nextQuiz.quizTitle} →`;
+        nextQuizLink.setAttribute('aria-label', `Zum vorherigen Quiz: ${nextQuiz.quizTitle}`);
+        nextQuizLink.style.display = '';
+    } catch (error) {
+        console.error(`Error loading next quiz navigation: ${error}`);
+    }
+}
+
 async function loadQuizResults(): Promise<void> {
     const loadingEl = document.getElementById('loading');
     const tableEl = document.getElementById('resultsTable');
@@ -83,6 +107,10 @@ async function loadQuizResults(): Promise<void> {
             heading.textContent = `\uD83C\uDFC6 ${data.quizTitle}`;
         }
         renderResults(data.entries);
+        const numericQuizId = Number(quizId);
+        if (Number.isSafeInteger(numericQuizId)) {
+            void loadNextQuizNavigation(numericQuizId);
+        }
     } catch {
         if (loadingEl) loadingEl.style.display = 'none';
         if (errorEl) {

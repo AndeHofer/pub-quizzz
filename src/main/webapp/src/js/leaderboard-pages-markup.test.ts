@@ -16,6 +16,27 @@ describe('leaderboard page markup', () => {
         });
     });
 
+    it('links every leaderboard to the next leaderboard', async () => {
+        const pages = await Promise.all([
+            readPage('/points-leaderboard.html'),
+            readPage('/medal-leaderboard.html'),
+            readPage('/average-leaderboard.html'),
+            readPage('/top-results-leaderboard.html'),
+        ]);
+
+        const nextPageUrls = [
+            'medal-leaderboard.html',
+            'average-leaderboard.html',
+            'top-results-leaderboard.html',
+            'points-leaderboard.html',
+        ];
+
+        pages.forEach((page, index) => {
+            expect(page).toContain('id="nextLeaderboardLink"');
+            expect(page).toContain(`href="${nextPageUrls[index]}"`);
+        });
+    });
+
 });
 
 async function readPage(path: string): Promise<string> {

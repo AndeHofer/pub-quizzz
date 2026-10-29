@@ -4,6 +4,19 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Remove Leaderboard Tile Dividers ✅ COMPLETE
+
+- Removed the three redundant desktop right-border utilities from the leaderboard tiles on the start page.
+- No styling test was added, in accordance with the project rules.
+- Full Maven verification passed with 333 backend tests, TypeScript check, and 104 frontend tests.
+
+### Toolchain Dependency Updates ✅ COMPLETE
+
+- Upgraded the Maven-managed frontend Node.js version to 26.13.0 LTS and Node type definitions to 26.6.6.
+- Updated Axios to 1.21.0, Maven Wrapper to 3.10.0, and the Maven Docker build image to 3.10.0.
+- Full Maven verification passed with Java 25: 333 backend tests, TypeScript check, and 104 frontend tests.
+- Docker build verification remains blocked because Docker is unavailable in this environment.
+
 ### Compact Quiz Overview Titles ✅ COMPLETE
 
 - Reused the Top 10 compact mobile quiz-title formatter on the quiz overview.

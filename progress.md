@@ -2,6 +2,18 @@
 
 ## Open Tasks
 
+### Previous Quiz Navigation
+
+- [x] Add the right-side navigation link to the public quiz-results page.
+- [x] Select the chronologically previous finished quiz and wrap from the oldest to the newest quiz.
+- [x] Add unit and markup tests, then run the full CI verification suite.
+
+### Preserve Leaderboard Year in Navigation
+
+- [x] Inspect the failing frontend tests caused by the new next-leaderboard link.
+- [x] Update affected test expectations and add coverage for retaining the selected year.
+- [x] Run the complete CI verification suite, including frontend type checking.
+
 ### Docker Build Verification
 
 - [ ] Run `docker build --tag pub-quizzz:toolchain-update .` in an environment with Docker installed. Blocked here:
@@ -9,24 +21,28 @@
 
 ## Finished Phases
 
-### Toolchain Dependency Updates ✅ COMPLETE
-
-- Upgraded the Maven-managed frontend Node.js version to 26.13.0 LTS and Node type definitions to 26.6.6.
-- Updated Axios to 1.21.0, Maven Wrapper to 3.10.0, and the Maven Docker build image to 3.10.0.
-- Full Maven verification passed with Java 25: 333 backend tests, TypeScript check, and 104 frontend tests.
-- Docker build verification remains blocked because Docker is unavailable in this environment.
-
-### Remove Leaderboard Tile Dividers ✅ COMPLETE
-
-- Removed the three redundant desktop right-border utilities from the leaderboard tiles on the start page.
-- No styling test was added, in accordance with the project rules.
-- Full Maven verification passed with 333 backend tests, TypeScript check, and 104 frontend tests.
-
 ### Remove Cache Metrics Logging ✅ COMPLETE
 
 - Removed the scheduled cache-metrics collector, its unit tests, metric properties, and Caffeine statistics tracking.
 - Removed scheduling because no other scheduled task exists.
 - Retained Caffeine caching, cache annotations, cache invalidation, and cache invalidation logging.
 - Full Maven verification passed with 328 backend tests, TypeScript check, and 104 frontend tests.
+
+### Preserve Leaderboard Year in Navigation ✅ COMPLETE
+
+- Deferred next-leaderboard link initialization until the page load event, preventing the frontend test environment from
+  accessing an unavailable `document` object during module import.
+- Preserved the selected year, including `Alle` (`?year=all`), after changing the filter and navigating to the next
+  leaderboard.
+- Added coverage for next-link markup and year preservation; full Maven verification passed with 328 backend tests,
+  TypeScript checking, and 105 frontend tests.
+
+### Previous Quiz Navigation ✅ COMPLETE
+
+- Added a right-side link on the public quiz-results page showing the chronologically previous finished quiz and its
+  name; navigation wraps from the oldest quiz to the newest.
+- Kept the results page functional if navigation loading fails; the link remains hidden in that case.
+- Added unit and markup coverage; full Maven verification passed with 328 backend tests, TypeScript checking, and 111
+  frontend tests.
 
 Older finished phases are tracked in `progress_archive.md`.

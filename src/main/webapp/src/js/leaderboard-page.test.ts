@@ -81,6 +81,11 @@ describe('leaderboard page init helper', () => {
         const addEventListener = vi.fn();
         const tabListeners = new Map<string, EventListener>();
         const elements = createFakeElements(tabListeners);
+        elements.nextLeaderboardLink = {
+            href: 'https://example.test/medal-leaderboard.html',
+            innerHTML: '',
+            style: {display: ''},
+        };
 
         vi.stubGlobal('document', {
             getElementById: (id: string) => elements[id] ?? null,
@@ -120,6 +125,7 @@ describe('leaderboard page init helper', () => {
         );
         expect(elements.leaderboardYearTabs.innerHTML).toContain('data-year="2025"');
         expect(elements.leaderboardYearTabs.innerHTML).toContain('aria-pressed="true"');
+        expect(elements.nextLeaderboardLink.href).toBe('https://example.test/medal-leaderboard.html?year=2025');
     });
 
     it('updates the URL and reloads when the Alle tab is clicked', async () => {
@@ -127,6 +133,11 @@ describe('leaderboard page init helper', () => {
         const replaceState = vi.fn();
         const tabListeners = new Map<string, EventListener>();
         const elements = createFakeElements(tabListeners);
+        elements.nextLeaderboardLink = {
+            href: 'https://example.test/medal-leaderboard.html',
+            innerHTML: '',
+            style: {display: ''},
+        };
 
         vi.stubGlobal('document', {
             getElementById: (id: string) => elements[id] ?? null,
@@ -164,6 +175,7 @@ describe('leaderboard page init helper', () => {
         } as unknown as Event);
 
         expect(replaceState).toHaveBeenCalledWith({}, '', 'https://example.test/points-leaderboard.html?year=all');
+        expect(elements.nextLeaderboardLink.href).toBe('https://example.test/medal-leaderboard.html?year=all');
         expect(loadLeaderboardMock).toHaveBeenLastCalledWith(
             '/api/leaderboard/points',
             expect.any(Function),
@@ -217,6 +229,7 @@ describe('leaderboard page init helper', () => {
 });
 
 function createFakeElements(tabListeners: Map<string, EventListener>): Record<string, {
+    href?: string;
     innerHTML: string;
     style: { display: string };
     addEventListener?: (type: string, listener: EventListener) => void;

@@ -79,12 +79,29 @@ function updateYearInUrl(targetWindow: Window, year: number | null): void {
         url.searchParams.set('year', String(year));
     }
     targetWindow.history.replaceState({}, '', url.toString());
+    updateNextLeaderboardLink(targetWindow, url.search);
+}
+
+function updateNextLeaderboardLink(targetWindow: Window, search = targetWindow.location.search): void {
+    const nextLeaderboardLink = document.getElementById('nextLeaderboardLink') as HTMLAnchorElement | null;
+    if (!nextLeaderboardLink) return;
+
+    const targetUrl = new URL(nextLeaderboardLink.href);
+    const currentParams = new URLSearchParams(search);
+    const year = currentParams.get('year');
+
+    if (year !== null) {
+        targetUrl.searchParams.set('year', year);
+    }
+
+    nextLeaderboardLink.href = targetUrl.toString();
 }
 
 export function initLeaderboardPage<T>(config: LeaderboardPageConfig<T>): void {
     const targetWindow = config.targetWindow ?? window;
 
     targetWindow.addEventListener('load', async () => {
+        updateNextLeaderboardLink(targetWindow);
         let availableYears: number[] = [];
         try {
             availableYears = await fetchLeaderboardYears();
