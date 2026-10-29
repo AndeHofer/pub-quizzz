@@ -7,7 +7,7 @@ A simple webpage to archive results, quiz and answers.
 :seedling:Spring Boot 4.x  
 Java 25  
 JUnit  
-Mockito. 
+Mockito  
 Lombok  
 MapStruct  
 TypeScript  
