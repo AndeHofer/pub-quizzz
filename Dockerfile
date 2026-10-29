@@ -1,5 +1,9 @@
 # Stage 1: Build
 FROM maven:3.10.0-eclipse-temurin-25 AS build
+#needed for node.js 26
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libatomic1 \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
