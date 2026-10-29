@@ -2,34 +2,31 @@
 
 ## Open Tasks
 
-None.
+### Docker Build Verification
+
+- [ ] Run `docker build --tag pub-quizzz:toolchain-update .` in an environment with Docker installed. Blocked here:
+  Docker is not installed or available on `PATH`.
 
 ## Finished Phases
 
-### Leaderboard Year Default And Tab Order ✅ COMPLETE
+### Toolchain Dependency Updates ✅ COMPLETE
 
-- Multi-year leaderboards now always default to the newest available year, regardless of the calendar year.
-- Year tabs render newest-first with „Alle“ last; explicit all-years selections persist as `?year=all`.
-- Applied the shared behavior to points, medals, average, and Top 10 leaderboards.
-- Updated the existing test without adding tests; full verification passed with 22 frontend files / 104 tests and 333
-  backend tests.
+- Upgraded the Maven-managed frontend Node.js version to 26.13.0 LTS and Node type definitions to 26.6.6.
+- Updated Axios to 1.21.0, Maven Wrapper to 3.10.0, and the Maven Docker build image to 3.10.0.
+- Full Maven verification passed with Java 25: 333 backend tests, TypeScript check, and 104 frontend tests.
+- Docker build verification remains blocked because Docker is unavailable in this environment.
 
-### Compact Quiz Overview Titles ✅ COMPLETE
+### Remove Leaderboard Tile Dividers ✅ COMPLETE
 
-- Reused the Top 10 compact mobile quiz-title formatter on the quiz overview.
-- Reduced the mobile Quiz column to 72px so winner team names receive the released width; desktop widths remain
-  unchanged.
-- Preserved full desktop titles, accessible labels, and tooltips without adding tests.
-- Full Maven verification passed: production build, TypeScript check, 22 frontend files / 104 tests, and 333 backend
-  tests.
+- Removed the three redundant desktop right-border utilities from the leaderboard tiles on the start page.
+- No styling test was added, in accordance with the project rules.
+- Full Maven verification passed with 333 backend tests, TypeScript check, and 104 frontend tests.
 
-### Public Navigation White-Flicker Fix ✅ COMPLETE
+### Remove Cache Metrics Logging ✅ COMPLETE
 
-- Added an immediate themed root background and synchronous pre-CSS bootstrap to all 10 public pages.
-- Consolidated the duplicated bootstrap into one shared classic script referenced before CSS.
-- Persisted the resolved theme and motif layout for stable same-tab navigation with restricted-storage fallbacks.
-- Confirmed generated output retains the shared bootstrap before CSS; full verification passed with 22 frontend files /
-  104
-  tests and 333 backend tests.
+- Removed the scheduled cache-metrics collector, its unit tests, metric properties, and Caffeine statistics tracking.
+- Removed scheduling because no other scheduled task exists.
+- Retained Caffeine caching, cache annotations, cache invalidation, and cache invalidation logging.
+- Full Maven verification passed with 328 backend tests, TypeScript check, and 104 frontend tests.
 
 Older finished phases are tracked in `progress_archive.md`.
