@@ -29,6 +29,7 @@ SPRING_DATASOURCE_URL
 
 ## IDEAS
 
+- Fix "Anmerkung" in quiz section
 - Move project to Codeberg
 - add text for hints before a hint revealed like already possible with pics
 - usage statistics for admin
