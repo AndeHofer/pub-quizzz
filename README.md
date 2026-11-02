@@ -29,12 +29,12 @@ SPRING_DATASOURCE_URL
 
 ## IDEAS
 
+- Add team stats in team view
 - Fix "Anmerkung" in quiz section
 - Move project to Codeberg
 - add text for hints before a hint revealed like already possible with pics
 - usage statistics for admin
 - enrich the news section with html and pics
-- user for every team with a different appearance and more focus on the team results
 - svg pic for every team which want one
 - ~~make news foldable~~
 - ~~merging teams should be possible~~
