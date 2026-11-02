@@ -32,7 +32,7 @@ async function loadTeamStatistics(teamId: number): Promise<void> {
 function renderResults(teamName: string, entries: TeamResultEntry[]): void {
     const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement;
     const heading = document.getElementById('teamHeading') as HTMLHeadingElement;
-    heading.textContent = `Team: ${teamName}`;
+    heading.textContent = `${teamName}`;
 
     if (entries.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">Noch keine Ergebnisse für dieses Team.</td></tr>';
