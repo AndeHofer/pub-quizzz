@@ -5,6 +5,8 @@ import com.ande.pubquizzz.dto.TeamResultEntry;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
 import com.ande.pubquizzz.service.ResultService;
+import com.ande.pubquizzz.service.TeamStatisticsService;
+import com.ande.pubquizzz.service.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
@@ -34,6 +36,12 @@ class UserTeamControllerTest {
 
     @MockitoBean
     private ResultService resultService;
+
+    @MockitoBean
+    private TeamStatisticsService teamStatisticsService;
+
+    @MockitoBean
+    private TeamService teamService;
 
     @Test
     @WithMockUser

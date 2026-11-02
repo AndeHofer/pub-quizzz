@@ -1,7 +1,33 @@
-import {TeamResultEntry} from './types';
+import {TeamLeaderboardStatistics, TeamResultEntry} from './types';
 import {getMedal} from './leaderboard-common';
 import {escapeHtml} from './html-utils';
 import {buildToggleButtonHtml, wireDetailToggleButtons} from './results-table-common';
+import {renderTeamStatisticsMarkup} from './team-statistics';
+
+async function loadTeamStatistics(teamId: number): Promise<void> {
+    const container = document.getElementById('teamStatistics');
+    const loading = document.getElementById('statisticsLoading');
+    const content = document.getElementById('statisticsContent');
+    const error = document.getElementById('statisticsError');
+    if (!container || !loading || !content || !error) return;
+
+    container.style.display = 'block';
+    try {
+        const response = await fetch(`/api/teams/${encodeURIComponent(String(teamId))}/statistics`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const statistics: TeamLeaderboardStatistics[] = await response.json();
+        if (statistics.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+        content.innerHTML = renderTeamStatisticsMarkup(statistics);
+    } catch {
+        error.textContent = 'Die Ranglistenplatzierungen konnten nicht geladen werden.';
+        error.style.display = 'block';
+    } finally {
+        loading.style.display = 'none';
+    }
+}
 
 function renderResults(teamName: string, entries: TeamResultEntry[]): void {
     const tbody = document.getElementById('resultsBody') as HTMLTableSectionElement;
@@ -94,6 +120,8 @@ async function loadTeamResults(): Promise<void> {
     // Set heading immediately so it shows during load
     const heading = document.getElementById('teamHeading');
     if (heading) heading.textContent = '\uD83C\uDFF5\uFE0F Team';
+
+    void loadTeamStatistics(teamId);
 
     try {
         const response = await fetch(`/api/teams/${encodeURIComponent(String(teamId))}/results`);

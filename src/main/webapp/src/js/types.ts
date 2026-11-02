@@ -123,6 +123,14 @@ export interface TeamResultEntry {
     answers: AnswerScoreDTO[];
 }
 
+export interface TeamLeaderboardStatistics {
+    year: number | null;
+    points: AllTimeLeaderboardEntry | null;
+    average: AverageLeaderboardEntry | null;
+    medals: MedalLeaderboardEntry | null;
+    topResults: TopResultLeaderboardEntry[];
+}
+
 export interface QuizSummaryDTO {
     quizId: number;
     quizTitle: string;

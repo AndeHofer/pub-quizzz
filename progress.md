@@ -21,27 +21,26 @@
 
 ## Finished Phases
 
-### Preserve Leaderboard Year in Navigation ✅ COMPLETE
+### Team Leaderboard Statistics ✅ COMPLETE
 
-- Deferred next-leaderboard link initialization until the page load event, preventing the frontend test environment from
-  accessing an unavailable `document` object during module import.
-- Preserved the selected year, including `Alle` (`?year=all`), after changing the filter and navigating to the next
-  leaderboard.
-- Added coverage for next-link markup and year preservation; full Maven verification passed with 328 backend tests,
-  TypeScript checking, and 105 frontend tests.
+- Added a team statistics API reusing existing rankings; participation years appear newest first and `Alle` follows when
+  applicable.
+- Displayed points, average, medal, and all qualifying Top 10 placements above participations, with separate error
+  handling.
+- Added unit, API integration, and frontend rendering coverage; browser checks passed at mobile and desktop widths.
+- Full Maven verification passed with 333 backend tests, 113 frontend tests, and TypeScript checking.
 
-### Previous Quiz Navigation ✅ COMPLETE
+### Participating Teams Directory ✅ COMPLETE
 
-- Added a right-side link on the public quiz-results page showing the chronologically previous finished quiz and its
-  name; navigation wraps from the oldest quiz to the newest.
-- Kept the results page functional if navigation loading fails; the link remains hidden in that case.
-- Added unit and markup coverage; full Maven verification passed with 328 backend tests, TypeScript checking, and 111
-  frontend tests.
+- Added a home-page link and alphabetically sorted team directory for teams with recorded participations.
+- Added service unit, API integration, and frontend behavior tests; verified navigation and states on mobile and
+  desktop.
+- Full Maven verification passed with 337 backend tests, 118 frontend tests, and TypeScript checking.
 
-### Mobile Quiz Detail Text Overflow ✅ COMPLETE
+### Hide Missing Team Statistics ✅ COMPLETE
 
-- Removed the fixed height limit for revealed text and enabled wrapping of long words in notes, hints, and answers.
-- Browser checks passed at 320px and 1024px for individual and global reveal controls using Microsoft Edge.
-- Full Maven verification passed with 328 backend tests, 111 frontend tests, and TypeScript checking.
+- Hide medal and Top 10 sections independently for each year or overall period when no qualifying placement exists.
+- Updated behavior coverage and verified mobile and desktop layouts in Microsoft Edge.
+- Full Maven verification passed with 337 backend tests, 119 frontend tests, and TypeScript checking.
 
 Older finished phases are tracked in `progress_archive.md`.

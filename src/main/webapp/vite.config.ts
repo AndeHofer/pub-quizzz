@@ -27,6 +27,7 @@ export default defineConfig({
                 average_leaderboard: './average-leaderboard.html',
                 top_results_leaderboard: './top-results-leaderboard.html',
                 team: './team.html',
+                teams: './teams.html',
                 quizzes: './quizzes.html',
                 quiz: './quiz.html',
                 quiz_details: './quiz-details.html',

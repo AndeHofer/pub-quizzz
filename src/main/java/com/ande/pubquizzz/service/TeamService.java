@@ -40,6 +40,13 @@ public class TeamService {
     }
 
     @Transactional(readOnly = true)
+    public List<TeamDTO> getParticipatingTeams() {
+        return teamRepository.findTeamsWithParticipations().stream()
+                .map(teamMapper::toDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     @Cacheable(value = TEAM_BY_ID, key = "#id")
     public Optional<TeamDTO> getTeamById(Long id) {
         log.debug("Fetching team with ID: {}", id);
