@@ -145,7 +145,7 @@ function createCollapsibleBlock(
                             ${buttonLabel} anzeigen
                         </button>
                         <div id="${id}" 
-                            class="h-auto min-h-fit px-2 text-sm leading-normal flex items-center justify-start text-left text" 
+                            class="h-auto min-h-fit px-2 text-sm leading-normal flex items-center justify-start text-left break-words text" 
                             data-reveal-type="text" 
                             data-expanded="false" 
                             style="display:none; opacity:0; visibility:hidden; overflow:visible;">
@@ -190,7 +190,7 @@ function expandContent(element: HTMLElement): void {
         element.style.display = 'block';
         element.style.visibility = 'visible';
         element.style.opacity = '1';
-        element.style.maxHeight = '2.25rem';
+        element.style.maxHeight = 'none';
         element.style.overflow = 'visible';
         element.style.transition = 'opacity 180ms ease';
         element.setAttribute('data-expanded', 'true');

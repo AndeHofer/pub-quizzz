@@ -4,6 +4,13 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Remove Cache Metrics Logging ✅ COMPLETE
+
+- Removed the scheduled cache-metrics collector, its unit tests, metric properties, and Caffeine statistics tracking.
+- Removed scheduling because no other scheduled task exists.
+- Retained Caffeine caching, cache annotations, cache invalidation, and cache invalidation logging.
+- Full Maven verification passed with 328 backend tests, TypeScript check, and 104 frontend tests.
+
 ### Remove Leaderboard Tile Dividers ✅ COMPLETE
 
 - Removed the three redundant desktop right-border utilities from the leaderboard tiles on the start page.

@@ -21,13 +21,6 @@
 
 ## Finished Phases
 
-### Remove Cache Metrics Logging ✅ COMPLETE
-
-- Removed the scheduled cache-metrics collector, its unit tests, metric properties, and Caffeine statistics tracking.
-- Removed scheduling because no other scheduled task exists.
-- Retained Caffeine caching, cache annotations, cache invalidation, and cache invalidation logging.
-- Full Maven verification passed with 328 backend tests, TypeScript check, and 104 frontend tests.
-
 ### Preserve Leaderboard Year in Navigation ✅ COMPLETE
 
 - Deferred next-leaderboard link initialization until the page load event, preventing the frontend test environment from
@@ -44,5 +37,11 @@
 - Kept the results page functional if navigation loading fails; the link remains hidden in that case.
 - Added unit and markup coverage; full Maven verification passed with 328 backend tests, TypeScript checking, and 111
   frontend tests.
+
+### Mobile Quiz Detail Text Overflow ✅ COMPLETE
+
+- Removed the fixed height limit for revealed text and enabled wrapping of long words in notes, hints, and answers.
+- Browser checks passed at 320px and 1024px for individual and global reveal controls using Microsoft Edge.
+- Full Maven verification passed with 328 backend tests, 111 frontend tests, and TypeScript checking.
 
 Older finished phases are tracked in `progress_archive.md`.
