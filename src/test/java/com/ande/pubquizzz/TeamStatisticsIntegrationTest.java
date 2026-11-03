@@ -75,18 +75,21 @@ class TeamStatisticsIntegrationTest {
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].year").value(2026))
                 .andExpect(jsonPath("$[0].points.rank").value(1))
-                .andExpect(jsonPath("$[0].average.rank").value(2))
+                .andExpect(jsonPath("$[0].average.rank").value(1))
                 .andExpect(jsonPath("$[0].medals.rank").value(1))
                 .andExpect(jsonPath("$[0].topResults", hasSize(2)))
                 .andExpect(jsonPath("$[0].topResults[0].rank").value(1))
                 .andExpect(jsonPath("$[1].year").value(2025))
+                .andExpect(jsonPath("$[1].average").doesNotExist())
                 .andExpect(jsonPath("$[2].year").doesNotExist())
+                .andExpect(jsonPath("$[2].average.quizCount").value(3))
                 .andExpect(jsonPath("$[2].points.totalPoints").value(72));
 
         mockMvc.perform(get("/api/teams/{id}/statistics", rival.getTeamsId()).with(user("test")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].year").value(2026))
+                .andExpect(jsonPath("$[0].average").doesNotExist())
                 .andExpect(jsonPath("$[0].topResults[0].rank").value(1));
     }
 

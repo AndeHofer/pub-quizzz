@@ -13,5 +13,6 @@ initLeaderboardPage<AverageLeaderboardEntry>({
                         <td class="py-2 px-1.5 sm:py-3 sm:px-4 text-center text-gray-600">${e.quizCount}</td>
                     </tr>
                 `,
-    fallbackMessage: 'Noch keine Ergebnisse vorhanden.'
+    fallbackMessage: 'Keine Teams mit mindestens zwei Teilnahmen in diesem Zeitraum.',
+    emptyStateId: 'emptyLeaderboard'
 });

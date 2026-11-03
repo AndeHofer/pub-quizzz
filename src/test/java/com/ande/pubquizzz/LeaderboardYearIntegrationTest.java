@@ -87,7 +87,7 @@ class LeaderboardYearIntegrationTest {
 
         mockMvc.perform(get("/api/leaderboard/average").with(user()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].teamName").value("Gamma Team"));
+                .andExpect(jsonPath("$[0].teamName").value("Alpha Team"));
 
         mockMvc.perform(get("/api/leaderboard/average").param("year", "2025").with(user()))
                 .andExpect(status().isOk())
@@ -111,6 +111,34 @@ class LeaderboardYearIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].teamName").value("Gamma Team"))
                 .andExpect(jsonPath("$[0].quizDate").value("2026-05-01"));
+    }
+
+    @Test
+    void averageLeaderboard_requiresTwoParticipationsInEachSelectedPeriod() throws Exception {
+        Team crossYear = saveTeam("Cross-year Team");
+        Quiz oldQuiz = saveQuiz(LocalDate.of(2025, 7, 1));
+        Quiz newQuiz = saveQuiz(LocalDate.of(2026, 7, 1));
+        resultRepository.save(buildResult(crossYear, oldQuiz, new int[]{5, 5, 5, 5, 5, 5, 5, 5}));
+        resultRepository.save(buildResult(crossYear, newQuiz, new int[]{5, 5, 5, 5, 5, 5, 5, 5}));
+
+        mockMvc.perform(get("/api/leaderboard/average").param("year", "2025").with(user()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(2)))
+                .andExpect(jsonPath("$[0].teamName").value("Alpha Team"))
+                .andExpect(jsonPath("$[1].teamName").value("Beta Team"));
+
+        mockMvc.perform(get("/api/leaderboard/average").param("year", "2026").with(user()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+
+        mockMvc.perform(get("/api/leaderboard/average").with(user()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))
+                .andExpect(jsonPath("$[0].teamName").value("Cross-year Team"))
+                .andExpect(jsonPath("$[0].rank").value(1))
+                .andExpect(jsonPath("$[0].quizCount").value(2))
+                .andExpect(jsonPath("$[0].averagePoints").value(40.0))
+                .andExpect(jsonPath("$[1].rank").value(2));
     }
 
     private Team saveTeam(String name) {

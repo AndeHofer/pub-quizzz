@@ -37,6 +37,22 @@ describe('leaderboard page markup', () => {
         });
     });
 
+    it('explains the minimum participation requirement on the average leaderboard', async () => {
+        const page = await readPage('/average-leaderboard.html');
+
+        expect(page).toContain('mindestens zwei Teilnahmen im ausgewählten Zeitraum');
+        expect(page).not.toContain('Hat in einem Jahr kein Team zwei Teilnahmen');
+    });
+
+    it('provides a separate empty state for the average leaderboard', async () => {
+        const page = await readPage('/average-leaderboard.html');
+        const script = await readPage('/js/average-leaderboard.ts');
+
+        expect(page).toContain('id="emptyLeaderboard"');
+        expect(script).toContain("emptyStateId: 'emptyLeaderboard'");
+        expect(script).toContain('Keine Teams mit mindestens zwei Teilnahmen in diesem Zeitraum.');
+    });
+
 });
 
 async function readPage(path: string): Promise<string> {

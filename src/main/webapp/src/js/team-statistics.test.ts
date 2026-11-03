@@ -12,7 +12,7 @@ describe('team statistics rendering', () => {
         expect(html.indexOf('>2026</h3>')).toBeLessThan(html.indexOf('>2025</h3>'));
         expect(html.indexOf('>2025</h3>')).toBeLessThan(html.indexOf('>Alle</h3>'));
         expect(html).toContain('/points-leaderboard.html?year=2026');
-        expect(html).toContain('/average-leaderboard.html?year=2025');
+        expect(html).not.toContain('Durchschnittsrangliste');
         expect(html).not.toContain('Medaillenrangliste');
         expect(html).not.toContain('Top 10 Ergebnisse');
         expect(html).not.toContain('Keine Medaillenplatzierung');
@@ -32,6 +32,7 @@ describe('team statistics rendering', () => {
         }]);
         expect(html).toContain('Platz 2 · 55 Punkte');
         expect(html).toContain('Platz 1 · 27.50 Punkte');
+        expect(html).toContain('/average-leaderboard.html?year=2026');
         expect(html).toContain('Platz 3 · 🥇 1 🥈 0 🥉 2');
         expect(html).toContain('/medal-leaderboard.html?year=2026');
         expect(html).toContain('/top-results-leaderboard.html?year=2026');
@@ -39,6 +40,24 @@ describe('team statistics rendering', () => {
         expect(html).toContain('/quiz.html?id=1');
         expect(html).toContain('/quiz.html?id=2');
         expect(html).not.toContain('Keine Top-10-Platzierung');
+    });
+
+    it('shows the average only in periods with a qualifying placement', () => {
+        const html = renderTeamStatisticsMarkup([
+            emptyPeriod(2026),
+            emptyPeriod(2025),
+            {
+                ...emptyPeriod(null),
+                average: {rank: 1, teamId: 7, teamName: 'Team', averagePoints: 27.5, quizCount: 2},
+            },
+        ]);
+
+        expect(html).not.toContain('/average-leaderboard.html?year=2026');
+        expect(html).not.toContain('/average-leaderboard.html?year=2025');
+        expect(html).toContain('/average-leaderboard.html?year=all');
+        expect(html).toContain('Platz 1 · 27.50 Punkte');
+        expect(html).toContain('/points-leaderboard.html?year=2026');
+        expect(html).toContain('/points-leaderboard.html?year=2025');
     });
 
     it('determines medal and Top 10 visibility separately for each period', () => {

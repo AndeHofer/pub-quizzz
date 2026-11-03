@@ -226,6 +226,59 @@ describe('leaderboard page init helper', () => {
             'errorMessage'
         );
     });
+
+    it('switches between a separate empty state, results, and loading errors', async () => {
+        const addEventListener = vi.fn();
+        const tabListeners = new Map<string, EventListener>();
+        const elements = createFakeElements(tabListeners);
+        elements.emptyLeaderboard = {innerHTML: '', textContent: '', style: {display: 'none'}};
+        vi.stubGlobal('document', {getElementById: (id: string) => elements[id] ?? null});
+        vi.stubGlobal('fetch', vi.fn()
+            .mockResolvedValueOnce({ok: true, json: async () => [2026, 2025]})
+            .mockResolvedValueOnce({ok: true, json: async () => []})
+            .mockResolvedValueOnce({ok: true, json: async () => [{rank: 1}]})
+            .mockResolvedValueOnce({ok: true, json: async () => []})
+            .mockResolvedValueOnce({ok: false, status: 500}));
+        const actual = await vi.importActual<typeof import('./leaderboard-common')>('./leaderboard-common');
+        loadLeaderboardMock.mockImplementation(actual.loadLeaderboard);
+        const fakeWindow = {
+            addEventListener,
+            history: {replaceState: vi.fn()},
+            location: {href: 'https://example.test/average-leaderboard.html', search: ''},
+        } as unknown as Window;
+        const module = await import('./leaderboard-page');
+        module.initLeaderboardPage({
+            apiUrl: '/api/leaderboard/average',
+            fallbackMessage: 'Keine Teams mit mindestens zwei Teilnahmen in diesem Zeitraum.',
+            emptyStateId: 'emptyLeaderboard',
+            rowRenderer: () => '<tr></tr>',
+            targetWindow: fakeWindow,
+        });
+
+        await (addEventListener.mock.calls[0][1] as () => Promise<void>)();
+        await vi.waitFor(() => expect(elements.emptyLeaderboard.style.display).toBe('block'));
+        expect(elements.emptyLeaderboard.textContent).toBe('Keine Teams mit mindestens zwei Teilnahmen in diesem Zeitraum.');
+        expect(elements.leaderboardTable.style.display).toBe('none');
+        expect(renderLeaderboardMock).not.toHaveBeenCalled();
+
+        const click = (year: string) => tabListeners.get('leaderboardYearTabs')!({
+            target: {closest: () => ({dataset: {year}})},
+        } as unknown as Event);
+        click('2025');
+        await vi.waitFor(() => expect(elements.leaderboardTable.style.display).toBe('table'));
+        expect(elements.emptyLeaderboard.style.display).toBe('none');
+        expect(renderLeaderboardMock).toHaveBeenCalledOnce();
+
+        click('2026');
+        await vi.waitFor(() => expect(elements.emptyLeaderboard.style.display).toBe('block'));
+        expect(elements.leaderboardTable.style.display).toBe('none');
+
+        click('all');
+        await vi.waitFor(() => expect(elements.errorMessage.style.display).toBe('block'));
+        expect(elements.emptyLeaderboard.style.display).toBe('none');
+        expect(elements.leaderboardTable.style.display).toBe('none');
+        expect(elements.loading.style.display).toBe('none');
+    });
 });
 
 function createFakeElements(tabListeners: Map<string, EventListener>): Record<string, {

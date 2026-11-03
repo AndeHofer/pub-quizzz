@@ -2,6 +2,45 @@
 
 ## Open Tasks
 
+### Average Leaderboard Empty State
+
+- [x] Show a separate German message card instead of the average leaderboard table when no teams qualify; restore the
+  table when results are available. Reset the card and loading/error state on period changes.
+- [x] Add frontend behavior coverage for switching between empty and populated periods and loading errors, plus coverage
+  for the average page's empty-state wiring and message.
+- [x] Run full Maven verification, including frontend type checking: 340 backend tests and 123 frontend tests passed.
+
+### Remove Average Leaderboard Yearly Fallback
+
+- [x] Restore the two-participation minimum for every year and the overall ranking, and remove the exception from the
+  explanation.
+- [x] Update unit, API integration, team statistics, and explanatory text tests to cover the restored rule, including
+  years with no qualifying teams.
+- [x] Run full Maven verification, including frontend type checking: 340 backend tests and 121 frontend tests passed.
+
+### Average Leaderboard Yearly Fallback
+
+- [x] Update yearly qualification to allow one participation only when no team reaches two that year; preserve the
+  overall minimum. Updated the leaderboard explanation as well.
+- [x] Update unit, API integration, team statistics, and explanatory text coverage for fallback and normal cases.
+- [x] Run full Maven verification, including frontend type checking: 340 backend tests and 121 frontend tests passed.
+
+### Hide Missing Average Team Placement
+
+- [x] Update team statistics rendering to hide the average card when no placement exists, independently per period, and
+  adapt the grid.
+- [x] Update frontend behavior tests for missing and qualifying yearly and overall placements.
+- [x] Run full Maven verification, including frontend type checking: 339 backend tests and 121 frontend tests passed.
+
+### Average Leaderboard Qualification
+
+- [x] Inspect average leaderboard calculation, API coverage, and CI verification commands: the shared repository counts
+  distinct quizzes per selected period; Maven verify includes backend tests, frontend tests, and type checking.
+- [x] Require at least two participations within the selected year or across all years; add unit and integration
+  coverage. Added a German explanation to the leaderboard and markup coverage.
+- [x] Run the complete CI verification suite, including frontend type checking: `mvnw.cmd verify` passed with 339
+  backend tests, 120 frontend tests, and TypeScript checking.
+
 ### Previous Quiz Navigation
 
 - [x] Add the right-side navigation link to the public quiz-results page.
@@ -21,26 +60,21 @@
 
 ## Finished Phases
 
-### Team Leaderboard Statistics ✅ COMPLETE
+### Average Leaderboard Empty State ✅ COMPLETE
 
-- Added a team statistics API reusing existing rankings; participation years appear newest first and `Alle` follows when
-  applicable.
-- Displayed points, average, medal, and all qualifying Top 10 placements above participations, with separate error
-  handling.
-- Added unit, API integration, and frontend rendering coverage; browser checks passed at mobile and desktop widths.
-- Full Maven verification passed with 333 backend tests, 113 frontend tests, and TypeScript checking.
+- Show a separate explanatory card without table headings when no teams meet the participation minimum.
+- Covered period changes and loading errors; full Maven verification passed with 340 backend tests, 123 frontend tests,
+  and TypeScript checking.
 
-### Participating Teams Directory ✅ COMPLETE
+### Remove Average Leaderboard Yearly Fallback ✅ COMPLETE
 
-- Added a home-page link and alphabetically sorted team directory for teams with recorded participations.
-- Added service unit, API integration, and frontend behavior tests; verified navigation and states on mobile and
-  desktop.
-- Full Maven verification passed with 337 backend tests, 118 frontend tests, and TypeScript checking.
+- Restored the two-participation minimum for every year and the overall ranking, including when no team qualifies.
+- Full Maven verification passed with 340 backend tests, 121 frontend tests, and TypeScript checking.
 
-### Hide Missing Team Statistics ✅ COMPLETE
+### Average Leaderboard Yearly Fallback ✅ COMPLETE
 
-- Hide medal and Top 10 sections independently for each year or overall period when no qualifying placement exists.
-- Updated behavior coverage and verified mobile and desktop layouts in Microsoft Edge.
-- Full Maven verification passed with 337 backend tests, 119 frontend tests, and TypeScript checking.
+- Previously allowed one participation in a year when no team had two; this exception has now been removed.
+- Updated leaderboard explanation, unit tests, API integration tests, and team statistics expectations.
+- Full Maven verification passed with 340 backend tests, 121 frontend tests, and TypeScript checking.
 
 Older finished phases are tracked in `progress_archive.md`.

@@ -22,6 +22,8 @@
     </div>
 
     <h1 class="text-xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">Durchschnittsrangliste</h1>
+    <p class="text-sm text-gray-500 mb-3">Für die Rangliste sind mindestens zwei Teilnahmen im ausgewählten Zeitraum
+        erforderlich.</p>
 
     <div class="mb-2">
         <div id="leaderboardYearTabs" class="flex gap-2 overflow-x-auto pb-1"></div>
@@ -32,6 +34,9 @@
     </div>
 
     <div id="errorMessage" class="bg-red-100 text-red-700 rounded-lg px-4 py-3 mb-4" style="display:none;"></div>
+
+    <div id="emptyLeaderboard" role="status" class="bg-white rounded-lg shadow-sm text-center py-8 px-4 text-gray-500"
+         style="display:none;"></div>
 
     <div>
         <table id="leaderboardTable" class="w-full table-fixed bg-white rounded-lg shadow-sm mt-0"

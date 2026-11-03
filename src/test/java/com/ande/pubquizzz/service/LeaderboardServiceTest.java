@@ -92,8 +92,10 @@ class LeaderboardServiceTest {
     void getAverageLeaderboard_returnsEntriesRankedByAverage() {
         Object[] row1 = {2L, "Beta Team", 100L, 2L};
         Object[] row2 = {1L, "Alpha Team", 120L, 3L};
-        Object[] row3 = {3L, "Gamma Team", 50L, 1L};
-        when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.of(row1, row2, row3));
+        Object[] row3 = {3L, "Gamma Team", 100L, 2L};
+        Object[] row4 = {4L, "Single Team", 60L, 1L};
+        Object[] row5 = {5L, "Empty Team", 0L, 0L};
+        when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.of(row1, row2, row3, row4, row5));
 
         List<AverageLeaderboardEntry> result = leaderboardService.getAverageLeaderboard();
 
@@ -106,7 +108,7 @@ class LeaderboardServiceTest {
         assertThat(result.get(1).getRank()).isEqualTo(1);
         assertThat(result.get(1).getTeamName()).isEqualTo("Gamma Team");
         assertThat(result.get(1).getAveragePoints()).isEqualTo(50.0);
-        assertThat(result.get(1).getQuizCount()).isEqualTo(1);
+        assertThat(result.get(1).getQuizCount()).isEqualTo(2);
 
         assertThat(result.get(2).getRank()).isEqualTo(3);
         assertThat(result.get(2).getTeamName()).isEqualTo("Alpha Team");
@@ -124,9 +126,38 @@ class LeaderboardServiceTest {
         List<AverageLeaderboardEntry> result = leaderboardService.getAverageLeaderboard(2025);
 
         assertThat(result).extracting(AverageLeaderboardEntry::getTeamName)
-                .containsExactly("Beta Team", "Alpha Team");
+                .containsExactly("Beta Team");
         assertThat(result.get(0).getAveragePoints()).isEqualTo(40.0);
-        assertThat(result.get(1).getAveragePoints()).isEqualTo(30.0);
+    }
+
+    @Test
+    void getAverageLeaderboard_requiresTwoParticipationsInEachPeriod() {
+        when(resultRepository.findLeaderboardRaw(2025)).thenReturn(List.<Object[]>of(
+                new Object[]{1L, "Cross-year Team", 40L, 1L},
+                new Object[]{2L, "Zero Team", 0L, 0L}));
+        when(resultRepository.findLeaderboardRaw(2026)).thenReturn(List.of(
+                new Object[]{1L, "Cross-year Team", 20L, 1L},
+                new Object[]{3L, "Other Team", 30L, 1L}));
+        when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.of(
+                new Object[]{1L, "Cross-year Team", 60L, 2L},
+                new Object[]{3L, "Other Team", 30L, 1L}));
+
+        assertThat(leaderboardService.getAverageLeaderboard(2025)).isEmpty();
+        assertThat(leaderboardService.getAverageLeaderboard(2026)).isEmpty();
+        assertThat(leaderboardService.getAverageLeaderboard()).singleElement().satisfies(entry -> {
+            assertThat(entry.getRank()).isEqualTo(1);
+            assertThat(entry.getTeamName()).isEqualTo("Cross-year Team");
+            assertThat(entry.getQuizCount()).isEqualTo(2);
+            assertThat(entry.getAveragePoints()).isEqualTo(30.0);
+        });
+    }
+
+    @Test
+    void getAverageLeaderboard_overallRequiresTwoParticipations() {
+        when(resultRepository.findLeaderboardRaw(null)).thenReturn(List.<Object[]>of(
+                new Object[]{1L, "Single Team", 40L, 1L}));
+
+        assertThat(leaderboardService.getAverageLeaderboard()).isEmpty();
     }
 
     @Test

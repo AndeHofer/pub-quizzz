@@ -4,6 +4,7 @@ type LeaderboardPageConfig<T> = {
     apiUrl: string;
     rowRenderer: (entry: T) => string;
     fallbackMessage: string;
+    emptyStateId?: string;
     targetWindow?: Window;
 };
 
@@ -113,9 +114,26 @@ export function initLeaderboardPage<T>(config: LeaderboardPageConfig<T>): void {
         const activeYear = resolveActiveYear(requestedYear, availableYears);
 
         const reloadLeaderboard = (year: number | null): void => {
+            const emptyState = config.emptyStateId ? document.getElementById(config.emptyStateId) : null;
+            const table = document.getElementById('leaderboardTable');
+            if (emptyState) {
+                emptyState.style.display = 'none';
+                if (table) table.style.display = 'none';
+                const loading = document.getElementById('loading');
+                const error = document.getElementById('errorMessage');
+                if (loading) loading.style.display = 'block';
+                if (error) error.style.display = 'none';
+            }
             loadLeaderboard<T>(
                 buildLeaderboardUrl(config.apiUrl, year),
                 (entries: T[]) => {
+                    if (emptyState && entries.length === 0) {
+                        if (table) table.style.display = 'none';
+                        emptyState.textContent = config.fallbackMessage;
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+                    if (emptyState) emptyState.style.display = 'none';
                     renderLeaderboard<T>(
                         entries,
                         'leaderboardBody',

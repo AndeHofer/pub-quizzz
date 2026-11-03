@@ -11,11 +11,10 @@ export function renderTeamStatisticsMarkup(statistics: TeamLeaderboardStatistics
         const points = period.points
             ? `Platz ${period.points.rank} · ${period.points.totalPoints} Punkte`
             : 'Keine Platzierung';
-        const average = period.average
-            ? `Platz ${period.average.rank} · ${period.average.averagePoints.toFixed(2)} Punkte`
-            : 'Keine Platzierung';
+        const average = period.average;
         const medals = period.medals;
         const hasMedals = medals !== null && (medals.goldCount + medals.silverCount + medals.bronzeCount) > 0;
+        const columns = average && hasMedals ? 'sm:grid-cols-3' : average || hasMedals ? 'sm:grid-cols-2' : '';
         const topResults = period.topResults.length > 0
             ? `<div class="mt-4">
                 <h4 class="font-medium mb-2"><a href="${leaderboardLink('top-results', period.year)}" class="text-blue-600 hover:underline">Top 10 Ergebnisse</a></h4>
@@ -31,15 +30,15 @@ export function renderTeamStatisticsMarkup(statistics: TeamLeaderboardStatistics
         return `
             <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5" aria-label="Ranglisten ${label}">
                 <h3 class="text-lg font-semibold text-gray-900 mb-3">${label}</h3>
-                <dl class="grid grid-cols-1 ${hasMedals ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3">
+                <dl class="grid grid-cols-1 ${columns} gap-3">
                     <div class="min-w-0 break-words rounded-md bg-gray-50 p-3">
                         <dt><a href="${leaderboardLink('points', period.year)}" class="font-medium text-blue-600 hover:underline">Punkterangliste</a></dt>
                         <dd class="mt-1 text-sm text-gray-900">${points}</dd>
                     </div>
-                    <div class="min-w-0 break-words rounded-md bg-gray-50 p-3">
+                    ${average ? `<div class="min-w-0 break-words rounded-md bg-gray-50 p-3">
                         <dt><a href="${leaderboardLink('average', period.year)}" class="font-medium text-blue-600 hover:underline">Durchschnittsrangliste</a></dt>
-                        <dd class="mt-1 text-sm text-gray-900">${average}</dd>
-                    </div>
+                        <dd class="mt-1 text-sm text-gray-900">Platz ${average.rank} · ${average.averagePoints.toFixed(2)} Punkte</dd>
+                    </div>` : ''}
                     ${hasMedals && medals ? `<div class="min-w-0 break-words rounded-md bg-gray-50 p-3">
                         <dt><a href="${leaderboardLink('medal', period.year)}" class="font-medium text-blue-600 hover:underline">Medaillenrangliste</a></dt>
                         <dd class="mt-1 text-sm text-gray-900">Platz ${medals.rank} · 🥇 ${medals.goldCount} 🥈 ${medals.silverCount} 🥉 ${medals.bronzeCount}</dd>

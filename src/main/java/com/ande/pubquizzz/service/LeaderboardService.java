@@ -73,11 +73,12 @@ public class LeaderboardService {
         List<Object[]> rows = resultRepository.findLeaderboardRaw(year);
 
         List<AverageTeamStats> stats = rows.stream()
+                .filter(row -> ((Number) row[3]).intValue() >= 2)
                 .map(row -> {
                     Long teamId = ((Number) row[0]).longValue();
                     String teamName = (String) row[1];
                     int quizCount = ((Number) row[3]).intValue();
-                    double averagePoints = quizCount == 0 ? 0.0 : ((Number) row[2]).doubleValue() / quizCount;
+                    double averagePoints = ((Number) row[2]).doubleValue() / quizCount;
                     return new AverageTeamStats(teamId, teamName, quizCount, averagePoints);
                 })
                 .sorted(Comparator.comparingDouble(AverageTeamStats::averagePoints).reversed())

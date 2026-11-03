@@ -4,6 +4,39 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Hide Missing Average Team Placement ✅ COMPLETE
+
+- Hide the average ranking card independently for each year or overall period when no qualifying placement exists.
+- Full Maven verification passed with 339 backend tests, 121 frontend tests, and TypeScript checking.
+
+### Average Leaderboard Qualification ✅ COMPLETE
+
+- Require two participations within the selected year or across all years; team statistics use the same rankings.
+- Explain the qualification on the average leaderboard and cover yearly, cross-year, ranking, and statistics behavior.
+- Full Maven verification passed with 339 backend tests, 120 frontend tests, and TypeScript checking.
+
+### Hide Missing Team Statistics ✅ COMPLETE
+
+- Hide medal and Top 10 sections independently for each year or overall period when no qualifying placement exists.
+- Updated behavior coverage and verified mobile and desktop layouts in Microsoft Edge.
+- Full Maven verification passed with 337 backend tests, 119 frontend tests, and TypeScript checking.
+
+### Participating Teams Directory ✅ COMPLETE
+
+- Added a home-page link and alphabetically sorted team directory for teams with recorded participations.
+- Added service unit, API integration, and frontend behavior tests; verified navigation and states on mobile and
+  desktop.
+- Full Maven verification passed with 337 backend tests, 118 frontend tests, and TypeScript checking.
+
+### Team Leaderboard Statistics ✅ COMPLETE
+
+- Added a team statistics API reusing existing rankings; participation years appear newest first and `Alle` follows when
+  applicable.
+- Displayed points, average, medal, and all qualifying Top 10 placements above participations, with separate error
+  handling.
+- Added unit, API integration, and frontend rendering coverage; browser checks passed at mobile and desktop widths.
+- Full Maven verification passed with 333 backend tests, 113 frontend tests, and TypeScript checking.
+
 ### Mobile Quiz Detail Text Overflow ✅ COMPLETE
 
 - Removed the fixed height limit for revealed text and enabled wrapping of long words in notes, hints, and answers.
