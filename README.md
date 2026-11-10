@@ -39,6 +39,7 @@ SPRING_DATASOURCE_URL
 
 ### Done
 
+- ~~make logins durable through restarts~~
 - ~~fix "Anmerkung" in quiz section~~
 - ~~make news foldable~~
 - ~~merging teams should be possible~~
