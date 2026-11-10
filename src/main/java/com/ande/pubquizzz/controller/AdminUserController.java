@@ -2,10 +2,8 @@ package com.ande.pubquizzz.controller;
 
 import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.AdminLogResponseDTO;
-import com.ande.pubquizzz.dto.AdminMonthlyLoginStatDTO;
 import com.ande.pubquizzz.dto.UserDTO;
 import com.ande.pubquizzz.service.AdminLogService;
-import com.ande.pubquizzz.service.UsageEventService;
 import com.ande.pubquizzz.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +29,6 @@ import java.util.List;
 public class AdminUserController {
 
     private final UserService userService;
-    private final UsageEventService usageEventService;
     private final AdminLogService adminLogService;
 
     @PostMapping("/register")
@@ -45,12 +42,6 @@ public class AdminUserController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         log.debug("GET /admin/users");
         return ResponseEntity.ok(userService.getAllUsers());
-    }
-
-    @GetMapping("/login-stats/monthly")
-    public ResponseEntity<List<AdminMonthlyLoginStatDTO>> getMonthlyLoginStatsByRole() {
-        log.debug("GET /admin/login-stats/monthly");
-        return ResponseEntity.ok(usageEventService.getMonthlyLoginStatsByRole());
     }
 
     @GetMapping("/logs")

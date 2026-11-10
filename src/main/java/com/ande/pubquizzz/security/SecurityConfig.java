@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
@@ -46,7 +48,7 @@ import java.io.IOException;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, UserRememberMeServices rememberMeServices) throws Exception {
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         http.csrf(csrf -> csrf
                         .ignoringRequestMatchers("/h2-console/**")
@@ -59,6 +61,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**", "/h2-console/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 ).formLogin(Customizer.withDefaults())
+                .rememberMe(rememberMe -> rememberMe
+                        .key(rememberMeServices.getKey())
+                        .rememberMeServices(rememberMeServices))
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login")
                         .permitAll())
@@ -66,7 +71,19 @@ public class SecurityConfig {
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
                 .addFilterAfter(new LoginNoStoreFilter(), CsrfFilter.class);
 
-        return http.build();
+        SecurityFilterChain filterChain = http.build();
+        // Remember-me is automatic for users, so the default login page must not suggest it is optional.
+        filterChain.getFilters().stream()
+                .filter(DefaultLoginPageGeneratingFilter.class::isInstance)
+                .map(DefaultLoginPageGeneratingFilter.class::cast)
+                .forEach(loginPage -> loginPage.setRememberMeParameter(null));
+        return filterChain;
+    }
+
+    @Bean
+    UserRememberMeServices userRememberMeServices(@Value("${app.security.remember-me.key}") String key,
+                                                  UserDetailsService userDetailsService) {
+        return new UserRememberMeServices(RememberMeKey.validate(key), userDetailsService);
     }
 
 

@@ -17,11 +17,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,6 +59,13 @@ class SecurityAccessTest {
         mockMvc.perform(get("/static/does-not-exist.txt"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void removedLoginStatisticsPage_isNotAvailable() throws Exception {
+        mockMvc.perform(get("/admin/login_stats.html"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -124,6 +134,17 @@ class SecurityAccessTest {
                 .andExpect(header().string("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate"))
                 .andExpect(header().string("Pragma", "no-cache"))
                 .andExpect(header().dateValue("Expires", 0));
+    }
+
+    @Test
+    void loginPage_hasCredentialsAndCsrfWithoutRememberMeCheckbox() throws Exception {
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"username\"")))
+                .andExpect(content().string(containsString("name=\"password\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
+                .andExpect(content().string(not(containsString("remember-me"))))
+                .andExpect(content().string(not(containsString("Remember me"))));
     }
 
     @Test

@@ -2,56 +2,40 @@
 
 ## Open Tasks
 
-### Average Leaderboard Empty State
+### Remove Misleading Remember-Me Checkbox
 
-- [x] Show a separate German message card instead of the average leaderboard table when no teams qualify; restore the
-  table when results are available. Reset the card and loading/error state on period changes.
-- [x] Add frontend behavior coverage for switching between empty and populated periods and loading errors, plus coverage
-  for the average page's empty-state wiring and message.
-- [x] Run full Maven verification, including frontend type checking: 340 backend tests and 123 frontend tests passed.
+- [x] Remove the checkbox from the generated login page without changing automatic user or admin authentication
+  behavior.
+- [x] Add an integration test for login credentials, CSRF, and the absence of the checkbox; retain existing remember-me
+  tests.
+- [x] Run full Maven verification: 365 backend tests, 120 frontend tests, and frontend type checking passed.
 
-### Remove Average Leaderboard Yearly Fallback
+### Restore Successful Login Logging
 
-- [x] Restore the two-participation minimum for every year and the overall ranking, and remove the exception from the
-  explanation.
-- [x] Update unit, API integration, team statistics, and explanatory text tests to cover the restored rule, including
-  years with no qualifying teams.
-- [x] Run full Maven verification, including frontend type checking: 340 backend tests and 121 frontend tests passed.
+- [x] Restore the original successful-authentication log message without restoring statistics persistence.
+- [x] Add unit and integration coverage for password and automatic login logging.
+- [x] Run full Maven verification: 364 backend tests, 120 frontend tests, and frontend type checking passed.
 
-### Average Leaderboard Yearly Fallback
+### Remove Login Statistics
 
-- [x] Update yearly qualification to allow one participation only when no team reaches two that year; preserve the
-  overall minimum. Updated the leaderboard explanation as well.
-- [x] Update unit, API integration, team statistics, and explanatory text coverage for fallback and normal cases.
-- [x] Run full Maven verification, including frontend type checking: 340 backend tests and 121 frontend tests passed.
+- [x] Remove the admin statistics UI, navigation, frontend types, and page-specific tests.
+- [x] Remove the statistics API, successful-login database recording, and obsolete persistence code and tests.
+- [x] Drop the legacy statistics table on startup and after old-backup restores, including failed restores.
+- [x] Exclude the legacy statistics table from new backups.
+- [x] Add migration, legacy-restore, API removal, authentication, and failed-login logging coverage.
+- [x] Run full Maven verification: 362 backend tests, 120 frontend tests, and frontend type checking passed.
+- [x] Remove stale generated login-statistics assets and verify the packaged JAR contains no obsolete statistics files.
+- Added JAR exclusions for old incremental-build copies and removed the two identified generated files from
+  `target/classes`.
+- Added an authenticated integration test confirming the old statistics page is unavailable.
+- Blockers: None.
 
-### Hide Missing Average Team Placement
+### User-Only Remember-Me Login
 
-- [x] Update team statistics rendering to hide the average card when no placement exists, independently per period, and
-  adapt the grid.
-- [x] Update frontend behavior tests for missing and qualifying yearly and overall placements.
-- [x] Run full Maven verification, including frontend type checking: 339 backend tests and 121 frontend tests passed.
-
-### Average Leaderboard Qualification
-
-- [x] Inspect average leaderboard calculation, API coverage, and CI verification commands: the shared repository counts
-  distinct quizzes per selected period; Maven verify includes backend tests, frontend tests, and type checking.
-- [x] Require at least two participations within the selected year or across all years; add unit and integration
-  coverage. Added a German explanation to the leaderboard and markup coverage.
-- [x] Run the complete CI verification suite, including frontend type checking: `mvnw.cmd verify` passed with 339
-  backend tests, 120 frontend tests, and TypeScript checking.
-
-### Previous Quiz Navigation
-
-- [x] Add the right-side navigation link to the public quiz-results page.
-- [x] Select the chronologically previous finished quiz and wrap from the oldest to the newest quiz.
-- [x] Add unit and markup tests, then run the full CI verification suite.
-
-### Preserve Leaderboard Year in Navigation
-
-- [x] Inspect the failing frontend tests caused by the new next-leaderboard link.
-- [x] Update affected test expectations and add coverage for retaining the selected year.
-- [x] Run the complete CI verification suite, including frontend type checking.
+- [x] Implement user-only signed cookies, session-only admin access, key validation, and local secret protection.
+- [x] Cover renewal, security, and a full process restart; Maven verification passed (365 backend, 123 frontend tests).
+- [ ] Verify the Docker build and Compose configuration; Docker is unavailable here.
+- Note: Deployment requires a stable random `REMEMBER_ME_KEY` and HTTPS.
 
 ### Docker Build Verification
 
@@ -60,21 +44,20 @@
 
 ## Finished Phases
 
-### Average Leaderboard Empty State ✅ COMPLETE
+### Remove Misleading Remember-Me Checkbox ✅ COMPLETE
 
-- Show a separate explanatory card without table headings when no teams meet the participation minimum.
-- Covered period changes and loading errors; full Maven verification passed with 340 backend tests, 123 frontend tests,
-  and TypeScript checking.
+- Removed the generated checkbox without changing automatic user or admin login behavior.
+- Full Maven verification passed with 365 backend tests, 120 frontend tests, and frontend type checking.
 
-### Remove Average Leaderboard Yearly Fallback ✅ COMPLETE
+### Restore Successful Login Logging ✅ COMPLETE
 
-- Restored the two-participation minimum for every year and the overall ranking, including when no team qualifies.
-- Full Maven verification passed with 340 backend tests, 121 frontend tests, and TypeScript checking.
+- Restored the original INFO message for password and remember-me authentication without database recording.
+- Full Maven verification passed with 364 backend tests, 120 frontend tests, and frontend type checking.
 
-### Average Leaderboard Yearly Fallback ✅ COMPLETE
+### Remove Login Statistics ✅ COMPLETE
 
-- Previously allowed one participation in a year when no team had two; this exception has now been removed.
-- Updated leaderboard explanation, unit tests, API integration tests, and team statistics expectations.
-- Full Maven verification passed with 340 backend tests, 121 frontend tests, and TypeScript checking.
+- Removed the page, successful-login database recording, API, and legacy database table, including after old-backup
+  restores.
+- Full Maven verification passed with 362 backend tests, 120 frontend tests, and frontend type checking.
 
 Older finished phases are tracked in `progress_archive.md`.

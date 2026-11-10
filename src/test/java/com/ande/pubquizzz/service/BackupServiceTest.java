@@ -208,7 +208,7 @@ public class BackupServiceTest {
     }
 
     @Test
-    void createBackup_sqlDump_containsAppUsageEventTable() throws Exception {
+    void createBackup_sqlDump_doesNotContainLegacyUsageEventTable() throws Exception {
         BackupService svc = service();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zip = new ZipOutputStream(baos)) {
@@ -217,8 +217,8 @@ public class BackupServiceTest {
 
         Map<String, byte[]> entries = readZipEntries(baos.toByteArray());
         String sqlContent = new String(entries.get("database.sql"), StandardCharsets.UTF_8).toUpperCase();
-        assertTrue(sqlContent.contains("APP_USAGE_EVENT"),
-                "SQL dump must contain APP_USAGE_EVENT table");
+        assertFalse(sqlContent.contains("APP_USAGE_EVENT"),
+                "SQL dump must not contain the legacy login-statistics table");
     }
 
     @Test

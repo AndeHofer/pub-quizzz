@@ -1,33 +1,64 @@
 package com.ande.pubquizzz.listener;
 
-import com.ande.pubquizzz.service.UsageEventService;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
-import org.springframework.security.core.Authentication;
 
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
 class AuthenticationEventListenerTest {
 
-    @Mock
-    private UsageEventService usageEventService;
+    @Test
+    void successfulLoginLogsOriginalMessageWithoutPassword() {
+        Logger logger = (Logger) LoggerFactory.getLogger(AuthenticationEventListener.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            var authentication = UsernamePasswordAuthenticationToken.unauthenticated("alice", "secret-password");
 
-    @InjectMocks
-    private AuthenticationEventListener authenticationEventListener;
+            new AuthenticationEventListener().onAuthenticationSuccess(new AuthenticationSuccessEvent(authentication));
+
+            assertEquals(1, appender.list.size());
+            ILoggingEvent logged = appender.list.getFirst();
+            assertEquals(Level.INFO, logged.getLevel());
+            assertEquals("User alice logged in successfully", logged.getFormattedMessage());
+            assertFalse(logged.getFormattedMessage().contains("secret-password"));
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
 
     @Test
-    void delegatesSuccessfulAuthenticationToUsageEventService() {
-        Authentication authentication = new UsernamePasswordAuthenticationToken("alice", "n/a");
-        AuthenticationSuccessEvent event = new AuthenticationSuccessEvent(authentication);
+    void failedLoginIsStillLoggedWithoutPassword() {
+        Logger logger = (Logger) LoggerFactory.getLogger(AuthenticationEventListener.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            var authentication = UsernamePasswordAuthenticationToken.unauthenticated("alice", "secret-password");
+            var event = new AuthenticationFailureBadCredentialsEvent(authentication, new BadCredentialsException("Invalid credentials"));
 
-        authenticationEventListener.onAuthenticationSuccess(event);
+            new AuthenticationEventListener().onAuthenticationFailure(event);
 
-        verify(usageEventService).trackAuthenticationSuccess("alice");
+            assertEquals(1, appender.list.size());
+            ILoggingEvent logged = appender.list.getFirst();
+            assertEquals(Level.WARN, logged.getLevel());
+            assertTrue(logged.getFormattedMessage().contains("alice"));
+            assertFalse(logged.getFormattedMessage().contains("secret-password"));
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
     }
 }

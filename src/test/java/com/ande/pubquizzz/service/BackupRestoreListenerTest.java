@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
@@ -126,6 +127,29 @@ public class BackupRestoreListenerTest {
         listener().onApplicationStarted();
 
         verify(mockQuizService, never()).cleanupOrphanedImages();
+    }
+
+    @Test
+    void startup_removesLegacyUsageTableIdempotentlyWithoutTouchingOtherData() throws Exception {
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            stmt.execute("INSERT INTO quiz VALUES (100, 'Existing Quiz')");
+            stmt.execute("INSERT INTO app_usage_event VALUES (1, 'AUTH_SUCCESS', 'alice', TIMESTAMP '2026-06-01 10:05:00', NULL, NULL, NULL)");
+        }
+
+        listener().onApplicationStarted();
+        listener().onApplicationStarted();
+
+        try (var conn = sharedDs.getConnection();
+             var stmt = conn.createStatement()) {
+            ResultSet legacyTable = stmt.executeQuery("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'APP_USAGE_EVENT'");
+            legacyTable.next();
+            assertEquals(0, legacyTable.getInt(1));
+
+            ResultSet quiz = stmt.executeQuery("SELECT COUNT(*) FROM quiz WHERE id = 100");
+            quiz.next();
+            assertEquals(1, quiz.getInt(1));
+        }
     }
 
     @Test
@@ -248,7 +272,7 @@ public class BackupRestoreListenerTest {
             stmt.execute("INSERT INTO quiz VALUES (100, 'Original Quiz')");
         }
 
-        String brokenSql = "INSERT INTO quiz VALUES ('broken', 'Broken Quiz');";
+        String brokenSql = "CREATE TABLE app_usage_event (id BIGINT); INSERT INTO quiz VALUES ('broken', 'Broken Quiz');";
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zip = new ZipOutputStream(baos)) {
@@ -266,6 +290,9 @@ public class BackupRestoreListenerTest {
             originalQuizCount.next();
             assertEquals(1, originalQuizCount.getInt(1),
                     "Original live quiz row must remain after failed restore rollback");
+            ResultSet legacyTable = stmt.executeQuery("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'APP_USAGE_EVENT'");
+            legacyTable.next();
+            assertEquals(0, legacyTable.getInt(1), "Failed restore must not leave the legacy table behind");
         }
     }
 
@@ -320,11 +347,10 @@ public class BackupRestoreListenerTest {
     }
 
     @Test
-    void applyRestore_restoresNewsAndUsageEventsFromBackup() throws Exception {
+    void applyRestore_fromOldBackupRestoresNewsAndRemovesUsageEvents() throws Exception {
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
             stmt.execute("INSERT INTO news VALUES (1, 'Original News', 'Original Text', TRUE, TIMESTAMP '2026-06-01 10:00:00')");
-            stmt.execute("INSERT INTO app_usage_event VALUES (1, 'AUTH_SUCCESS', 'alice', TIMESTAMP '2026-06-01 10:05:00', NULL, NULL, NULL)");
         }
 
         BackupService svc = backupService();
@@ -333,13 +359,16 @@ public class BackupRestoreListenerTest {
             svc.createBackup(zip);
         }
         svc.stageRestore(new ByteArrayInputStream(baos.toByteArray()));
+        Files.writeString(tempDir.resolve("restore").resolve("database.sql"), """
+                
+                CREATE TABLE app_usage_event (usage_event_id BIGINT PRIMARY KEY, username VARCHAR(255));
+                INSERT INTO app_usage_event VALUES (1, 'alice');
+                """, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
 
         try (var conn = sharedDs.getConnection();
              var stmt = conn.createStatement()) {
             stmt.execute("DELETE FROM news");
-            stmt.execute("DELETE FROM app_usage_event");
             stmt.execute("INSERT INTO news VALUES (2, 'Mutated News', 'Mutated Text', FALSE, TIMESTAMP '2026-06-02 10:00:00')");
-            stmt.execute("INSERT INTO app_usage_event VALUES (2, 'AUTH_SUCCESS', 'bob', TIMESTAMP '2026-06-02 10:05:00', NULL, NULL, NULL)");
         }
 
         listener().onApplicationStarted();
@@ -354,13 +383,9 @@ public class BackupRestoreListenerTest {
             mutatedNews.next();
             assertEquals(0, mutatedNews.getInt(1), "Mutated news row should not remain after restore");
 
-            ResultSet originalUsageEvent = stmt.executeQuery("SELECT COUNT(*) FROM app_usage_event WHERE usage_event_id = 1");
-            originalUsageEvent.next();
-            assertEquals(1, originalUsageEvent.getInt(1), "Original usage event row from backup should be restored");
-
-            ResultSet mutatedUsageEvent = stmt.executeQuery("SELECT COUNT(*) FROM app_usage_event WHERE usage_event_id = 2");
-            mutatedUsageEvent.next();
-            assertEquals(0, mutatedUsageEvent.getInt(1), "Mutated usage event row should not remain after restore");
+            ResultSet legacyTable = stmt.executeQuery("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = 'APP_USAGE_EVENT'");
+            legacyTable.next();
+            assertEquals(0, legacyTable.getInt(1), "Legacy usage events must not be retained after restore");
         }
     }
 }

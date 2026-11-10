@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -48,6 +49,7 @@ public class BackupRestoreListener {
 
     @EventListener(ApplicationStartedEvent.class)
     public void onApplicationStarted() {
+        removeLegacyUsageTable();
         Path pendingSql = restoreDir.resolve("database.sql");
         if (!Files.exists(pendingSql)) {
             return;  // No pending restore — nothing to do
@@ -72,6 +74,18 @@ public class BackupRestoreListener {
             }
             log.error("Restore FAILED — leaving {} in place for diagnosis. Application continues with old state.", restoreDir);
             // Do NOT rethrow — application must continue running
+        } finally {
+            // Older backups may recreate the table, including when a restore fails partway through.
+            removeLegacyUsageTable();
+        }
+    }
+
+    private void removeLegacyUsageTable() {
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("DROP TABLE IF EXISTS app_usage_event");
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to remove legacy login-statistics table", e);
         }
     }
 

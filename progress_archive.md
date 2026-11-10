@@ -4,6 +4,23 @@ Archived phases moved out of `progress.md` to keep active progress short and foc
 
 ## Archived Phases
 
+### Average Leaderboard Empty State ✅ COMPLETE
+
+- Show a separate explanatory card without table headings when no teams meet the participation minimum.
+- Covered period changes and loading errors; full Maven verification passed with 340 backend tests, 123 frontend tests,
+  and TypeScript checking.
+
+### Remove Average Leaderboard Yearly Fallback ✅ COMPLETE
+
+- Restored the two-participation minimum for every year and the overall ranking, including when no team qualifies.
+- Full Maven verification passed with 340 backend tests, 121 frontend tests, and TypeScript checking.
+
+### Average Leaderboard Yearly Fallback ✅ COMPLETE
+
+- Previously allowed one participation in a year when no team had two; this exception has now been removed.
+- Updated leaderboard explanation, unit tests, API integration tests, and team statistics expectations.
+- Full Maven verification passed with 340 backend tests, 121 frontend tests, and TypeScript checking.
+
 ### Hide Missing Average Team Placement ✅ COMPLETE
 
 - Hide the average ranking card independently for each year or overall period when no qualifying placement exists.

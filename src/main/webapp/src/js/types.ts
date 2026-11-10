@@ -57,12 +57,6 @@ export interface UserDTO {
     role: string;
 }
 
-export interface AdminMonthlyLoginStatDTO {
-    month: string;
-    role: string;
-    loginCount: number;
-}
-
 export interface AdminLogEntryDTO {
     timestamp: string | null;
     level: string;

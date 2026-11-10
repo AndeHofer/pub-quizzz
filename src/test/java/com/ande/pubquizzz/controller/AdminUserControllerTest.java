@@ -3,13 +3,11 @@ package com.ande.pubquizzz.controller;
 import com.ande.pubquizzz.database.entities.Role;
 import com.ande.pubquizzz.dto.AdminLogEntryDTO;
 import com.ande.pubquizzz.dto.AdminLogResponseDTO;
-import com.ande.pubquizzz.dto.AdminMonthlyLoginStatDTO;
 import com.ande.pubquizzz.dto.CreateUserRequest;
 import com.ande.pubquizzz.dto.UserDTO;
 import com.ande.pubquizzz.exception.BusinessValidationException;
 import com.ande.pubquizzz.exception.GlobalExceptionHandler;
 import com.ande.pubquizzz.security.SecurityConfig;
-import com.ande.pubquizzz.service.UsageEventService;
 import com.ande.pubquizzz.service.AdminLogService;
 import com.ande.pubquizzz.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,9 +47,6 @@ class AdminUserControllerTest {
 
     @MockitoBean
     private UserService userService;
-
-    @MockitoBean
-    private UsageEventService usageEventService;
 
     @MockitoBean
     private AdminLogService adminLogService;
@@ -116,25 +111,9 @@ class AdminUserControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void getMonthlyLoginStatsByRole_returnsAggregatedStats() throws Exception {
-        AdminMonthlyLoginStatDTO userStat = new AdminMonthlyLoginStatDTO("2026-05", Role.USER, 12L);
-        AdminMonthlyLoginStatDTO adminStat = new AdminMonthlyLoginStatDTO("2026-05", Role.ADMIN, 3L);
-
-        when(usageEventService.getMonthlyLoginStatsByRole()).thenReturn(List.of(userStat, adminStat));
-
+    void removedLoginStatisticsApi_returnsNotFoundForAdmin() throws Exception {
         mockMvc.perform(get("/admin/login-stats/monthly"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].month").value("2026-05"))
-                .andExpect(jsonPath("$[0].role").value("USER"))
-                .andExpect(jsonPath("$[0].loginCount").value(12))
-                .andExpect(jsonPath("$[1].role").value("ADMIN"))
-                .andExpect(jsonPath("$[1].loginCount").value(3));
-    }
-
-    @Test
-    void getMonthlyLoginStatsByRole_unauthenticated_redirects() throws Exception {
-        mockMvc.perform(get("/admin/login-stats/monthly"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isNotFound());
     }
 
     @Test

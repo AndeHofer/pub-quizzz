@@ -19,7 +19,6 @@ export default defineConfig({
                 create_quiz: './admin/create_quiz.html',
                 create_result: './admin/create_result.html',
                 results: './admin/results.html',
-                login_stats: './admin/login_stats.html',
                 logs: './admin/logs.html',
                 register_user: './admin/register_user.html',
                 points_leaderboard: './points-leaderboard.html',

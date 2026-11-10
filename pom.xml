@@ -90,6 +90,20 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <!-- Keep local credentials on the development classpath, never in the packaged JAR. -->
+                    <excludes>
+                        <exclude>application-local.properties</exclude>
+                        <!-- Prevent stale incremental-build copies of the removed login-statistics page. -->
+                        <exclude>static/admin/login_stats.html</exclude>
+                        <exclude>static/assets/login_stats-*.js</exclude>
+                    </excludes>
+                    <forceCreation>true</forceCreation>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>2.0.2</version>
@@ -191,6 +205,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <excludedGroups>${excludedTestGroups}</excludedGroups>
+                    <!-- Synthetic test-only key; deployments must provide their own secret. -->
+                    <systemPropertyVariables>
+                        <REMEMBER_ME_KEY>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</REMEMBER_ME_KEY>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
