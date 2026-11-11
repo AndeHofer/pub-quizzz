@@ -30,7 +30,6 @@ REMEMBER_ME_KEY
 
 ## Ideas
 
-- make logins durable through restarts
 - Add team stats in team view
 - Move project to Codeberg
 - add text for hints before a hint revealed like already possible with pics
