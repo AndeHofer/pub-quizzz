@@ -10,7 +10,7 @@ RUN mvn clean package -DskipTests
 # Stage 2: Runtime
 FROM amazoncorretto:25-alpine
 ENV TZ=Europe/Vienna
-ENV JAVA_TOOL_OPTIONS="-Duser.timezone=Europe/Vienna -XX:-UseBASE64Intrinsics"
+ENV JAVA_TOOL_OPTIONS="-Duser.timezone=Europe/Vienna"
 WORKDIR /app
 RUN mkdir -p /data
 COPY --from=build /app/target/*.jar app.jar
