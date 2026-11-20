@@ -8,9 +8,9 @@ WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 # Stage 2: Runtime
-FROM eclipse-temurin:25-jre-alpine
+FROM amazoncorretto:25-alpine
 ENV TZ=Europe/Vienna
-ENV JAVA_TOOL_OPTIONS="-Duser.timezone=Europe/Vienna"
+ENV JAVA_TOOL_OPTIONS="-Duser.timezone=Europe/Vienna -XX:-UseBASE64Intrinsics""
 WORKDIR /app
 RUN mkdir -p /data
 COPY --from=build /app/target/*.jar app.jar
